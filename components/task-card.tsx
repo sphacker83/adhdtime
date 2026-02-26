@@ -1,11 +1,26 @@
 import React from "react";
 import {
-  calculateDeadlineProgress,
-  formatTimeToDeadline,
-  isOverdue,
-  resolveProgressColor
+  formatHourMinuteApprox,
+  formatDDayLabel,
+  formatDueDateLabel
 } from "@/lib/deadline";
 import { DeadlineProgressBar } from "@/components/deadline-progress-bar";
+import {
+  getTaskActionUi,
+  getTaskRemainingPercent,
+  type TaskActionIcon
+} from "@/lib/task-state";
+import {
+  CheckIcon,
+  ImportanceHighIcon,
+  ImportanceLowIcon,
+  ImportanceMediumIcon,
+  PencilSquareIcon,
+  PlayIcon,
+  RotateCcwIcon,
+  SparklesIcon,
+  TrashIcon
+} from "@/components/ui-icons";
 import type { Importance, TaskItem } from "@/types/task";
 
 interface TaskCardProps {
@@ -13,67 +28,107 @@ interface TaskCardProps {
   now: Date;
   selected: boolean;
   onSelect: (id: string) => void;
-  onToggleComplete: (id: string) => void;
+  onCycleRunState: (id: string) => void;
   onEdit: (task: TaskItem) => void;
   onDelete: (id: string) => void;
 }
 
-function importanceLabel(importance: Importance): string {
+function ImportanceIcon({ importance }: { importance: Importance }) {
   if (importance === "HIGH") {
-    return "높음";
+    return <ImportanceHighIcon className="ui-icon" />;
   }
   if (importance === "MEDIUM") {
-    return "중간";
+    return <ImportanceMediumIcon className="ui-icon" />;
   }
-  return "낮음";
+  return <ImportanceLowIcon className="ui-icon" />;
 }
 
-function toTimeLabel(value: string): string {
-  const date = new Date(value);
-  return date.toLocaleTimeString("ko-KR", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false
-  });
+function TaskActionIconSvg({ icon }: { icon: TaskActionIcon }) {
+  if (icon === "play") {
+    return <PlayIcon className="task-action-icon" />;
+  }
+  if (icon === "check") {
+    return <CheckIcon className="task-action-icon" />;
+  }
+  return <RotateCcwIcon className="task-action-icon" />;
 }
 
-export function TaskCard({ task, now, selected, onSelect, onToggleComplete, onEdit, onDelete }: TaskCardProps) {
-  const createdAt = new Date(task.createdAt);
+export function TaskCard({
+  task,
+  now,
+  selected,
+  onSelect,
+  onCycleRunState,
+  onEdit,
+  onDelete
+}: TaskCardProps) {
   const dueAt = new Date(task.dueAt);
-  const progress = calculateDeadlineProgress(now, createdAt, dueAt);
-  const overdue = isOverdue(now, dueAt);
-  const tone = resolveProgressColor(progress, overdue);
-  const deadlineText = formatTimeToDeadline(now, dueAt);
+  const progressPercent = getTaskRemainingPercent(task, now);
+  const dueLabel = formatDueDateLabel(now, dueAt);
+  const dDayLabel = formatDDayLabel(now, dueAt);
+  const remainingMs = Math.max(0, dueAt.getTime() - now.getTime());
+  const remainingClock = formatHourMinuteApprox(remainingMs);
+  const actionUi = getTaskActionUi(task.runState);
+
+  const handleDelete = () => {
+    const ok = window.confirm("이 일정을 삭제할까요?");
+    if (ok) {
+      onDelete(task.id);
+    }
+  };
 
   return (
     <article className={selected ? "task-card selected" : "task-card"}>
       <header className="task-header">
         <button type="button" className="task-title-btn" onClick={() => onSelect(task.id)}>
-          <strong>{task.title}</strong>
+          <span className="task-title-main">
+            <span className={`task-importance-icon ${task.importance.toLowerCase()}`} aria-hidden="true">
+              <ImportanceIcon importance={task.importance} />
+            </span>
+            <strong>{task.title}</strong>
+          </span>
         </button>
         <div className="task-header-actions">
-          <span className={`importance-badge importance-${task.importance.toLowerCase()}`}>
-            중요도 {importanceLabel(task.importance)}
-          </span>
-          <span className="priority-badge">P{task.priority}</span>
+          <button type="button" className="icon-btn subtle small edit" onClick={() => onEdit(task)} aria-label="일정 편집">
+            <PencilSquareIcon className="ui-icon" />
+          </button>
+          <button type="button" className="icon-btn subtle small danger" onClick={handleDelete} aria-label="일정 삭제">
+            <TrashIcon className="ui-icon" />
+          </button>
         </div>
       </header>
 
-      <p className="task-meta">마감 {toTimeLabel(task.dueAt)}</p>
-      <p className={overdue ? "task-deadline overdue" : "task-deadline"}>{deadlineText}</p>
-      <DeadlineProgressBar progress={progress} tone={tone} />
+      <div className="task-due-row">
+        <p className="task-due-text">
+          {dueLabel} · {dDayLabel}
+        </p>
+        <p className={`task-remaining-inline ${task.runState === "COMPLETED" ? "is-complete" : ""}`}>
+          {task.runState === "COMPLETED" ? (
+            <span className="task-complete-reward">
+              <SparklesIcon className="ui-icon" />
+              <strong>Complete</strong>
+              <SparklesIcon className="ui-icon" />
+            </span>
+          ) : (
+            remainingClock
+          )}
+        </p>
+      </div>
 
-      <footer className="task-footer">
-        <button type="button" className="ghost-btn" onClick={() => onToggleComplete(task.id)}>
-          {task.completed ? "미완료로" : "완료"}
+      <div className="task-progress-row">
+        <button
+          type="button"
+          className={`task-complete-btn ${actionUi.stateClass}`}
+          onClick={() => onCycleRunState(task.id)}
+          aria-label={actionUi.ariaLabel}
+          aria-pressed={task.runState === "RUNNING"}
+        >
+          <TaskActionIconSvg icon={actionUi.icon} />
         </button>
-        <button type="button" className="ghost-btn" onClick={() => onEdit(task)}>
-          편집
-        </button>
-        <button type="button" className="danger-btn" onClick={() => onDelete(task.id)}>
-          삭제
-        </button>
-      </footer>
+        <div className="task-progress-wrap">
+          <DeadlineProgressBar progress={progressPercent} runState={task.runState} />
+        </div>
+      </div>
     </article>
   );
 }

@@ -7,7 +7,6 @@ interface TaskFormValues {
   title: string;
   description: string;
   importance: Importance;
-  priority: number;
   dueAt: string;
 }
 
@@ -37,7 +36,6 @@ export function TaskFormModal({ open, task, onClose, onSave }: TaskFormModalProp
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [importance, setImportance] = useState<Importance>("MEDIUM");
-  const [priority, setPriority] = useState<number>(3);
   const [dueAt, setDueAt] = useState(defaultDueAtLocal());
   const [error, setError] = useState<string | null>(null);
 
@@ -52,7 +50,6 @@ export function TaskFormModal({ open, task, onClose, onSave }: TaskFormModalProp
       setTitle(task.title);
       setDescription(task.description ?? "");
       setImportance(task.importance);
-      setPriority(task.priority);
       setDueAt(toInputDateTime(task.dueAt));
       setError(null);
       return;
@@ -61,7 +58,6 @@ export function TaskFormModal({ open, task, onClose, onSave }: TaskFormModalProp
     setTitle("");
     setDescription("");
     setImportance("MEDIUM");
-    setPriority(3);
     setDueAt(defaultDueAtLocal());
     setError(null);
   }, [open, task]);
@@ -92,7 +88,6 @@ export function TaskFormModal({ open, task, onClose, onSave }: TaskFormModalProp
       title: safeTitle,
       description: description.trim(),
       importance,
-      priority,
       dueAt: dueDate.toISOString()
     });
   };
@@ -138,22 +133,11 @@ export function TaskFormModal({ open, task, onClose, onSave }: TaskFormModalProp
                   className={importance === item ? "chip active" : "chip"}
                   onClick={() => setImportance(item)}
                 >
-                  {item === "HIGH" ? "높음" : item === "MEDIUM" ? "중간" : "낮음"}
+                  {item === "HIGH" ? "긴급" : item === "MEDIUM" ? "보통" : "낮음"}
                 </button>
               ))}
             </div>
           </div>
-
-          <label className="field">
-            <span>우선순위 (1이 가장 높음)</span>
-            <input
-              type="number"
-              min={1}
-              max={5}
-              value={priority}
-              onChange={(e) => setPriority(Math.min(5, Math.max(1, Number(e.target.value) || 1)))}
-            />
-          </label>
 
           {error ? <p className="error-text">{error}</p> : null}
         </div>

@@ -1,27 +1,27 @@
 import React from "react";
-import type { ProgressTone } from "@/lib/deadline";
+import { getProgressPalette } from "@/lib/progress-color";
+import type { TaskRunState } from "@/types/task";
 
 interface DeadlineProgressBarProps {
   progress: number;
-  tone: ProgressTone;
+  runState: TaskRunState;
 }
 
-const toneClassName: Record<ProgressTone, string> = {
-  safe: "progress-safe",
-  warning: "progress-warning",
-  danger: "progress-danger",
-  overdue: "progress-overdue"
-};
-
-export function DeadlineProgressBar({ progress, tone }: DeadlineProgressBarProps) {
-  const percent = Math.round(progress);
+export function DeadlineProgressBar({ progress, runState }: DeadlineProgressBarProps) {
+  const percent = Math.max(0, Math.min(100, Math.round(progress)));
+  const palette = getProgressPalette(percent);
 
   return (
-    <div className="progress-wrap" aria-label="마감 진행률">
-      <div className="progress-track">
-        <div className={`progress-fill ${toneClassName[tone]}`} style={{ width: `${percent}%` }} />
+    <div className="progress-wrap" aria-label="남은시간 진행률">
+      <div className={`progress-track ${runState.toLowerCase()}`}>
+        <div
+          className={`progress-fill ${runState.toLowerCase()}`}
+          style={{
+            width: `${percent}%`,
+            background: palette.fill
+          }}
+        />
       </div>
-      <span className="progress-label">{percent}%</span>
     </div>
   );
 }
