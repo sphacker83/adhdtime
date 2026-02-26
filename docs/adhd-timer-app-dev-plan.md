@@ -1,6 +1,6 @@
 # ADHD 타이머 앱 개발기획서 (MVP)
 
-- 문서 버전: v1.0
+- 문서 버전: v1.1
 - 작성일: 2026-02-26
 - 문서 목적: ADHD 사용자 대상 타이머/일정관리 앱의 MVP 구현을 위한 개발 기준 정의
 
@@ -32,6 +32,7 @@ ADHD 사용자는 시간의 흐름 체감이 어렵고, 우선순위 판단 및 
 - 팀 협업 기능(공유 보드, 멀티 유저 편집)
 - AI 자동 일정 추천
 - 웨어러블/음성비서 연동
+- 모바일 앱(Flutter) 구현: MVP 완료 이후 최종 단계에서 진행
 
 ## 3. 핵심 사용자 플로우
 
@@ -95,8 +96,9 @@ ADHD 사용자는 시간의 흐름 체감이 어렵고, 우선순위 판단 및 
 ## 6. 기술 아키텍처 제안
 
 ### 6.1 권장 스택
-- Frontend: Next.js + TypeScript + React Query
-- Backend: Next.js API Route 또는 NestJS
+- Web Frontend: Next.js + TypeScript + React Query
+- Backend: Next.js (App Router + Route Handlers)
+- Mobile App: Flutter (Post-MVP, 마지막 구현 단계)
 - DB: PostgreSQL
 - Auth: OAuth(구글), 이메일 기반 로컬 로그인(선택)
 - Infra: Vercel/Render + Managed PostgreSQL
@@ -106,6 +108,7 @@ ADHD 사용자는 시간의 흐름 체감이 어렵고, 우선순위 판단 및 
 - `tasks`: 일정 CRUD, 중요도/우선순위, 마감 계산
 - `calendar-sync`: 외부 API 연동, 토큰 갱신, 충돌 처리
 - `analytics`: 집중시간/완료율 집계
+- `mobile-client` (Post-MVP): Flutter UI/상태관리, Next.js API 재사용
 
 ## 7. 데이터 모델 (초안)
 
@@ -169,7 +172,7 @@ ADHD 사용자는 시간의 흐름 체감이 어렵고, 우선순위 판단 및 
 - `POST /api/integrations/apple/connect` 애플 연결
 - `POST /api/integrations/:provider/sync` 수동 동기화
 
-## 9. 개발 일정 (6주 기준)
+## 9. 개발 일정 (MVP 6주 + 모바일 후속)
 
 ### Week 1
 - 요구사항 확정, IA/와이어프레임
@@ -194,6 +197,11 @@ ADHD 사용자는 시간의 흐름 체감이 어렵고, 우선순위 판단 및 
 ### Week 6
 - 통합 QA, 버그 수정, 성능 최적화
 - 베타 릴리스
+
+### Post-MVP (최종 단계)
+- Flutter 모바일 앱 구현 시작 (기존 Next.js API 재사용)
+- 모바일 UI/네비게이션/상태관리 구현
+- 모바일 QA 및 스토어 배포 준비
 
 ## 10. 품질 기준 및 테스트
 
@@ -237,4 +245,3 @@ ADHD 사용자는 시간의 흐름 체감이 어렵고, 우선순위 판단 및 
 - 일정 완료율
 - 캘린더 연동 활성화율
 - 7일/30일 리텐션
-
