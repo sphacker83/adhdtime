@@ -9,6 +9,7 @@ import {
   type ChunkTemplate,
   type ChunkingResult
 } from "@/features/mvp/types/domain";
+import chunkPresetsJson from "@/docs/adhd_chunk_presets_50.json";
 
 export interface ChunkingValidationResult {
   ok: boolean;
@@ -24,6 +25,66 @@ interface LocalPatternRule {
   keywords: string[];
   templates: ChunkTemplate[];
 }
+
+interface ChunkPresetMeta {
+  keywords: string[];
+  keyword_weights: Record<string, number>;
+  intent: string;
+  priority: number;
+  negative_keywords: string[];
+  examples: string[];
+  updated_at: string;
+}
+
+interface ChunkPresetTaskChunk {
+  step: string;
+  min: number;
+  done: string;
+}
+
+interface ChunkPresetTask {
+  id: string;
+  estimated_time_min: number;
+  difficulty: number;
+  chunks: ChunkPresetTaskChunk[];
+}
+
+interface ChunkPreset {
+  schema_version: string;
+  meta: ChunkPresetMeta;
+  task: ChunkPresetTask;
+}
+
+interface IntentProfile {
+  keywords: string[];
+  examples: string[];
+}
+
+interface IntentSignalScore {
+  score: number;
+  keywordHits: number;
+  exampleScore: number;
+}
+
+interface ScoredPresetCandidate {
+  preset: ChunkPreset;
+  totalScore: number;
+  priority: number;
+  difficulty: number;
+  estimatedTimeMin: number;
+  taskId: string;
+}
+
+const PRESET_INTENT_SCORE_WEIGHT = 1.3;
+const PRESET_NEGATIVE_KEYWORD_PENALTY = 7;
+const PRESET_KEYWORD_FALLBACK_WEIGHT = 1;
+const PRESET_MIN_SIGNAL_SCORE = 2;
+const PRESET_MIN_EXAMPLE_SCORE = 3;
+const DEFAULT_CHUNK_NOTE = "완료 조건 체크";
+
+const JSON_PRESETS: readonly ChunkPreset[] = Array.isArray(chunkPresetsJson)
+  ? (chunkPresetsJson as unknown as readonly ChunkPreset[])
+  : [];
 
 const LOCAL_RULES: LocalPatternRule[] = [
   {
@@ -91,6 +152,11 @@ function clampMinutes(minutes: number): number {
   return Math.min(MAX_CHUNK_EST_MINUTES, Math.max(MIN_CHUNK_EST_MINUTES, safeMinutes));
 }
 
+function clampDifficulty(difficulty: number, fallback = 2): number {
+  const safeDifficulty = Number.isFinite(difficulty) ? Math.floor(difficulty) : fallback;
+  return Math.min(3, Math.max(1, safeDifficulty));
+}
+
 export function sumChunkEstMinutes<T extends { estMinutes: number }>(chunks: T[]): number {
   return chunks.reduce((sum, chunk) => sum + clampMinutes(chunk.estMinutes), 0);
 }
@@ -141,6 +207,322 @@ function normalizeTitle(title: string): string {
   return normalizeTaskSummary(title);
 }
 
+function normalizeScoreText(input: string): string {
+  return input.toLowerCase().trim().replace(/\s+/g, " ");
+}
+
+function tokenizeScoreText(input: string): string[] {
+  return normalizeScoreText(input)
+    .split(" ")
+    .map((token) => token.trim())
+    .filter((token) => token.length > 0);
+}
+
+function hasScoreTerm(normalizedInput: string, compactInput: string, term: string): boolean {
+  const normalizedTerm = normalizeScoreText(term);
+  if (!normalizedTerm) {
+    return false;
+  }
+
+  if (normalizedInput.includes(normalizedTerm)) {
+    return true;
+  }
+
+  const compactTerm = normalizedTerm.replace(/\s+/g, "");
+  return compactTerm.length > 0 && compactInput.includes(compactTerm);
+}
+
+function isFuzzyTokenMatch(sourceToken: string, targetToken: string): boolean {
+  if (sourceToken === targetToken) {
+    return true;
+  }
+
+  if (sourceToken.length < 2 || targetToken.length < 2) {
+    return false;
+  }
+
+  return sourceToken.includes(targetToken) || targetToken.includes(sourceToken);
+}
+
+function scoreExampleMatch(normalizedInput: string, compactInput: string, example: string): number {
+  const normalizedExample = normalizeScoreText(example);
+  if (!normalizedExample) {
+    return 0;
+  }
+
+  if (hasScoreTerm(normalizedInput, compactInput, normalizedExample)) {
+    return 12;
+  }
+
+  const inputTokens = tokenizeScoreText(normalizedInput);
+  const exampleTokens = tokenizeScoreText(normalizedExample);
+  if (inputTokens.length === 0 || exampleTokens.length === 0) {
+    return 0;
+  }
+
+  const matchedTokenCount = exampleTokens.reduce((count, exampleToken) => {
+    const hasMatch = inputTokens.some((inputToken) => isFuzzyTokenMatch(inputToken, exampleToken));
+    return count + (hasMatch ? 1 : 0);
+  }, 0);
+
+  const overlapRatio = matchedTokenCount / Math.max(inputTokens.length, exampleTokens.length);
+  return overlapRatio * 10;
+}
+
+function buildIntentProfiles(presets: readonly ChunkPreset[]): Record<string, IntentProfile> {
+  const profileMap = new Map<string, { keywords: Set<string>; examples: Set<string> }>();
+
+  presets.forEach((preset) => {
+    const normalizedIntent = normalizeScoreText(preset.meta.intent);
+    if (!normalizedIntent) {
+      return;
+    }
+
+    if (!profileMap.has(normalizedIntent)) {
+      profileMap.set(normalizedIntent, {
+        keywords: new Set<string>(),
+        examples: new Set<string>()
+      });
+    }
+
+    const profile = profileMap.get(normalizedIntent);
+    if (!profile) {
+      return;
+    }
+
+    const weightedKeywords = Object.keys(preset.meta.keyword_weights);
+    [...preset.meta.keywords, ...weightedKeywords].forEach((keyword) => {
+      const normalizedKeyword = normalizeScoreText(keyword);
+      if (normalizedKeyword) {
+        profile.keywords.add(normalizedKeyword);
+      }
+    });
+
+    preset.meta.examples.forEach((example) => {
+      const normalizedExample = normalizeScoreText(example);
+      if (normalizedExample) {
+        profile.examples.add(normalizedExample);
+      }
+    });
+  });
+
+  return Array.from(profileMap.entries()).reduce<Record<string, IntentProfile>>((acc, [intent, profile]) => {
+    acc[intent] = {
+      keywords: Array.from(profile.keywords),
+      examples: Array.from(profile.examples)
+    };
+    return acc;
+  }, {});
+}
+
+const INTENT_PROFILE_MAP = buildIntentProfiles(JSON_PRESETS);
+
+function computeIntentSignalScores(normalizedTitle: string, compactTitle: string): Record<string, IntentSignalScore> {
+  return Object.entries(INTENT_PROFILE_MAP).reduce<Record<string, IntentSignalScore>>((acc, [intent, profile]) => {
+    let keywordHits = 0;
+    profile.keywords.forEach((keyword) => {
+      if (hasScoreTerm(normalizedTitle, compactTitle, keyword)) {
+        keywordHits += 1;
+      }
+    });
+
+    const exampleScore = profile.examples.reduce((maxScore, example) => {
+      return Math.max(maxScore, scoreExampleMatch(normalizedTitle, compactTitle, example));
+    }, 0);
+    const intentText = intent.replace(/_/g, " ");
+    const directIntentScore = hasScoreTerm(normalizedTitle, compactTitle, intentText) ? 6 : 0;
+    const score = keywordHits * 2 + exampleScore + directIntentScore;
+
+    acc[intent] = {
+      score,
+      keywordHits,
+      exampleScore
+    };
+
+    return acc;
+  }, {});
+}
+
+function scoreKeywordWeights(
+  meta: ChunkPresetMeta,
+  normalizedTitle: string,
+  compactTitle: string
+): { score: number; hitCount: number } {
+  let score = 0;
+  let hitCount = 0;
+  const weightedKeywords = new Set<string>();
+
+  Object.entries(meta.keyword_weights).forEach(([keyword, weight]) => {
+    weightedKeywords.add(keyword);
+    if (!hasScoreTerm(normalizedTitle, compactTitle, keyword)) {
+      return;
+    }
+
+    const safeWeight = Number.isFinite(weight) ? weight : 0;
+    score += safeWeight;
+    hitCount += 1;
+  });
+
+  meta.keywords.forEach((keyword) => {
+    if (weightedKeywords.has(keyword)) {
+      return;
+    }
+
+    if (!hasScoreTerm(normalizedTitle, compactTitle, keyword)) {
+      return;
+    }
+
+    score += PRESET_KEYWORD_FALLBACK_WEIGHT;
+    hitCount += 1;
+  });
+
+  return {
+    score,
+    hitCount
+  };
+}
+
+function scoreNegativeKeywords(meta: ChunkPresetMeta, normalizedTitle: string, compactTitle: string): number {
+  return meta.negative_keywords.reduce((penalty, keyword) => {
+    if (!hasScoreTerm(normalizedTitle, compactTitle, keyword)) {
+      return penalty;
+    }
+
+    return penalty + PRESET_NEGATIVE_KEYWORD_PENALTY;
+  }, 0);
+}
+
+function scoreAdhdExecution(task: ChunkPresetTask): number {
+  const difficulty = clampDifficulty(task.difficulty);
+  const estimatedTime = Number.isFinite(task.estimated_time_min)
+    ? Math.max(1, Math.floor(task.estimated_time_min))
+    : MAX_CHUNK_EST_MINUTES;
+  const firstChunkMin = Number.isFinite(task.chunks[0]?.min)
+    ? Math.max(1, Math.floor(task.chunks[0].min))
+    : MAX_CHUNK_EST_MINUTES;
+
+  const difficultyBonus = (4 - difficulty) * 2.5;
+  const shortTimeBonus = Math.max(0, 15 - estimatedTime) * 0.4;
+  const firstChunkBonus = firstChunkMin >= 1 && firstChunkMin <= 2 ? 2.5 : 0;
+
+  return difficultyBonus + shortTimeBonus + firstChunkBonus;
+}
+
+function compareScoredPresetCandidates(a: ScoredPresetCandidate, b: ScoredPresetCandidate): number {
+  if (b.totalScore !== a.totalScore) {
+    return b.totalScore - a.totalScore;
+  }
+
+  if (b.priority !== a.priority) {
+    return b.priority - a.priority;
+  }
+
+  if (a.difficulty !== b.difficulty) {
+    return a.difficulty - b.difficulty;
+  }
+
+  if (a.estimatedTimeMin !== b.estimatedTimeMin) {
+    return a.estimatedTimeMin - b.estimatedTimeMin;
+  }
+
+  return a.taskId.localeCompare(b.taskId, "en");
+}
+
+function mapPresetChunksToTemplates(preset: ChunkPreset): ChunkTemplate[] | null {
+  if (!Array.isArray(preset.task.chunks) || preset.task.chunks.length === 0) {
+    return null;
+  }
+
+  const difficulty = clampDifficulty(preset.task.difficulty);
+  const templates = preset.task.chunks
+    .map((chunk): ChunkTemplate | null => {
+      const action = normalizeActionText(chunk.step ?? "");
+      if (!action) {
+        return null;
+      }
+
+      const notes = normalizeActionText(chunk.done ?? "") || DEFAULT_CHUNK_NOTE;
+      return {
+        action,
+        estMinutes: clampMinutes(chunk.min),
+        difficulty,
+        notes
+      };
+    })
+    .filter((template): template is ChunkTemplate => template !== null);
+
+  return templates.length > 0 ? templates : null;
+}
+
+function scorePresetCandidates(title: string): ScoredPresetCandidate[] {
+  const normalizedTitle = normalizeScoreText(title);
+  if (!normalizedTitle) {
+    return [];
+  }
+
+  const compactTitle = normalizedTitle.replace(/\s+/g, "");
+  const intentSignals = computeIntentSignalScores(normalizedTitle, compactTitle);
+
+  return JSON_PRESETS.reduce<ScoredPresetCandidate[]>((candidates, preset) => {
+    const normalizedIntent = normalizeScoreText(preset.meta.intent);
+    const intentSignal = intentSignals[normalizedIntent];
+    const { score: keywordScore, hitCount: keywordHitCount } = scoreKeywordWeights(
+      preset.meta,
+      normalizedTitle,
+      compactTitle
+    );
+    const priority = Number.isFinite(preset.meta.priority) ? preset.meta.priority : 0;
+    const difficulty = clampDifficulty(preset.task.difficulty);
+    const estimatedTimeMin = Number.isFinite(preset.task.estimated_time_min)
+      ? Math.max(1, Math.floor(preset.task.estimated_time_min))
+      : MAX_CHUNK_EST_MINUTES;
+    const negativePenalty = scoreNegativeKeywords(preset.meta, normalizedTitle, compactTitle);
+    const adhdScore = scoreAdhdExecution(preset.task);
+    const safeIntentScore = intentSignal?.score ?? 0;
+    const signalMatched = keywordHitCount > 0
+      || (intentSignal?.keywordHits ?? 0) > 0
+      || (intentSignal?.exampleScore ?? 0) >= PRESET_MIN_EXAMPLE_SCORE
+      || safeIntentScore >= PRESET_MIN_SIGNAL_SCORE;
+
+    if (!signalMatched) {
+      return candidates;
+    }
+
+    const totalScore = Number(
+      (
+        safeIntentScore * PRESET_INTENT_SCORE_WEIGHT
+        + keywordScore
+        + priority
+        + adhdScore
+        - negativePenalty
+      ).toFixed(4)
+    );
+
+    candidates.push({
+      preset,
+      totalScore,
+      priority,
+      difficulty,
+      estimatedTimeMin,
+      taskId: preset.task.id
+    });
+
+    return candidates;
+  }, []);
+}
+
+function selectJsonPresetTemplates(title: string): ChunkTemplate[] | null {
+  const rankedCandidates = scorePresetCandidates(title).sort(compareScoredPresetCandidates);
+  for (const candidate of rankedCandidates) {
+    const mappedTemplates = mapPresetChunksToTemplates(candidate.preset);
+    if (mappedTemplates) {
+      return mappedTemplates;
+    }
+  }
+
+  return null;
+}
+
 function normalizeActionText(action: string): string {
   return action.trim().replace(/\s+/g, " ");
 }
@@ -184,7 +566,7 @@ function buildResult(taskId: string, title: string, templates: ChunkTemplate[]):
       order: index + 1,
       action: template.action,
       estMinutes: clampMinutes(template.estMinutes),
-      difficulty: Math.max(1, Math.min(3, Math.floor(template.difficulty))),
+      difficulty: clampDifficulty(template.difficulty),
       notes: template.notes
     })),
     safety: {
@@ -208,8 +590,16 @@ function buildDefaultTemplates(title: string): ChunkTemplate[] {
 }
 
 export function generateLocalChunking(taskId: string, title: string): ChunkingResult | null {
-  const safeTitle = normalizeTitle(title).toLowerCase();
-  const matchedRule = LOCAL_RULES.find((rule) => rule.keywords.some((keyword) => safeTitle.includes(keyword)));
+  const jsonTemplates = selectJsonPresetTemplates(title);
+  if (jsonTemplates) {
+    return buildResult(taskId, title, jsonTemplates);
+  }
+
+  const normalizedTitle = normalizeScoreText(normalizeTitle(title));
+  const compactTitle = normalizedTitle.replace(/\s+/g, "");
+  const matchedRule = LOCAL_RULES.find((rule) =>
+    rule.keywords.some((keyword) => hasScoreTerm(normalizedTitle, compactTitle, keyword))
+  );
 
   if (!matchedRule) {
     return null;
