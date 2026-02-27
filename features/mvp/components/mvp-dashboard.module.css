@@ -2,7 +2,7 @@
 
 .shell {
   min-height: 100dvh;
-  padding: 18px 16px 96px;
+  padding: 18px 16px calc(96px + env(safe-area-inset-bottom));
   background:
     radial-gradient(circle at 0% 0%, rgba(255, 170, 64, 0.18), transparent 34%),
     radial-gradient(circle at 100% 20%, rgba(26, 167, 130, 0.16), transparent 33%),
@@ -702,11 +702,22 @@
 .settingsRow p {
   font-size: 12px;
   color: #5a6885;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .settingsBody {
   display: grid;
   gap: 4px;
+  min-width: 0;
+  flex: 1;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.settingsBody p {
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .syncButtonRow {
@@ -720,6 +731,8 @@
   margin: 0;
   color: #8d5200;
   font-size: 12px;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .toggle {
@@ -738,10 +751,11 @@
 
 .tabBar {
   position: fixed;
-  left: 50%;
-  bottom: 12px;
-  transform: translateX(-50%);
-  width: min(880px, calc(100% - 20px));
+  left: 10px;
+  right: 10px;
+  bottom: calc(12px + env(safe-area-inset-bottom));
+  transform: none;
+  width: auto;
   background: rgba(255, 255, 255, 0.9);
   border: 1px solid rgba(34, 56, 93, 0.2);
   border-radius: 16px;
@@ -772,7 +786,26 @@
   color: #fff;
 }
 
+@media (max-width: 767px) {
+  .settingsRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .settingsBody {
+    width: 100%;
+  }
+}
+
 @media (min-width: 768px) {
+  .tabBar {
+    left: 50%;
+    right: auto;
+    bottom: 12px;
+    transform: translateX(-50%);
+    width: min(880px, calc(100% - 20px));
+  }
+
   .shell {
     padding-top: 24px;
   }

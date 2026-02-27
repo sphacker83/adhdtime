@@ -20,6 +20,7 @@ Last Updated: 2026-02-28
   - `docs/RELEASE_GATE_LOG.md` 신규 작성
 - 릴리즈 검증 실행 완료
   - `npm run verify:mvp` PASS (2026-02-28 01:25~01:26 KST)
+- 모바일 settings 클리핑 이슈 수정 및 재현 검증 완료 (390x844 기준, settings 진입 전/후 스크린샷 확보)
 
 ### 🟡 IN PROGRESS
 - 없음 (본 트랙 범위 내 작업 완료)

@@ -68,6 +68,9 @@ Acceptance
 Acceptance
 - [x] 코드/문서 정합성 확보
 
+## Phase 8: Mobile Settings Clipping Hotfix ✅
+- [x] 모바일 settings 탭 진입 시 우측 잘림/클리핑 이슈 수정 및 390x844 Playwright 재현 검증 완료
+
 ## Validation Gate
 1. [x] `npm run typecheck`
 2. [x] `npm run lint`
