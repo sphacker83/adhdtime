@@ -20,13 +20,13 @@
 
 현재 저장소는 **Next.js App Router + React + TypeScript** 중심입니다.
 
-- 바로 사용 권장: `frontend-error-fixer`, `code-refactor-master`, `refactor-planner`, `plan-reviewer`, `documentation-architect`, `web-research-specialist`
+- 바로 사용 권장: `frontend-error-fixer`, `frontend-architecture-designer`, `code-refactor-master`, `refactor-planner`, `plan-reviewer`, `documentation-architect`, `web-research-specialist`
 - 조건부 사용: `auth-route-tester`, `auth-route-debugger` (JWT 쿠키 인증 API가 있을 때)
 - 스택 불일치 가능: `flutter-developer` (Flutter 코드가 있을 때만)
 
 ---
 
-## 사용 가능한 에이전트 (11)
+## 사용 가능한 에이전트 (12)
 
 ### code-architecture-reviewer
 **목적:** 아키텍처 일관성과 베스트 프랙티스 관점에서 코드를 리뷰
@@ -114,6 +114,19 @@
 - 레거시 코드를 현대화할 때
 - 큰 파일을 쪼갤 때
 - 코드 구조를 개선할 때
+
+**통합:** ✅ 그대로 복사
+
+---
+
+### frontend-architecture-designer
+**목적:** 프론트엔드 아키텍처 재설계 + 리팩터링 문서화
+
+**사용 시점:**
+- 프론트 구조가 무너져 경계 재설계가 필요할 때
+- 대형 컴포넌트를 기능 모듈로 분해할 때
+- 아키텍처 블루프린트/로드맵/ADR가 동시에 필요할 때
+- 장기 리팩터링을 `dev/active` 트랙으로 운영할 때
 
 **통합:** ✅ 그대로 복사
 
@@ -235,6 +248,7 @@ Codex에게 요청: "[agent-name] 에이전트를 사용해서 [task] 해줘"
 | documentation-architect | 중간 | ✅ 없음 | 아니오 |
 | flutter-developer | 높음 | ✅ 없음 | 아니오 |
 | frontend-error-fixer | 중간 | ⚠️ 스크린샷 경로 | 아니오 |
+| frontend-architecture-designer | 높음 | ✅ 없음 | 아니오 |
 | plan-reviewer | 낮음 | ✅ 없음 | 아니오 |
 | refactor-planner | 중간 | ✅ 없음 | 아니오 |
 | web-research-specialist | 낮음 | ✅ 없음 | 아니오 |

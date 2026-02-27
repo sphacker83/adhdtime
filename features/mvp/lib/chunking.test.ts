@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { generateLocalChunking } from "./chunking";
+import { generateLocalChunking, validateChunkingResult } from "./chunking";
 
 describe("generateLocalChunking", () => {
   it("sleep/wake 입력은 sleep_wake_routine 계열 프리셋을 우선 추천한다", () => {
@@ -15,6 +15,7 @@ describe("generateLocalChunking", () => {
     expect(result.chunks[0]?.estMinutes).toBe(2);
     expect(result.chunks[0]?.difficulty).toBe(1);
     expect(result.chunks[0]?.notes).toMatch(/커튼|충전|창문|자연광/);
+    expect(validateChunkingResult(result).ok).toBe(true);
   });
 
   it("범용 청소 입력은 시작 장벽이 낮은 프리셋을 우선한다", () => {
@@ -29,6 +30,7 @@ describe("generateLocalChunking", () => {
     expect(result.chunks[0]?.estMinutes).toBe(2);
     expect(result.chunks[0]?.difficulty).toBeLessThanOrEqual(2);
     expect(result.chunks[0]?.action).not.toContain("청소기 플러그");
+    expect(validateChunkingResult(result).ok).toBe(true);
   });
 
   it("JSON/LOCAL 모두 매칭 실패하면 null을 반환한다", () => {

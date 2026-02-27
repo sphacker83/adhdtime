@@ -187,8 +187,87 @@ function parseTaskTotalMinutesInput(rawInput: string): number | null {
   return normalized;
 }
 
+function parseLooseMinuteInput(rawInput: string): number | null {
+  const trimmed = rawInput.trim();
+  if (!trimmed) {
+    return null;
+  }
+
+  const parsed = Number(trimmed);
+  if (!Number.isFinite(parsed)) {
+    return null;
+  }
+
+  return Math.floor(parsed);
+}
+
+type TaskMetaField = "totalMinutes" | "scheduledFor" | "dueAt";
+
+type TaskMetaInputs = {
+  totalMinutesInput: string;
+  scheduledForInput: string;
+  dueAtInput: string;
+};
+
+const TASK_META_PAIR_PRIORITY: Record<TaskMetaField, TaskMetaField[]> = {
+  totalMinutes: ["scheduledFor", "dueAt"],
+  scheduledFor: ["totalMinutes", "dueAt"],
+  dueAt: ["totalMinutes", "scheduledFor"]
+};
+
+function isTaskTotalMinutesInRange(totalMinutes: number): boolean {
+  return totalMinutes >= MIN_TASK_TOTAL_MINUTES && totalMinutes <= MAX_TASK_TOTAL_MINUTES;
+}
+
+function getTaskMetaConstraintFeedback(
+  totalMinutes: number | null,
+  scheduledFor: Date | null,
+  dueAt: Date | null
+): string | null {
+  if (totalMinutes !== null && !isTaskTotalMinutesInRange(totalMinutes)) {
+    return `총 소요 시간은 ${MIN_TASK_TOTAL_MINUTES}~${MAX_TASK_TOTAL_MINUTES}분 범위로 입력해주세요.`;
+  }
+
+  if (scheduledFor && dueAt && scheduledFor.getTime() > dueAt.getTime()) {
+    return "시작 예정 시간은 마감 시간보다 늦을 수 없습니다.";
+  }
+
+  return null;
+}
+
 function buildTaskSummary(rawInput: string): string {
   return rawInput.trim().replace(/\s+/g, " ").slice(0, 60);
+}
+
+function parseDateTimeLocalInput(rawInput: string): Date | null {
+  const trimmed = rawInput.trim();
+  if (!trimmed) {
+    return null;
+  }
+
+  const timestamp = Date.parse(trimmed);
+  if (!Number.isFinite(timestamp)) {
+    return null;
+  }
+
+  return new Date(timestamp);
+}
+
+function formatDateTimeLocalInput(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+}
+
+function addMinutesToDate(date: Date, minutes: number): Date {
+  return new Date(date.getTime() + minutes * 60_000);
+}
+
+function getDiffMinutes(start: Date, end: Date): number {
+  return Math.round((end.getTime() - start.getTime()) / 60_000);
 }
 
 function parseOptionalDateTimeInput(rawInput: string): string | undefined {
@@ -431,10 +510,12 @@ export function MvpDashboard() {
   const [taskTotalMinutesInput, setTaskTotalMinutesInput] = useState(String(DEFAULT_TASK_TOTAL_MINUTES));
   const [taskScheduledForInput, setTaskScheduledForInput] = useState("");
   const [taskDueAtInput, setTaskDueAtInput] = useState("");
+  const [taskMetaFeedback, setTaskMetaFeedback] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [feedback, setFeedback] = useState<string>("오늘은 가장 작은 행동부터 시작해요.");
   const [clock, setClock] = useState(new Date());
   const [currentChunkId, setCurrentChunkId] = useState<string | null>(null);
+  const [expandedHomeTaskId, setExpandedHomeTaskId] = useState<string | null>(null);
   const [hydrated, setHydrated] = useState(false);
   const [notificationCapability, setNotificationCapability] = useState<NotificationCapability>(
     DEFAULT_NOTIFICATION_CAPABILITY
@@ -457,6 +538,8 @@ export function MvpDashboard() {
   const sttInterimTranscriptRef = useRef("");
   const syncMockAdapterRef = useRef(createSyncMockAdapter("GOOGLE_CALENDAR"));
   const lastHapticBucketByChunkRef = useRef<Record<string, number>>({});
+  const taskMetaEditingFieldRef = useRef<TaskMetaField | null>(null);
+  const taskMetaLastDistinctEditedFieldRef = useRef<TaskMetaField | null>(null);
   const gateMetricsRef = useRef<{
     startClickCountByTaskId: Record<string, number>;
     firstStartLoggedByTaskId: Record<string, boolean>;
@@ -655,6 +738,16 @@ export function MvpDashboard() {
       setActiveTaskId(nextTask.id);
     }
   }, [tasks, activeTaskId]);
+
+  useEffect(() => {
+    if (!expandedHomeTaskId) {
+      return;
+    }
+
+    if (!tasks.some((task) => task.id === expandedHomeTaskId)) {
+      setExpandedHomeTaskId(null);
+    }
+  }, [tasks, expandedHomeTaskId]);
 
   useEffect(() => {
     if (!activeTaskId) {
@@ -1055,10 +1148,111 @@ export function MvpDashboard() {
     }
   };
 
+  const handleTaskMetaInputChange = (editedField: TaskMetaField, nextValue: string) => {
+    const nextInputs: TaskMetaInputs = {
+      totalMinutesInput: editedField === "totalMinutes" ? nextValue : taskTotalMinutesInput,
+      scheduledForInput: editedField === "scheduledFor" ? nextValue : taskScheduledForInput,
+      dueAtInput: editedField === "dueAt" ? nextValue : taskDueAtInput
+    };
+
+    const parsedTotalMinutes = parseLooseMinuteInput(nextInputs.totalMinutesInput);
+    const parsedScheduledFor = parseDateTimeLocalInput(nextInputs.scheduledForInput);
+    const parsedDueAt = parseDateTimeLocalInput(nextInputs.dueAtInput);
+
+    const hasValidValue = (field: TaskMetaField): boolean => {
+      if (field === "totalMinutes") {
+        return parsedTotalMinutes !== null;
+      }
+      if (field === "scheduledFor") {
+        return parsedScheduledFor !== null;
+      }
+      return parsedDueAt !== null;
+    };
+
+    if (taskMetaEditingFieldRef.current !== editedField) {
+      taskMetaLastDistinctEditedFieldRef.current = taskMetaEditingFieldRef.current;
+      taskMetaEditingFieldRef.current = editedField;
+    }
+
+    const previousEditedField = taskMetaLastDistinctEditedFieldRef.current;
+    const pairCandidates = TASK_META_PAIR_PRIORITY[editedField];
+    const preferredAnchorField =
+      previousEditedField
+      && previousEditedField !== editedField
+      && pairCandidates.includes(previousEditedField)
+      && hasValidValue(previousEditedField)
+        ? previousEditedField
+        : null;
+    const anchorField = preferredAnchorField ?? pairCandidates.find((field) => hasValidValue(field)) ?? null;
+
+    let immediateFeedback: string | null = null;
+
+    if (anchorField) {
+      const derivedField = (["totalMinutes", "scheduledFor", "dueAt"] as const).find(
+        (field) => field !== editedField && field !== anchorField
+      );
+
+      if (derivedField === "dueAt" && parsedTotalMinutes !== null && parsedScheduledFor) {
+        if (!isTaskTotalMinutesInRange(parsedTotalMinutes)) {
+          immediateFeedback = `총 소요 시간은 ${MIN_TASK_TOTAL_MINUTES}~${MAX_TASK_TOTAL_MINUTES}분 범위로 입력해주세요.`;
+        } else {
+          nextInputs.dueAtInput = formatDateTimeLocalInput(addMinutesToDate(parsedScheduledFor, parsedTotalMinutes));
+        }
+      }
+
+      if (derivedField === "scheduledFor" && parsedTotalMinutes !== null && parsedDueAt) {
+        if (!isTaskTotalMinutesInRange(parsedTotalMinutes)) {
+          immediateFeedback = `총 소요 시간은 ${MIN_TASK_TOTAL_MINUTES}~${MAX_TASK_TOTAL_MINUTES}분 범위로 입력해주세요.`;
+        } else {
+          nextInputs.scheduledForInput = formatDateTimeLocalInput(addMinutesToDate(parsedDueAt, -parsedTotalMinutes));
+        }
+      }
+
+      if (derivedField === "totalMinutes" && parsedScheduledFor && parsedDueAt) {
+        if (parsedScheduledFor.getTime() > parsedDueAt.getTime()) {
+          immediateFeedback = "시작 예정 시간은 마감 시간보다 늦을 수 없습니다.";
+        } else {
+          const derivedTotalMinutes = getDiffMinutes(parsedScheduledFor, parsedDueAt);
+          if (!isTaskTotalMinutesInRange(derivedTotalMinutes)) {
+            immediateFeedback = `총 소요 시간은 ${MIN_TASK_TOTAL_MINUTES}~${MAX_TASK_TOTAL_MINUTES}분 범위로 입력해주세요.`;
+          } else {
+            nextInputs.totalMinutesInput = String(derivedTotalMinutes);
+          }
+        }
+      }
+    }
+
+    const finalTotalMinutes = parseLooseMinuteInput(nextInputs.totalMinutesInput);
+    const finalScheduledFor = parseDateTimeLocalInput(nextInputs.scheduledForInput);
+    const finalDueAt = parseDateTimeLocalInput(nextInputs.dueAtInput);
+
+    setTaskTotalMinutesInput(nextInputs.totalMinutesInput);
+    setTaskScheduledForInput(nextInputs.scheduledForInput);
+    setTaskDueAtInput(nextInputs.dueAtInput);
+    setTaskMetaFeedback(immediateFeedback ?? getTaskMetaConstraintFeedback(finalTotalMinutes, finalScheduledFor, finalDueAt));
+  };
+
+  const handleTaskTotalMinutesInputChange = (nextValue: string) => {
+    handleTaskMetaInputChange("totalMinutes", nextValue);
+  };
+
+  const handleTaskScheduledForInputChange = (nextValue: string) => {
+    handleTaskMetaInputChange("scheduledFor", nextValue);
+  };
+
+  const handleTaskDueAtInputChange = (nextValue: string) => {
+    handleTaskMetaInputChange("dueAt", nextValue);
+  };
+
   const handleGenerateTask = async () => {
     const rawInput = taskInput.trim();
     if (!rawInput) {
       setFeedback("할 일을 입력하면 바로 10분 단위로 쪼개드릴게요.");
+      return;
+    }
+
+    if (taskMetaFeedback) {
+      setFeedback(`입력 단계 오류를 먼저 해결해주세요: ${taskMetaFeedback}`);
       return;
     }
 
@@ -1177,6 +1371,9 @@ export function MvpDashboard() {
       setTaskInput("");
       setTaskScheduledForInput("");
       setTaskDueAtInput("");
+      setTaskMetaFeedback(null);
+      taskMetaEditingFieldRef.current = null;
+      taskMetaLastDistinctEditedFieldRef.current = null;
       setActiveTab("home");
       setFeedback(
         source === "local"
@@ -1214,6 +1411,91 @@ export function MvpDashboard() {
     } finally {
       setIsGenerating(false);
     }
+  };
+
+  const handleGenerateManualChunk = () => {
+    if (!activeTask) {
+      setFeedback("청크를 추가할 과업을 먼저 선택해주세요.");
+      return;
+    }
+
+    if (isExecutionLocked) {
+      setFeedback("실행 중에는 수동 청크 생성을 잠글게요. 현재 청크를 먼저 마무리해주세요.");
+      return;
+    }
+
+    const nextActionRaw = window.prompt("추가할 청크 액션을 입력하세요.", "");
+    if (nextActionRaw === null) {
+      return;
+    }
+
+    const nextAction = nextActionRaw.trim();
+    if (!nextAction) {
+      setFeedback("청크 액션을 입력해주세요.");
+      return;
+    }
+
+    const nextMinutesRaw = window.prompt(
+      `예상 시간을 입력하세요. ${MIN_CHUNK_EST_MINUTES}~${MAX_CHUNK_EST_MINUTES}분`,
+      "5"
+    );
+    if (nextMinutesRaw === null) {
+      return;
+    }
+
+    const parsedMinutes = Number(nextMinutesRaw);
+    if (!Number.isFinite(parsedMinutes)) {
+      setFeedback("시간은 숫자로 입력해주세요.");
+      return;
+    }
+
+    const nextMinutes = Math.floor(parsedMinutes);
+    if (nextMinutes < MIN_CHUNK_EST_MINUTES || nextMinutes > MAX_CHUNK_EST_MINUTES) {
+      setFeedback(`청크 시간은 ${MIN_CHUNK_EST_MINUTES}~${MAX_CHUNK_EST_MINUTES}분으로 입력해주세요.`);
+      return;
+    }
+
+    const budgetUsageBefore = getTaskBudgetUsage(chunks, activeTask.id);
+    const budgetUsageAfter = budgetUsageBefore + nextMinutes;
+    if (budgetUsageAfter > activeTask.totalMinutes) {
+      setFeedback("과업 총 시간 예산을 초과해서 수동 청크를 추가할 수 없습니다.");
+      return;
+    }
+
+    const maxOrder = chunks
+      .filter((chunk) => chunk.taskId === activeTask.id)
+      .reduce((max, chunk) => Math.max(max, chunk.order), 0);
+    const nextChunk: Chunk = {
+      id: crypto.randomUUID(),
+      taskId: activeTask.id,
+      order: maxOrder + 1,
+      action: nextAction,
+      estMinutes: nextMinutes,
+      status: "todo"
+    };
+
+    setChunks((prev) => withReorderedTaskChunks([...prev, nextChunk], activeTask.id));
+    setRemainingSecondsByChunk((prev) => ({
+      ...prev,
+      [nextChunk.id]: nextChunk.estMinutes * 60
+    }));
+    setCurrentChunkId((prev) => prev ?? nextChunk.id);
+    setActiveTaskId(activeTask.id);
+
+    logEvent({
+      eventName: "chunk_generated",
+      source: "user",
+      taskId: activeTask.id,
+      chunkId: nextChunk.id,
+      meta: {
+        chunkCount: 1,
+        manual: true,
+        budgetUsageBefore,
+        budgetUsageAfter
+      }
+    });
+
+    setFeedback(`수동 청크를 추가했어요. 예산 ${budgetUsageAfter}/${activeTask.totalMinutes}분`);
   };
 
   const handleStartChunk = (chunkId: string) => {
@@ -1432,7 +1714,7 @@ export function MvpDashboard() {
     setFeedback(`좋아요. +${reward.xpGain} XP 획득! ${nextChunk ? "다음 청크로 바로 이어가요." : "오늘 루프를 완료했어요."}`);
   };
 
-  const handleAdjustRunningChunkMinutes = (deltaMinutes: -1 | 1) => {
+  const handleAdjustRunningChunkMinutes = (deltaMinutes: -5 | -1 | 1 | 5) => {
     if (!runningChunk) {
       return;
     }
@@ -1564,7 +1846,7 @@ export function MvpDashboard() {
 
   const handleEditChunk = (chunk: Chunk) => {
     if (isExecutionLocked) {
-      setFeedback("실행 중에는 프롬프트 편집을 잠그고, 현재 청크의 +/- 1분 조정만 허용됩니다.");
+      setFeedback("실행 중에는 프롬프트 편집을 잠그고, 현재 청크의 ±1/±5분 조정만 허용됩니다.");
       return;
     }
 
@@ -1936,6 +2218,9 @@ export function MvpDashboard() {
     setSyncMessage("동기화 대기 중");
     setNotificationCapability(getNotificationCapability());
     setSttCapability(getSttCapability());
+    setTaskMetaFeedback(null);
+    taskMetaEditingFieldRef.current = null;
+    taskMetaLastDistinctEditedFieldRef.current = null;
     setFeedback("초기화 완료. 새 루프를 시작해보세요.");
   };
 
@@ -1954,22 +2239,36 @@ export function MvpDashboard() {
     ? remainingSecondsByChunk[homeChunk.id] ?? homeChunk.estMinutes * 60
     : 0;
   const homeTaskBudgetUsage = homeTask ? getTaskBudgetUsage(chunks, homeTask.id) : 0;
-  const canDecreaseRunningChunkMinutes = homeChunk?.status === "running" && homeChunk.estMinutes > MIN_CHUNK_EST_MINUTES;
-  const canIncreaseRunningChunkMinutes = homeChunk?.status === "running" && homeTask
-    ? homeChunk.estMinutes < MAX_CHUNK_EST_MINUTES
-      && isWithinTaskChunkBudget(
-        [
-          ...getTaskBudgetedChunks(chunks, homeChunk.taskId, homeChunk.id),
-          {
-            ...homeChunk,
-            estMinutes: homeChunk.estMinutes + 1
-          }
-        ],
-        homeTask.totalMinutes
-      )
-    : false;
+  const runningOwnerTask = runningChunk
+    ? tasks.find((task) => task.id === runningChunk.taskId) ?? null
+    : null;
+  const canAdjustRunningChunkMinutes = (deltaMinutes: -5 | -1 | 1 | 5): boolean => {
+    if (!runningChunk || !runningOwnerTask) {
+      return false;
+    }
 
-  const homeTaskCards = tasks.slice(0, 3);
+    const nextMinutes = runningChunk.estMinutes + deltaMinutes;
+    if (nextMinutes < MIN_CHUNK_EST_MINUTES || nextMinutes > MAX_CHUNK_EST_MINUTES) {
+      return false;
+    }
+
+    return isWithinTaskChunkBudget(
+      [
+        ...getTaskBudgetedChunks(chunks, runningChunk.taskId, runningChunk.id),
+        {
+          ...runningChunk,
+          estMinutes: nextMinutes
+        }
+      ],
+      runningOwnerTask.totalMinutes
+    );
+  };
+  const canAdjustMinusFive = canAdjustRunningChunkMinutes(-5);
+  const canAdjustMinusOne = canAdjustRunningChunkMinutes(-1);
+  const canAdjustPlusOne = canAdjustRunningChunkMinutes(1);
+  const canAdjustPlusFive = canAdjustRunningChunkMinutes(5);
+
+  const homeTaskCards = tasks.filter((task) => task.status !== "archived");
 
   return (
     <div className={styles.shell}>
@@ -2031,20 +2330,32 @@ export function MvpDashboard() {
             </span>
           </div>
           <div className={styles.inputRow}>
-            <input
-              id="task-input"
-              value={taskInput}
-              onChange={(event) => setTaskInput(event.target.value)}
-              placeholder="예: 방 청소, 제안서 마무리, 메일 답장"
-              className={styles.input}
-            />
+            <div className={styles.inputWithStt}>
+              <input
+                id="task-input"
+                value={taskInput}
+                onChange={(event) => setTaskInput(event.target.value)}
+                placeholder="예: 방 청소, 제안서 마무리, 메일 답장"
+                className={`${styles.input} ${styles.inputWithSttPadding}`}
+              />
+              <button
+                type="button"
+                className={isSttListening ? `${styles.sttIconButton} ${styles.sttIconButtonActive}` : styles.sttIconButton}
+                onClick={isSttListening ? handleStopStt : handleStartStt}
+                disabled={!sttCapability.canStartRecognition && !isSttListening}
+                aria-label={isSttListening ? "음성 입력 중지" : "음성 입력 시작"}
+                title={isSttListening ? "음성 입력 중지" : "음성 입력 시작"}
+              >
+                <span aria-hidden="true">{isSttListening ? "■" : "🎙"}</span>
+              </button>
+            </div>
             <button
               type="button"
-              className={isSttListening ? styles.successButton : styles.ghostButton}
-              onClick={isSttListening ? handleStopStt : handleStartStt}
-              disabled={!sttCapability.canStartRecognition && !isSttListening}
+              className={styles.ghostButton}
+              onClick={handleGenerateManualChunk}
+              disabled={isExecutionLocked || !activeTask}
             >
-              {isSttListening ? "음성 중지" : "음성 시작"}
+              청크 생성
             </button>
             <button
               type="button"
@@ -2064,7 +2375,7 @@ export function MvpDashboard() {
                 min={MIN_TASK_TOTAL_MINUTES}
                 max={MAX_TASK_TOTAL_MINUTES}
                 value={taskTotalMinutesInput}
-                onChange={(event) => setTaskTotalMinutesInput(event.target.value)}
+                onChange={(event) => handleTaskTotalMinutesInputChange(event.target.value)}
                 className={styles.input}
                 inputMode="numeric"
                 required
@@ -2076,7 +2387,7 @@ export function MvpDashboard() {
                 id="task-scheduled-for"
                 type="datetime-local"
                 value={taskScheduledForInput}
-                onChange={(event) => setTaskScheduledForInput(event.target.value)}
+                onChange={(event) => handleTaskScheduledForInputChange(event.target.value)}
                 className={styles.input}
               />
             </label>
@@ -2086,7 +2397,7 @@ export function MvpDashboard() {
                 id="task-due-at"
                 type="datetime-local"
                 value={taskDueAtInput}
-                onChange={(event) => setTaskDueAtInput(event.target.value)}
+                onChange={(event) => handleTaskDueAtInputChange(event.target.value)}
                 className={styles.input}
               />
             </label>
@@ -2094,6 +2405,7 @@ export function MvpDashboard() {
           <p className={styles.helperText}>
             총 시간은 {MIN_TASK_TOTAL_MINUTES}~{MAX_TASK_TOTAL_MINUTES}분 범위이며, 시작 예정 시간은 마감보다 늦을 수 없습니다.
           </p>
+          {taskMetaFeedback ? <p className={styles.errorText}>{taskMetaFeedback}</p> : null}
           <p className={styles.helperText}>로컬 패턴 우선, 필요 시 AI 폴백으로 청킹합니다. STT 엔진: {sttCapability.engine}</p>
           {sttTranscript ? <p className={styles.transcriptPreview}>미리보기: {sttTranscript}</p> : null}
           {sttError ? <p className={styles.errorText}>{sttError}</p> : null}
@@ -2159,8 +2471,16 @@ export function MvpDashboard() {
                       <button
                         type="button"
                         className={styles.subtleButton}
+                        onClick={() => handleAdjustRunningChunkMinutes(-5)}
+                        disabled={!canAdjustMinusFive}
+                      >
+                        -5분
+                      </button>
+                      <button
+                        type="button"
+                        className={styles.subtleButton}
                         onClick={() => handleAdjustRunningChunkMinutes(-1)}
-                        disabled={!canDecreaseRunningChunkMinutes}
+                        disabled={!canAdjustMinusOne}
                       >
                         -1분
                       </button>
@@ -2168,9 +2488,17 @@ export function MvpDashboard() {
                         type="button"
                         className={styles.subtleButton}
                         onClick={() => handleAdjustRunningChunkMinutes(1)}
-                        disabled={!canIncreaseRunningChunkMinutes}
+                        disabled={!canAdjustPlusOne}
                       >
                         +1분
+                      </button>
+                      <button
+                        type="button"
+                        className={styles.subtleButton}
+                        onClick={() => handleAdjustRunningChunkMinutes(5)}
+                        disabled={!canAdjustPlusFive}
+                      >
+                        +5분
                       </button>
                     </div>
                   ) : null}
@@ -2208,15 +2536,47 @@ export function MvpDashboard() {
               <ul className={styles.taskPreviewList}>
                 {homeTaskCards.length === 0 ? <li className={styles.emptyRow}>아직 생성된 과업이 없습니다.</li> : null}
                 {homeTaskCards.map((task) => {
-                  const openChunks = chunks.filter(
-                    (chunk) => chunk.taskId === task.id && isActionableChunkStatus(chunk.status)
-                  ).length;
+                  const actionableTaskChunks = orderChunks(
+                    chunks.filter((chunk) => chunk.taskId === task.id && isActionableChunkStatus(chunk.status))
+                  );
+                  const openChunks = actionableTaskChunks.length;
+                  const isExpanded = expandedHomeTaskId === task.id;
                   return (
-                    <li key={task.id}>
-                      <button type="button" onClick={() => setActiveTaskId(task.id)}>
-                        <span>{task.title}</span>
+                    <li key={task.id} className={styles.homeTaskItem}>
+                      <button
+                        type="button"
+                        className={styles.homeTaskToggle}
+                        onClick={() => {
+                          setActiveTaskId(task.id);
+                          setExpandedHomeTaskId((prev) => (prev === task.id ? null : task.id));
+                        }}
+                        aria-expanded={isExpanded}
+                        aria-controls={`home-task-chunks-${task.id}`}
+                      >
+                        <span className={styles.homeTaskTitle}>{task.title}</span>
                         <strong>{openChunks}개 남음</strong>
+                        <span className={styles.homeTaskChevron} aria-hidden="true">
+                          {isExpanded ? "▾" : "▸"}
+                        </span>
                       </button>
+                      {isExpanded ? (
+                        <ul id={`home-task-chunks-${task.id}`} className={styles.homeTaskChunkList}>
+                          {actionableTaskChunks.length === 0 ? (
+                            <li className={styles.homeTaskChunkEmpty}>청크가 없습니다.</li>
+                          ) : null}
+                          {actionableTaskChunks.map((chunk) => {
+                            const remaining = remainingSecondsByChunk[chunk.id] ?? chunk.estMinutes * 60;
+                            return (
+                              <li key={chunk.id} className={styles.homeTaskChunkRow}>
+                                <span className={styles.homeTaskChunkAction}>{chunk.action}</span>
+                                <span className={styles.homeTaskChunkInfo}>
+                                  {chunk.estMinutes}분 · {formatClock(remaining)} · {chunkStatusLabel(chunk.status)}
+                                </span>
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      ) : null}
                     </li>
                   );
                 })}

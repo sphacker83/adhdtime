@@ -227,6 +227,44 @@
   color: #1f2638;
 }
 
+.inputWithStt {
+  position: relative;
+}
+
+.inputWithSttPadding {
+  padding-right: 46px;
+}
+
+.sttIconButton {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  width: 32px;
+  height: 32px;
+  transform: translateY(-50%);
+  border-radius: 999px;
+  border: 1px solid rgba(40, 63, 104, 0.2);
+  background: #f1f6ff;
+  color: #304264;
+  font-size: 15px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.sttIconButtonActive {
+  background: linear-gradient(120deg, #0ea278, #0f8a98);
+  border-color: rgba(15, 138, 152, 0.4);
+  color: #fff;
+}
+
+.sttIconButton:focus-visible {
+  outline: 2px solid rgba(20, 166, 120, 0.35);
+  outline-offset: 1px;
+}
+
 .input:focus {
   outline: 2px solid rgba(20, 166, 120, 0.35);
   border-color: rgba(20, 166, 120, 0.62);
@@ -238,7 +276,6 @@
 .subtleButton,
 .smallButton,
 .smallButtonDanger,
-.taskPreviewList li button,
 .taskChip,
 .taskChipActive,
 .tabButton,
@@ -508,16 +545,71 @@
   gap: 8px;
 }
 
-.taskPreviewList li button {
+.homeTaskItem {
+  border: 1px solid rgba(45, 68, 110, 0.17);
+  border-radius: 12px;
+  background: #f7f9ff;
+  overflow: hidden;
+}
+
+.homeTaskToggle {
   width: 100%;
   padding: 12px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  border: 1px solid rgba(45, 68, 110, 0.17);
+  border-radius: 11px;
+  cursor: pointer;
+  font-family: inherit;
   background: #f7f9ff;
-  border-color: rgba(45, 68, 110, 0.17);
   color: #24395f;
   font-weight: 600;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.homeTaskTitle {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.homeTaskChevron {
+  color: #5b6883;
+  font-size: 12px;
+}
+
+.homeTaskChunkList {
+  margin: 0;
+  padding: 0 12px 12px;
+  list-style: none;
+  display: grid;
+  gap: 6px;
+}
+
+.homeTaskChunkRow {
+  display: grid;
+  gap: 2px;
+  border: 1px solid rgba(45, 68, 110, 0.14);
+  border-radius: 10px;
+  padding: 8px;
+  background: #fff;
+}
+
+.homeTaskChunkAction {
+  font-size: 13px;
+  color: #24395f;
+}
+
+.homeTaskChunkInfo {
+  font-size: 12px;
+  color: #5b6883;
+}
+
+.homeTaskChunkEmpty {
+  font-size: 12px;
+  color: #687792;
 }
 
 .emptyRow {
@@ -610,6 +702,7 @@
 .primaryButton:disabled,
 .ghostButton:disabled,
 .successButton:disabled,
+.sttIconButton:disabled,
 .subtleButton:disabled,
 .smallButton:disabled,
 .smallButtonDanger:disabled {
@@ -877,6 +970,11 @@
   .actionRow {
     grid-template-columns: 150px 150px 150px;
     justify-content: start;
+  }
+
+  .quickAdjustRow {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    max-width: 420px;
   }
 
   .recoveryRow {
