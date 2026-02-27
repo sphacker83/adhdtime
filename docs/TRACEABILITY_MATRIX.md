@@ -22,7 +22,7 @@ Last Updated: 2026-02-28
 | FR-07 | XP/레벨/5스탯 반영 | 완료 | `features/mvp/lib/reward.ts`, `features/mvp/components/mvp-dashboard.tsx` | 완료/복귀 보상 및 레벨업 이벤트 처리 |
 | FR-08 | 일간 리포트 | 완료 | `features/mvp/components/mvp-dashboard.tsx` | 완료 수/완료율/XP/회복 점수 및 KPI 스냅샷 표시 |
 | FR-09 | 복귀 루프(재등록/재청킹) | 완료 | `features/mvp/components/mvp-dashboard.tsx` | `rechunk_requested`/`reschedule_requested` 및 회복 보상 구현 |
-| FR-10 | 알림(시작/종료) | 부분 | `features/mvp/components/mvp-dashboard.tsx`, `features/p1/helpers/notification-capability.ts` | 권한/폴백/알림 트리거 있음. 종료 알림 시나리오는 미구현 |
+| FR-10 | 알림(시작/종료) | 완료 | `features/mvp/components/mvp-dashboard.tsx`, `features/p1/helpers/notification-capability.ts` | 권한/폴백/알림 트리거(`chunk_started`/`chunk_completed`/`reschedule_requested`) 구현 |
 
 ## 2) USECASE 추적
 

@@ -755,7 +755,7 @@ export function MvpDashboard() {
   };
 
   const pushLoopNotification = (params: {
-    eventName: "chunk_started" | "reschedule_requested";
+    eventName: "chunk_started" | "chunk_completed" | "reschedule_requested";
     taskTitle: string;
     chunkAction: string;
   }) => {
@@ -770,11 +770,18 @@ export function MvpDashboard() {
       return;
     }
 
-    const title = params.eventName === "chunk_started" ? "청크 시작" : "내일로 재등록";
+    const title =
+      params.eventName === "chunk_started"
+        ? "청크 시작"
+        : params.eventName === "chunk_completed"
+          ? "청크 완료"
+          : "내일로 재등록";
     const body =
       params.eventName === "chunk_started"
         ? `${params.taskTitle} · ${params.chunkAction}`
-        : `${params.taskTitle} · ${params.chunkAction} 청크를 내일로 옮겼어요.`;
+        : params.eventName === "chunk_completed"
+          ? `${params.taskTitle} · ${params.chunkAction} 청크를 완료했어요.`
+          : `${params.taskTitle} · ${params.chunkAction} 청크를 내일로 옮겼어요.`;
     const notification = new window.Notification(title, {
       body,
       tag: `adhdtime-${params.eventName}-${Date.now()}`
@@ -1229,6 +1236,13 @@ export function MvpDashboard() {
         }
       });
     }
+
+    const taskTitle = tasks.find((task) => task.id === target.taskId)?.title ?? "과업";
+    pushLoopNotification({
+      eventName: "chunk_completed",
+      taskTitle,
+      chunkAction: target.action
+    });
 
     setFeedback(`좋아요. +${reward.xpGain} XP 획득! ${nextChunk ? "다음 청크로 바로 이어가요." : "오늘 루프를 완료했어요."}`);
   };
@@ -1952,7 +1966,9 @@ export function MvpDashboard() {
                 {notificationFallbackText ? (
                   <p className={styles.fallbackText}>{notificationFallbackText}</p>
                 ) : (
-                  <p className={styles.helperText}>chunk_started/reschedule_requested 이벤트 시 1회 알림을 보냅니다.</p>
+                  <p className={styles.helperText}>
+                    chunk_started/chunk_completed/reschedule_requested 이벤트 시 1회 알림을 보냅니다.
+                  </p>
                 )}
               </div>
               <button
