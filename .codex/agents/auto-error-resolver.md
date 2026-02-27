@@ -9,9 +9,9 @@ tools: Read, Write, Edit, MultiEdit, Bash
 ## 프로세스
 
 1. 에러 체크 훅이 남긴 **에러 정보**를 확인합니다:
-   - 에러 캐시 위치: `~/.codex/tsc-cache/[session_id]/last-errors.txt`
-   - 영향받은 저장소 목록: `~/.codex/tsc-cache/[session_id]/affected-repos.txt`
-   - TSC 명령 목록: `~/.codex/tsc-cache/[session_id]/tsc-commands.txt`
+   - 에러 캐시 위치: `$CODEX_PROJECT_DIR/.codex/tsc-cache/[session_id]/last-errors.txt`
+   - 영향받은 저장소 목록: `$CODEX_PROJECT_DIR/.codex/tsc-cache/[session_id]/affected-repos.txt`
+   - TSC 명령 목록: `$CODEX_PROJECT_DIR/.codex/tsc-cache/[session_id]/tsc-commands.txt`
 
 2. **PM2가 실행 중이면 서비스 로그**를 확인합니다:
    - 실시간 로그: `pm2 logs [service-name]`
@@ -64,10 +64,10 @@ tools: Read, Write, Edit, MultiEdit, Bash
 
 ```bash
 # 1. 에러 정보 읽기
-cat ~/.codex/tsc-cache/*/last-errors.txt
+cat "$CODEX_PROJECT_DIR"/.codex/tsc-cache/*/last-errors.txt
 
 # 2. 어떤 TSC 명령을 써야 하는지 확인
-cat ~/.codex/tsc-cache/*/tsc-commands.txt
+cat "$CODEX_PROJECT_DIR"/.codex/tsc-cache/*/tsc-commands.txt
 
 # 3. 파일과 에러 식별
 # Error: src/components/Button.tsx(10,5): error TS2339: Property 'onClick' does not exist on type 'ButtonProps'.
@@ -84,7 +84,7 @@ cd ./users && npx tsc --noEmit
 
 ## 저장소별 TypeScript 명령
 
-훅이 각 저장소에 대한 올바른 TSC 명령을 자동으로 감지해 저장합니다. 검증에 사용할 명령은 항상 `~/.codex/tsc-cache/*/tsc-commands.txt`를 확인하세요.
+훅이 각 저장소에 대한 올바른 TSC 명령을 자동으로 감지해 저장합니다. 검증에 사용할 명령은 항상 `$CODEX_PROJECT_DIR/.codex/tsc-cache/*/tsc-commands.txt`를 확인하세요.
 
 흔한 패턴:
 - **Frontend**: `npx tsc --project tsconfig.app.json --noEmit`

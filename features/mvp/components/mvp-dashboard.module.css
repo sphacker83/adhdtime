@@ -1,0 +1,661 @@
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap");
+
+.shell {
+  min-height: 100dvh;
+  padding: 18px 16px 96px;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(255, 170, 64, 0.18), transparent 34%),
+    radial-gradient(circle at 100% 20%, rgba(26, 167, 130, 0.16), transparent 33%),
+    linear-gradient(160deg, #fffaf0 0%, #f1f7ff 48%, #f7f8fb 100%);
+  font-family: "IBM Plex Sans KR", "Space Grotesk", sans-serif;
+  color: #1f2638;
+  position: relative;
+  overflow-x: hidden;
+}
+
+.noiseLayer {
+  position: fixed;
+  inset: 0;
+  background-image: radial-gradient(rgba(25, 35, 59, 0.05) 0.7px, transparent 0.7px);
+  background-size: 4px 4px;
+  pointer-events: none;
+  opacity: 0.25;
+}
+
+.app {
+  width: min(880px, 100%);
+  margin: 0 auto;
+  display: grid;
+  gap: 14px;
+  position: relative;
+  z-index: 1;
+}
+
+.topBar {
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(29, 47, 80, 0.12);
+  border-radius: 20px;
+  padding: 16px;
+  box-shadow: 0 18px 36px rgba(22, 36, 66, 0.08);
+  backdrop-filter: blur(10px);
+  display: grid;
+  gap: 8px;
+}
+
+.topBar h1 {
+  margin: 4px 0;
+  font-size: clamp(1.3rem, 3.6vw, 2rem);
+  line-height: 1.2;
+  font-family: "Space Grotesk", "IBM Plex Sans KR", sans-serif;
+}
+
+.eyebrow {
+  margin: 0;
+  color: #0f9b6a;
+  letter-spacing: 0.08em;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.clock {
+  margin: 0;
+  font-size: 13px;
+  color: #54607a;
+  font-weight: 600;
+}
+
+.feedback {
+  margin: 0;
+  font-size: 14px;
+  color: #2b3552;
+  line-height: 1.4;
+  background: linear-gradient(90deg, rgba(31, 154, 101, 0.15), rgba(255, 191, 71, 0.2));
+  border: 1px solid rgba(31, 154, 101, 0.22);
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+
+.statusCard,
+.inputCard,
+.currentChunkCard,
+.listCard {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(29, 47, 80, 0.12);
+  border-radius: 20px;
+  padding: 16px;
+  box-shadow: 0 14px 32px rgba(17, 31, 58, 0.08);
+}
+
+.statusCard {
+  display: grid;
+  gap: 14px;
+}
+
+.levelBlock {
+  display: grid;
+  gap: 8px;
+}
+
+.levelLabel {
+  margin: 0;
+  color: #0f9b6a;
+  font-family: "Space Grotesk", "IBM Plex Sans KR", sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.levelXp,
+.todaySummary {
+  margin: 0;
+  font-size: 13px;
+  color: #3d4864;
+}
+
+.xpTrack {
+  width: 100%;
+  height: 10px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(39, 64, 110, 0.12);
+}
+
+.xpTrack span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(120deg, #ff9f1f, #f2721e 45%, #17a673);
+}
+
+.radarBlock {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+}
+
+.radarSvg {
+  width: 120px;
+  height: 120px;
+}
+
+.radarGrid {
+  fill: none;
+  stroke: rgba(40, 63, 104, 0.22);
+  stroke-width: 0.7;
+}
+
+.radarAxis {
+  stroke: rgba(31, 46, 71, 0.22);
+  stroke-width: 0.8;
+}
+
+.radarData {
+  fill: rgba(14, 162, 120, 0.34);
+  stroke: #0f9b6a;
+  stroke-width: 1.4;
+}
+
+.statList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 6px;
+}
+
+.statList li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #2c3551;
+  font-size: 13px;
+}
+
+.statList strong {
+  font-family: "Space Grotesk", "IBM Plex Sans KR", sans-serif;
+  font-size: 0.95rem;
+}
+
+.inputCard {
+  display: grid;
+  gap: 8px;
+}
+
+.inputLabel {
+  font-size: 13px;
+  font-weight: 700;
+  color: #28406f;
+}
+
+.inputRow {
+  display: grid;
+  gap: 8px;
+}
+
+.input {
+  width: 100%;
+  height: 44px;
+  border-radius: 12px;
+  border: 1px solid rgba(23, 39, 67, 0.2);
+  padding: 0 12px;
+  font-size: 15px;
+  background: #fff;
+  color: #1f2638;
+}
+
+.input:focus {
+  outline: 2px solid rgba(20, 166, 120, 0.35);
+  border-color: rgba(20, 166, 120, 0.62);
+}
+
+.primaryButton,
+.ghostButton,
+.successButton,
+.subtleButton,
+.smallButton,
+.smallButtonDanger,
+.taskPreviewList li button,
+.taskChip,
+.taskChipActive,
+.tabButton,
+.tabButtonActive {
+  border: 1px solid transparent;
+  border-radius: 11px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.primaryButton,
+.ghostButton {
+  height: 42px;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.primaryButton {
+  background: linear-gradient(120deg, #ff9f1f, #f2721e);
+  color: #fff;
+}
+
+.primaryButton:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.ghostButton {
+  background: #f1f6ff;
+  border-color: rgba(40, 63, 104, 0.2);
+  color: #304264;
+}
+
+.successButton {
+  height: 42px;
+  background: linear-gradient(120deg, #0ea278, #0f8a98);
+  color: #fff;
+  font-weight: 700;
+}
+
+.subtleButton {
+  height: 36px;
+  padding: 0 12px;
+  background: rgba(43, 71, 123, 0.08);
+  border-color: rgba(43, 71, 123, 0.17);
+  color: #304264;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.helperText {
+  margin: 0;
+  color: #5c6885;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.currentChunkCard h2 {
+  margin: 2px 0;
+  font-size: 1.1rem;
+  line-height: 1.35;
+}
+
+.sectionLabel {
+  margin: 0;
+  font-size: 12px;
+  color: #5b6784;
+  letter-spacing: 0.04em;
+  font-weight: 700;
+}
+
+.taskTitle {
+  margin: 0;
+  font-size: 13px;
+  color: #5b6784;
+}
+
+.timerValue {
+  margin: 10px 0;
+  font-family: "Space Grotesk", "IBM Plex Sans KR", sans-serif;
+  font-size: clamp(2rem, 10vw, 3rem);
+  letter-spacing: 0.02em;
+  color: #1b2c4f;
+}
+
+.chunkMetaRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 13px;
+  color: #475471;
+}
+
+.statusBadge {
+  border-radius: 999px;
+  padding: 5px 10px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.status_todo {
+  background: rgba(80, 110, 161, 0.14);
+  color: #32466d;
+}
+
+.status_running {
+  background: rgba(16, 159, 111, 0.15);
+  color: #0e7f65;
+}
+
+.status_paused {
+  background: rgba(250, 188, 44, 0.21);
+  color: #986100;
+}
+
+.status_done {
+  background: rgba(73, 178, 126, 0.18);
+  color: #0d835f;
+}
+
+.status_abandoned {
+  background: rgba(245, 155, 38, 0.2);
+  color: #8d5200;
+}
+
+.status_archived {
+  background: rgba(102, 114, 141, 0.18);
+  color: #4a546d;
+}
+
+.actionRow,
+.recoveryRow {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.recoveryRow {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.listHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.listHeader h3,
+.eventBlock h4 {
+  margin: 0;
+}
+
+.listHeader p {
+  margin: 0;
+  color: #53617f;
+  font-size: 12px;
+}
+
+.taskPreviewList,
+.chunkList,
+.eventBlock ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 8px;
+}
+
+.taskPreviewList li button {
+  width: 100%;
+  padding: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f7f9ff;
+  border-color: rgba(45, 68, 110, 0.17);
+  color: #24395f;
+  font-weight: 600;
+}
+
+.emptyRow {
+  color: #687792;
+  font-size: 13px;
+  padding: 10px;
+  border: 1px dashed rgba(44, 66, 108, 0.25);
+  border-radius: 10px;
+  background: rgba(247, 249, 255, 0.65);
+}
+
+.taskSelector {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.taskChip,
+.taskChipActive {
+  height: 34px;
+  padding: 0 12px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.taskChip {
+  background: rgba(77, 103, 154, 0.1);
+  border-color: rgba(77, 103, 154, 0.18);
+  color: #304264;
+}
+
+.taskChipActive {
+  background: linear-gradient(120deg, #12a26b, #0f8d9f);
+  color: #fff;
+}
+
+.chunkItem {
+  border: 1px solid rgba(39, 60, 96, 0.16);
+  border-radius: 12px;
+  padding: 10px;
+  display: grid;
+  gap: 9px;
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.chunkItemCurrent {
+  border-color: rgba(13, 159, 111, 0.5);
+  box-shadow: 0 0 0 2px rgba(13, 159, 111, 0.16);
+}
+
+.chunkOrder,
+.chunkInfo {
+  margin: 0;
+  font-size: 12px;
+  color: #5b6883;
+}
+
+.chunkItem h4 {
+  margin: 2px 0;
+  font-size: 15px;
+}
+
+.chunkButtons {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.smallButton,
+.smallButtonDanger {
+  height: 30px;
+  padding: 0 10px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.smallButton {
+  background: #f2f6ff;
+  border-color: rgba(44, 70, 112, 0.2);
+  color: #2f4268;
+}
+
+.smallButtonDanger {
+  background: #fff2ef;
+  border-color: rgba(163, 55, 23, 0.22);
+  color: #a13a1d;
+}
+
+.primaryButton:disabled,
+.ghostButton:disabled,
+.successButton:disabled,
+.subtleButton:disabled,
+.smallButton:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.reportGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.reportGrid article {
+  border: 1px solid rgba(41, 63, 104, 0.14);
+  border-radius: 12px;
+  padding: 10px;
+  background: rgba(247, 249, 255, 0.75);
+}
+
+.reportGrid p,
+.reportGrid strong {
+  margin: 0;
+}
+
+.reportGrid p {
+  font-size: 12px;
+  color: #5a6885;
+}
+
+.reportGrid strong {
+  font-family: "Space Grotesk", "IBM Plex Sans KR", sans-serif;
+  font-size: 1.1rem;
+}
+
+.eventBlock {
+  margin-top: 12px;
+  display: grid;
+  gap: 8px;
+}
+
+.eventBlock li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: #334769;
+  border-bottom: 1px dashed rgba(48, 70, 110, 0.16);
+  padding-bottom: 6px;
+}
+
+.eventInfo {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.eventInfo strong {
+  font-size: 12px;
+  color: #24395f;
+}
+
+.eventMeta {
+  font-size: 11px;
+  color: #586788;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.eventBlock time {
+  color: #6a7792;
+  font-size: 12px;
+}
+
+.settingsRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid rgba(42, 64, 104, 0.14);
+  border-radius: 12px;
+  padding: 12px;
+  background: rgba(248, 250, 255, 0.75);
+  margin-bottom: 10px;
+}
+
+.settingsRow p,
+.settingsRow strong {
+  margin: 0;
+}
+
+.settingsRow p {
+  font-size: 12px;
+  color: #5a6885;
+}
+
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #31486e;
+}
+
+.toggle input {
+  width: 18px;
+  height: 18px;
+}
+
+.tabBar {
+  position: fixed;
+  left: 50%;
+  bottom: 12px;
+  transform: translateX(-50%);
+  width: min(880px, calc(100% - 20px));
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(34, 56, 93, 0.2);
+  border-radius: 16px;
+  padding: 8px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  box-shadow: 0 16px 30px rgba(18, 33, 61, 0.18);
+  z-index: 10;
+  backdrop-filter: blur(8px);
+}
+
+.tabButton,
+.tabButtonActive {
+  height: 40px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.tabButton {
+  background: #f3f7ff;
+  border-color: rgba(44, 67, 108, 0.16);
+  color: #31466d;
+}
+
+.tabButtonActive {
+  background: linear-gradient(120deg, #ff9f1f, #0ea278);
+  color: #fff;
+}
+
+@media (min-width: 768px) {
+  .shell {
+    padding-top: 24px;
+  }
+
+  .statusCard {
+    grid-template-columns: 280px minmax(0, 1fr);
+    align-items: center;
+  }
+
+  .inputRow {
+    grid-template-columns: minmax(0, 1fr) 120px 154px;
+  }
+
+  .actionRow {
+    grid-template-columns: 150px 150px 150px;
+    justify-content: start;
+  }
+
+  .recoveryRow {
+    grid-template-columns: 1fr 1fr;
+    max-width: 420px;
+  }
+}

@@ -25,7 +25,7 @@
 
 ### 🤖 Codex CLI로 통합 중인가요?
 
-Codex용 단계별 통합 가이드는 [`codex_integration_guide.md`](../CODEX_INTEGRATION_GUIDE.md)를 읽으세요.
+Codex용 단계별 통합 가이드는 [`CODEX_INTEGRATION_GUIDE.md`](../CODEX_INTEGRATION_GUIDE.md)를 읽으세요.
 
 ### 🎯 스킬 자동 활성화가 필요해요
 
@@ -255,13 +255,13 @@ skill-name/
 
 ### 사용자용
 **통합이 잘 안 되나요?**
-1. [`codex_integration_guide.md`](../codex_integration_guide.md) 확인
+1. [`CODEX_INTEGRATION_GUIDE.md`](../CODEX_INTEGRATION_GUIDE.md) 확인
 2. Codex에게 질문: "왜 [skill]이 활성화되지 않지?"
 3. 프로젝트 구조와 함께 이슈 등록
 
 ### Codex CLI용
 사용자 통합 지원 시:
-1. **먼저 `codex_integration_guide.md` 읽기**
+1. **먼저 `CODEX_INTEGRATION_GUIDE.md` 읽기**
 2. 프로젝트 구조 질문
 3. 무작정 복사하지 말고 맞춤 적용
 4. 통합 후 검증
@@ -289,7 +289,7 @@ MIT 라이선스 - 개인/상업 프로젝트에서 자유롭게 사용하세요
 
 ## 빠른 링크
 
-- 📖 [Codex 통합 가이드](../codex_integration_guide.md) - Codex CLI 설정/통합
+- 📖 [Codex 통합 가이드](../CODEX_INTEGRATION_GUIDE.md) - Codex CLI 설정/통합
 - 🎨 [스킬 문서](skills/README.md)
 - 🪝 [훅 설정](hooks/README.md)
 - 🤖 [에이전트 가이드](agents/README.md)

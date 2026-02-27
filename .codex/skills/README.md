@@ -18,6 +18,16 @@
 
 ---
 
+## adhdtime 프로젝트 적용 상태
+
+현재 저장소 기준으로 `skill-rules.json`이 다음처럼 튜닝되어 있습니다.
+
+- 프론트엔드(Next.js App Router) 경로 `app/`, `components/`, `lib/`, `types/`에 맞춘 파일 트리거
+- 한글/영문 프롬프트를 모두 인식하도록 키워드/의도 패턴 확장
+- `frontend-dev-guidelines`는 이 프로젝트에서 과차단을 피하기 위해 `suggest` 모드로 설정
+
+---
+
 ## 제공되는 스킬
 
 ### skill-developer (메타 스킬)
@@ -366,4 +376,3 @@ skill-rules.json을 업데이트하세요:
 4. **커스터마이즈:** 워크플로에 맞게 트리거를 조정하세요
 
 **질문이 있나요?** 더 자세한 통합 가이드는 [CODEX_INTEGRATION_GUIDE.md](../../CODEX_INTEGRATION_GUIDE.md)를 참고하세요.
-

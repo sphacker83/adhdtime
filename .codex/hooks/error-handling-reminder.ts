@@ -1,56 +1,70 @@
 #!/usr/bin/env node
-import { readFileSync, existsSync } from 'fs';
+import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
 
 interface HookInput {
-    session_id: string;
-    transcript_path: string;
-    cwd: string;
-    permission_mode: string;
-    hook_event_name: string;
+    session_id?: string;
 }
 
 interface EditedFile {
-    path: string;
-    tool: string;
     timestamp: string;
+    path: string;
 }
 
-interface SessionTracking {
-    edited_files: EditedFile[];
+function normalizePath(filePath: string): string {
+    return filePath.replace(/\\/g, '/');
+}
+
+function resolvePath(filePath: string, projectDir: string): string {
+    if (filePath.startsWith('/')) {
+        return filePath;
+    }
+    return join(projectDir, filePath);
 }
 
 function getFileCategory(filePath: string): 'backend' | 'frontend' | 'database' | 'other' {
-    // Frontend detection
-    if (filePath.includes('/frontend/') ||
-        filePath.includes('/client/') ||
-        filePath.includes('/src/components/') ||
-        filePath.includes('/src/features/')) return 'frontend';
+    const normalized = normalizePath(filePath);
 
-    // Backend detection (common service directories)
-    if (filePath.includes('/src/controllers/') ||
-        filePath.includes('/src/services/') ||
-        filePath.includes('/src/routes/') ||
-        filePath.includes('/src/api/') ||
-        filePath.includes('/server/')) return 'backend';
+    // Backend detection first so app/api/* is treated as backend, not frontend.
+    if (normalized.includes('/app/api/') ||
+        normalized.includes('/api/') ||
+        normalized.includes('/server/') ||
+        normalized.includes('/backend/') ||
+        normalized.includes('/src/api/') ||
+        normalized.includes('/src/controllers/') ||
+        normalized.includes('/src/services/') ||
+        normalized.includes('/src/routes/')) {
+        return 'backend';
+    }
 
-    // Database detection
-    if (filePath.includes('/database/') ||
-        filePath.includes('/prisma/') ||
-        filePath.includes('/migrations/')) return 'database';
+    if (normalized.includes('/app/') ||
+        normalized.includes('/components/') ||
+        normalized.includes('/lib/') ||
+        normalized.includes('/frontend/') ||
+        normalized.includes('/client/') ||
+        normalized.includes('/src/components/') ||
+        normalized.includes('/src/features/')) {
+        return 'frontend';
+    }
+
+    if (normalized.includes('/database/') ||
+        normalized.includes('/prisma/') ||
+        normalized.includes('/migrations/')) {
+        return 'database';
+    }
 
     return 'other';
 }
 
 function shouldCheckErrorHandling(filePath: string): boolean {
-    // Skip test files, config files, and type definitions
-    if (filePath.match(/\.(test|spec)\.(ts|tsx)$/)) return false;
-    if (filePath.match(/\.(config|d)\.(ts|tsx)$/)) return false;
-    if (filePath.includes('types/')) return false;
-    if (filePath.includes('.styles.ts')) return false;
+    const normalized = normalizePath(filePath);
 
-    // Check for code files
-    return filePath.match(/\.(ts|tsx|js|jsx)$/) !== null;
+    if (normalized.match(/\.(test|spec)\.(ts|tsx|js|jsx)$/)) return false;
+    if (normalized.match(/\.(config|d)\.(ts|tsx|js|jsx)$/)) return false;
+    if (normalized.includes('/types/')) return false;
+    if (normalized.endsWith('.styles.ts')) return false;
+
+    return normalized.match(/\.(ts|tsx|js|jsx)$/) !== null;
 }
 
 function analyzeFileContent(filePath: string): {
@@ -61,7 +75,13 @@ function analyzeFileContent(filePath: string): {
     hasApiCall: boolean;
 } {
     if (!existsSync(filePath)) {
-        return { hasTryCatch: false, hasAsync: false, hasPrisma: false, hasController: false, hasApiCall: false };
+        return {
+            hasTryCatch: false,
+            hasAsync: false,
+            hasPrisma: false,
+            hasController: false,
+            hasApiCall: false,
+        };
     }
 
     const content = readFileSync(filePath, 'utf-8');
@@ -70,69 +90,81 @@ function analyzeFileContent(filePath: string): {
         hasTryCatch: /try\s*\{/.test(content),
         hasAsync: /async\s+/.test(content),
         hasPrisma: /prisma\.|PrismaService|findMany|findUnique|create\(|update\(|delete\(/i.test(content),
-        hasController: /export class.*Controller|router\.|app\.(get|post|put|delete|patch)/.test(content),
+        hasController: /export class.*Controller|router\.|app\.(get|post|put|delete|patch)|export\s+async\s+function\s+(GET|POST|PUT|PATCH|DELETE)/.test(content),
         hasApiCall: /fetch\(|axios\.|apiClient\./i.test(content),
     };
 }
 
+function parseEditedFiles(trackingContent: string): EditedFile[] {
+    return trackingContent
+        .trim()
+        .split('\n')
+        .filter(line => line.length > 0)
+        .map(line => {
+            // Current tracker format: timestamp:path:repo
+            const currentFormat = line.match(/^([^:]+):(.+):([^:]+)$/);
+            if (currentFormat) {
+                return { timestamp: currentFormat[1], path: currentFormat[2] };
+            }
+
+            // Backward compatible format: timestamp<TAB>tool<TAB>path
+            const legacy = line.split('\t');
+            if (legacy.length >= 3) {
+                return { timestamp: legacy[0], path: legacy[2] };
+            }
+
+            return null;
+        })
+        .filter((item): item is EditedFile => item !== null);
+}
+
 async function main() {
     try {
-        // Read input from stdin
         const input = readFileSync(0, 'utf-8');
         const data: HookInput = JSON.parse(input);
 
-        const { session_id } = data;
+        const sessionId = data.session_id || 'default';
         const projectDir = process.env.CODEX_PROJECT_DIR || process.cwd();
 
-        // Check for edited files tracking
-        const cacheDir = join(process.env.HOME || '/root', '.codex', 'tsc-cache', session_id);
+        const cacheDir = join(projectDir, '.codex', 'tsc-cache', sessionId);
         const trackingFile = join(cacheDir, 'edited-files.log');
 
         if (!existsSync(trackingFile)) {
-            // No files edited this session, no reminder needed
             process.exit(0);
         }
 
-        // Read tracking data
         const trackingContent = readFileSync(trackingFile, 'utf-8');
-        const editedFiles = trackingContent
-            .trim()
-            .split('\n')
-            .filter(line => line.length > 0)
-            .map(line => {
-                const [timestamp, tool, path] = line.split('\t');
-                return { timestamp, tool, path };
-            });
+        const editedFiles = parseEditedFiles(trackingContent);
 
         if (editedFiles.length === 0) {
             process.exit(0);
         }
 
-        // Categorize files
         const categories = {
-            backend: [] as string[],
-            frontend: [] as string[],
-            database: [] as string[],
-            other: [] as string[],
+            backend: new Set<string>(),
+            frontend: new Set<string>(),
+            database: new Set<string>(),
+            other: new Set<string>(),
         };
 
         const analysisResults: Array<{
             path: string;
-            category: string;
+            category: 'backend' | 'frontend' | 'database' | 'other';
             analysis: ReturnType<typeof analyzeFileContent>;
         }> = [];
 
         for (const file of editedFiles) {
             if (!shouldCheckErrorHandling(file.path)) continue;
 
-            const category = getFileCategory(file.path);
-            categories[category].push(file.path);
+            const resolvedPath = resolvePath(file.path, projectDir);
+            const category = getFileCategory(resolvedPath);
 
-            const analysis = analyzeFileContent(file.path);
+            categories[category].add(file.path);
+
+            const analysis = analyzeFileContent(resolvedPath);
             analysisResults.push({ path: file.path, category, analysis });
         }
 
-        // Check if any code that needs error handling was written
         const needsAttention = analysisResults.some(
             ({ analysis }) =>
                 analysis.hasTryCatch ||
@@ -143,24 +175,21 @@ async function main() {
         );
 
         if (!needsAttention) {
-            // No risky code patterns detected, skip reminder
             process.exit(0);
         }
 
-        // Display reminder
         console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
         console.log('📋 ERROR HANDLING SELF-CHECK');
         console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
 
-        // Backend reminders
-        if (categories.backend.length > 0) {
+        if (categories.backend.size > 0) {
             const backendFiles = analysisResults.filter(f => f.category === 'backend');
             const hasTryCatch = backendFiles.some(f => f.analysis.hasTryCatch);
             const hasPrisma = backendFiles.some(f => f.analysis.hasPrisma);
             const hasController = backendFiles.some(f => f.analysis.hasController);
 
             console.log('⚠️  Backend Changes Detected');
-            console.log(`   ${categories.backend.length} file(s) edited\n`);
+            console.log(`   ${categories.backend.size} file(s) edited\n`);
 
             if (hasTryCatch) {
                 console.log('   ❓ Did you add Sentry.captureException() in catch blocks?');
@@ -169,43 +198,41 @@ async function main() {
                 console.log('   ❓ Are Prisma operations wrapped in error handling?');
             }
             if (hasController) {
-                console.log('   ❓ Do controllers use BaseController.handleError()?');
+                console.log('   ❓ Do controllers use consistent error helpers?');
             }
 
             console.log('\n   💡 Backend Best Practice:');
             console.log('      - All errors should be captured to Sentry');
-            console.log('      - Use appropriate error helpers for context');
-            console.log('      - Controllers should extend BaseController\n');
+            console.log('      - Use contextual error helpers for diagnostics');
+            console.log('      - Keep route/controller error responses consistent\n');
         }
 
-        // Frontend reminders
-        if (categories.frontend.length > 0) {
+        if (categories.frontend.size > 0) {
             const frontendFiles = analysisResults.filter(f => f.category === 'frontend');
             const hasApiCall = frontendFiles.some(f => f.analysis.hasApiCall);
             const hasTryCatch = frontendFiles.some(f => f.analysis.hasTryCatch);
 
             console.log('💡 Frontend Changes Detected');
-            console.log(`   ${categories.frontend.length} file(s) edited\n`);
+            console.log(`   ${categories.frontend.size} file(s) edited\n`);
 
             if (hasApiCall) {
                 console.log('   ❓ Do API calls show user-friendly error messages?');
             }
             if (hasTryCatch) {
-                console.log('   ❓ Are errors displayed to the user?');
+                console.log('   ❓ Are errors surfaced to users appropriately?');
             }
 
             console.log('\n   💡 Frontend Best Practice:');
-            console.log('      - Use your notification system for user feedback');
-            console.log('      - Error boundaries for component errors');
-            console.log('      - Display user-friendly error messages\n');
+            console.log('      - Use notification UI for actionable feedback');
+            console.log('      - Keep error boundaries around risky components');
+            console.log('      - Avoid silent failures in async handlers\n');
         }
 
-        // Database reminders
-        if (categories.database.length > 0) {
+        if (categories.database.size > 0) {
             console.log('🗄️  Database Changes Detected');
-            console.log(`   ${categories.database.length} file(s) edited\n`);
-            console.log('   ❓ Did you verify column names against schema?');
-            console.log('   ❓ Are migrations tested?\n');
+            console.log(`   ${categories.database.size} file(s) edited\n`);
+            console.log('   ❓ Did you verify schema/column names?');
+            console.log('   ❓ Are migrations validated locally?\n');
         }
 
         console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
@@ -213,8 +240,7 @@ async function main() {
         console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
 
         process.exit(0);
-    } catch (err) {
-        // Silently fail - this is just a reminder, not critical
+    } catch {
         process.exit(0);
     }
 }

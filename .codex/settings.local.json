@@ -1,9 +1,6 @@
 {
   "permissions": {
-    "allow": [
-      "Bash(for file in /root/git/codex-code-infrastructure-showcase/.codex/skills/frontend-dev-guidelines/resources/*.md)",
-      "Bash(done)"
-    ],
+    "allow": [],
     "deny": [],
     "ask": []
   }

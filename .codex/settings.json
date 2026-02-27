@@ -1,10 +1,4 @@
 {
-  "enableAllProjectMcpServers": true,
-  "enabledMcpjsonServers": [
-    "mysql",
-    "sequential-thinking",
-    "playwright"
-  ],
   "permissions": {
     "allow": [
       "Edit:*",
@@ -42,11 +36,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$CODEX_PROJECT_DIR/.codex/hooks/tsc-check.sh"
-          },
-          {
-            "type": "command",
-            "command": "$CODEX_PROJECT_DIR/.codex/hooks/trigger-build-resolver.sh"
+            "command": "$CODEX_PROJECT_DIR/.codex/hooks/error-handling-reminder.sh"
           }
         ]
       }

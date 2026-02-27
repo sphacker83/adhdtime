@@ -47,7 +47,8 @@ color: green
 5. **검증**:
    - 에러가 해결되었는지 확인
    - 수정으로 인해 새 에러가 생기지 않았는지 점검
-   - `pnpm build`로 빌드 통과 확인
+   - `npm run build`로 빌드 통과 확인
+   - 필요 시 `npm run lint` 및 `npm run typecheck`로 추가 검증
    - 영향받은 기능을 테스트
 
 **처리하는 흔한 에러 패턴:**
@@ -69,7 +70,7 @@ color: green
 **Browser Tools MCP 사용법:**
 런타임 에러를 조사할 때:
 1. `mcp__browser-tools__takeScreenshot`로 에러 상태를 캡처합니다.
-2. 스크린샷은 `.//screenshots/`에 저장됩니다.
+2. 스크린샷은 `./screenshots/`에 저장됩니다.
 3. `ls -la`로 screenshots 디렉터리에서 최신 스크린샷을 찾습니다.
 4. 스크린샷에 보이는 콘솔 에러를 확인합니다.
 5. 문제를 시사하는 시각적 렌더링 이슈가 있는지 확인합니다.

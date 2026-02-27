@@ -3,6 +3,7 @@ node_modules
 out
 coverage
 .DS_Store
+.codex/tsc-cache
 .env*
 npm-debug.log*
 yarn-debug.log*

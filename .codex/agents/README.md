@@ -16,6 +16,16 @@
 
 ---
 
+## adhdtime 프로젝트 권장 사용
+
+현재 저장소는 **Next.js App Router + React + TypeScript** 중심입니다.
+
+- 바로 사용 권장: `frontend-error-fixer`, `code-refactor-master`, `refactor-planner`, `plan-reviewer`, `documentation-architect`, `web-research-specialist`
+- 조건부 사용: `auth-route-tester`, `auth-route-debugger` (JWT 쿠키 인증 API가 있을 때)
+- 스택 불일치 가능: `flutter-developer` (Flutter 코드가 있을 때만)
+
+---
+
 ## 사용 가능한 에이전트 (11)
 
 ### code-architecture-reviewer

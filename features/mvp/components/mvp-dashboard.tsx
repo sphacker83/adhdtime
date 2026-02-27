@@ -1,0 +1,1556 @@
+"use client";
+
+import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  createAiFallbackAdapter,
+  generateLocalChunking,
+  generateTemplateChunking,
+  validateChunkingResult
+} from "@/features/mvp/lib/chunking";
+import { appendEvent, createEvent } from "@/features/mvp/lib/events";
+import {
+  applyChunkCompletionReward,
+  applyRecoveryReward,
+  createInitialStats,
+  rollDailyStats
+} from "@/features/mvp/lib/reward";
+import { loadPersistedState, savePersistedState } from "@/features/mvp/lib/storage";
+import {
+  applyElapsedToChunkRemaining,
+  applyElapsedWindow,
+  createTimerElapsedAccumulator
+} from "@/features/mvp/lib/timer-accuracy";
+import type {
+  AppEvent,
+  Chunk,
+  EventSource,
+  FiveStats,
+  PersistedState,
+  StatsState,
+  Task,
+  TimerSession,
+  UserSettings
+} from "@/features/mvp/types/domain";
+import styles from "./mvp-dashboard.module.css";
+
+const TAB_ITEMS = [
+  { key: "home", label: "홈" },
+  { key: "tasks", label: "할 일" },
+  { key: "stats", label: "스탯" },
+  { key: "settings", label: "설정" }
+] as const;
+
+type TabKey = (typeof TAB_ITEMS)[number]["key"];
+
+const STAT_META: Array<{ key: keyof FiveStats; label: string }> = [
+  { key: "initiation", label: "시작력" },
+  { key: "focus", label: "몰입력" },
+  { key: "breakdown", label: "분해력" },
+  { key: "recovery", label: "회복력" },
+  { key: "consistency", label: "지속력" }
+];
+
+const RISKY_INPUT_PATTERN = /(자해|죽고\s?싶|폭탄|불법|마약|살인|테러)/i;
+
+const DEFAULT_SETTINGS: UserSettings = {
+  hapticEnabled: true
+};
+
+const ACTIONABLE_CHUNK_STATUSES: Chunk["status"][] = ["todo", "running", "paused"];
+
+const RECOVERY_FEEDBACK = {
+  safetyBlocked: "괜찮아요. 안전을 위해 이 입력은 청킹하지 않았어요. 안전한 할 일로 다시 입력해 주세요.",
+  rechunked: "괜찮아요. 더 작은 단계로 다시 나눴어요. 첫 단계부터 이어가요.",
+  rescheduled: "괜찮아요. 내일로 다시 등록했어요. 바로 시작할 청크를 준비해뒀어요."
+} as const;
+
+function clampMinuteInput(minutes: number): number {
+  return Math.min(15, Math.max(2, Math.floor(minutes)));
+}
+
+function buildTaskSummary(rawInput: string): string {
+  return rawInput.trim().replace(/\s+/g, " ").slice(0, 60);
+}
+
+function buildNextRescheduleDate(now = new Date()): string {
+  const next = new Date(now);
+  next.setDate(next.getDate() + 1);
+  next.setHours(9, 0, 0, 0);
+  return next.toISOString();
+}
+
+function isActionableChunkStatus(status: Chunk["status"]): boolean {
+  return ACTIONABLE_CHUNK_STATUSES.includes(status);
+}
+
+function isTaskClosedStatus(status: Chunk["status"]): boolean {
+  return status === "done" || status === "abandoned" || status === "archived";
+}
+
+function normalizeLoadedEvents(rawEvents: AppEvent[] | undefined, fallbackSessionId: string): AppEvent[] {
+  return (rawEvents ?? []).map((event) => ({
+    ...event,
+    sessionId: event.sessionId || fallbackSessionId,
+    source: event.source || "local",
+    taskId: event.taskId ?? null,
+    chunkId: event.chunkId ?? null
+  }));
+}
+
+function formatDateTime(date: Date): string {
+  return new Intl.DateTimeFormat("ko-KR", {
+    month: "long",
+    day: "numeric",
+    weekday: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit"
+  }).format(date);
+}
+
+function formatClock(totalSeconds: number): string {
+  const safe = Math.max(0, Math.floor(totalSeconds));
+  const minutes = Math.floor(safe / 60);
+  const seconds = safe % 60;
+  return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+}
+
+function chunkStatusLabel(status: Chunk["status"]): string {
+  if (status === "running") {
+    return "진행 중";
+  }
+  if (status === "paused") {
+    return "일시정지";
+  }
+  if (status === "done") {
+    return "완료";
+  }
+  if (status === "abandoned") {
+    return "중단";
+  }
+  if (status === "archived") {
+    return "보관됨";
+  }
+  return "대기";
+}
+
+function orderChunks(list: Chunk[]): Chunk[] {
+  return [...list].sort((a, b) => a.order - b.order);
+}
+
+function getXpProgressPercent(stats: StatsState): number {
+  const maxXp = 100 + (stats.level - 1) * 45;
+  if (maxXp <= 0) {
+    return 0;
+  }
+  return Math.min(100, Math.round((stats.xp / maxXp) * 100));
+}
+
+function pointsToString(points: Array<[number, number]>): string {
+  return points.map(([x, y]) => `${x},${y}`).join(" ");
+}
+
+function buildRadarShape(stats: FiveStats): { data: string; grid: string[] } {
+  const center = 60;
+  const radius = 48;
+
+  const axes = STAT_META.map((_, index) => {
+    const angle = (-Math.PI / 2) + (index * Math.PI * 2) / STAT_META.length;
+    const x = center + Math.cos(angle) * radius;
+    const y = center + Math.sin(angle) * radius;
+    return [x, y] as [number, number];
+  });
+
+  const grid = [0.25, 0.5, 0.75, 1].map((ratio) =>
+    pointsToString(
+      axes.map(([x, y]) => [
+        center + (x - center) * ratio,
+        center + (y - center) * ratio
+      ])
+    )
+  );
+
+  const data = pointsToString(
+    axes.map(([x, y], index) => {
+      const key = STAT_META[index].key;
+      const ratio = Math.max(0, Math.min(1, stats[key] / 100));
+      return [
+        center + (x - center) * ratio,
+        center + (y - center) * ratio
+      ] as [number, number];
+    })
+  );
+
+  return { data, grid };
+}
+
+function buildInitialState(): PersistedState {
+  return {
+    tasks: [],
+    chunks: [],
+    timerSessions: [],
+    stats: createInitialStats(),
+    settings: DEFAULT_SETTINGS,
+    events: [],
+    activeTaskId: null,
+    activeTab: "home",
+    remainingSecondsByChunk: {}
+  };
+}
+
+function withReorderedTaskChunks(chunks: Chunk[], taskId: string): Chunk[] {
+  const targetChunks = orderChunks(chunks.filter((chunk) => chunk.taskId === taskId));
+  const reorderedMap = new Map(
+    targetChunks.map((chunk, index) => [
+      chunk.id,
+      {
+        ...chunk,
+        order: index + 1
+      }
+    ])
+  );
+
+  return chunks.map((chunk) => reorderedMap.get(chunk.id) ?? chunk);
+}
+
+function formatEventMeta(meta?: AppEvent["meta"]): string {
+  if (!meta) {
+    return "";
+  }
+
+  return Object.entries(meta)
+    .slice(0, 3)
+    .map(([key, value]) => `${key}:${String(value)}`)
+    .join(" · ");
+}
+
+export function MvpDashboard() {
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [chunks, setChunks] = useState<Chunk[]>([]);
+  const [timerSessions, setTimerSessions] = useState<TimerSession[]>([]);
+  const [stats, setStats] = useState<StatsState>(createInitialStats());
+  const [settings, setSettings] = useState<UserSettings>(DEFAULT_SETTINGS);
+  const [events, setEvents] = useState<AppEvent[]>([]);
+  const [activeTaskId, setActiveTaskId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<TabKey>("home");
+  const [remainingSecondsByChunk, setRemainingSecondsByChunk] = useState<Record<string, number>>({});
+
+  const [taskInput, setTaskInput] = useState("");
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [feedback, setFeedback] = useState<string>("오늘은 가장 작은 행동부터 시작해요.");
+  const [clock, setClock] = useState(new Date());
+  const [currentChunkId, setCurrentChunkId] = useState<string | null>(null);
+  const [hydrated, setHydrated] = useState(false);
+
+  const aiAdapterRef = useRef(createAiFallbackAdapter());
+  const sessionIdRef = useRef(crypto.randomUUID());
+  const tickAccumulatorRef = useRef(createTimerElapsedAccumulator());
+  const lastHapticBucketByChunkRef = useRef<Record<string, number>>({});
+  const gateMetricsRef = useRef<{
+    startClickCountByTaskId: Record<string, number>;
+    firstStartLoggedByTaskId: Record<string, boolean>;
+    recoveryClickCountByTaskId: Record<string, number>;
+  }>({
+    startClickCountByTaskId: {},
+    firstStartLoggedByTaskId: {},
+    recoveryClickCountByTaskId: {}
+  });
+
+  const activeTask = useMemo(
+    () => tasks.find((task) => task.id === activeTaskId) ?? null,
+    [tasks, activeTaskId]
+  );
+
+  const activeTaskChunks = useMemo(() => {
+    if (!activeTaskId) {
+      return [];
+    }
+    return orderChunks(chunks.filter((chunk) => chunk.taskId === activeTaskId));
+  }, [chunks, activeTaskId]);
+
+  const runningChunk = useMemo(
+    () => chunks.find((chunk) => chunk.status === "running") ?? null,
+    [chunks]
+  );
+
+  const completionRate = useMemo(() => {
+    if (chunks.length === 0) {
+      return 0;
+    }
+    const doneCount = chunks.filter((chunk) => chunk.status === "done").length;
+    return Math.round((doneCount / chunks.length) * 100);
+  }, [chunks]);
+
+  const xpProgressPercent = getXpProgressPercent(stats);
+
+  const radar = useMemo(
+    () => buildRadarShape(stats),
+    [stats]
+  );
+
+  useEffect(() => {
+    const tick = window.setInterval(() => {
+      setClock(new Date());
+    }, 1000);
+
+    return () => window.clearInterval(tick);
+  }, []);
+
+  useEffect(() => {
+    const loaded = loadPersistedState();
+    if (loaded) {
+      setTasks(
+        (loaded.tasks ?? []).map((task) => ({
+          ...task,
+          summary: task.summary ?? task.title
+        }))
+      );
+      setChunks(loaded.chunks ?? []);
+      setTimerSessions(loaded.timerSessions ?? []);
+      setStats(rollDailyStats(loaded.stats ?? createInitialStats()));
+      setSettings(loaded.settings ?? DEFAULT_SETTINGS);
+      setEvents(normalizeLoadedEvents(loaded.events, sessionIdRef.current));
+      setActiveTaskId(loaded.activeTaskId ?? null);
+      setActiveTab((loaded.activeTab ?? "home") as TabKey);
+      setRemainingSecondsByChunk(loaded.remainingSecondsByChunk ?? {});
+    }
+    setHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated) {
+      return;
+    }
+
+    savePersistedState({
+      tasks,
+      chunks,
+      timerSessions,
+      stats,
+      settings,
+      events,
+      activeTaskId,
+      activeTab,
+      remainingSecondsByChunk
+    });
+  }, [
+    hydrated,
+    tasks,
+    chunks,
+    timerSessions,
+    stats,
+    settings,
+    events,
+    activeTaskId,
+    activeTab,
+    remainingSecondsByChunk
+  ]);
+
+  useEffect(() => {
+    if (tasks.length === 0) {
+      if (activeTaskId !== null) {
+        setActiveTaskId(null);
+      }
+      return;
+    }
+
+    if (activeTaskId && tasks.some((task) => task.id === activeTaskId && task.status !== "archived")) {
+      return;
+    }
+
+    const nextTask = tasks.find((task) => task.status === "todo")
+      ?? tasks.find((task) => task.status !== "archived")
+      ?? tasks[0];
+    if (nextTask) {
+      setActiveTaskId(nextTask.id);
+    }
+  }, [tasks, activeTaskId]);
+
+  useEffect(() => {
+    if (!activeTaskId) {
+      if (currentChunkId !== null) {
+        setCurrentChunkId(null);
+      }
+      return;
+    }
+
+    const usableChunks = activeTaskChunks.filter((chunk) => isActionableChunkStatus(chunk.status));
+    if (usableChunks.length === 0) {
+      if (currentChunkId !== null) {
+        setCurrentChunkId(null);
+      }
+      return;
+    }
+
+    if (currentChunkId && usableChunks.some((chunk) => chunk.id === currentChunkId)) {
+      return;
+    }
+
+    const nextChunk = usableChunks.find((chunk) => chunk.status === "running") ?? usableChunks[0];
+    setCurrentChunkId(nextChunk.id);
+  }, [activeTaskId, activeTaskChunks, currentChunkId]);
+
+  useEffect(() => {
+    if (!runningChunk) {
+      tickAccumulatorRef.current = createTimerElapsedAccumulator();
+      return;
+    }
+
+    const applyTick = () => {
+      if (!runningChunk) {
+        return;
+      }
+
+      const tickResult = applyElapsedWindow({
+        nowMs: Date.now(),
+        accumulator: tickAccumulatorRef.current
+      });
+      tickAccumulatorRef.current = tickResult.nextAccumulator;
+
+      setRemainingSecondsByChunk((prev) => {
+        return applyElapsedToChunkRemaining({
+          remainingSecondsByChunk: prev,
+          chunkId: runningChunk.id,
+          chunkTotalSeconds: runningChunk.estMinutes * 60,
+          elapsedSeconds: tickResult.elapsedSeconds
+        });
+      });
+    };
+
+    const intervalId = window.setInterval(applyTick, 1000);
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        applyTick();
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      window.clearInterval(intervalId);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [runningChunk]);
+
+  useEffect(() => {
+    if (!runningChunk || !settings.hapticEnabled) {
+      return;
+    }
+
+    const total = runningChunk.estMinutes * 60;
+    const remaining = remainingSecondsByChunk[runningChunk.id] ?? total;
+    const elapsed = Math.max(0, total - remaining);
+    const currentBucket = Math.floor(elapsed / 300);
+    const previousBucket = lastHapticBucketByChunkRef.current[runningChunk.id] ?? 0;
+
+    if (currentBucket > previousBucket && currentBucket > 0) {
+      lastHapticBucketByChunkRef.current[runningChunk.id] = currentBucket;
+
+      if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+        navigator.vibrate(35);
+      }
+
+      setEvents((prev) =>
+        appendEvent(
+          prev,
+          createEvent({
+            eventName: "haptic_fired",
+            sessionId: sessionIdRef.current,
+            source: "local",
+            taskId: runningChunk.taskId,
+            chunkId: runningChunk.id,
+            meta: {
+              minuteMark: currentBucket * 5
+            }
+          })
+        )
+      );
+    }
+  }, [remainingSecondsByChunk, runningChunk, settings.hapticEnabled]);
+
+  useEffect(() => {
+    setTasks((prev) => {
+      if (prev.length === 0) {
+        return prev;
+      }
+
+      const next = prev.map((task) => {
+        const taskChunks = chunks.filter((chunk) => chunk.taskId === task.id);
+        if (taskChunks.length === 0) {
+          return task;
+        }
+
+        const allDone = taskChunks.every((chunk) => isTaskClosedStatus(chunk.status));
+        const nextStatus: Task["status"] = allDone ? "done" : "todo";
+
+        if (task.status === nextStatus) {
+          return task;
+        }
+
+        return {
+          ...task,
+          status: nextStatus
+        };
+      });
+
+      const changed = next.some((task, index) => task !== prev[index]);
+      return changed ? next : prev;
+    });
+  }, [chunks]);
+
+  const upsertTimerSession = (chunkId: string, nextState: TimerSession["state"], nowIso: string) => {
+    setTimerSessions((prev) => {
+      const activeSessionIndex = prev.findIndex(
+        (session) => session.chunkId === chunkId && session.state !== "ended"
+      );
+
+      if (activeSessionIndex === -1) {
+        if (nextState === "ended") {
+          return prev;
+        }
+
+        return [
+          {
+            id: crypto.randomUUID(),
+            chunkId,
+            state: nextState,
+            startedAt: nowIso,
+            pausedAt: nextState === "paused" ? nowIso : undefined,
+            pauseCount: nextState === "paused" ? 1 : 0
+          },
+          ...prev
+        ];
+      }
+
+      const current = prev[activeSessionIndex];
+      const nextSession: TimerSession =
+        nextState === "paused"
+          ? {
+              ...current,
+              state: "paused",
+              pausedAt: nowIso,
+              pauseCount: current.pauseCount + 1
+            }
+          : nextState === "running"
+            ? {
+                ...current,
+                state: "running",
+                pausedAt: undefined
+              }
+            : {
+                ...current,
+                state: "ended",
+                endedAt: nowIso
+              };
+
+      return prev.map((session, index) => (index === activeSessionIndex ? nextSession : session));
+    });
+  };
+
+  const logEvent = (params: {
+    eventName: AppEvent["eventName"];
+    source: EventSource;
+    taskId?: string;
+    chunkId?: string;
+    meta?: AppEvent["meta"];
+  }) => {
+    setEvents((prev) =>
+      appendEvent(
+        prev,
+        createEvent({
+          ...params,
+          sessionId: sessionIdRef.current
+        })
+      )
+    );
+  };
+
+  const handleGenerateTask = async () => {
+    const rawInput = taskInput.trim();
+    if (!rawInput) {
+      setFeedback("할 일을 입력하면 바로 10분 단위로 쪼개드릴게요.");
+      return;
+    }
+
+    if (RISKY_INPUT_PATTERN.test(rawInput)) {
+      logEvent({
+        eventName: "safety_blocked",
+        source: "system",
+        meta: {
+          reason: "risky_input",
+          inputLength: rawInput.length
+        }
+      });
+      setFeedback(RECOVERY_FEEDBACK.safetyBlocked);
+      return;
+    }
+
+    setIsGenerating(true);
+
+    try {
+      const taskId = crypto.randomUUID();
+      const summary = buildTaskSummary(rawInput);
+      const chunkingStartedAt = Date.now();
+      let source: EventSource = "local";
+      let chunking = generateLocalChunking(taskId, rawInput);
+
+      if (!chunking) {
+        source = "ai";
+        try {
+          chunking = await aiAdapterRef.current.generate({ taskId, title: rawInput });
+        } catch {
+          chunking = null;
+        }
+      }
+
+      if (!chunking) {
+        source = "local";
+        chunking = generateTemplateChunking(taskId, rawInput);
+      }
+
+      let usedValidationFallback = false;
+      const validation = validateChunkingResult(chunking);
+      if (!validation.ok) {
+        usedValidationFallback = true;
+        source = "local";
+        chunking = generateTemplateChunking(taskId, rawInput);
+      }
+
+      const chunkingLatencyMs = Date.now() - chunkingStartedAt;
+      const createdAt = new Date().toISOString();
+
+      const safeTitle = summary || "새 과업";
+
+      const nextTask: Task = {
+        id: taskId,
+        title: safeTitle,
+        summary: safeTitle,
+        createdAt,
+        status: "todo"
+      };
+
+      const nextChunks: Chunk[] = chunking.chunks.map((chunk) => ({
+        id: chunk.chunkId,
+        taskId,
+        order: chunk.order,
+        action: chunk.action,
+        estMinutes: chunk.estMinutes,
+        status: "todo"
+      }));
+
+      setTasks((prev) => [nextTask, ...prev]);
+      setChunks((prev) => [...nextChunks, ...prev]);
+      setRemainingSecondsByChunk((prev) => {
+        const next = { ...prev };
+        nextChunks.forEach((chunk) => {
+          next[chunk.id] = chunk.estMinutes * 60;
+        });
+        return next;
+      });
+      gateMetricsRef.current.startClickCountByTaskId[taskId] = 0;
+      gateMetricsRef.current.firstStartLoggedByTaskId[taskId] = false;
+      gateMetricsRef.current.recoveryClickCountByTaskId[taskId] = 0;
+
+      setActiveTaskId(taskId);
+      setCurrentChunkId(nextChunks[0]?.id ?? null);
+      setTaskInput("");
+      setActiveTab("home");
+      setFeedback(
+        source === "local"
+          ? "로컬 청킹으로 바로 시작할 수 있게 준비했어요."
+          : "AI 폴백으로 청킹을 완료했어요."
+      );
+
+      logEvent({
+        eventName: "task_created",
+        source: "user",
+        taskId,
+        meta: {
+          summaryLength: safeTitle.length,
+          chunkCount: nextChunks.length
+        }
+      });
+
+      logEvent({
+        eventName: "chunk_generated",
+        source,
+        taskId,
+        meta: {
+          chunkCount: nextChunks.length,
+          chunkingLatencyMs,
+          withinTenSeconds: chunkingLatencyMs <= 10_000,
+          usedValidationFallback
+        }
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleStartChunk = (chunkId: string) => {
+    const target = chunks.find((chunk) => chunk.id === chunkId);
+    if (!target || !isActionableChunkStatus(target.status)) {
+      return;
+    }
+
+    const metricState = gateMetricsRef.current;
+    const startClickCount = (metricState.startClickCountByTaskId[target.taskId] ?? 0) + 1;
+    metricState.startClickCountByTaskId[target.taskId] = startClickCount;
+    const isFirstStart = !metricState.firstStartLoggedByTaskId[target.taskId];
+    metricState.firstStartLoggedByTaskId[target.taskId] = true;
+
+    const createdAtRaw = tasks.find((task) => task.id === target.taskId)?.createdAt;
+    const createdAtMs = createdAtRaw ? new Date(createdAtRaw).getTime() : Number.NaN;
+    const timeToFirstStartMs =
+      isFirstStart && Number.isFinite(createdAtMs)
+        ? Math.max(0, Date.now() - createdAtMs)
+        : undefined;
+
+    const nowIso = new Date().toISOString();
+    const runningChunkIds = chunks
+      .filter((chunk) => chunk.status === "running" && chunk.id !== chunkId)
+      .map((chunk) => chunk.id);
+
+    setChunks((prev) =>
+      prev.map((chunk) => {
+        if (chunk.id === chunkId) {
+          return {
+            ...chunk,
+            status: "running",
+            startedAt: chunk.startedAt ?? nowIso
+          };
+        }
+
+        if (chunk.status === "running") {
+          return {
+            ...chunk,
+            status: "paused"
+          };
+        }
+
+        return chunk;
+      })
+    );
+
+    runningChunkIds.forEach((runningId) => {
+      upsertTimerSession(runningId, "paused", nowIso);
+    });
+
+    upsertTimerSession(chunkId, "running", nowIso);
+
+    setRemainingSecondsByChunk((prev) => ({
+      ...prev,
+      [chunkId]: prev[chunkId] ?? target.estMinutes * 60
+    }));
+
+    tickAccumulatorRef.current = createTimerElapsedAccumulator(Date.now());
+    setCurrentChunkId(chunkId);
+    setActiveTaskId(target.taskId);
+
+    logEvent({
+      eventName: "chunk_started",
+      source: "local",
+      taskId: target.taskId,
+      chunkId,
+      meta: {
+        startClickCount,
+        firstStart: isFirstStart,
+        timeToFirstStartMs: timeToFirstStartMs ?? null,
+        withinThreeMinutes: timeToFirstStartMs !== undefined ? timeToFirstStartMs <= 180_000 : null
+      }
+    });
+  };
+
+  const handlePauseChunk = (chunkId: string) => {
+    const target = chunks.find((chunk) => chunk.id === chunkId);
+    if (!target || target.status !== "running") {
+      return;
+    }
+
+    const nowIso = new Date().toISOString();
+
+    setChunks((prev) =>
+      prev.map((chunk) =>
+        chunk.id === chunkId
+          ? {
+              ...chunk,
+              status: "paused"
+            }
+          : chunk
+      )
+    );
+
+    upsertTimerSession(chunkId, "paused", nowIso);
+    tickAccumulatorRef.current = createTimerElapsedAccumulator();
+
+    logEvent({
+      eventName: "chunk_paused",
+      source: "local",
+      taskId: target.taskId,
+      chunkId
+    });
+  };
+
+  const handleCompleteChunk = (chunkId: string) => {
+    const target = chunks.find((chunk) => chunk.id === chunkId);
+    if (!target || !isActionableChunkStatus(target.status)) {
+      return;
+    }
+
+    const nowIso = new Date().toISOString();
+    const totalSeconds = target.estMinutes * 60;
+    const remaining = remainingSecondsByChunk[chunkId] ?? totalSeconds;
+    const actualSeconds = Math.max(1, totalSeconds - remaining);
+
+    const candidateChunks = orderChunks(
+      chunks.filter((item) => item.taskId === target.taskId && item.id !== target.id)
+    );
+    const nextChunk = candidateChunks.find((chunk) => chunk.order > target.order && isActionableChunkStatus(chunk.status))
+      ?? candidateChunks.find((chunk) => isActionableChunkStatus(chunk.status))
+      ?? null;
+
+    setChunks((prev) =>
+      prev.map((chunk) =>
+        chunk.id === chunkId
+          ? {
+              ...chunk,
+              status: "done",
+              completedAt: nowIso,
+              actualSeconds
+            }
+          : chunk
+      )
+    );
+
+    setRemainingSecondsByChunk((prev) => ({
+      ...prev,
+      [chunkId]: 0
+    }));
+
+    upsertTimerSession(chunkId, "ended", nowIso);
+    setCurrentChunkId(nextChunk?.id ?? null);
+    tickAccumulatorRef.current = createTimerElapsedAccumulator();
+
+    const reward = applyChunkCompletionReward({
+      stats,
+      estMinutes: target.estMinutes,
+      actualSeconds
+    });
+
+    setStats(reward.nextStats);
+
+    logEvent({
+      eventName: "chunk_completed",
+      source: "local",
+      taskId: target.taskId,
+      chunkId,
+      meta: {
+        actualSeconds,
+        estMinutes: target.estMinutes
+      }
+    });
+
+    logEvent({
+      eventName: "xp_gained",
+      source: "local",
+      taskId: target.taskId,
+      chunkId,
+      meta: {
+        xpGain: reward.xpGain
+      }
+    });
+
+    if (reward.levelUps > 0) {
+      logEvent({
+        eventName: "level_up",
+        source: "local",
+        taskId: target.taskId,
+        chunkId,
+        meta: {
+          levelUps: reward.levelUps,
+          currentLevel: reward.nextStats.level
+        }
+      });
+    }
+
+    setFeedback(`좋아요. +${reward.xpGain} XP 획득! ${nextChunk ? "다음 청크로 바로 이어가요." : "오늘 루프를 완료했어요."}`);
+  };
+
+  const handleEditChunk = (chunk: Chunk) => {
+    const nextAction = window.prompt("행동 청크를 수정하세요", chunk.action);
+    if (!nextAction) {
+      return;
+    }
+
+    const nextMinutesRaw = window.prompt("예상 시간(2~15분)", String(chunk.estMinutes));
+    if (!nextMinutesRaw) {
+      return;
+    }
+
+    const parsedMinutes = Number(nextMinutesRaw);
+    if (!Number.isFinite(parsedMinutes)) {
+      setFeedback("시간은 숫자로 입력해주세요.");
+      return;
+    }
+
+    const nextMinutes = clampMinuteInput(parsedMinutes);
+
+    setChunks((prev) =>
+      prev.map((item) =>
+        item.id === chunk.id
+          ? {
+              ...item,
+              action: nextAction.trim() || item.action,
+              estMinutes: nextMinutes
+            }
+          : item
+      )
+    );
+
+    setRemainingSecondsByChunk((prev) => {
+      if (chunk.status === "done") {
+        return prev;
+      }
+
+      const oldTotal = chunk.estMinutes * 60;
+      const newTotal = nextMinutes * 60;
+      const current = prev[chunk.id] ?? oldTotal;
+      const ratio = oldTotal > 0 ? current / oldTotal : 1;
+
+      return {
+        ...prev,
+        [chunk.id]: Math.max(0, Math.round(newTotal * ratio))
+      };
+    });
+  };
+
+  const handleDeleteChunk = (chunk: Chunk) => {
+    const ok = window.confirm("이 청크를 삭제할까요?");
+    if (!ok) {
+      return;
+    }
+
+    const isDeletingRunningChunk = chunk.status === "running";
+    const nowIso = new Date().toISOString();
+    const nextCandidate = orderChunks(
+      chunks.filter((item) => item.taskId === chunk.taskId && item.id !== chunk.id)
+    ).find((item) => isActionableChunkStatus(item.status)) ?? null;
+
+    setChunks((prev) => withReorderedTaskChunks(prev.filter((item) => item.id !== chunk.id), chunk.taskId));
+
+    setRemainingSecondsByChunk((prev) => {
+      const next = { ...prev };
+      delete next[chunk.id];
+      return next;
+    });
+
+    if (isDeletingRunningChunk) {
+      upsertTimerSession(chunk.id, "ended", nowIso);
+      tickAccumulatorRef.current = createTimerElapsedAccumulator();
+      delete lastHapticBucketByChunkRef.current[chunk.id];
+    }
+
+    if (currentChunkId === chunk.id || isDeletingRunningChunk) {
+      setCurrentChunkId(nextCandidate?.id ?? null);
+    }
+  };
+
+  const handleRechunk = (targetChunkId = currentChunkId) => {
+    if (!targetChunkId) {
+      return;
+    }
+
+    const target = chunks.find((chunk) => chunk.id === targetChunkId);
+    if (!target || !isActionableChunkStatus(target.status)) {
+      return;
+    }
+
+    const metricState = gateMetricsRef.current;
+    const recoveryClickCount = (metricState.recoveryClickCountByTaskId[target.taskId] ?? 0) + 1;
+    metricState.recoveryClickCountByTaskId[target.taskId] = recoveryClickCount;
+
+    const nowIso = new Date().toISOString();
+
+    const newChunks: Chunk[] = [
+      {
+        id: crypto.randomUUID(),
+        taskId: target.taskId,
+        order: target.order + 1,
+        action: `${target.action} - 첫 5분 버전`,
+        estMinutes: Math.max(2, Math.floor(target.estMinutes / 2)),
+        status: "todo",
+        parentChunkId: target.id
+      },
+      {
+        id: crypto.randomUUID(),
+        taskId: target.taskId,
+        order: target.order + 2,
+        action: `${target.action} - 마무리 5분 버전`,
+        estMinutes: Math.max(2, target.estMinutes - Math.max(2, Math.floor(target.estMinutes / 2))),
+        status: "todo",
+        parentChunkId: target.id
+      }
+    ];
+
+    setChunks((prev) => {
+      const shifted: Chunk[] = prev.map((chunk): Chunk => {
+        if (chunk.id === target.id) {
+          return {
+            ...chunk,
+            status: "archived"
+          };
+        }
+
+        if (chunk.taskId !== target.taskId) {
+          return chunk;
+        }
+
+        if (chunk.order > target.order) {
+          return {
+            ...chunk,
+            order: chunk.order + 2
+          };
+        }
+
+        return chunk;
+      });
+
+      return withReorderedTaskChunks([...shifted, ...newChunks], target.taskId);
+    });
+
+    setRemainingSecondsByChunk((prev) => {
+      const next = { ...prev };
+      next[target.id] = 0;
+      newChunks.forEach((chunk) => {
+        next[chunk.id] = chunk.estMinutes * 60;
+      });
+      return next;
+    });
+
+    upsertTimerSession(target.id, "ended", nowIso);
+    tickAccumulatorRef.current = createTimerElapsedAccumulator();
+
+    const recovery = applyRecoveryReward(stats);
+    setStats(recovery.nextStats);
+
+    setCurrentChunkId(newChunks[0].id);
+    setActiveTaskId(target.taskId);
+
+    logEvent({
+      eventName: "rechunk_requested",
+      source: "local",
+      taskId: target.taskId,
+      chunkId: target.id,
+      meta: {
+        parentChunkId: target.id,
+        newChunkCount: newChunks.length,
+        recoveryClickCount
+      }
+    });
+
+    logEvent({
+      eventName: "xp_gained",
+      source: "local",
+      taskId: target.taskId,
+      chunkId: target.id,
+      meta: {
+        xpGain: recovery.xpGain,
+        reason: "rechunk",
+        recoveryClickCount
+      }
+    });
+
+    setFeedback(RECOVERY_FEEDBACK.rechunked);
+  };
+
+  const handleReschedule = (targetChunkId = currentChunkId) => {
+    if (!targetChunkId) {
+      return;
+    }
+
+    const target = chunks.find((chunk) => chunk.id === targetChunkId);
+    if (!target || !isActionableChunkStatus(target.status)) {
+      return;
+    }
+
+    const metricState = gateMetricsRef.current;
+    const recoveryClickCount = (metricState.recoveryClickCountByTaskId[target.taskId] ?? 0) + 1;
+    metricState.recoveryClickCountByTaskId[target.taskId] = recoveryClickCount;
+
+    const nowIso = new Date().toISOString();
+    const rescheduledFor = buildNextRescheduleDate();
+    const followUpChunk: Chunk = {
+      id: crypto.randomUUID(),
+      taskId: target.taskId,
+      order: target.order + 1,
+      action: `${target.action} - 내일 다시 시작`,
+      estMinutes: target.estMinutes,
+      status: "todo",
+      parentChunkId: target.id,
+      rescheduledFor
+    };
+
+    setChunks((prev) =>
+      withReorderedTaskChunks(
+        [
+          ...prev.map((chunk): Chunk =>
+            chunk.id === target.id
+              ? {
+                  ...chunk,
+                  status: "abandoned",
+                  rescheduledFor
+                }
+              : chunk
+          ),
+          followUpChunk
+        ],
+        target.taskId
+      )
+    );
+
+    setRemainingSecondsByChunk((prev) => ({
+      ...prev,
+      [target.id]: 0,
+      [followUpChunk.id]: followUpChunk.estMinutes * 60
+    }));
+
+    upsertTimerSession(target.id, "ended", nowIso);
+    tickAccumulatorRef.current = createTimerElapsedAccumulator();
+    setCurrentChunkId(followUpChunk.id);
+    setActiveTaskId(target.taskId);
+
+    const recovery = applyRecoveryReward(stats);
+    setStats(recovery.nextStats);
+
+    logEvent({
+      eventName: "reschedule_requested",
+      source: "local",
+      taskId: target.taskId,
+      chunkId: target.id,
+      meta: {
+        rescheduledFor,
+        followUpChunkId: followUpChunk.id,
+        recoveryClickCount
+      }
+    });
+
+    logEvent({
+      eventName: "chunk_abandoned",
+      source: "local",
+      taskId: target.taskId,
+      chunkId: target.id,
+      meta: {
+        rescheduledFor
+      }
+    });
+
+    logEvent({
+      eventName: "xp_gained",
+      source: "local",
+      taskId: target.taskId,
+      chunkId: target.id,
+      meta: {
+        xpGain: recovery.xpGain,
+        reason: "reschedule",
+        recoveryClickCount
+      }
+    });
+
+    setFeedback(RECOVERY_FEEDBACK.rescheduled);
+  };
+
+  const handleResetAll = () => {
+    const ok = window.confirm("모든 로컬 데이터를 초기화할까요?");
+    if (!ok) {
+      return;
+    }
+
+    const initial = buildInitialState();
+
+    setTasks(initial.tasks);
+    setChunks(initial.chunks);
+    setTimerSessions(initial.timerSessions);
+    setStats(initial.stats);
+    setSettings(initial.settings);
+    setEvents(initial.events);
+    setActiveTaskId(initial.activeTaskId);
+    setActiveTab(initial.activeTab);
+    setRemainingSecondsByChunk(initial.remainingSecondsByChunk);
+    setCurrentChunkId(null);
+    tickAccumulatorRef.current = createTimerElapsedAccumulator();
+    setFeedback("초기화 완료. 새 루프를 시작해보세요.");
+  };
+
+  const currentChunk =
+    activeTaskChunks.find((chunk) => chunk.id === currentChunkId && isActionableChunkStatus(chunk.status))
+    ?? activeTaskChunks.find((chunk) => isActionableChunkStatus(chunk.status))
+    ?? null;
+
+  const homeChunk = runningChunk ?? currentChunk;
+
+  const homeTask = homeChunk
+    ? tasks.find((task) => task.id === homeChunk.taskId) ?? activeTask
+    : activeTask;
+
+  const homeRemaining = homeChunk
+    ? remainingSecondsByChunk[homeChunk.id] ?? homeChunk.estMinutes * 60
+    : 0;
+
+  const homeTaskCards = tasks.slice(0, 3);
+
+  return (
+    <div className={styles.shell}>
+      <div className={styles.noiseLayer} aria-hidden="true" />
+
+      <main className={styles.app}>
+        <header className={styles.topBar}>
+          <div>
+            <p className={styles.eyebrow}>ADHDTIME MVP LOOP</p>
+            <h1>입력하고 바로 실행</h1>
+            <p className={styles.clock} suppressHydrationWarning>
+              {formatDateTime(clock)}
+            </p>
+          </div>
+          <p className={styles.feedback}>{feedback}</p>
+        </header>
+
+        <section className={styles.statusCard}>
+          <div className={styles.levelBlock}>
+            <p className={styles.levelLabel}>LV {stats.level}</p>
+            <p className={styles.levelXp}>XP {stats.xp}</p>
+            <div className={styles.xpTrack} aria-hidden="true">
+              <span style={{ width: `${xpProgressPercent}%` }} />
+            </div>
+            <p className={styles.todaySummary}>오늘 완료 {stats.todayCompleted}개 · +{stats.todayXpGain} XP</p>
+          </div>
+
+          <div className={styles.radarBlock}>
+            <svg viewBox="0 0 120 120" className={styles.radarSvg} role="img" aria-label="5스탯 레이더 차트">
+              {radar.grid.map((gridLine, index) => (
+                <polygon key={gridLine} points={gridLine} className={styles.radarGrid} data-level={index} />
+              ))}
+              {STAT_META.map((_, index) => {
+                const angle = (-Math.PI / 2) + (index * Math.PI * 2) / STAT_META.length;
+                const x = 60 + Math.cos(angle) * 48;
+                const y = 60 + Math.sin(angle) * 48;
+                return <line key={STAT_META[index].key} x1={60} y1={60} x2={x} y2={y} className={styles.radarAxis} />;
+              })}
+              <polygon points={radar.data} className={styles.radarData} />
+            </svg>
+            <ul className={styles.statList}>
+              {STAT_META.map((item) => (
+                <li key={item.key}>
+                  <span>{item.label}</span>
+                  <strong>{stats[item.key]}</strong>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+
+        <section className={styles.inputCard}>
+          <label className={styles.inputLabel} htmlFor="task-input">
+            무지성 태스크 청킹
+          </label>
+          <div className={styles.inputRow}>
+            <input
+              id="task-input"
+              value={taskInput}
+              onChange={(event) => setTaskInput(event.target.value)}
+              placeholder="예: 방 청소, 제안서 마무리, 메일 답장"
+              className={styles.input}
+            />
+            <button type="button" className={styles.ghostButton} aria-label="음성 입력 (준비중)">
+              마이크
+            </button>
+            <button
+              type="button"
+              className={styles.primaryButton}
+              disabled={isGenerating}
+              onClick={handleGenerateTask}
+            >
+              {isGenerating ? "생성 중..." : "AI가 쪼개기"}
+            </button>
+          </div>
+          <p className={styles.helperText}>로컬 패턴 우선, 필요 시 AI 폴백으로 청킹합니다.</p>
+        </section>
+
+        {activeTab === "home" ? (
+          <>
+            <section className={styles.currentChunkCard}>
+              <header>
+                <p className={styles.sectionLabel}>현재 퀘스트</p>
+                <h2>{homeChunk ? homeChunk.action : "진행할 청크가 없어요"}</h2>
+                {homeTask ? <p className={styles.taskTitle}>과업: {homeTask.title}</p> : null}
+              </header>
+
+              {homeChunk ? (
+                <>
+                  <p className={styles.timerValue}>{formatClock(homeRemaining)}</p>
+                  <div className={styles.chunkMetaRow}>
+                    <span>{homeChunk.estMinutes}분 청크</span>
+                    <span className={`${styles.statusBadge} ${styles[`status_${homeChunk.status}`]}`}>
+                      {chunkStatusLabel(homeChunk.status)}
+                    </span>
+                  </div>
+
+                  <div className={styles.actionRow}>
+                    <button
+                      type="button"
+                      className={styles.primaryButton}
+                      onClick={() => handleStartChunk(homeChunk.id)}
+                      disabled={!isActionableChunkStatus(homeChunk.status) || homeChunk.status === "running"}
+                    >
+                      시작
+                    </button>
+                    <button
+                      type="button"
+                      className={styles.ghostButton}
+                      onClick={() => handlePauseChunk(homeChunk.id)}
+                      disabled={homeChunk.status !== "running"}
+                    >
+                      일시정지
+                    </button>
+                    <button
+                      type="button"
+                      className={styles.successButton}
+                      onClick={() => handleCompleteChunk(homeChunk.id)}
+                      disabled={!isActionableChunkStatus(homeChunk.status)}
+                    >
+                      완료
+                    </button>
+                  </div>
+
+                  <div className={styles.recoveryRow}>
+                    <button
+                      type="button"
+                      className={styles.subtleButton}
+                      onClick={() => handleRechunk(homeChunk.id)}
+                      disabled={!isActionableChunkStatus(homeChunk.status)}
+                    >
+                      더 작게 다시 나누기
+                    </button>
+                    <button
+                      type="button"
+                      className={styles.subtleButton}
+                      onClick={() => handleReschedule(homeChunk.id)}
+                      disabled={!isActionableChunkStatus(homeChunk.status)}
+                    >
+                      내일로 다시 등록
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <p className={styles.helperText}>입력창에서 할 일을 넣고 첫 청크를 만들어보세요.</p>
+              )}
+            </section>
+
+            <section className={styles.listCard}>
+              <header className={styles.listHeader}>
+                <h3>오늘의 퀘스트</h3>
+                <p>완료율 {completionRate}%</p>
+              </header>
+
+              <ul className={styles.taskPreviewList}>
+                {homeTaskCards.length === 0 ? <li className={styles.emptyRow}>아직 생성된 과업이 없습니다.</li> : null}
+                {homeTaskCards.map((task) => {
+                  const openChunks = chunks.filter(
+                    (chunk) => chunk.taskId === task.id && isActionableChunkStatus(chunk.status)
+                  ).length;
+                  return (
+                    <li key={task.id}>
+                      <button type="button" onClick={() => setActiveTaskId(task.id)}>
+                        <span>{task.title}</span>
+                        <strong>{openChunks}개 남음</strong>
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+          </>
+        ) : null}
+
+        {activeTab === "tasks" ? (
+          <section className={styles.listCard}>
+            <header className={styles.listHeader}>
+              <h3>청크 목록</h3>
+              <p>{activeTask ? activeTask.title : "과업을 선택하세요"}</p>
+            </header>
+
+            <div className={styles.taskSelector}>
+              {tasks.map((task) => (
+                <button
+                  key={task.id}
+                  type="button"
+                  className={task.id === activeTaskId ? styles.taskChipActive : styles.taskChip}
+                  onClick={() => setActiveTaskId(task.id)}
+                >
+                  {task.title}
+                </button>
+              ))}
+            </div>
+
+            <ul className={styles.chunkList}>
+              {activeTaskChunks.length === 0 ? <li className={styles.emptyRow}>선택된 과업의 청크가 없습니다.</li> : null}
+              {activeTaskChunks.map((chunk) => {
+                const remaining = remainingSecondsByChunk[chunk.id] ?? chunk.estMinutes * 60;
+                return (
+                  <li
+                    key={chunk.id}
+                    className={`${styles.chunkItem} ${currentChunk?.id === chunk.id ? styles.chunkItemCurrent : ""}`}
+                  >
+                    <div>
+                      <p className={styles.chunkOrder}>#{chunk.order}</p>
+                      <h4>{chunk.action}</h4>
+                      <p className={styles.chunkInfo}>
+                        {chunk.estMinutes}분 · {formatClock(remaining)} · {chunkStatusLabel(chunk.status)}
+                      </p>
+                    </div>
+                    <div className={styles.chunkButtons}>
+                      <button
+                        type="button"
+                        className={styles.smallButton}
+                        onClick={() => handleStartChunk(chunk.id)}
+                        disabled={!isActionableChunkStatus(chunk.status) || chunk.status === "running"}
+                      >
+                        시작
+                      </button>
+                      <button
+                        type="button"
+                        className={styles.smallButton}
+                        onClick={() => handlePauseChunk(chunk.id)}
+                        disabled={chunk.status !== "running"}
+                      >
+                        일시정지
+                      </button>
+                      <button
+                        type="button"
+                        className={styles.smallButton}
+                        onClick={() => handleCompleteChunk(chunk.id)}
+                        disabled={!isActionableChunkStatus(chunk.status)}
+                      >
+                        완료
+                      </button>
+                      <button type="button" className={styles.smallButton} onClick={() => handleEditChunk(chunk)}>
+                        수정
+                      </button>
+                      <button type="button" className={styles.smallButtonDanger} onClick={() => handleDeleteChunk(chunk)}>
+                        삭제
+                      </button>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
+        ) : null}
+
+        {activeTab === "stats" ? (
+          <section className={styles.listCard}>
+            <header className={styles.listHeader}>
+              <h3>오늘 리포트</h3>
+              <p>5초 안에 확인하는 요약</p>
+            </header>
+
+            <div className={styles.reportGrid}>
+              <article>
+                <p>완료 청크</p>
+                <strong>{stats.todayCompleted}</strong>
+              </article>
+              <article>
+                <p>완료율</p>
+                <strong>{completionRate}%</strong>
+              </article>
+              <article>
+                <p>획득 XP</p>
+                <strong>+{stats.todayXpGain}</strong>
+              </article>
+              <article>
+                <p>다시 시작 점수</p>
+                <strong>+{stats.todayStatGain.recovery}</strong>
+              </article>
+            </div>
+
+            <div className={styles.eventBlock}>
+              <h4>최근 이벤트</h4>
+              <ul>
+                {events.slice(0, 8).map((event) => {
+                  const metaText = formatEventMeta(event.meta);
+                  return (
+                    <li key={event.id}>
+                      <div className={styles.eventInfo}>
+                        <strong>{event.eventName}</strong>
+                        <span className={styles.eventMeta}>
+                          [{event.source}]
+                          {metaText ? ` ${metaText}` : ""}
+                        </span>
+                      </div>
+                      <time suppressHydrationWarning>{new Date(event.timestamp).toLocaleTimeString("ko-KR")}</time>
+                    </li>
+                  );
+                })}
+                {events.length === 0 ? <li className={styles.emptyRow}>아직 이벤트가 없습니다.</li> : null}
+              </ul>
+            </div>
+          </section>
+        ) : null}
+
+        {activeTab === "settings" ? (
+          <section className={styles.listCard}>
+            <header className={styles.listHeader}>
+              <h3>설정</h3>
+              <p>실행 흐름에 필요한 최소 옵션</p>
+            </header>
+
+            <div className={styles.settingsRow}>
+              <div>
+                <strong>5분 미세 햅틱</strong>
+                <p>진행 중 5분마다 짧게 진동합니다.</p>
+              </div>
+              <label className={styles.toggle}>
+                <input
+                  type="checkbox"
+                  checked={settings.hapticEnabled}
+                  onChange={(event) => {
+                    setSettings((prev) => ({
+                      ...prev,
+                      hapticEnabled: event.target.checked
+                    }));
+                  }}
+                />
+                <span>{settings.hapticEnabled ? "ON" : "OFF"}</span>
+              </label>
+            </div>
+
+            <div className={styles.settingsRow}>
+              <div>
+                <strong>데이터 초기화</strong>
+                <p>로컬에 저장된 과업/청크/스탯을 모두 삭제합니다.</p>
+              </div>
+              <button type="button" className={styles.smallButtonDanger} onClick={handleResetAll}>
+                초기화
+              </button>
+            </div>
+
+            <p className={styles.helperText}>원문 입력 텍스트는 로컬 저장을 최소화하도록 과업 제목만 유지합니다.</p>
+          </section>
+        ) : null}
+      </main>
+
+      <nav className={styles.tabBar} aria-label="하단 탭">
+        {TAB_ITEMS.map((tab) => (
+          <button
+            key={tab.key}
+            type="button"
+            className={tab.key === activeTab ? styles.tabButtonActive : styles.tabButton}
+            onClick={() => setActiveTab(tab.key)}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </nav>
+    </div>
+  );
+}

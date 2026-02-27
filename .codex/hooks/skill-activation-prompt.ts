@@ -1,13 +1,14 @@
 #!/usr/bin/env node
-import { readFileSync } from 'fs';
-import { join } from 'path';
+import { existsSync, readFileSync } from 'fs';
+import { dirname, isAbsolute, join, relative, resolve } from 'path';
+import { fileURLToPath } from 'url';
 
 interface HookInput {
-    session_id: string;
-    transcript_path: string;
-    cwd: string;
-    permission_mode: string;
-    prompt: string;
+    session_id?: string;
+    transcript_path?: string;
+    cwd?: string;
+    permission_mode?: string;
+    prompt?: string;
 }
 
 interface PromptTriggers {
@@ -15,11 +16,18 @@ interface PromptTriggers {
     intentPatterns?: string[];
 }
 
+interface FileTriggers {
+    pathPatterns?: string[];
+    pathExclusions?: string[];
+    contentPatterns?: string[];
+}
+
 interface SkillRule {
     type: 'guardrail' | 'domain';
     enforcement: 'block' | 'suggest' | 'warn';
     priority: 'critical' | 'high' | 'medium' | 'low';
     promptTriggers?: PromptTriggers;
+    fileTriggers?: FileTriggers;
 }
 
 interface SkillRules {
@@ -29,104 +37,309 @@ interface SkillRules {
 
 interface MatchedSkill {
     name: string;
-    matchType: 'keyword' | 'intent';
     config: SkillRule;
+    reasons: string[];
+}
+
+interface RecentEdit {
+    absolutePath: string;
+    relativePath: string;
+}
+
+const PRIORITY_ORDER: Array<SkillRule['priority']> = ['critical', 'high', 'medium', 'low'];
+const PRIORITY_LABEL: Record<SkillRule['priority'], string> = {
+    critical: 'CRITICAL SKILLS',
+    high: 'RECOMMENDED SKILLS',
+    medium: 'SUGGESTED SKILLS',
+    low: 'OPTIONAL SKILLS'
+};
+
+function safeParseJson<T>(raw: string): T | null {
+    try {
+        return JSON.parse(raw) as T;
+    } catch {
+        return null;
+    }
+}
+
+function findProjectDir(input: HookInput): string {
+    const scriptDir = dirname(fileURLToPath(import.meta.url));
+    const candidates = [
+        process.env.CODEX_PROJECT_DIR,
+        input.cwd,
+        resolve(scriptDir, '../..'),
+        process.cwd()
+    ].filter(Boolean) as string[];
+
+    for (const candidate of candidates) {
+        const normalized = resolve(candidate);
+        const rulesPath = join(normalized, '.codex', 'skills', 'skill-rules.json');
+        if (existsSync(rulesPath)) {
+            return normalized;
+        }
+    }
+
+    return resolve(scriptDir, '../..');
+}
+
+function globToRegex(glob: string): RegExp {
+    const normalized = glob.replace(/\\/g, '/');
+    let out = '^';
+
+    for (let i = 0; i < normalized.length; i++) {
+        const char = normalized[i];
+        const next = normalized[i + 1];
+        const afterNext = normalized[i + 2];
+
+        if (char === '*' && next === '*' && afterNext === '/') {
+            out += '(?:.*/)?';
+            i += 2;
+            continue;
+        }
+
+        if (char === '*' && next === '*') {
+            out += '.*';
+            i += 1;
+            continue;
+        }
+
+        if (char === '*') {
+            out += '[^/]*';
+            continue;
+        }
+
+        if (char === '?') {
+            out += '[^/]';
+            continue;
+        }
+
+        if ('\\^$+?.()|{}[]'.includes(char)) {
+            out += `\\${char}`;
+            continue;
+        }
+
+        out += char;
+    }
+
+    out += '$';
+    return new RegExp(out);
+}
+
+function matchGlob(value: string, pattern: string): boolean {
+    return globToRegex(pattern).test(value.replace(/\\/g, '/'));
+}
+
+function addMatch(
+    map: Map<string, MatchedSkill>,
+    skillName: string,
+    config: SkillRule,
+    reason: string
+) {
+    const existing = map.get(skillName);
+    if (existing) {
+        if (!existing.reasons.includes(reason)) {
+            existing.reasons.push(reason);
+        }
+        return;
+    }
+
+    map.set(skillName, {
+        name: skillName,
+        config,
+        reasons: [reason]
+    });
+}
+
+function getRecentEdit(projectDir: string, sessionId?: string): RecentEdit | null {
+    if (!sessionId) {
+        return null;
+    }
+
+    const logPath = join(projectDir, '.codex', 'tsc-cache', sessionId, 'edited-files.log');
+    if (!existsSync(logPath)) {
+        return null;
+    }
+
+    const lines = readFileSync(logPath, 'utf-8')
+        .split('\n')
+        .map((line) => line.trim())
+        .filter(Boolean);
+
+    if (lines.length === 0) {
+        return null;
+    }
+
+    const lastLine = lines[lines.length - 1];
+    const match = lastLine.match(/^\d+:(.*):([^:]+)$/);
+    if (!match || match.length < 3) {
+        return null;
+    }
+
+    const rawFilePath = match[1];
+    const absolutePath = isAbsolute(rawFilePath) ? rawFilePath : resolve(projectDir, rawFilePath);
+    const relativePath = relative(projectDir, absolutePath).replace(/\\/g, '/');
+
+    return {
+        absolutePath,
+        relativePath
+    };
+}
+
+function matchesFileTrigger(
+    relativeFilePath: string,
+    absoluteFilePath: string,
+    triggers?: FileTriggers
+): { path: boolean; content: boolean } {
+    if (!triggers) {
+        return { path: false, content: false };
+    }
+
+    const pathPatterns = triggers.pathPatterns ?? [];
+    const pathExclusions = triggers.pathExclusions ?? [];
+    const contentPatterns = triggers.contentPatterns ?? [];
+
+    let pathMatched = false;
+
+    if (pathPatterns.length > 0) {
+        pathMatched = pathPatterns.some((pattern) => matchGlob(relativeFilePath, pattern));
+        if (pathMatched && pathExclusions.length > 0) {
+            const excluded = pathExclusions.some((pattern) => matchGlob(relativeFilePath, pattern));
+            if (excluded) {
+                pathMatched = false;
+            }
+        }
+    }
+
+    let contentMatched = false;
+    if (contentPatterns.length > 0) {
+        // 콘텐츠 패턴은 경로가 맞거나 경로 패턴이 없을 때만 확인해 성능을 아낍니다.
+        const shouldInspectContent = pathMatched || pathPatterns.length === 0;
+        if (shouldInspectContent) {
+            try {
+                const content = readFileSync(absoluteFilePath, 'utf-8');
+                contentMatched = contentPatterns.some((pattern) => {
+                    try {
+                        return new RegExp(pattern, 'i').test(content);
+                    } catch {
+                        return false;
+                    }
+                });
+            } catch {
+                contentMatched = false;
+            }
+        }
+    }
+
+    return { path: pathMatched, content: contentMatched };
+}
+
+function formatOutput(matched: MatchedSkill[]): string {
+    let output = '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
+    output += 'SKILL ACTIVATION CHECK\n';
+    output += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n';
+
+    for (const priority of PRIORITY_ORDER) {
+        const items = matched.filter((item) => item.config.priority === priority);
+        if (items.length === 0) {
+            continue;
+        }
+
+        output += `${PRIORITY_LABEL[priority]}:\n`;
+        for (const item of items) {
+            const reasonText = item.reasons.length > 0 ? ` (${item.reasons.join(', ')})` : '';
+            output += `  - ${item.name}${reasonText}\n`;
+        }
+        output += '\n';
+    }
+
+    output += "ACTION: 필요하면 Skill 도구로 해당 스킬을 먼저 로드하세요.\n";
+    output += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
+
+    return output;
 }
 
 async function main() {
     try {
-        // Read input from stdin
         const input = readFileSync(0, 'utf-8');
-        const data: HookInput = JSON.parse(input);
-        const prompt = data.prompt.toLowerCase();
+        const data = safeParseJson<HookInput>(input) ?? {};
+        const prompt = (data.prompt ?? '').toLowerCase();
 
-        // Load skill rules
-        const projectDir = process.env.CODEX_PROJECT_DIR || '$HOME/project';
+        const projectDir = findProjectDir(data);
         const rulesPath = join(projectDir, '.codex', 'skills', 'skill-rules.json');
-        const rules: SkillRules = JSON.parse(readFileSync(rulesPath, 'utf-8'));
+        if (!existsSync(rulesPath)) {
+            process.exit(0);
+            return;
+        }
 
-        const matchedSkills: MatchedSkill[] = [];
+        const rulesRaw = readFileSync(rulesPath, 'utf-8');
+        const rules = safeParseJson<SkillRules>(rulesRaw);
+        if (!rules?.skills) {
+            process.exit(0);
+            return;
+        }
 
-        // Check each skill for matches
+        const matched = new Map<string, MatchedSkill>();
+        const recentEdit = getRecentEdit(projectDir, data.session_id);
+
         for (const [skillName, config] of Object.entries(rules.skills)) {
-            const triggers = config.promptTriggers;
-            if (!triggers) {
-                continue;
+            const promptTriggers = config.promptTriggers;
+            if (promptTriggers && prompt.length > 0) {
+                if (promptTriggers.keywords?.some((kw) => prompt.includes(kw.toLowerCase()))) {
+                    addMatch(matched, skillName, config, 'prompt:keyword');
+                }
+
+                if (promptTriggers.intentPatterns?.length) {
+                    const intentMatched = promptTriggers.intentPatterns.some((pattern) => {
+                        try {
+                            return new RegExp(pattern, 'i').test(prompt);
+                        } catch {
+                            return false;
+                        }
+                    });
+                    if (intentMatched) {
+                        addMatch(matched, skillName, config, 'prompt:intent');
+                    }
+                }
             }
 
-            // Keyword matching
-            if (triggers.keywords) {
-                const keywordMatch = triggers.keywords.some(kw =>
-                    prompt.includes(kw.toLowerCase())
+            if (recentEdit && config.fileTriggers) {
+                const result = matchesFileTrigger(
+                    recentEdit.relativePath,
+                    recentEdit.absolutePath,
+                    config.fileTriggers
                 );
-                if (keywordMatch) {
-                    matchedSkills.push({ name: skillName, matchType: 'keyword', config });
-                    continue;
+                if (result.path) {
+                    addMatch(matched, skillName, config, 'file:path');
                 }
-            }
 
-            // Intent pattern matching
-            if (triggers.intentPatterns) {
-                const intentMatch = triggers.intentPatterns.some(pattern => {
-                    const regex = new RegExp(pattern, 'i');
-                    return regex.test(prompt);
-                });
-                if (intentMatch) {
-                    matchedSkills.push({ name: skillName, matchType: 'intent', config });
+                if (result.content) {
+                    addMatch(matched, skillName, config, 'file:content');
                 }
             }
         }
 
-        // Generate output if matches found
-        if (matchedSkills.length > 0) {
-            let output = '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
-            output += '🎯 SKILL ACTIVATION CHECK\n';
-            output += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n';
-
-            // Group by priority
-            const critical = matchedSkills.filter(s => s.config.priority === 'critical');
-            const high = matchedSkills.filter(s => s.config.priority === 'high');
-            const medium = matchedSkills.filter(s => s.config.priority === 'medium');
-            const low = matchedSkills.filter(s => s.config.priority === 'low');
-
-            if (critical.length > 0) {
-                output += '⚠️ CRITICAL SKILLS (REQUIRED):\n';
-                critical.forEach(s => output += `  → ${s.name}\n`);
-                output += '\n';
-            }
-
-            if (high.length > 0) {
-                output += '📚 RECOMMENDED SKILLS:\n';
-                high.forEach(s => output += `  → ${s.name}\n`);
-                output += '\n';
-            }
-
-            if (medium.length > 0) {
-                output += '💡 SUGGESTED SKILLS:\n';
-                medium.forEach(s => output += `  → ${s.name}\n`);
-                output += '\n';
-            }
-
-            if (low.length > 0) {
-                output += '📌 OPTIONAL SKILLS:\n';
-                low.forEach(s => output += `  → ${s.name}\n`);
-                output += '\n';
-            }
-
-            output += 'ACTION: Use Skill tool BEFORE responding\n';
-            output += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
-
-            console.log(output);
+        if (matched.size === 0) {
+            process.exit(0);
+            return;
         }
 
+        const ordered = Array.from(matched.values()).sort((a, b) => {
+            const aPriority = PRIORITY_ORDER.indexOf(a.config.priority);
+            const bPriority = PRIORITY_ORDER.indexOf(b.config.priority);
+            if (aPriority !== bPriority) {
+                return aPriority - bPriority;
+            }
+            return a.name.localeCompare(b.name);
+        });
+
+        console.log(formatOutput(ordered));
         process.exit(0);
-    } catch (err) {
-        console.error('Error in skill-activation-prompt hook:', err);
-        process.exit(1);
+    } catch {
+        // 훅 실패로 사용자 워크플로를 막지 않도록 항상 조용히 종료합니다.
+        process.exit(0);
     }
 }
 
-main().catch(err => {
-    console.error('Uncaught error:', err);
-    process.exit(1);
+main().catch(() => {
+    process.exit(0);
 });
