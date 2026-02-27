@@ -1,61 +1,54 @@
 # Release Readiness + P1 Foundation - Context
 
-Last Updated: 2026-02-28
+Last Updated: 2026-02-27
 
 ## SESSION PROGRESS
 
-### ✅ COMPLETED
-- `dev/README.md`, `.codex/commands/dev-docs.md` 기준으로 Dev Docs 워크플로우 재확인
-- 기존 트랙(`mvp-core-loop`, `post-mvp-p1`) 진행 상태/미완료 항목 분석
-- 코드베이스 점검을 통해 실제 구현 갭 식별 및 반영
-  - KPI 계산 파이프라인 구현 (`features/mvp/lib/kpi.ts`)
-  - 릴리즈 게이트 자동 스크립트 구현 (`scripts/verify-release-gate.mjs`)
-  - P1 foundation(알림/STT/동기화 mock) UI 연결
-  - README/추적 문서 최신화
-- 본 트랙 Dev Docs 생성 (`plan/context/tasks`)
-- 문서 작업 완료
-  - `README.md` 전면 업데이트
-  - `docs/TRACEABILITY_MATRIX.md` 신규 작성
-  - `docs/KPI_PIPELINE.md` 신규 작성
-  - `docs/RELEASE_GATE_LOG.md` 신규 작성
-- 릴리즈 검증 실행 완료
-  - `npm run verify:mvp` PASS (2026-02-28 01:25~01:26 KST)
-- 모바일 settings 클리핑 이슈 수정 및 재현 검증 완료 (390x844 기준, settings 진입 전/후 스크린샷 확보)
-
-### 🟡 IN PROGRESS
-- 없음 (본 트랙 범위 내 작업 완료)
+### ✅ COMPLETED (Round 2 Confirmed)
+- FR-01/02/03/05/11/12 구현 상태를 `완료`로 2차 확정하고 문서 4종을 동기화했다.
+- 리뷰 지적사항 반영 완료를 문서 근거와 함께 확정했다.
+  - 실행 중 `+1분` 조정 상한을 `15분`으로 강제
+  - `paused` 상태를 실행 잠금(`running`과 동등)으로 포함
+  - `completedAt`은 `status=done`일 때만 저장
+  - 시간 필드 저장 시 ISO UTC 정규화 보강
+  - 실행 잠금 중 청크 삭제 버튼 비활성화
+- 검증 명령 통과 사실을 반영했다.
+  - `npm run typecheck` PASS
+  - `npm run lint` PASS
+  - `npm run test:mvp` PASS
+  - `npm run verify:gate` PASS
+  - `npm run build` PASS
 
 ### ⚠️ BLOCKERS
-- 없음 (단, 후속 범위 이슈는 유지)
-  - AI 청킹 실연동 미구현(현재 모의 폴백)
-  - 외부 동기화 실제 OAuth/API 연동 미구현(mock 한정)
-  - (해소) 알림 종료 이벤트 트리거 구현 완료
+- 없음
+
+### 📝 NON-BLOCKING FOLLOW-UP
+- 정책성 리스크 메모만 유지: FR-10(알림 정책 정교화), 외부 동기화 실연동(OAuth/API), 기타 P1 범위 항목은 별도 트랙에서 관리
 
 ## Key Decisions
-- 본 턴에서는 “전면 확장”보다 “검증 가능한 최소 연결”에 집중한다.
-- P1 기능은 MVP 흐름을 깨지 않도록 설정/입력 카드 중심으로 점진 연결한다.
-- 릴리즈 게이트는 명령어 한 번(`npm run verify:mvp`)으로 재현 가능한 형태로 만든다.
-- 문서는 구현 완료 후가 아니라 단계별로 즉시 갱신한다.
+- 2차 확정은 제공된 확정 사실(구현 완료/리뷰 반영/검증 PASS)만 반영하고 추정 서술은 배제한다.
+- 실행 잠금 상태 정의를 `running` + `paused`로 고정한다.
+- 실행 중 빠른 시간 조정은 `-1/+1` 단위와 `15분 상한` 및 과업 예산 제약을 동시에 만족해야 한다.
+- 시간 필드는 ISO 8601 UTC로 정규화하며 `completedAt`은 `done` 조건에서만 보존한다.
+- 문서 상태 표기는 본 세션부터 `in-progress/pending` 임시 슬롯을 종료하고 확정 상태로 유지한다.
 
 ## Files In Scope
-- `features/mvp/components/mvp-dashboard.tsx`
-- `features/mvp/components/mvp-dashboard.module.css`
-- `features/mvp/lib/events.ts`
-- `features/mvp/lib/storage.ts`
-- `features/mvp/lib/kpi.ts` (new)
-- `features/mvp/lib/kpi.test.ts` (new)
-- `features/p1/helpers/notification-capability.ts`
-- `features/p1/helpers/stt-capability.ts`
-- `features/p1/helpers/sync-mock-adapter.ts` (new)
-- `features/p1/helpers/index.ts`
-- `scripts/verify-release-gate.mjs` (new)
-- `package.json`
-- `README.md`
-- `docs/TRACEABILITY_MATRIX.md` (new)
-- `docs/KPI_PIPELINE.md` (new)
-- `docs/RELEASE_GATE_LOG.md` (new)
+- `dev/active/release-readiness-p1-foundation/release-readiness-p1-foundation-context.md`
+- `dev/active/release-readiness-p1-foundation/release-readiness-p1-foundation-tasks.md`
+- `docs/DEVELOPMENT_PLAN.md`
+- `docs/TRACEABILITY_MATRIX.md`
+
+## FR Progress Sync (Round 2 Final)
+
+| FR | 확정 상태 | 근거 구현 파일 | 검증 근거 | 비고 |
+| --- | --- | --- | --- | --- |
+| FR-01 | 완료 | `features/mvp/components/mvp-dashboard.tsx` | `typecheck/lint/test:mvp/verify:gate/build` PASS | `totalMinutes` 필수 입력/검증 반영 |
+| FR-02 | 완료 | `features/mvp/components/mvp-dashboard.tsx`, `features/mvp/lib/chunking.ts` | `typecheck/lint/test:mvp/verify:gate/build` PASS | 청킹 합계 예산(`<= totalMinutes`) 강제 |
+| FR-03 | 완료 | `features/mvp/components/mvp-dashboard.tsx` | `typecheck/lint/test:mvp/verify:gate/build` PASS | 실행 잠금 중 청크 삭제 버튼 비활성화 포함 |
+| FR-05 | 완료 | `features/mvp/components/mvp-dashboard.tsx`, `features/mvp/lib/timer-accuracy.ts` | `typecheck/lint/test:mvp/verify:gate/build` PASS | 실행 중 `-1/+1` 조정 및 `15분` 상한 강제 |
+| FR-11 | 완료 | `features/mvp/components/mvp-dashboard.tsx` | `typecheck/lint/test:mvp/verify:gate/build` PASS | `paused` 포함 실행 잠금, 실행 중 정책 가드 반영 |
+| FR-12 | 완료 | `features/mvp/lib/storage.ts`, `features/mvp/components/mvp-dashboard.tsx`, `features/mvp/types/domain.ts` | `typecheck/lint/test:mvp/verify:gate/build` PASS | ISO UTC 정규화 + `completedAt(done only)` 보장 |
 
 ## Quick Resume
-1. 후속 구현 전 `docs/TRACEABILITY_MATRIX.md`의 `부분/미구현` 항목부터 우선순위 확정.
-2. 기능 변경 시 `docs/KPI_PIPELINE.md`, `docs/RELEASE_GATE_LOG.md`를 함께 갱신.
-3. 릴리즈 전 `npm run verify:mvp` 재실행 후 최신 결과를 로그에 추가.
+1. FR-01/02/03/05/11/12는 문서 기준 2차 확정 완료 상태로 유지한다.
+2. 후속은 정책성 리스크 메모(P1 범위)만 추적하고, 본 트랙의 P0 확정 문서는 추가 변경 없이 유지한다.

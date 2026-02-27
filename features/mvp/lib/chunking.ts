@@ -1,5 +1,7 @@
 import {
+  MAX_TASK_TOTAL_MINUTES,
   MAX_CHUNK_EST_MINUTES,
+  MIN_TASK_TOTAL_MINUTES,
   MIN_CHUNK_EST_MINUTES,
   RECOMMENDED_MAX_CHUNK_COUNT,
   RECOMMENDED_MIN_CHUNK_COUNT,
@@ -79,9 +81,56 @@ const ACTION_CONTAINS_VERB_PATTERN =
 const EST_MINUTES_RANGE_LABEL = `${MIN_CHUNK_EST_MINUTES}~${MAX_CHUNK_EST_MINUTES}분`;
 const CHUNK_COUNT_RECOMMENDED_LABEL = `${RECOMMENDED_MIN_CHUNK_COUNT}~${RECOMMENDED_MAX_CHUNK_COUNT}개`;
 
+export function clampTaskTotalMinutes(totalMinutes: number, fallback = MIN_TASK_TOTAL_MINUTES): number {
+  const baseValue = Number.isFinite(totalMinutes) ? totalMinutes : fallback;
+  return Math.min(MAX_TASK_TOTAL_MINUTES, Math.max(MIN_TASK_TOTAL_MINUTES, Math.floor(baseValue)));
+}
+
 function clampMinutes(minutes: number): number {
   const safeMinutes = Number.isFinite(minutes) ? Math.floor(minutes) : MIN_CHUNK_EST_MINUTES;
   return Math.min(MAX_CHUNK_EST_MINUTES, Math.max(MIN_CHUNK_EST_MINUTES, safeMinutes));
+}
+
+export function sumChunkEstMinutes<T extends { estMinutes: number }>(chunks: T[]): number {
+  return chunks.reduce((sum, chunk) => sum + clampMinutes(chunk.estMinutes), 0);
+}
+
+export function isWithinTaskChunkBudget<T extends { estMinutes: number }>(chunks: T[], totalMinutes: number): boolean {
+  return sumChunkEstMinutes(chunks) <= clampTaskTotalMinutes(totalMinutes);
+}
+
+export function enforceChunkBudget<T extends { estMinutes: number }>(chunks: T[], totalMinutes: number): T[] {
+  const budget = clampTaskTotalMinutes(totalMinutes);
+  const maxChunkCount = Math.max(1, Math.floor(budget / MIN_CHUNK_EST_MINUTES));
+  const normalized = chunks.slice(0, maxChunkCount).map(
+    (chunk) =>
+      ({
+        ...chunk,
+        estMinutes: clampMinutes(chunk.estMinutes)
+      }) as T
+  );
+
+  let total = sumChunkEstMinutes(normalized);
+  if (total <= budget) {
+    return normalized;
+  }
+
+  for (let index = normalized.length - 1; index >= 0 && total > budget; index -= 1) {
+    const chunk = normalized[index];
+    const reducible = chunk.estMinutes - MIN_CHUNK_EST_MINUTES;
+    if (reducible <= 0) {
+      continue;
+    }
+
+    const reduceBy = Math.min(reducible, total - budget);
+    normalized[index] = {
+      ...chunk,
+      estMinutes: chunk.estMinutes - reduceBy
+    };
+    total -= reduceBy;
+  }
+
+  return normalized;
 }
 
 export function normalizeTaskSummary(input: string): string {

@@ -2,9 +2,13 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
+  clampTaskTotalMinutes,
   createAiFallbackAdapter,
+  enforceChunkBudget,
   generateLocalChunking,
   generateTemplateChunking,
+  isWithinTaskChunkBudget,
+  sumChunkEstMinutes,
   validateChunkingResult
 } from "@/features/mvp/lib/chunking";
 import { appendEvent, createEvent } from "@/features/mvp/lib/events";
@@ -21,16 +25,20 @@ import {
   applyElapsedWindow,
   createTimerElapsedAccumulator
 } from "@/features/mvp/lib/timer-accuracy";
-import type {
-  AppEvent,
-  Chunk,
-  EventSource,
-  FiveStats,
-  PersistedState,
-  StatsState,
-  Task,
-  TimerSession,
-  UserSettings
+import {
+  MAX_CHUNK_EST_MINUTES,
+  MAX_TASK_TOTAL_MINUTES,
+  MIN_CHUNK_EST_MINUTES,
+  MIN_TASK_TOTAL_MINUTES,
+  type AppEvent,
+  type Chunk,
+  type EventSource,
+  type FiveStats,
+  type PersistedState,
+  type StatsState,
+  type Task,
+  type TimerSession,
+  type UserSettings
 } from "@/features/mvp/types/domain";
 import {
   canShowNotification,
@@ -71,6 +79,7 @@ const RISKY_INPUT_PATTERN = /(자해|죽고\s?싶|폭탄|불법|마약|살인|�
 const DEFAULT_SETTINGS: UserSettings = {
   hapticEnabled: true
 };
+const DEFAULT_TASK_TOTAL_MINUTES = 60;
 
 const ACTIONABLE_CHUNK_STATUSES: Chunk["status"][] = ["todo", "running", "paused"];
 
@@ -164,8 +173,36 @@ function clampMinuteInput(minutes: number): number {
   return Math.min(15, Math.max(2, Math.floor(minutes)));
 }
 
+function parseTaskTotalMinutesInput(rawInput: string): number | null {
+  const parsed = Number(rawInput);
+  if (!Number.isFinite(parsed)) {
+    return null;
+  }
+
+  const normalized = Math.floor(parsed);
+  if (normalized < MIN_TASK_TOTAL_MINUTES || normalized > MAX_TASK_TOTAL_MINUTES) {
+    return null;
+  }
+
+  return normalized;
+}
+
 function buildTaskSummary(rawInput: string): string {
   return rawInput.trim().replace(/\s+/g, " ").slice(0, 60);
+}
+
+function parseOptionalDateTimeInput(rawInput: string): string | undefined {
+  const trimmed = rawInput.trim();
+  if (!trimmed) {
+    return undefined;
+  }
+
+  const timestamp = Date.parse(trimmed);
+  if (!Number.isFinite(timestamp)) {
+    return undefined;
+  }
+
+  return new Date(timestamp).toISOString();
 }
 
 function buildNextRescheduleDate(now = new Date()): string {
@@ -173,6 +210,22 @@ function buildNextRescheduleDate(now = new Date()): string {
   next.setDate(next.getDate() + 1);
   next.setHours(9, 0, 0, 0);
   return next.toISOString();
+}
+
+function isBudgetCountedChunkStatus(status: Chunk["status"]): boolean {
+  return status !== "archived";
+}
+
+function getTaskBudgetedChunks(chunks: Chunk[], taskId: string, excludeChunkId?: string): Chunk[] {
+  return chunks.filter((chunk) =>
+    chunk.taskId === taskId
+    && chunk.id !== excludeChunkId
+    && isBudgetCountedChunkStatus(chunk.status)
+  );
+}
+
+function getTaskBudgetUsage(chunks: Chunk[], taskId: string, excludeChunkId?: string): number {
+  return sumChunkEstMinutes(getTaskBudgetedChunks(chunks, taskId, excludeChunkId));
 }
 
 function isActionableChunkStatus(status: Chunk["status"]): boolean {
@@ -211,6 +264,19 @@ function formatClock(totalSeconds: number): string {
   return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 }
 
+function formatOptionalDateTime(isoValue?: string): string {
+  if (!isoValue) {
+    return "미설정";
+  }
+
+  return new Date(isoValue).toLocaleString("ko-KR", {
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit"
+  });
+}
+
 function chunkStatusLabel(status: Chunk["status"]): string {
   if (status === "running") {
     return "진행 중";
@@ -223,6 +289,19 @@ function chunkStatusLabel(status: Chunk["status"]): string {
   }
   if (status === "abandoned") {
     return "중단";
+  }
+  if (status === "archived") {
+    return "보관됨";
+  }
+  return "대기";
+}
+
+function taskStatusLabel(status: Task["status"]): string {
+  if (status === "in_progress") {
+    return "진행 중";
+  }
+  if (status === "done") {
+    return "완료";
   }
   if (status === "archived") {
     return "보관됨";
@@ -349,6 +428,9 @@ export function MvpDashboard() {
   const [remainingSecondsByChunk, setRemainingSecondsByChunk] = useState<Record<string, number>>({});
 
   const [taskInput, setTaskInput] = useState("");
+  const [taskTotalMinutesInput, setTaskTotalMinutesInput] = useState(String(DEFAULT_TASK_TOTAL_MINUTES));
+  const [taskScheduledForInput, setTaskScheduledForInput] = useState("");
+  const [taskDueAtInput, setTaskDueAtInput] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [feedback, setFeedback] = useState<string>("오늘은 가장 작은 행동부터 시작해요.");
   const [clock, setClock] = useState(new Date());
@@ -401,6 +483,16 @@ export function MvpDashboard() {
     () => chunks.find((chunk) => chunk.status === "running") ?? null,
     [chunks]
   );
+  const executionLockedChunk = useMemo(
+    () => chunks.find((chunk) => chunk.status === "running" || chunk.status === "paused") ?? null,
+    [chunks]
+  );
+  const executionLockedTaskId = executionLockedChunk?.taskId ?? null;
+  const isExecutionLocked = executionLockedChunk !== null;
+  const activeTaskBudgetUsage = useMemo(
+    () => (activeTaskId ? getTaskBudgetUsage(chunks, activeTaskId) : 0),
+    [chunks, activeTaskId]
+  );
 
   const completionRate = useMemo(() => {
     if (chunks.length === 0) {
@@ -447,10 +539,19 @@ export function MvpDashboard() {
   useEffect(() => {
     const loaded = loadPersistedState();
     if (loaded) {
+      const loadedChunkMinutesByTask = (loaded.chunks ?? []).reduce<Record<string, number>>((acc, chunk) => {
+        acc[chunk.taskId] = (acc[chunk.taskId] ?? 0) + chunk.estMinutes;
+        return acc;
+      }, {});
+
       setTasks(
         (loaded.tasks ?? []).map((task) => ({
           ...task,
-          summary: task.summary ?? task.title
+          summary: task.summary ?? task.title,
+          totalMinutes: clampTaskTotalMinutes(
+            task.totalMinutes,
+            loadedChunkMinutesByTask[task.id] ?? DEFAULT_TASK_TOTAL_MINUTES
+          )
         }))
       );
       setChunks(loaded.chunks ?? []);
@@ -546,7 +647,8 @@ export function MvpDashboard() {
       return;
     }
 
-    const nextTask = tasks.find((task) => task.status === "todo")
+    const nextTask = tasks.find((task) => task.status === "in_progress")
+      ?? tasks.find((task) => task.status === "todo")
       ?? tasks.find((task) => task.status !== "archived")
       ?? tasks[0];
     if (nextTask) {
@@ -663,22 +765,53 @@ export function MvpDashboard() {
         return prev;
       }
 
+      const nowIso = new Date().toISOString();
       const next = prev.map((task) => {
+        if (task.status === "archived") {
+          return task;
+        }
+
         const taskChunks = chunks.filter((chunk) => chunk.taskId === task.id);
+        const openTaskChunks = taskChunks.filter((chunk) => !isTaskClosedStatus(chunk.status));
         if (taskChunks.length === 0) {
           return task;
         }
 
-        const allDone = taskChunks.every((chunk) => isTaskClosedStatus(chunk.status));
-        const nextStatus: Task["status"] = allDone ? "done" : "todo";
+        const allClosed = taskChunks.every((chunk) => isTaskClosedStatus(chunk.status));
+        const hasRunningOrPaused = openTaskChunks.some((chunk) => chunk.status === "running" || chunk.status === "paused");
+        const inferredStartedAt = openTaskChunks
+          .map((chunk) => chunk.startedAt)
+          .filter((startedAt): startedAt is string => Boolean(startedAt))
+          .sort((a, b) => Date.parse(a) - Date.parse(b))[0];
+        const inferredCompletedAt = taskChunks
+          .map((chunk) => chunk.completedAt)
+          .filter((completedAt): completedAt is string => Boolean(completedAt))
+          .sort((a, b) => Date.parse(b) - Date.parse(a))[0];
 
-        if (task.status === nextStatus) {
+        const hasStarted = Boolean(task.startedAt || inferredStartedAt);
+        const nextStatus: Task["status"] = allClosed
+          ? "done"
+          : hasRunningOrPaused || hasStarted
+            ? "in_progress"
+            : "todo";
+        const nextStartedAt = task.startedAt ?? inferredStartedAt;
+        const nextCompletedAt = nextStatus === "done"
+          ? task.completedAt ?? inferredCompletedAt ?? nowIso
+          : undefined;
+
+        if (
+          task.status === nextStatus
+          && task.startedAt === nextStartedAt
+          && task.completedAt === nextCompletedAt
+        ) {
           return task;
         }
 
         return {
           ...task,
-          status: nextStatus
+          status: nextStatus,
+          startedAt: nextStartedAt,
+          completedAt: nextCompletedAt
         };
       });
 
@@ -755,7 +888,7 @@ export function MvpDashboard() {
   };
 
   const pushLoopNotification = (params: {
-    eventName: "chunk_started" | "chunk_completed" | "reschedule_requested";
+    eventName: "chunk_started" | "chunk_completed" | "reschedule_requested" | "task_rescheduled";
     taskTitle: string;
     chunkAction: string;
   }) => {
@@ -929,6 +1062,25 @@ export function MvpDashboard() {
       return;
     }
 
+    const parsedTotalMinutes = parseTaskTotalMinutesInput(taskTotalMinutesInput);
+    if (parsedTotalMinutes === null) {
+      setFeedback(`총 소요 시간은 ${MIN_TASK_TOTAL_MINUTES}~${MAX_TASK_TOTAL_MINUTES}분 사이로 입력해주세요.`);
+      return;
+    }
+
+    const hasScheduledForInput = taskScheduledForInput.trim().length > 0;
+    const hasDueAtInput = taskDueAtInput.trim().length > 0;
+    const scheduledFor = parseOptionalDateTimeInput(taskScheduledForInput);
+    const dueAt = parseOptionalDateTimeInput(taskDueAtInput);
+    if ((hasScheduledForInput && !scheduledFor) || (hasDueAtInput && !dueAt)) {
+      setFeedback("일정 시간 형식이 올바르지 않습니다. 날짜와 시간을 다시 확인해주세요.");
+      return;
+    }
+    if (scheduledFor && dueAt && Date.parse(scheduledFor) > Date.parse(dueAt)) {
+      setFeedback("시작 예정 시간은 마감 시간보다 늦을 수 없습니다.");
+      return;
+    }
+
     if (RISKY_INPUT_PATTERN.test(rawInput)) {
       logEvent({
         eventName: "safety_blocked",
@@ -977,16 +1129,23 @@ export function MvpDashboard() {
       const createdAt = new Date().toISOString();
 
       const safeTitle = summary || "새 과업";
+      const adjustedChunkTemplates = enforceChunkBudget(chunking.chunks, parsedTotalMinutes).map((chunk, index) => ({
+        ...chunk,
+        order: index + 1
+      }));
 
       const nextTask: Task = {
         id: taskId,
         title: safeTitle,
         summary: safeTitle,
+        totalMinutes: parsedTotalMinutes,
         createdAt,
+        scheduledFor,
+        dueAt,
         status: "todo"
       };
 
-      const nextChunks: Chunk[] = chunking.chunks.map((chunk) => ({
+      const nextChunks: Chunk[] = adjustedChunkTemplates.map((chunk) => ({
         id: chunk.chunkId,
         taskId,
         order: chunk.order,
@@ -994,6 +1153,11 @@ export function MvpDashboard() {
         estMinutes: chunk.estMinutes,
         status: "todo"
       }));
+
+      if (!isWithinTaskChunkBudget(nextChunks, parsedTotalMinutes)) {
+        setFeedback("청크 시간 합계가 과업 총 시간 예산을 초과해 생성이 취소되었습니다.");
+        return;
+      }
 
       setTasks((prev) => [nextTask, ...prev]);
       setChunks((prev) => [...nextChunks, ...prev]);
@@ -1011,6 +1175,8 @@ export function MvpDashboard() {
       setActiveTaskId(taskId);
       setCurrentChunkId(nextChunks[0]?.id ?? null);
       setTaskInput("");
+      setTaskScheduledForInput("");
+      setTaskDueAtInput("");
       setActiveTab("home");
       setFeedback(
         source === "local"
@@ -1024,7 +1190,10 @@ export function MvpDashboard() {
         taskId,
         meta: {
           summaryLength: safeTitle.length,
-          chunkCount: nextChunks.length
+          chunkCount: nextChunks.length,
+          totalMinutes: parsedTotalMinutes,
+          scheduledFor: scheduledFor ?? null,
+          dueAt: dueAt ?? null
         }
       });
 
@@ -1034,6 +1203,9 @@ export function MvpDashboard() {
         taskId,
         meta: {
           chunkCount: nextChunks.length,
+          originalChunkCount: chunking.chunks.length,
+          adjustedForBudget: chunking.chunks.length !== nextChunks.length
+            || sumChunkEstMinutes(chunking.chunks) !== sumChunkEstMinutes(nextChunks),
           chunkingLatencyMs,
           withinTenSeconds: chunkingLatencyMs <= 10_000,
           usedValidationFallback
@@ -1087,6 +1259,19 @@ export function MvpDashboard() {
 
         return chunk;
       })
+    );
+
+    setTasks((prev) =>
+      prev.map((task) =>
+        task.id === target.taskId
+          ? {
+              ...task,
+              status: task.status === "archived" ? "archived" : "in_progress",
+              startedAt: task.startedAt ?? nowIso,
+              completedAt: undefined
+            }
+          : task
+      )
     );
 
     runningChunkIds.forEach((runningId) => {
@@ -1247,7 +1432,142 @@ export function MvpDashboard() {
     setFeedback(`좋아요. +${reward.xpGain} XP 획득! ${nextChunk ? "다음 청크로 바로 이어가요." : "오늘 루프를 완료했어요."}`);
   };
 
+  const handleAdjustRunningChunkMinutes = (deltaMinutes: -1 | 1) => {
+    if (!runningChunk) {
+      return;
+    }
+
+    const ownerTask = tasks.find((task) => task.id === runningChunk.taskId);
+    if (!ownerTask) {
+      return;
+    }
+
+    const nextMinutes = runningChunk.estMinutes + deltaMinutes;
+    if (nextMinutes < MIN_CHUNK_EST_MINUTES) {
+      setFeedback(`실행 중 청크는 최소 ${MIN_CHUNK_EST_MINUTES}분 이상이어야 합니다.`);
+      return;
+    }
+    if (nextMinutes > MAX_CHUNK_EST_MINUTES) {
+      setFeedback(`실행 중 청크는 최대 ${MAX_CHUNK_EST_MINUTES}분까지만 늘릴 수 있습니다.`);
+      return;
+    }
+
+    const projectedChunks = [
+      ...getTaskBudgetedChunks(chunks, runningChunk.taskId, runningChunk.id),
+      {
+        ...runningChunk,
+        estMinutes: nextMinutes
+      }
+    ];
+    if (!isWithinTaskChunkBudget(projectedChunks, ownerTask.totalMinutes)) {
+      setFeedback("과업 총 시간 예산을 초과해서 청크 시간을 늘릴 수 없습니다.");
+      return;
+    }
+
+    const previousMinutes = runningChunk.estMinutes;
+    const nowIso = new Date().toISOString();
+
+    setChunks((prev) =>
+      prev.map((chunk) =>
+        chunk.id === runningChunk.id
+          ? {
+              ...chunk,
+              estMinutes: nextMinutes
+            }
+          : chunk
+      )
+    );
+
+    setRemainingSecondsByChunk((prev) => {
+      const oldTotalSeconds = previousMinutes * 60;
+      const nextTotalSeconds = nextMinutes * 60;
+      const currentRemaining = prev[runningChunk.id] ?? oldTotalSeconds;
+      const progressRatio = oldTotalSeconds > 0 ? currentRemaining / oldTotalSeconds : 1;
+
+      return {
+        ...prev,
+        [runningChunk.id]: Math.max(0, Math.round(nextTotalSeconds * progressRatio))
+      };
+    });
+
+    logEvent({
+      eventName: "chunk_time_adjusted",
+      source: "user",
+      taskId: runningChunk.taskId,
+      chunkId: runningChunk.id,
+      meta: {
+        deltaMinutes,
+        previousMinutes,
+        nextMinutes,
+        adjustedAt: nowIso
+      }
+    });
+
+    setFeedback(`실행 중 청크 시간을 ${nextMinutes}분으로 조정했습니다.`);
+  };
+
+  const handleEditTaskTotalMinutes = (task: Task) => {
+    const nextTotalRaw = window.prompt(
+      `과업 총 시간(분)을 입력하세요. ${MIN_TASK_TOTAL_MINUTES}~${MAX_TASK_TOTAL_MINUTES}`,
+      String(task.totalMinutes)
+    );
+    if (!nextTotalRaw) {
+      return;
+    }
+
+    const parsedTotal = parseTaskTotalMinutesInput(nextTotalRaw);
+    if (parsedTotal === null) {
+      setFeedback(`총 소요 시간은 ${MIN_TASK_TOTAL_MINUTES}~${MAX_TASK_TOTAL_MINUTES}분 사이여야 합니다.`);
+      return;
+    }
+
+    const taskHasExecutionLockedChunk = executionLockedTaskId === task.id;
+    if (taskHasExecutionLockedChunk && parsedTotal < task.totalMinutes) {
+      setFeedback("실행 중에는 과업 총 시간을 줄일 수 없습니다. 증가만 가능합니다.");
+      return;
+    }
+
+    const currentBudgetChunks = getTaskBudgetedChunks(chunks, task.id);
+    if (!isWithinTaskChunkBudget(currentBudgetChunks, parsedTotal)) {
+      setFeedback("현재 청크 시간 합계보다 작게 과업 총 시간을 줄일 수 없습니다.");
+      return;
+    }
+
+    if (parsedTotal === task.totalMinutes) {
+      return;
+    }
+
+    setTasks((prev) =>
+      prev.map((item) =>
+        item.id === task.id
+          ? {
+              ...item,
+              totalMinutes: parsedTotal
+            }
+          : item
+      )
+    );
+
+    logEvent({
+      eventName: "task_time_updated",
+      source: "user",
+      taskId: task.id,
+      meta: {
+        previousTotalMinutes: task.totalMinutes,
+        nextTotalMinutes: parsedTotal,
+        updatedDuringRun: taskHasExecutionLockedChunk
+      }
+    });
+
+    setFeedback(`과업 총 시간을 ${parsedTotal}분으로 업데이트했습니다.`);
+  };
+
   const handleEditChunk = (chunk: Chunk) => {
+    if (isExecutionLocked) {
+      setFeedback("실행 중에는 프롬프트 편집을 잠그고, 현재 청크의 +/- 1분 조정만 허용됩니다.");
+      return;
+    }
+
     const nextAction = window.prompt("행동 청크를 수정하세요", chunk.action);
     if (!nextAction) {
       return;
@@ -1265,6 +1585,22 @@ export function MvpDashboard() {
     }
 
     const nextMinutes = clampMinuteInput(parsedMinutes);
+    const ownerTask = tasks.find((task) => task.id === chunk.taskId);
+    if (!ownerTask) {
+      return;
+    }
+
+    const projectedBudgetChunks = [
+      ...getTaskBudgetedChunks(chunks, chunk.taskId, chunk.id),
+      {
+        ...chunk,
+        estMinutes: nextMinutes
+      }
+    ];
+    if (!isWithinTaskChunkBudget(projectedBudgetChunks, ownerTask.totalMinutes)) {
+      setFeedback("과업 총 시간 예산을 초과하여 청크 시간을 수정할 수 없습니다.");
+      return;
+    }
 
     setChunks((prev) =>
       prev.map((item) =>
@@ -1335,6 +1671,10 @@ export function MvpDashboard() {
     if (!target || !isActionableChunkStatus(target.status)) {
       return;
     }
+    const ownerTask = tasks.find((task) => task.id === target.taskId);
+    if (!ownerTask) {
+      return;
+    }
 
     const metricState = gateMetricsRef.current;
     const recoveryClickCount = (metricState.recoveryClickCountByTaskId[target.taskId] ?? 0) + 1;
@@ -1362,6 +1702,15 @@ export function MvpDashboard() {
         parentChunkId: target.id
       }
     ];
+
+    const projectedBudgetChunks = [
+      ...getTaskBudgetedChunks(chunks, target.taskId, target.id),
+      ...newChunks
+    ];
+    if (!isWithinTaskChunkBudget(projectedBudgetChunks, ownerTask.totalMinutes)) {
+      setFeedback("리청크 결과가 과업 총 시간 예산을 초과해서 적용할 수 없습니다.");
+      return;
+    }
 
     setChunks((prev) => {
       const shifted: Chunk[] = prev.map((chunk): Chunk => {
@@ -1443,6 +1792,10 @@ export function MvpDashboard() {
     if (!target || !isActionableChunkStatus(target.status)) {
       return;
     }
+    const ownerTask = tasks.find((task) => task.id === target.taskId);
+    if (!ownerTask) {
+      return;
+    }
 
     const metricState = gateMetricsRef.current;
     const recoveryClickCount = (metricState.recoveryClickCountByTaskId[target.taskId] ?? 0) + 1;
@@ -1450,48 +1803,72 @@ export function MvpDashboard() {
 
     const nowIso = new Date().toISOString();
     const rescheduledFor = buildNextRescheduleDate();
-    const followUpChunk: Chunk = {
-      id: crypto.randomUUID(),
-      taskId: target.taskId,
-      order: target.order + 1,
-      action: `${target.action} - 내일 다시 시작`,
-      estMinutes: target.estMinutes,
-      status: "todo",
-      parentChunkId: target.id,
-      rescheduledFor
-    };
+    const movedChunks = orderChunks(
+      chunks.filter((chunk) => chunk.taskId === target.taskId && isActionableChunkStatus(chunk.status))
+    );
+    const activeSessionChunkIds = movedChunks
+      .filter((chunk) => chunk.status === "running" || chunk.status === "paused")
+      .map((chunk) => chunk.id);
 
-    setChunks((prev) =>
-      withReorderedTaskChunks(
-        [
-          ...prev.map((chunk): Chunk =>
-            chunk.id === target.id
-              ? {
-                  ...chunk,
-                  status: "abandoned",
-                  rescheduledFor
-                }
-              : chunk
-          ),
-          followUpChunk
-        ],
-        target.taskId
+    setTasks((prev) =>
+      prev.map((task) =>
+        task.id === ownerTask.id
+          ? {
+              ...task,
+              scheduledFor: rescheduledFor,
+              dueAt: task.dueAt && Date.parse(task.dueAt) < Date.parse(rescheduledFor) ? rescheduledFor : task.dueAt,
+              status: "todo",
+              startedAt: undefined,
+              completedAt: undefined
+            }
+          : task
       )
     );
 
-    setRemainingSecondsByChunk((prev) => ({
-      ...prev,
-      [target.id]: 0,
-      [followUpChunk.id]: followUpChunk.estMinutes * 60
-    }));
+    setChunks((prev) =>
+      prev.map((chunk) => {
+        if (chunk.taskId !== target.taskId || !isActionableChunkStatus(chunk.status)) {
+          return chunk;
+        }
 
-    upsertTimerSession(target.id, "ended", nowIso);
+        return {
+          ...chunk,
+          status: "todo",
+          startedAt: undefined,
+          rescheduledFor
+        };
+      })
+    );
+
+    setRemainingSecondsByChunk((prev) => {
+      const next = { ...prev };
+      movedChunks.forEach((chunk) => {
+        next[chunk.id] = Math.max(0, prev[chunk.id] ?? chunk.estMinutes * 60);
+      });
+      return next;
+    });
+
+    activeSessionChunkIds.forEach((sessionChunkId) => {
+      upsertTimerSession(sessionChunkId, "ended", nowIso);
+    });
     tickAccumulatorRef.current = createTimerElapsedAccumulator();
-    setCurrentChunkId(followUpChunk.id);
+    setCurrentChunkId(movedChunks[0]?.id ?? null);
     setActiveTaskId(target.taskId);
 
     const recovery = applyRecoveryReward(stats);
     setStats(recovery.nextStats);
+
+    logEvent({
+      eventName: "task_rescheduled",
+      source: "local",
+      taskId: target.taskId,
+      chunkId: target.id,
+      meta: {
+        rescheduledFor,
+        movedChunkCount: movedChunks.length,
+        recoveryClickCount
+      }
+    });
 
     logEvent({
       eventName: "reschedule_requested",
@@ -1500,18 +1877,8 @@ export function MvpDashboard() {
       chunkId: target.id,
       meta: {
         rescheduledFor,
-        followUpChunkId: followUpChunk.id,
+        movedChunkCount: movedChunks.length,
         recoveryClickCount
-      }
-    });
-
-    logEvent({
-      eventName: "chunk_abandoned",
-      source: "local",
-      taskId: target.taskId,
-      chunkId: target.id,
-      meta: {
-        rescheduledFor
       }
     });
 
@@ -1531,7 +1898,7 @@ export function MvpDashboard() {
 
     const taskTitle = tasks.find((task) => task.id === target.taskId)?.title ?? "과업";
     pushLoopNotification({
-      eventName: "reschedule_requested",
+      eventName: "task_rescheduled",
       taskTitle,
       chunkAction: target.action
     });
@@ -1586,6 +1953,21 @@ export function MvpDashboard() {
   const homeRemaining = homeChunk
     ? remainingSecondsByChunk[homeChunk.id] ?? homeChunk.estMinutes * 60
     : 0;
+  const homeTaskBudgetUsage = homeTask ? getTaskBudgetUsage(chunks, homeTask.id) : 0;
+  const canDecreaseRunningChunkMinutes = homeChunk?.status === "running" && homeChunk.estMinutes > MIN_CHUNK_EST_MINUTES;
+  const canIncreaseRunningChunkMinutes = homeChunk?.status === "running" && homeTask
+    ? homeChunk.estMinutes < MAX_CHUNK_EST_MINUTES
+      && isWithinTaskChunkBudget(
+        [
+          ...getTaskBudgetedChunks(chunks, homeChunk.taskId, homeChunk.id),
+          {
+            ...homeChunk,
+            estMinutes: homeChunk.estMinutes + 1
+          }
+        ],
+        homeTask.totalMinutes
+      )
+    : false;
 
   const homeTaskCards = tasks.slice(0, 3);
 
@@ -1673,6 +2055,45 @@ export function MvpDashboard() {
               {isGenerating ? "생성 중..." : "AI가 쪼개기"}
             </button>
           </div>
+          <div className={styles.taskMetaGrid}>
+            <label className={styles.metaField} htmlFor="task-total-minutes">
+              <span>총 소요 시간(필수)</span>
+              <input
+                id="task-total-minutes"
+                type="number"
+                min={MIN_TASK_TOTAL_MINUTES}
+                max={MAX_TASK_TOTAL_MINUTES}
+                value={taskTotalMinutesInput}
+                onChange={(event) => setTaskTotalMinutesInput(event.target.value)}
+                className={styles.input}
+                inputMode="numeric"
+                required
+              />
+            </label>
+            <label className={styles.metaField} htmlFor="task-scheduled-for">
+              <span>시작 예정(선택)</span>
+              <input
+                id="task-scheduled-for"
+                type="datetime-local"
+                value={taskScheduledForInput}
+                onChange={(event) => setTaskScheduledForInput(event.target.value)}
+                className={styles.input}
+              />
+            </label>
+            <label className={styles.metaField} htmlFor="task-due-at">
+              <span>마감(선택)</span>
+              <input
+                id="task-due-at"
+                type="datetime-local"
+                value={taskDueAtInput}
+                onChange={(event) => setTaskDueAtInput(event.target.value)}
+                className={styles.input}
+              />
+            </label>
+          </div>
+          <p className={styles.helperText}>
+            총 시간은 {MIN_TASK_TOTAL_MINUTES}~{MAX_TASK_TOTAL_MINUTES}분 범위이며, 시작 예정 시간은 마감보다 늦을 수 없습니다.
+          </p>
           <p className={styles.helperText}>로컬 패턴 우선, 필요 시 AI 폴백으로 청킹합니다. STT 엔진: {sttCapability.engine}</p>
           {sttTranscript ? <p className={styles.transcriptPreview}>미리보기: {sttTranscript}</p> : null}
           {sttError ? <p className={styles.errorText}>{sttError}</p> : null}
@@ -1699,6 +2120,12 @@ export function MvpDashboard() {
                       {chunkStatusLabel(homeChunk.status)}
                     </span>
                   </div>
+                  {homeTask ? (
+                    <p className={styles.chunkBudget}>
+                      예산 {homeTaskBudgetUsage}/{homeTask.totalMinutes}분 · 시작 예정 {formatOptionalDateTime(homeTask.scheduledFor)}
+                      {" "}· 마감 {formatOptionalDateTime(homeTask.dueAt)}
+                    </p>
+                  ) : null}
 
                   <div className={styles.actionRow}>
                     <button
@@ -1726,6 +2153,27 @@ export function MvpDashboard() {
                       완료
                     </button>
                   </div>
+
+                  {homeChunk.status === "running" ? (
+                    <div className={styles.quickAdjustRow}>
+                      <button
+                        type="button"
+                        className={styles.subtleButton}
+                        onClick={() => handleAdjustRunningChunkMinutes(-1)}
+                        disabled={!canDecreaseRunningChunkMinutes}
+                      >
+                        -1분
+                      </button>
+                      <button
+                        type="button"
+                        className={styles.subtleButton}
+                        onClick={() => handleAdjustRunningChunkMinutes(1)}
+                        disabled={!canIncreaseRunningChunkMinutes}
+                      >
+                        +1분
+                      </button>
+                    </div>
+                  ) : null}
 
                   <div className={styles.recoveryRow}>
                     <button
@@ -1783,6 +2231,21 @@ export function MvpDashboard() {
               <h3>청크 목록</h3>
               <p>{activeTask ? activeTask.title : "과업을 선택하세요"}</p>
             </header>
+            {activeTask ? (
+              <div className={styles.taskBudgetRow}>
+                <p className={styles.helperText}>
+                  총 {activeTask.totalMinutes}분 · 청크 합계 {activeTaskBudgetUsage}분 · 상태 {taskStatusLabel(activeTask.status)}
+                  {" "}· 시작 예정 {formatOptionalDateTime(activeTask.scheduledFor)} · 마감 {formatOptionalDateTime(activeTask.dueAt)}
+                </p>
+                <button
+                  type="button"
+                  className={styles.smallButton}
+                  onClick={() => handleEditTaskTotalMinutes(activeTask)}
+                >
+                  총 시간 수정
+                </button>
+              </div>
+            ) : null}
 
             <div className={styles.taskSelector}>
               {tasks.map((task) => (
@@ -1838,10 +2301,20 @@ export function MvpDashboard() {
                       >
                         완료
                       </button>
-                      <button type="button" className={styles.smallButton} onClick={() => handleEditChunk(chunk)}>
+                      <button
+                        type="button"
+                        className={styles.smallButton}
+                        onClick={() => handleEditChunk(chunk)}
+                        disabled={isExecutionLocked}
+                      >
                         수정
                       </button>
-                      <button type="button" className={styles.smallButtonDanger} onClick={() => handleDeleteChunk(chunk)}>
+                      <button
+                        type="button"
+                        className={styles.smallButtonDanger}
+                        onClick={() => handleDeleteChunk(chunk)}
+                        disabled={isExecutionLocked}
+                      >
                         삭제
                       </button>
                     </div>
@@ -1967,7 +2440,7 @@ export function MvpDashboard() {
                   <p className={styles.fallbackText}>{notificationFallbackText}</p>
                 ) : (
                   <p className={styles.helperText}>
-                    chunk_started/chunk_completed/reschedule_requested 이벤트 시 1회 알림을 보냅니다.
+                    chunk_started/chunk_completed/task_rescheduled 이벤트 시 1회 알림을 보냅니다.
                   </p>
                 )}
               </div>

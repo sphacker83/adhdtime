@@ -1,4 +1,4 @@
-export type TaskStatus = "todo" | "done" | "archived";
+export type TaskStatus = "todo" | "in_progress" | "done" | "archived";
 export type ChunkStatus = "todo" | "running" | "paused" | "done" | "abandoned" | "archived";
 export type TimerSessionState = "running" | "paused" | "ended";
 export type EventSource = "local" | "ai" | "system" | "user";
@@ -12,12 +12,17 @@ export type EventName =
   | "chunk_abandoned"
   | "rechunk_requested"
   | "reschedule_requested"
+  | "task_rescheduled"
+  | "chunk_time_adjusted"
+  | "task_time_updated"
   | "xp_gained"
   | "level_up"
   | "haptic_fired"
   | "safety_blocked";
 
 export const TASK_SUMMARY_MAX_LENGTH = 60;
+export const MIN_TASK_TOTAL_MINUTES = 10;
+export const MAX_TASK_TOTAL_MINUTES = 480;
 export const MIN_CHUNK_EST_MINUTES = 2;
 export const MAX_CHUNK_EST_MINUTES = 15;
 export const RECOMMENDED_MIN_CHUNK_COUNT = 5;
@@ -27,7 +32,12 @@ export interface Task {
   id: string;
   title: string;
   summary?: string;
+  totalMinutes: number;
   createdAt: string;
+  scheduledFor?: string;
+  startedAt?: string;
+  dueAt?: string;
+  completedAt?: string;
   status: TaskStatus;
 }
 

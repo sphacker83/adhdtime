@@ -1,7 +1,8 @@
 # ADHDTime 개발 플랜 (MVP 실행안)
 
 문서 버전: v2.1  
-작성일: 2026-02-28  
+작성일: 2026-02-27  
+Last Updated: 2026-02-27  
 기준 문서: `docs/PRD.md` v3.1, `docs/USECASE.md` v2.1
 
 ---
@@ -38,6 +39,32 @@
 - P0 must: FR-01 ~ FR-09, FR-11 ~ FR-12
 - P1 later: FR-10(알림), STT, 외부 동기화/구독
 - 원칙: 릴리즈 게이트와 직접 연결된 항목을 먼저 구현
+
+## 3.1 FR 진행 상태 동기화 (Round 2 확정)
+
+- 대상: FR-01/02/03/05/11/12
+- 확정 결과: 대상 FR 모두 `완료`
+- 리뷰 지적사항 반영 완료
+  - 실행 중 `+1분` 상한 `15분` 강제
+  - `paused` 상태 실행 잠금 포함
+  - `completedAt`는 `done`일 때만 저장
+  - ISO UTC 정규화 보강
+  - 실행 잠금 중 청크 삭제 버튼 비활성화
+- 검증 명령 통과
+  - `npm run typecheck` PASS
+  - `npm run lint` PASS
+  - `npm run test:mvp` PASS
+  - `npm run verify:gate` PASS
+  - `npm run build` PASS
+
+| FR | 확정 상태 | 근거 파일 | 비고 |
+| --- | --- | --- | --- |
+| FR-01 | 완료 | `features/mvp/components/mvp-dashboard.tsx` | 과업 직접 등록 + `totalMinutes` 입력/검증 동작 |
+| FR-02 | 완료 | `features/mvp/components/mvp-dashboard.tsx`, `features/mvp/lib/chunking.ts` | 청킹 총시간 예산 강제(`sum <= totalMinutes`) |
+| FR-03 | 완료 | `features/mvp/components/mvp-dashboard.tsx` | 청크 편집/삭제 + 실행 잠금 시 삭제 비활성화 |
+| FR-05 | 완료 | `features/mvp/components/mvp-dashboard.tsx`, `features/mvp/lib/timer-accuracy.ts` | 타이머 실행 + 실행 중 빠른 `-1/+1` 조정 |
+| FR-11 | 완료 | `features/mvp/components/mvp-dashboard.tsx` | 실행 전/중 시간 수정 정책 가드(`running/paused` 잠금 포함) |
+| FR-12 | 완료 | `features/mvp/lib/storage.ts`, `features/mvp/components/mvp-dashboard.tsx`, `features/mvp/types/domain.ts` | 시간 필드 ISO UTC 정규화 + `completedAt(done only)` |
 
 ---
 
@@ -84,6 +111,17 @@
 ---
 
 ## 5. 에픽/티켓 백로그
+
+### 5.1 에픽/티켓 진행도 (2026-02-27 Round 2)
+
+- 아래 진행도는 전체 에픽 종료 여부가 아니라, 이번 2차 확정 범위(FR-01/02/03/05/11/12) 기준이다.
+
+| 에픽 | 진행도(확정 범위) | 완료 티켓(확정 반영) | 근거 |
+| --- | --- | --- | --- |
+| Epic A. 홈/과업등록/청킹 | 완료 | A-03, A-04, A-06, A-08 | `features/mvp/components/mvp-dashboard.tsx`, `features/mvp/lib/chunking.ts` |
+| Epic B. 타이머/실행/시간조정/햅틱 | 완료 | B-01, B-03, B-04, B-05 | `features/mvp/components/mvp-dashboard.tsx`, `features/mvp/lib/timer-accuracy.ts` |
+| Epic E. 계측/안전/프라이버시 | 완료 | E-05 | `features/mvp/lib/storage.ts`, `features/mvp/types/domain.ts` |
+| Epic F. QA/릴리즈 | 완료 | F-05 | `npm run typecheck`, `npm run lint`, `npm run test:mvp`, `npm run verify:gate`, `npm run build` PASS |
 
 ## Epic A. 홈/과업등록/청킹 (P0)
 

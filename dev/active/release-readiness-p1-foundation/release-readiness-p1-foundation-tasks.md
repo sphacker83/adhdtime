@@ -1,6 +1,6 @@
 # Release Readiness + P1 Foundation - Tasks
 
-Last Updated: 2026-02-28
+Last Updated: 2026-02-27
 
 ## Phase 0: Baseline & Planning ✅
 - [x] 기존 Dev Docs / 코드 상태 분석
@@ -71,10 +71,43 @@ Acceptance
 ## Phase 8: Mobile Settings Clipping Hotfix ✅
 - [x] 모바일 settings 탭 진입 시 우측 잘림/클리핑 이슈 수정 및 390x844 Playwright 재현 검증 완료
 
-## Validation Gate
-1. [x] `npm run typecheck`
-2. [x] `npm run lint`
-3. [x] `npm run test:mvp`
-4. [x] `npm run build`
-5. [x] `npm run verify:gate`
-6. [x] `npm run verify:mvp`
+## Phase 9: FR-01/02/03/05/11/12 Round 2 Confirmation ✅
+- [x] FR-01 구현 완료 상태 확정 및 근거 링크 기록
+- [x] FR-02 구현 완료 상태 확정 및 근거 링크 기록
+- [x] FR-03 구현 완료 상태 확정 및 근거 링크 기록
+- [x] FR-05 구현 완료 상태 확정 및 근거 링크 기록
+- [x] FR-11 구현 완료 상태 확정 및 근거 링크 기록
+- [x] FR-12 구현 완료 상태 확정 및 근거 링크 기록
+
+Acceptance (Round 2 확정)
+- [x] 대상 FR 상태를 `완료`로 최종 확정
+- [x] `docs/TRACEABILITY_MATRIX.md`와 상태/근거를 동기화
+- [x] `docs/DEVELOPMENT_PLAN.md`와 `context.md` 체크리스트를 동일 상태로 반영
+
+## Round 2 핵심 결정 ✅
+- [x] 실행 중 `+1분` 조정 상한을 `15분`으로 강제
+- [x] `paused` 상태를 실행 잠금으로 포함
+- [x] `completedAt`는 `done` 상태일 때만 저장
+- [x] 시간 필드 저장 시 ISO UTC 정규화 보강
+- [x] 실행 잠금 중 청크 삭제 버튼 비활성화
+
+## Round 2 확정 결과
+
+| FR | 상태 | 근거 파일 | 검증 결과 | 비고 |
+| --- | --- | --- | --- | --- |
+| FR-01 | 완료 | `features/mvp/components/mvp-dashboard.tsx` | `typecheck/lint/test:mvp/verify:gate/build` PASS | `title + totalMinutes` 입력/검증 동작 |
+| FR-02 | 완료 | `features/mvp/components/mvp-dashboard.tsx`, `features/mvp/lib/chunking.ts` | `typecheck/lint/test:mvp/verify:gate/build` PASS | 청킹 총합 예산 강제 |
+| FR-03 | 완료 | `features/mvp/components/mvp-dashboard.tsx` | `typecheck/lint/test:mvp/verify:gate/build` PASS | 편집/삭제 정책 + 실행 잠금 삭제 비활성화 |
+| FR-05 | 완료 | `features/mvp/components/mvp-dashboard.tsx`, `features/mvp/lib/timer-accuracy.ts` | `typecheck/lint/test:mvp/verify:gate/build` PASS | 실행 중 `-1/+1` 조정 및 상한 강제 |
+| FR-11 | 완료 | `features/mvp/components/mvp-dashboard.tsx` | `typecheck/lint/test:mvp/verify:gate/build` PASS | `running/paused` 잠금 정책 반영 |
+| FR-12 | 완료 | `features/mvp/lib/storage.ts`, `features/mvp/components/mvp-dashboard.tsx`, `features/mvp/types/domain.ts` | `typecheck/lint/test:mvp/verify:gate/build` PASS | ISO UTC + `completedAt(done only)` |
+
+## Validation Gate (Round 2)
+1. [x] `npm run typecheck` PASS
+2. [x] `npm run lint` PASS
+3. [x] `npm run test:mvp` PASS
+4. [x] `npm run verify:gate` PASS
+5. [x] `npm run build` PASS
+
+## Remaining Follow-up
+- 정책성 리스크 메모 유지: FR-10(알림 정책 세부화), 외부 동기화 실연동(OAuth/API), 기타 P1 범위 항목은 별도 트랙에서 계속 관리

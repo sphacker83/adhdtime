@@ -1,4 +1,6 @@
 import {
+  MAX_TASK_TOTAL_MINUTES,
+  MIN_TASK_TOTAL_MINUTES,
   type AppEvent,
   type Chunk,
   type ChunkStatus,
@@ -16,7 +18,7 @@ import {
 import { createInitialStats } from "@/features/mvp/lib/reward";
 
 const STORAGE_KEY = "adhdtime:mvp-state:v1";
-const TASK_STATUS_VALUES: Task["status"][] = ["todo", "done", "archived"];
+const TASK_STATUS_VALUES: Task["status"][] = ["todo", "in_progress", "done", "archived"];
 const CHUNK_STATUS_VALUES: ChunkStatus[] = ["todo", "running", "paused", "done", "abandoned", "archived"];
 const TIMER_SESSION_STATE_VALUES: TimerSessionState[] = ["running", "paused", "ended"];
 const ACTIVE_TAB_VALUES: PersistedState["activeTab"][] = ["home", "tasks", "stats", "settings"];
@@ -29,6 +31,9 @@ const EVENT_NAME_VALUES: EventName[] = [
   "chunk_abandoned",
   "rechunk_requested",
   "reschedule_requested",
+  "task_rescheduled",
+  "chunk_time_adjusted",
+  "task_time_updated",
   "xp_gained",
   "level_up",
   "haptic_fired",
@@ -36,6 +41,7 @@ const EVENT_NAME_VALUES: EventName[] = [
 ];
 const EVENT_SOURCE_VALUES: EventSource[] = ["local", "ai", "system", "user"];
 const FALLBACK_TASK_SUMMARY = "새 과업";
+const FALLBACK_TASK_TOTAL_MINUTES = 60;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
@@ -73,18 +79,112 @@ function isEventSource(value: unknown): value is EventSource {
   return isString(value) && EVENT_SOURCE_VALUES.includes(value as EventSource);
 }
 
-function isTask(value: unknown): value is Task {
-  if (!isRecord(value)) {
-    return false;
+function isIsoDateTime(value: unknown): value is string {
+  return isString(value) && Number.isFinite(Date.parse(value));
+}
+
+function sanitizeIsoDateTime(value: unknown): string | undefined {
+  if (!isIsoDateTime(value)) {
+    return undefined;
   }
 
-  return (
-    isString(value.id)
-    && isString(value.title)
-    && (value.summary === undefined || isString(value.summary))
-    && isString(value.createdAt)
-    && isTaskStatus(value.status)
-  );
+  const parsed = Date.parse(value);
+  if (!Number.isFinite(parsed)) {
+    return undefined;
+  }
+
+  return new Date(parsed).toISOString();
+}
+
+function sanitizeTaskTotalMinutes(totalMinutes: unknown, fallbackMinutes: number): number {
+  const numericFallback = Number.isFinite(fallbackMinutes)
+    ? Math.floor(fallbackMinutes)
+    : FALLBACK_TASK_TOTAL_MINUTES;
+  const rawValue = isNumber(totalMinutes) ? totalMinutes : numericFallback;
+  return Math.min(MAX_TASK_TOTAL_MINUTES, Math.max(MIN_TASK_TOTAL_MINUTES, Math.floor(rawValue)));
+}
+
+function buildChunkMinuteFallbackByTaskId(chunks: Chunk[]): Map<string, number> {
+  const taskMinutes = new Map<string, number>();
+
+  chunks.forEach((chunk) => {
+    const current = taskMinutes.get(chunk.taskId) ?? 0;
+    taskMinutes.set(chunk.taskId, current + Math.max(0, Math.floor(chunk.estMinutes)));
+  });
+
+  return taskMinutes;
+}
+
+interface TaskTimelineFallback {
+  startedAt?: string;
+  completedAt?: string;
+  hasOpenChunks: boolean;
+}
+
+function buildTaskTimelineFallbackByTaskId(chunks: Chunk[]): Map<string, TaskTimelineFallback> {
+  const timelineByTaskId = new Map<string, TaskTimelineFallback>();
+
+  chunks.forEach((chunk) => {
+    const current = timelineByTaskId.get(chunk.taskId) ?? { hasOpenChunks: false };
+
+    if (chunk.startedAt && (!current.startedAt || Date.parse(chunk.startedAt) < Date.parse(current.startedAt))) {
+      current.startedAt = chunk.startedAt;
+    }
+
+    if (chunk.completedAt && (!current.completedAt || Date.parse(chunk.completedAt) > Date.parse(current.completedAt))) {
+      current.completedAt = chunk.completedAt;
+    }
+
+    if (chunk.status === "todo" || chunk.status === "running" || chunk.status === "paused") {
+      current.hasOpenChunks = true;
+    }
+
+    timelineByTaskId.set(chunk.taskId, current);
+  });
+
+  return timelineByTaskId;
+}
+
+function sanitizeTaskRecord(
+  value: unknown,
+  minuteFallbackByTaskId: Map<string, number>,
+  timelineFallbackByTaskId: Map<string, TaskTimelineFallback>
+): Task | null {
+  if (!isRecord(value)) {
+    return null;
+  }
+
+  if (!isString(value.id) || !isString(value.title)) {
+    return null;
+  }
+
+  const fallbackMinutes = minuteFallbackByTaskId.get(value.id) ?? FALLBACK_TASK_TOTAL_MINUTES;
+  const timeline = timelineFallbackByTaskId.get(value.id);
+  const createdAt = sanitizeIsoDateTime(value.createdAt) ?? new Date().toISOString();
+  const scheduledFor = sanitizeIsoDateTime(value.scheduledFor);
+  const dueAtCandidate = sanitizeIsoDateTime(value.dueAt);
+  const dueAt =
+    scheduledFor && dueAtCandidate && Date.parse(scheduledFor) > Date.parse(dueAtCandidate)
+      ? scheduledFor
+      : dueAtCandidate;
+
+  const normalizedSummary = sanitizeTaskSummary((isString(value.summary) ? value.summary : value.title) ?? value.title);
+  const status = isTaskStatus(value.status) ? value.status : "todo";
+  const completedAtCandidate = sanitizeIsoDateTime(value.completedAt) ?? timeline?.completedAt;
+  const completedAt = status === "done" ? completedAtCandidate : undefined;
+
+  return {
+    id: value.id,
+    title: normalizedSummary,
+    summary: normalizedSummary,
+    totalMinutes: sanitizeTaskTotalMinutes(value.totalMinutes, fallbackMinutes),
+    createdAt,
+    scheduledFor,
+    startedAt: sanitizeIsoDateTime(value.startedAt) ?? timeline?.startedAt,
+    dueAt,
+    completedAt,
+    status
+  };
 }
 
 function isChunk(value: unknown): value is Chunk {
@@ -190,21 +290,38 @@ export function sanitizeTaskSummary(rawInput: string): string {
   return normalized || FALLBACK_TASK_SUMMARY;
 }
 
-function sanitizeTaskForStorage(task: Task): Task {
+function sanitizeTaskForStorage(task: Task, minuteFallbackByTaskId: Map<string, number>): Task {
   const safeSummary = sanitizeTaskSummary(task.summary ?? task.title);
+  const scheduledFor = sanitizeIsoDateTime(task.scheduledFor);
+  const dueAtCandidate = sanitizeIsoDateTime(task.dueAt);
+  const dueAt =
+    scheduledFor && dueAtCandidate && Date.parse(scheduledFor) > Date.parse(dueAtCandidate)
+      ? scheduledFor
+      : dueAtCandidate;
+  const fallbackMinutes = minuteFallbackByTaskId.get(task.id) ?? FALLBACK_TASK_TOTAL_MINUTES;
+  const completedAtCandidate = sanitizeIsoDateTime(task.completedAt);
+  const completedAt = task.status === "done" ? completedAtCandidate : undefined;
+
   return {
     id: task.id,
     title: safeSummary,
     summary: safeSummary,
-    createdAt: task.createdAt,
+    totalMinutes: sanitizeTaskTotalMinutes(task.totalMinutes, fallbackMinutes),
+    createdAt: sanitizeIsoDateTime(task.createdAt) ?? new Date().toISOString(),
+    scheduledFor,
+    startedAt: sanitizeIsoDateTime(task.startedAt),
+    dueAt,
+    completedAt,
     status: task.status
   };
 }
 
 function sanitizeStateForStorage(state: PersistedState): PersistedState {
+  const minuteFallbackByTaskId = buildChunkMinuteFallbackByTaskId(state.chunks);
+
   return {
     ...state,
-    tasks: state.tasks.map((task) => sanitizeTaskForStorage(task))
+    tasks: state.tasks.map((task) => sanitizeTaskForStorage(task, minuteFallbackByTaskId))
   };
 }
 
@@ -238,12 +355,15 @@ export function loadPersistedState(): PersistedState | null {
       return null;
     }
 
-    const sanitizedTasks = Array.isArray(parsed.tasks)
-      ? parsed.tasks.filter((task): task is Task => isTask(task)).map((task) => sanitizeTaskForStorage(task))
-      : [];
-
     const sanitizedChunks = Array.isArray(parsed.chunks)
       ? parsed.chunks.filter((chunk): chunk is Chunk => isChunk(chunk))
+      : [];
+    const minuteFallbackByTaskId = buildChunkMinuteFallbackByTaskId(sanitizedChunks);
+    const timelineFallbackByTaskId = buildTaskTimelineFallbackByTaskId(sanitizedChunks);
+    const sanitizedTasks = Array.isArray(parsed.tasks)
+      ? parsed.tasks
+        .map((task) => sanitizeTaskRecord(task, minuteFallbackByTaskId, timelineFallbackByTaskId))
+        .filter((task): task is Task => task !== null)
       : [];
     const sanitizedTimerSessions = Array.isArray(parsed.timerSessions)
       ? parsed.timerSessions.filter((session): session is TimerSession => isTimerSession(session))
