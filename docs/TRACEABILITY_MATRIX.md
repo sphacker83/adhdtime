@@ -1,7 +1,7 @@
 # TRACEABILITY_MATRIX
 
 Last Updated: 2026-02-28  
-기준 문서: `docs/PRD.md` v3.0, `docs/USECASE.md` v2.0
+기준 문서: `docs/PRD.md` v3.1, `docs/USECASE.md` v2.1
 
 ## 상태 정의
 
@@ -13,50 +13,55 @@ Last Updated: 2026-02-28
 
 | ID | 요구사항 요약 | 상태 | 근거 파일 | 비고/갭 |
 | --- | --- | --- | --- | --- |
-| FR-01 | 텍스트 과업 입력 | 완료 | `features/mvp/components/mvp-dashboard.tsx` | 입력값으로 과업/청크 생성 및 `task_created` 이벤트 기록 |
-| FR-02 | 로컬 우선 + AI 폴백 청킹 | 부분 | `features/mvp/components/mvp-dashboard.tsx`, `features/mvp/lib/chunking.ts` | 로컬 실패 시 폴백은 구현됨. 다만 AI는 실제 외부 호출이 아닌 모의 어댑터 |
-| FR-03 | 청크 편집/삭제/재정렬 | 완료 | `features/mvp/components/mvp-dashboard.tsx` | 수정 시 `estMinutes` 2~15로 clamp, 삭제 시 재정렬 |
+| FR-01 | 과업 직접 등록 + 총시간 설정 | 미구현 | `features/mvp/components/mvp-dashboard.tsx` | 현재는 free-text 입력 기반, `totalMinutes` 입력/검증 없음 |
+| FR-02 | 총시간 제약 포함 하이브리드 청킹 | 부분 | `features/mvp/components/mvp-dashboard.tsx`, `features/mvp/lib/chunking.ts` | 청킹/폴백은 동작하나 `sum(estMinutes) <= totalMinutes` 제약 없음 |
+| FR-03 | 청크 편집/삭제 + 총시간 정합 | 부분 | `features/mvp/components/mvp-dashboard.tsx` | 청크 편집/삭제는 구현, Task 총시간 연동 정책 미구현 |
 | FR-04 | 퀘스트 리스트/현재 청크 강조 | 완료 | `features/mvp/components/mvp-dashboard.tsx` | 현재 청크 강조 + 시작 CTA 제공 |
-| FR-05 | 타이머 시작/일시정지/재개/완료 | 완료 | `features/mvp/components/mvp-dashboard.tsx`, `features/mvp/lib/timer-accuracy.ts`, `features/mvp/lib/timer-accuracy.test.ts` | 상태 전이/잔여시간 계산/드리프트 테스트 포함 |
-| FR-06 | 5분 미세 햅틱 + ON/OFF | 완료 | `features/mvp/components/mvp-dashboard.tsx` | 설정 토글 반영, 미지원 환경은 조용한 폴백 |
-| FR-07 | XP/레벨/5스탯 반영 | 완료 | `features/mvp/lib/reward.ts`, `features/mvp/components/mvp-dashboard.tsx` | 완료/복귀 보상 및 레벨업 이벤트 처리 |
-| FR-08 | 일간 리포트 | 완료 | `features/mvp/components/mvp-dashboard.tsx` | 완료 수/완료율/XP/회복 점수 및 KPI 스냅샷 표시 |
-| FR-09 | 복귀 루프(재등록/재청킹) | 완료 | `features/mvp/components/mvp-dashboard.tsx` | `rechunk_requested`/`reschedule_requested` 및 회복 보상 구현 |
-| FR-10 | 알림(시작/종료) | 완료 | `features/mvp/components/mvp-dashboard.tsx`, `features/p1/helpers/notification-capability.ts` | 권한/폴백/알림 트리거(`chunk_started`/`chunk_completed`/`reschedule_requested`) 구현 |
+| FR-05 | 타이머 + 실행 중 빠른 시간 조정 | 미구현 | `features/mvp/components/mvp-dashboard.tsx` | 시작/일시정지/완료는 있으나 `-1/+1` 빠른 조정 없음 |
+| FR-06 | 5분 미세 햅틱 + ON/OFF | 완료 | `features/mvp/components/mvp-dashboard.tsx` | 설정 토글 반영, 미지원 환경 폴백 포함 |
+| FR-07 | XP/레벨/5스탯 반영 | 완료 | `features/mvp/lib/reward.ts`, `features/mvp/components/mvp-dashboard.tsx` | 완료/복귀 보상 및 레벨업 처리 |
+| FR-08 | 일간 리포트 | 완료 | `features/mvp/components/mvp-dashboard.tsx`, `features/mvp/lib/kpi.ts` | 리포트 카드 + KPI 스냅샷 표시 |
+| FR-09 | 과업 단위 재일정/재청킹 | 부분 | `features/mvp/components/mvp-dashboard.tsx` | 재청킹/재등록 동작은 있으나 재일정이 Task 단위가 아님(청크 중심) |
+| FR-10 | 알림(P1) | 부분 | `features/mvp/components/mvp-dashboard.tsx`, `features/p1/helpers/notification-capability.ts` | 권한/트리거 연결은 있으나 별도 알림 설정 토글/정책 정교화 미완 |
+| FR-11 | 실행 전/중 시간 수정 정책 | 미구현 | `features/mvp/components/mvp-dashboard.tsx` | 실행 상태별 시간 편집 가드(증가/감소 규칙) 미구현 |
+| FR-12 | date...At 정합성 규칙 | 미구현 | `features/mvp/types/domain.ts`, `features/mvp/components/mvp-dashboard.tsx` | `scheduledFor/dueAt/startedAt/completedAt` 정책 기반 전이 미구현 |
 
 ## 2) USECASE 추적
 
 | ID | 유스케이스 요약 | 상태 | 근거 파일 | 비고/갭 |
 | --- | --- | --- | --- | --- |
-| UC-01 | 과업 입력 -> 자동 청킹 | 부분 | `features/mvp/components/mvp-dashboard.tsx`, `features/mvp/lib/chunking.ts` | 안전 차단/폴백/이벤트는 구현. AI 실연동과 명시적 재시도 버튼은 없음 |
-| UC-02 | 청크 수정/삭제 | 완료 | `features/mvp/components/mvp-dashboard.tsx` | 수정/삭제/순서 재배치 동작 |
-| UC-03 | 타이머 시작/일시정지/재개/완료 | 완료 | `features/mvp/components/mvp-dashboard.tsx`, `features/mvp/lib/timer-accuracy.ts` | 상태 전이/백그라운드 복귀 보정/완료 후 다음 청크 제안 |
-| UC-04 | 5분 미세 햅틱 | 완료 | `features/mvp/components/mvp-dashboard.tsx` | ON/OFF 및 `haptic_fired` 이벤트 |
-| UC-05 | 보상/스탯 반영 | 완료 | `features/mvp/lib/reward.ts`, `features/mvp/components/mvp-dashboard.tsx` | XP/스탯/레벨업 즉시 반영 |
-| UC-06 | 미완료 -> 재등록/재청킹 | 완료 | `features/mvp/components/mvp-dashboard.tsx` | `rescheduledFor`, `parentChunkId`, 회복 보상 반영 |
-| UC-07 | 일간 리포트 | 완료 | `features/mvp/components/mvp-dashboard.tsx`, `features/mvp/lib/kpi.ts` | 리포트 카드 + KPI 요약 |
-| UC-08 | 알림(P1) | 부분 | `features/mvp/components/mvp-dashboard.tsx`, `features/p1/helpers/notification-capability.ts` | 권한/상태/트리거 일부 구현, 종료 이벤트 알림 없음 |
-| UC-09 | 외부 동기화(P1) | 미구현 | `features/p1/helpers/sync-mock-adapter.ts`, `features/mvp/components/mvp-dashboard.tsx` | 실제 OAuth/API 연동 없음. 상태 전이 Mock만 구현 |
+| UC-01 | 과업 직접 등록 + 총시간 설정 | 미구현 | `features/mvp/components/mvp-dashboard.tsx` | 총시간 필수 입력 플로우 없음 |
+| UC-02 | 등록 과업 청킹(총시간 제약) | 부분 | `features/mvp/components/mvp-dashboard.tsx`, `features/mvp/lib/chunking.ts` | 청킹은 구현, 총시간 제약 미구현 |
+| UC-03 | 청크 편집/삭제 + 시간 정책 | 부분 | `features/mvp/components/mvp-dashboard.tsx` | 편집/삭제는 구현, 실행 상태별 정책 가드 미구현 |
+| UC-04 | 타이머 + 실행 중 빠른 +/- | 미구현 | `features/mvp/components/mvp-dashboard.tsx` | 빠른 시간 조정 UX 없음 |
+| UC-05 | 5분 미세 햅틱 | 완료 | `features/mvp/components/mvp-dashboard.tsx` | ON/OFF 및 이벤트 기록 동작 |
+| UC-06 | 보상/스탯 반영 | 완료 | `features/mvp/lib/reward.ts`, `features/mvp/components/mvp-dashboard.tsx` | 즉시 보상 반영 |
+| UC-07 | 과업 재일정 또는 재청킹 | 부분 | `features/mvp/components/mvp-dashboard.tsx` | 재청킹/재등록 가능하나 Task 단위 일정 이동 정책 미구현 |
+| UC-08 | 일간 리포트 확인 | 완료 | `features/mvp/components/mvp-dashboard.tsx`, `features/mvp/lib/kpi.ts` | 리포트 및 KPI 표시 |
+| UC-09 | 알림(P1) | 부분 | `features/mvp/components/mvp-dashboard.tsx`, `features/p1/helpers/notification-capability.ts` | 시작/완료/재등록 알림 트리거 있음, 정책 완결성은 보강 필요 |
+| UC-10 | 외부 동기화(P1) | 부분 | `features/p1/helpers/sync-mock-adapter.ts`, `features/mvp/components/mvp-dashboard.tsx` | 상태 전이 mock만 구현, 실제 OAuth/API 연동 미구현 |
 
-## 3) PRD 릴리즈 게이트 체크 상태
+## 3) PRD v3.1 릴리즈 게이트 체크 상태
 
 | 게이트 | 상태 | 근거 파일 | 비고/갭 |
 | --- | --- | --- | --- |
-| 1. 청킹 10초 이내 표시 | 부분 | `features/mvp/components/mvp-dashboard.tsx` | `chunkingLatencyMs`, `withinTenSeconds` 이벤트 기록은 있으나 자동 차단/알람 없음 |
-| 2. 3탭/3분 이내 첫 시작 | 부분 | `features/mvp/components/mvp-dashboard.tsx` | `startClickCount`, `withinThreeMinutes` 기록은 있음. 게이트 자동 판정 없음 |
-| 3. 타이머 상태 안정성 | 완료 | `features/mvp/lib/timer-accuracy.ts`, `features/mvp/lib/timer-accuracy.test.ts` | 음수 방지/드리프트 검증 구현 |
-| 4. 햅틱 ON/OFF 동작 | 완료 | `features/mvp/components/mvp-dashboard.tsx` | 설정 연동과 폴백 동작 포함 |
-| 5. 완료 보상 즉시 반영 | 완료 | `features/mvp/components/mvp-dashboard.tsx`, `features/mvp/lib/reward.ts` | 완료 즉시 XP/스탯 업데이트 |
-| 6. 복귀 2탭 이내 | 부분 | `features/mvp/components/mvp-dashboard.tsx` | 복귀 CTA는 있으나 탭 수 자동 측정 없음 |
-| 7. 필수 이벤트 누락 없음 | 부분 | `features/mvp/lib/events.ts`, `features/mvp/lib/kpi.ts`, `scripts/verify-release-gate.mjs` | 필수 이벤트 정의/샘플 검증 있음. 실제 사용자 시나리오 전수 검증은 별도 필요 |
-| 8. rawInput 장기 저장 없음 | 완료 | `features/mvp/lib/storage.ts`, `features/mvp/components/mvp-dashboard.tsx` | 저장 시 summary로 정규화 |
-| 9. 위험 입력 차단 | 완료 | `features/mvp/components/mvp-dashboard.tsx` | 위험 패턴 차단 + `safety_blocked` 이벤트 |
+| 1. `title`, `totalMinutes` 필수 검증 | 미구현 | `features/mvp/components/mvp-dashboard.tsx` | 총시간 입력/검증 필드 없음 |
+| 2. 10초 내 청킹 + 총시간 제약 | 부분 | `features/mvp/components/mvp-dashboard.tsx` | 10초 메트릭은 있으나 총시간 제약 검증 없음 |
+| 3. 3탭/3분 이내 첫 시작 | 부분 | `features/mvp/components/mvp-dashboard.tsx` | 계측은 있으나 게이트 판정 자동화 미완 |
+| 4. 타이머 안정 + 빠른 `+/-` 조정 | 부분 | `features/mvp/components/mvp-dashboard.tsx`, `features/mvp/lib/timer-accuracy.ts` | 타이머 안정성은 확보, 빠른 조정 기능 미구현 |
+| 5. 햅틱 ON/OFF 정상 | 완료 | `features/mvp/components/mvp-dashboard.tsx` | 설정 반영 및 폴백 확인 가능 |
+| 6. 보상 즉시 반영 | 완료 | `features/mvp/lib/reward.ts`, `features/mvp/components/mvp-dashboard.tsx` | 완료/복귀 보상 즉시 반영 |
+| 7. 재일정/재청킹 2탭 복귀 | 부분 | `features/mvp/components/mvp-dashboard.tsx` | 동선은 있으나 정책 변경(Task 단위) 미반영 |
+| 8. 재일정 Task 단위 준수 | 미구현 | `features/mvp/components/mvp-dashboard.tsx` | 현재는 청크 단위 `rescheduledFor` 중심 |
+| 9. 필수 이벤트 누락 없음 | 부분 | `features/mvp/lib/events.ts`, `features/mvp/lib/kpi.ts`, `scripts/verify-release-gate.mjs` | 기존 이벤트 검증은 있으나 v3.1 신규 이벤트 미반영 |
+| 10. rawInput 장기 저장 없음 | 완료 | `features/mvp/lib/storage.ts` | summary 저장 정책 적용 |
+| 11. 시간 필드 정합성 규칙 | 미구현 | `features/mvp/types/domain.ts`, `features/mvp/components/mvp-dashboard.tsx` | date...At 정책/검증 로직 미구현 |
 
 ## 4) 요약
 
-- FR 기준: 완료 8 / 부분 2 / 미구현 0
-- UC 기준: 완료 6 / 부분 2 / 미구현 1
-- 주요 미구현/갭
-  - AI 청킹 실연동 부재(모의 어댑터)
-  - 알림 종료 이벤트 미지원
-  - 외부 동기화 실제 OAuth/API 연동 부재(mock only)
+- FR 기준: 완료 4 / 부분 5 / 미구현 3
+- UC 기준: 완료 3 / 부분 5 / 미구현 2
+- 즉시 우선순위
+1. FR-01/02: 총시간 입력 + 청킹 예산 제약
+2. FR-05/11: 실행 중 빠른 시간 조정 + 상태별 시간 수정 정책
+3. FR-09/12: Task 단위 재일정 + date...At 정합성 규칙 구현
