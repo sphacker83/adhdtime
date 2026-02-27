@@ -180,6 +180,14 @@
   gap: 8px;
 }
 
+.capabilityHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 .inputLabel {
   font-size: 13px;
   font-weight: 700;
@@ -271,6 +279,26 @@
   line-height: 1.4;
 }
 
+.transcriptPreview,
+.errorText,
+.fallbackText {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.transcriptPreview {
+  color: #294571;
+}
+
+.errorText {
+  color: #a13a1d;
+}
+
+.fallbackText {
+  color: #6f4a16;
+}
+
 .currentChunkCard h2 {
   margin: 2px 0;
   font-size: 1.1rem;
@@ -315,6 +343,19 @@
   font-weight: 700;
 }
 
+.capabilityBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 26px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  padding: 0 9px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+}
+
 .status_todo {
   background: rgba(80, 110, 161, 0.14);
   color: #32466d;
@@ -342,6 +383,42 @@
 
 .status_archived {
   background: rgba(102, 114, 141, 0.18);
+  color: #4a546d;
+}
+
+.capability_default,
+.syncStatus_idle {
+  background: rgba(80, 110, 161, 0.14);
+  border-color: rgba(70, 100, 152, 0.24);
+  color: #32466d;
+}
+
+.capability_granted,
+.capability_supported,
+.syncStatus_success {
+  background: rgba(16, 159, 111, 0.15);
+  border-color: rgba(11, 140, 98, 0.22);
+  color: #0e7f65;
+}
+
+.syncStatus_queued,
+.syncStatus_running {
+  background: rgba(250, 188, 44, 0.21);
+  border-color: rgba(196, 138, 10, 0.24);
+  color: #986100;
+}
+
+.capability_denied,
+.syncStatus_failed,
+.syncStatus_conflict {
+  background: rgba(245, 155, 38, 0.2);
+  border-color: rgba(163, 55, 23, 0.22);
+  color: #8d5200;
+}
+
+.capability_unsupported {
+  background: rgba(102, 114, 141, 0.18);
+  border-color: rgba(77, 88, 112, 0.24);
   color: #4a546d;
 }
 
@@ -522,6 +599,48 @@
   font-size: 1.1rem;
 }
 
+.kpiBlock {
+  margin-top: 12px;
+  display: grid;
+  gap: 8px;
+}
+
+.kpiBlock h4 {
+  margin: 0;
+}
+
+.kpiGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.kpiGrid article {
+  border: 1px solid rgba(41, 63, 104, 0.14);
+  border-radius: 12px;
+  padding: 10px;
+  background: rgba(247, 249, 255, 0.75);
+  display: grid;
+  gap: 2px;
+}
+
+.kpiGrid p,
+.kpiGrid strong,
+.kpiGrid span {
+  margin: 0;
+}
+
+.kpiGrid p,
+.kpiGrid span {
+  font-size: 12px;
+  color: #5a6885;
+}
+
+.kpiGrid strong {
+  font-family: "Space Grotesk", "IBM Plex Sans KR", sans-serif;
+  font-size: 1rem;
+}
+
 .eventBlock {
   margin-top: 12px;
   display: grid;
@@ -583,6 +702,24 @@
 .settingsRow p {
   font-size: 12px;
   color: #5a6885;
+}
+
+.settingsBody {
+  display: grid;
+  gap: 4px;
+}
+
+.syncButtonRow {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.conflictText {
+  margin: 0;
+  color: #8d5200;
+  font-size: 12px;
 }
 
 .toggle {
@@ -657,5 +794,9 @@
   .recoveryRow {
     grid-template-columns: 1fr 1fr;
     max-width: 420px;
+  }
+
+  .syncButtonRow {
+    justify-content: flex-start;
   }
 }

@@ -13,6 +13,28 @@ export interface SpeechRecognitionLike {
   interimResults: boolean;
   start: () => void;
   stop: () => void;
+  onresult?: ((event: SpeechRecognitionEventLike) => void) | null;
+  onerror?: ((event: SpeechRecognitionErrorEventLike) => void) | null;
+  onend?: (() => void) | null;
+}
+
+export interface SpeechRecognitionAlternativeLike {
+  transcript: string;
+}
+
+export interface SpeechRecognitionResultLike {
+  readonly length: number;
+  readonly isFinal: boolean;
+  [index: number]: SpeechRecognitionAlternativeLike;
+}
+
+export interface SpeechRecognitionEventLike {
+  readonly resultIndex: number;
+  readonly results: ArrayLike<SpeechRecognitionResultLike>;
+}
+
+export interface SpeechRecognitionErrorEventLike {
+  readonly error: string;
 }
 
 type SpeechRecognitionConstructor = new () => SpeechRecognitionLike;

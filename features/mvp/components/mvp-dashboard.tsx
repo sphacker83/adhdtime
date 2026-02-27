@@ -8,6 +8,7 @@ import {
   validateChunkingResult
 } from "@/features/mvp/lib/chunking";
 import { appendEvent, createEvent } from "@/features/mvp/lib/events";
+import { computeMvpKpis } from "@/features/mvp/lib/kpi";
 import {
   applyChunkCompletionReward,
   applyRecoveryReward,
@@ -31,6 +32,21 @@ import type {
   TimerSession,
   UserSettings
 } from "@/features/mvp/types/domain";
+import {
+  canShowNotification,
+  createSttRecognition,
+  createSyncMockAdapter,
+  getNotificationCapability,
+  getSttCapability,
+  requestNotificationPermission,
+  type NotificationCapability,
+  type NotificationPermissionState,
+  type SpeechRecognitionEventLike,
+  type SpeechRecognitionLike,
+  type SttCapability,
+  type SyncMockOutcome
+} from "@/features/p1/helpers";
+import type { ExternalSyncConflict, ExternalSyncJobStatus } from "@/features/p1/types";
 import styles from "./mvp-dashboard.module.css";
 
 const TAB_ITEMS = [
@@ -63,6 +79,86 @@ const RECOVERY_FEEDBACK = {
   rechunked: "괜찮아요. 더 작은 단계로 다시 나눴어요. 첫 단계부터 이어가요.",
   rescheduled: "괜찮아요. 내일로 다시 등록했어요. 바로 시작할 청크를 준비해뒀어요."
 } as const;
+
+const DEFAULT_NOTIFICATION_CAPABILITY: NotificationCapability = {
+  supported: false,
+  secureContext: false,
+  permission: "unsupported",
+  canRequestPermission: false
+};
+
+const DEFAULT_STT_CAPABILITY: SttCapability = {
+  supported: false,
+  secureContext: false,
+  engine: "unsupported",
+  canStartRecognition: false
+};
+
+const SYNC_STATUS_LABEL: Record<ExternalSyncJobStatus, string> = {
+  IDLE: "idle",
+  QUEUED: "queued",
+  RUNNING: "running",
+  SUCCESS: "success",
+  FAILED: "failed",
+  CONFLICT: "conflict"
+};
+
+function deriveNotificationState(capability: NotificationCapability): NotificationPermissionState {
+  if (!capability.supported || !capability.secureContext) {
+    return "unsupported";
+  }
+
+  return capability.permission;
+}
+
+function getNotificationFallbackText(state: NotificationPermissionState): string | null {
+  if (state === "denied") {
+    return "브라우저 설정에서 알림 권한을 허용으로 변경해야 알림을 받을 수 있어요.";
+  }
+
+  if (state === "unsupported") {
+    return "이 환경은 알림 API를 지원하지 않거나 HTTPS 보안 컨텍스트가 아니어서 알림을 보낼 수 없어요.";
+  }
+
+  return null;
+}
+
+function getSttSupportState(capability: SttCapability): "supported" | "unsupported" {
+  return capability.canStartRecognition ? "supported" : "unsupported";
+}
+
+function extractTranscriptBuffers(event: SpeechRecognitionEventLike): {
+  finalTranscript: string;
+  interimTranscript: string;
+} {
+  const finalSegments: string[] = [];
+  const interimSegments: string[] = [];
+
+  for (let index = 0; index < event.results.length; index += 1) {
+    const result = event.results[index];
+    if (!result) {
+      continue;
+    }
+
+    const primary = result[0];
+    const transcript = primary?.transcript?.trim();
+    if (!transcript) {
+      continue;
+    }
+
+    if (result.isFinal) {
+      finalSegments.push(transcript);
+      continue;
+    }
+
+    interimSegments.push(transcript);
+  }
+
+  return {
+    finalTranscript: finalSegments.join(" ").trim(),
+    interimTranscript: interimSegments.join(" ").trim()
+  };
+}
 
 function clampMinuteInput(minutes: number): number {
   return Math.min(15, Math.max(2, Math.floor(minutes)));
@@ -148,6 +244,23 @@ function getXpProgressPercent(stats: StatsState): number {
 
 function pointsToString(points: Array<[number, number]>): string {
   return points.map(([x, y]) => `${x},${y}`).join(" ");
+}
+
+function formatPercentValue(value: number | null): string {
+  if (value === null) {
+    return "데이터 없음";
+  }
+  return `${value}%`;
+}
+
+function formatTimeToStart(seconds: number | null): string {
+  if (seconds === null) {
+    return "데이터 없음";
+  }
+
+  const minutes = Math.floor(seconds / 60);
+  const remainSeconds = seconds % 60;
+  return `${minutes}분 ${String(remainSeconds).padStart(2, "0")}초`;
 }
 
 function buildRadarShape(stats: FiveStats): { data: string; grid: string[] } {
@@ -241,10 +354,26 @@ export function MvpDashboard() {
   const [clock, setClock] = useState(new Date());
   const [currentChunkId, setCurrentChunkId] = useState<string | null>(null);
   const [hydrated, setHydrated] = useState(false);
+  const [notificationCapability, setNotificationCapability] = useState<NotificationCapability>(
+    DEFAULT_NOTIFICATION_CAPABILITY
+  );
+  const [isRequestingNotificationPermission, setIsRequestingNotificationPermission] = useState(false);
+  const [sttCapability, setSttCapability] = useState<SttCapability>(DEFAULT_STT_CAPABILITY);
+  const [isSttListening, setIsSttListening] = useState(false);
+  const [sttTranscript, setSttTranscript] = useState("");
+  const [sttError, setSttError] = useState<string | null>(null);
+  const [syncStatus, setSyncStatus] = useState<ExternalSyncJobStatus>("IDLE");
+  const [syncLastJobId, setSyncLastJobId] = useState<string | null>(null);
+  const [syncConflict, setSyncConflict] = useState<ExternalSyncConflict | null>(null);
+  const [syncMessage, setSyncMessage] = useState("동기화 대기 중");
 
   const aiAdapterRef = useRef(createAiFallbackAdapter());
   const sessionIdRef = useRef(crypto.randomUUID());
   const tickAccumulatorRef = useRef(createTimerElapsedAccumulator());
+  const sttRecognitionRef = useRef<SpeechRecognitionLike | null>(null);
+  const sttFinalTranscriptRef = useRef("");
+  const sttInterimTranscriptRef = useRef("");
+  const syncMockAdapterRef = useRef(createSyncMockAdapter("GOOGLE_CALENDAR"));
   const lastHapticBucketByChunkRef = useRef<Record<string, number>>({});
   const gateMetricsRef = useRef<{
     startClickCountByTaskId: Record<string, number>;
@@ -282,11 +411,30 @@ export function MvpDashboard() {
   }, [chunks]);
 
   const xpProgressPercent = getXpProgressPercent(stats);
+  const kpis = useMemo(() => computeMvpKpis(events), [events]);
 
   const radar = useMemo(
     () => buildRadarShape(stats),
     [stats]
   );
+  const notificationState = deriveNotificationState(notificationCapability);
+  const notificationFallbackText = getNotificationFallbackText(notificationState);
+  const sttSupportState = getSttSupportState(sttCapability);
+  const syncStatusLabel = SYNC_STATUS_LABEL[syncStatus];
+  const isSyncBusy = syncStatus === "QUEUED" || syncStatus === "RUNNING";
+
+  const clearSttTranscriptRefs = () => {
+    sttFinalTranscriptRef.current = "";
+    sttInterimTranscriptRef.current = "";
+  };
+
+  const resetSttTranscriptBuffers = () => {
+    clearSttTranscriptRefs();
+    setSttTranscript("");
+  };
+
+  const mergeSttTranscript = (finalTranscript: string, interimTranscript: string): string =>
+    [finalTranscript, interimTranscript].filter(Boolean).join(" ").trim();
 
   useEffect(() => {
     const tick = window.setInterval(() => {
@@ -315,6 +463,46 @@ export function MvpDashboard() {
       setRemainingSecondsByChunk(loaded.remainingSecondsByChunk ?? {});
     }
     setHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated) {
+      return;
+    }
+
+    setNotificationCapability(getNotificationCapability());
+    setSttCapability(getSttCapability());
+  }, [hydrated]);
+
+  useEffect(() => {
+    if (!hydrated) {
+      return;
+    }
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState !== "visible") {
+        return;
+      }
+
+      setNotificationCapability(getNotificationCapability());
+      setSttCapability(getSttCapability());
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [hydrated]);
+
+  useEffect(() => {
+    return () => {
+      if (sttRecognitionRef.current) {
+        sttRecognitionRef.current.stop();
+        sttRecognitionRef.current = null;
+      }
+
+      clearSttTranscriptRefs();
+    };
   }, []);
 
   useEffect(() => {
@@ -566,6 +754,167 @@ export function MvpDashboard() {
     );
   };
 
+  const pushLoopNotification = (params: {
+    eventName: "chunk_started" | "reschedule_requested";
+    taskTitle: string;
+    chunkAction: string;
+  }) => {
+    const capability = getNotificationCapability();
+    setNotificationCapability(capability);
+
+    if (!canShowNotification(capability)) {
+      return;
+    }
+
+    if (typeof window === "undefined" || typeof window.Notification !== "function") {
+      return;
+    }
+
+    const title = params.eventName === "chunk_started" ? "청크 시작" : "내일로 재등록";
+    const body =
+      params.eventName === "chunk_started"
+        ? `${params.taskTitle} · ${params.chunkAction}`
+        : `${params.taskTitle} · ${params.chunkAction} 청크를 내일로 옮겼어요.`;
+    const notification = new window.Notification(title, {
+      body,
+      tag: `adhdtime-${params.eventName}-${Date.now()}`
+    });
+
+    window.setTimeout(() => {
+      notification.close();
+    }, 4500);
+  };
+
+  const handleRequestNotification = async () => {
+    setIsRequestingNotificationPermission(true);
+    try {
+      await requestNotificationPermission();
+    } finally {
+      setNotificationCapability(getNotificationCapability());
+      setIsRequestingNotificationPermission(false);
+    }
+  };
+
+  const handleStartStt = () => {
+    const capability = getSttCapability();
+    setSttCapability(capability);
+
+    if (!capability.canStartRecognition) {
+      setIsSttListening(false);
+      resetSttTranscriptBuffers();
+      setSttError("현재 환경에서는 STT를 사용할 수 없습니다.");
+      return;
+    }
+
+    if (sttRecognitionRef.current) {
+      sttRecognitionRef.current.stop();
+      sttRecognitionRef.current = null;
+    }
+
+    const recognition = createSttRecognition("ko-KR");
+    if (!recognition) {
+      resetSttTranscriptBuffers();
+      setSttError("STT 엔진 초기화에 실패했습니다.");
+      return;
+    }
+
+    setSttError(null);
+    resetSttTranscriptBuffers();
+
+    recognition.onresult = (event) => {
+      const { finalTranscript, interimTranscript } = extractTranscriptBuffers(event);
+      sttFinalTranscriptRef.current = finalTranscript;
+      sttInterimTranscriptRef.current = interimTranscript;
+      setSttTranscript(interimTranscript);
+
+      const mergedTranscript = mergeSttTranscript(finalTranscript, interimTranscript);
+      if (mergedTranscript) {
+        setTaskInput(mergedTranscript);
+      }
+    };
+    recognition.onerror = (event) => {
+      setSttError(`음성 인식 오류: ${event.error}`);
+      setIsSttListening(false);
+      sttRecognitionRef.current = null;
+      resetSttTranscriptBuffers();
+    };
+    recognition.onend = () => {
+      setIsSttListening(false);
+      sttRecognitionRef.current = null;
+      resetSttTranscriptBuffers();
+    };
+
+    sttRecognitionRef.current = recognition;
+
+    try {
+      recognition.start();
+      setIsSttListening(true);
+    } catch {
+      setIsSttListening(false);
+      setSttError("STT 시작 중 오류가 발생했습니다.");
+      sttRecognitionRef.current = null;
+      resetSttTranscriptBuffers();
+    }
+  };
+
+  const handleStopStt = () => {
+    if (sttRecognitionRef.current) {
+      sttRecognitionRef.current.stop();
+      sttRecognitionRef.current = null;
+    }
+    setIsSttListening(false);
+    resetSttTranscriptBuffers();
+  };
+
+  const handleRunSyncMock = async (outcome: SyncMockOutcome) => {
+    if (isSyncBusy) {
+      return;
+    }
+
+    setSyncConflict(null);
+
+    try {
+      await syncMockAdapterRef.current.simulateSync({
+        outcome,
+        onTransition: ({ job, conflict }) => {
+          setSyncStatus(job.status);
+          setSyncLastJobId(job.id);
+
+          if (job.status === "QUEUED") {
+            setSyncMessage("queued: 동기화 요청을 큐에 등록했습니다.");
+            setSyncConflict(null);
+            return;
+          }
+
+          if (job.status === "RUNNING") {
+            setSyncMessage("running: 외부 provider와 데이터를 비교 중입니다.");
+            return;
+          }
+
+          if (job.status === "SUCCESS") {
+            setSyncMessage("success: mock 동기화가 정상 완료되었습니다.");
+            setSyncConflict(null);
+            return;
+          }
+
+          if (job.status === "FAILED") {
+            setSyncMessage("failed: mock 동기화가 실패했습니다.");
+            setSyncConflict(null);
+            return;
+          }
+
+          if (job.status === "CONFLICT") {
+            setSyncMessage("conflict: 충돌이 감지되어 사용자 확인이 필요합니다.");
+            setSyncConflict(conflict);
+          }
+        }
+      });
+    } catch {
+      setSyncStatus("FAILED");
+      setSyncMessage("failed: mock 어댑터 실행 중 예외가 발생했습니다.");
+    }
+  };
+
   const handleGenerateTask = async () => {
     const rawInput = taskInput.trim();
     if (!rawInput) {
@@ -759,6 +1108,13 @@ export function MvpDashboard() {
         timeToFirstStartMs: timeToFirstStartMs ?? null,
         withinThreeMinutes: timeToFirstStartMs !== undefined ? timeToFirstStartMs <= 180_000 : null
       }
+    });
+
+    const taskTitle = tasks.find((task) => task.id === target.taskId)?.title ?? "과업";
+    pushLoopNotification({
+      eventName: "chunk_started",
+      taskTitle,
+      chunkAction: target.action
     });
   };
 
@@ -1158,6 +1514,13 @@ export function MvpDashboard() {
     });
 
     setFeedback(RECOVERY_FEEDBACK.rescheduled);
+
+    const taskTitle = tasks.find((task) => task.id === target.taskId)?.title ?? "과업";
+    pushLoopNotification({
+      eventName: "reschedule_requested",
+      taskTitle,
+      chunkAction: target.action
+    });
   };
 
   const handleResetAll = () => {
@@ -1179,6 +1542,19 @@ export function MvpDashboard() {
     setRemainingSecondsByChunk(initial.remainingSecondsByChunk);
     setCurrentChunkId(null);
     tickAccumulatorRef.current = createTimerElapsedAccumulator();
+    resetSttTranscriptBuffers();
+    setSttError(null);
+    setIsSttListening(false);
+    if (sttRecognitionRef.current) {
+      sttRecognitionRef.current.stop();
+      sttRecognitionRef.current = null;
+    }
+    setSyncStatus("IDLE");
+    setSyncLastJobId(null);
+    setSyncConflict(null);
+    setSyncMessage("동기화 대기 중");
+    setNotificationCapability(getNotificationCapability());
+    setSttCapability(getSttCapability());
     setFeedback("초기화 완료. 새 루프를 시작해보세요.");
   };
 
@@ -1250,9 +1626,14 @@ export function MvpDashboard() {
         </section>
 
         <section className={styles.inputCard}>
-          <label className={styles.inputLabel} htmlFor="task-input">
-            무지성 태스크 청킹
-          </label>
+          <div className={styles.capabilityHeader}>
+            <label className={styles.inputLabel} htmlFor="task-input">
+              무지성 태스크 청킹
+            </label>
+            <span className={`${styles.capabilityBadge} ${styles[`capability_${sttSupportState}`]}`}>
+              STT {sttSupportState}
+            </span>
+          </div>
           <div className={styles.inputRow}>
             <input
               id="task-input"
@@ -1261,8 +1642,13 @@ export function MvpDashboard() {
               placeholder="예: 방 청소, 제안서 마무리, 메일 답장"
               className={styles.input}
             />
-            <button type="button" className={styles.ghostButton} aria-label="음성 입력 (준비중)">
-              마이크
+            <button
+              type="button"
+              className={isSttListening ? styles.successButton : styles.ghostButton}
+              onClick={isSttListening ? handleStopStt : handleStartStt}
+              disabled={!sttCapability.canStartRecognition && !isSttListening}
+            >
+              {isSttListening ? "음성 중지" : "음성 시작"}
             </button>
             <button
               type="button"
@@ -1273,7 +1659,12 @@ export function MvpDashboard() {
               {isGenerating ? "생성 중..." : "AI가 쪼개기"}
             </button>
           </div>
-          <p className={styles.helperText}>로컬 패턴 우선, 필요 시 AI 폴백으로 청킹합니다.</p>
+          <p className={styles.helperText}>로컬 패턴 우선, 필요 시 AI 폴백으로 청킹합니다. STT 엔진: {sttCapability.engine}</p>
+          {sttTranscript ? <p className={styles.transcriptPreview}>미리보기: {sttTranscript}</p> : null}
+          {sttError ? <p className={styles.errorText}>{sttError}</p> : null}
+          {!sttCapability.canStartRecognition ? (
+            <p className={styles.fallbackText}>STT를 지원하지 않는 환경입니다. 직접 텍스트 입력을 사용해주세요.</p>
+          ) : null}
         </section>
 
         {activeTab === "home" ? (
@@ -1473,6 +1864,51 @@ export function MvpDashboard() {
               </article>
             </div>
 
+            <div className={styles.kpiBlock}>
+              <h4>MVP KPI 스냅샷</h4>
+              <div className={styles.kpiGrid}>
+                <article>
+                  <p>Activation</p>
+                  <strong>{formatPercentValue(kpis.activationRate.value)}</strong>
+                  <span>
+                    {kpis.activationRate.numerator}/{kpis.activationRate.denominator}
+                  </span>
+                </article>
+                <article>
+                  <p>Time to Start</p>
+                  <strong>{formatTimeToStart(kpis.averageTimeToStartSeconds)}</strong>
+                  <span>{kpis.samples.tasksStarted}개 과업 기준</span>
+                </article>
+                <article>
+                  <p>Completion Rate</p>
+                  <strong>{formatPercentValue(kpis.chunkCompletionRate.value)}</strong>
+                  <span>
+                    {kpis.samples.completedChunks}/{kpis.samples.generatedChunks} chunks
+                  </span>
+                </article>
+                <article>
+                  <p>Recovery Rate</p>
+                  <strong>{formatPercentValue(kpis.recoveryRate.value)}</strong>
+                  <span>
+                    {kpis.recoveryRate.numerator}/{kpis.recoveryRate.denominator}
+                  </span>
+                </article>
+                <article>
+                  <p>D1 Retention</p>
+                  <strong>{formatPercentValue(kpis.d1Retention.value)}</strong>
+                  <span>사용자 타임라인 기준</span>
+                </article>
+                <article>
+                  <p>D7 Retention</p>
+                  <strong>{formatPercentValue(kpis.d7Retention.value)}</strong>
+                  <span>사용자 타임라인 기준</span>
+                </article>
+              </div>
+              <p className={styles.helperText}>
+                이벤트 샘플: 세션 {kpis.samples.sessions}개 · 과업 {kpis.samples.tasksCreated}개 · 중단 과업 {kpis.samples.tasksAbandoned}개
+              </p>
+            </div>
+
             <div className={styles.eventBlock}>
               <h4>최근 이벤트</h4>
               <ul>
@@ -1505,7 +1941,32 @@ export function MvpDashboard() {
             </header>
 
             <div className={styles.settingsRow}>
-              <div>
+              <div className={styles.settingsBody}>
+                <strong>브라우저 알림</strong>
+                <p>
+                  상태{" "}
+                  <span className={`${styles.capabilityBadge} ${styles[`capability_${notificationState}`]}`}>
+                    {notificationState}
+                  </span>
+                </p>
+                {notificationFallbackText ? (
+                  <p className={styles.fallbackText}>{notificationFallbackText}</p>
+                ) : (
+                  <p className={styles.helperText}>chunk_started/reschedule_requested 이벤트 시 1회 알림을 보냅니다.</p>
+                )}
+              </div>
+              <button
+                type="button"
+                className={styles.smallButton}
+                onClick={() => void handleRequestNotification()}
+                disabled={!notificationCapability.canRequestPermission || isRequestingNotificationPermission}
+              >
+                {isRequestingNotificationPermission ? "요청 중..." : "권한 요청"}
+              </button>
+            </div>
+
+            <div className={styles.settingsRow}>
+              <div className={styles.settingsBody}>
                 <strong>5분 미세 햅틱</strong>
                 <p>진행 중 5분마다 짧게 진동합니다.</p>
               </div>
@@ -1525,7 +1986,52 @@ export function MvpDashboard() {
             </div>
 
             <div className={styles.settingsRow}>
-              <div>
+              <div className={styles.settingsBody}>
+                <strong>외부 동기화 Mock</strong>
+                <p>
+                  상태{" "}
+                  <span className={`${styles.capabilityBadge} ${styles[`syncStatus_${syncStatusLabel}`]}`}>
+                    {syncStatusLabel}
+                  </span>
+                  {syncLastJobId ? ` · job ${syncLastJobId.slice(0, 8)}` : ""}
+                </p>
+                <p>{syncMessage}</p>
+                {syncConflict ? (
+                  <p className={styles.conflictText}>
+                    conflict: {syncConflict.localEntityId} ↔ {syncConflict.sourceEventId}
+                  </p>
+                ) : null}
+              </div>
+              <div className={styles.syncButtonRow}>
+                <button
+                  type="button"
+                  className={styles.smallButton}
+                  onClick={() => void handleRunSyncMock("SUCCESS")}
+                  disabled={isSyncBusy}
+                >
+                  성공
+                </button>
+                <button
+                  type="button"
+                  className={styles.smallButton}
+                  onClick={() => void handleRunSyncMock("FAILED")}
+                  disabled={isSyncBusy}
+                >
+                  실패
+                </button>
+                <button
+                  type="button"
+                  className={styles.smallButtonDanger}
+                  onClick={() => void handleRunSyncMock("CONFLICT")}
+                  disabled={isSyncBusy}
+                >
+                  충돌
+                </button>
+              </div>
+            </div>
+
+            <div className={styles.settingsRow}>
+              <div className={styles.settingsBody}>
                 <strong>데이터 초기화</strong>
                 <p>로컬에 저장된 과업/청크/스탯을 모두 삭제합니다.</p>
               </div>
