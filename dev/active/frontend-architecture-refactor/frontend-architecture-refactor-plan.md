@@ -10,9 +10,23 @@ Last Updated: 2026-02-27
 
 - 라우트 엔트리: `app/page.tsx` -> `MvpDashboard` 단일 진입
 - 핵심 병목:
-  - `features/mvp/components/mvp-dashboard.tsx` 2,911 lines
+  - `features/mvp/components/mvp-dashboard.tsx` 2,541 lines (Phase 2 경계 분해 반영)
   - `features/mvp/components/mvp-dashboard.module.css` 988 lines
 - 결과: UI/도메인/연동/저장/로깅이 단일 컴포넌트에 결합
+
+## Progress Snapshot
+
+- Phase 0: 완료
+- Phase 1: 완료
+  - 순수 함수/타입/상수 추출 및 `shared/model` 재배치
+  - 단위 테스트 추가 + 회귀 게이트 통과(typecheck/lint/test:mvp/build)
+- Phase 2: 완료
+  - `core-state`를 types/actions/reducer/selectors로 분해
+  - `useMvpStore` 도입으로 hydration/persist/reset 경로 단일화
+  - `mvp-dashboard.tsx`에서 store hook + selector 기반 상태 경계 적용
+  - `core-state`/`selectors` 단위 테스트 추가 + 회귀 게이트 통과
+- Phase 3: 다음 착수 대상
+  - 탭/화면 단위 컴포넌트 분해
 
 ## Target State
 
@@ -51,3 +65,5 @@ Last Updated: 2026-02-27
 - `docs/frontend-architecture/refactor-blueprint.md`
 - `docs/frontend-architecture/refactor-roadmap.md`
 - `docs/frontend-architecture/adr-template.md`
+- `docs/frontend-architecture/adr-0001-phase1-shared-model-extraction.md`
+- `docs/frontend-architecture/adr-0002-phase2-core-state-boundary.md`

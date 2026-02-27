@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  clampTaskTotalMinutes,
   createAiFallbackAdapter,
   enforceChunkBudget,
   generateLocalChunking,
@@ -15,11 +14,51 @@ import { appendEvent, createEvent } from "@/features/mvp/lib/events";
 import { computeMvpKpis } from "@/features/mvp/lib/kpi";
 import {
   applyChunkCompletionReward,
-  applyRecoveryReward,
-  createInitialStats,
-  rollDailyStats
+  applyRecoveryReward
 } from "@/features/mvp/lib/reward";
-import { loadPersistedState, savePersistedState } from "@/features/mvp/lib/storage";
+import { useMvpStore } from "@/features/mvp/shell/hooks/use-mvp-store";
+import {
+  selectActiveTask,
+  selectActiveTaskChunks,
+  selectCompletionRate,
+  selectHomeChunk,
+  selectHomeRemaining,
+  selectHomeTask,
+  selectRunningChunk
+} from "@/features/mvp/shell/model/core-state";
+import {
+  STAT_META,
+  TASK_META_PAIR_PRIORITY,
+  addMinutesToDate,
+  buildNextRescheduleDate,
+  buildRadarShape,
+  getTaskMetaConstraintFeedback,
+  getTaskBudgetUsage,
+  getTaskBudgetedChunks,
+  getDiffMinutes,
+  isActionableChunkStatus,
+  isTaskClosedStatus,
+  isTaskTotalMinutesInRange,
+  orderChunks,
+  chunkStatusLabel,
+  formatClock,
+  formatDateTime,
+  formatDateTimeLocalInput,
+  formatEventMeta,
+  formatOptionalDateTime,
+  formatPercentValue,
+  formatTimeToStart,
+  getXpProgressPercent,
+  taskStatusLabel,
+  parseDateTimeLocalInput,
+  parseLooseMinuteInput,
+  parseOptionalDateTimeInput,
+  parseTaskTotalMinutesInput,
+  withReorderedTaskChunks,
+  buildTaskSummary,
+  type TaskMetaField,
+  type TaskMetaInputs
+} from "@/features/mvp/shared";
 import {
   applyElapsedToChunkRemaining,
   applyElapsedWindow,
@@ -33,12 +72,8 @@ import {
   type AppEvent,
   type Chunk,
   type EventSource,
-  type FiveStats,
-  type PersistedState,
-  type StatsState,
   type Task,
-  type TimerSession,
-  type UserSettings
+  type TimerSession
 } from "@/features/mvp/types/domain";
 import {
   canShowNotification,
@@ -64,24 +99,9 @@ const TAB_ITEMS = [
   { key: "settings", label: "설정" }
 ] as const;
 
-type TabKey = (typeof TAB_ITEMS)[number]["key"];
-
-const STAT_META: Array<{ key: keyof FiveStats; label: string }> = [
-  { key: "initiation", label: "시작력" },
-  { key: "focus", label: "몰입력" },
-  { key: "breakdown", label: "분해력" },
-  { key: "recovery", label: "회복력" },
-  { key: "consistency", label: "지속력" }
-];
-
 const RISKY_INPUT_PATTERN = /(자해|죽고\s?싶|폭탄|불법|마약|살인|테러)/i;
 
-const DEFAULT_SETTINGS: UserSettings = {
-  hapticEnabled: true
-};
 const DEFAULT_TASK_TOTAL_MINUTES = 60;
-
-const ACTIONABLE_CHUNK_STATUSES: Chunk["status"][] = ["todo", "running", "paused"];
 
 const RECOVERY_FEEDBACK = {
   safetyBlocked: "괜찮아요. 안전을 위해 이 입력은 청킹하지 않았어요. 안전한 할 일로 다시 입력해 주세요.",
@@ -173,338 +193,30 @@ function clampMinuteInput(minutes: number): number {
   return Math.min(15, Math.max(2, Math.floor(minutes)));
 }
 
-function parseTaskTotalMinutesInput(rawInput: string): number | null {
-  const parsed = Number(rawInput);
-  if (!Number.isFinite(parsed)) {
-    return null;
-  }
-
-  const normalized = Math.floor(parsed);
-  if (normalized < MIN_TASK_TOTAL_MINUTES || normalized > MAX_TASK_TOTAL_MINUTES) {
-    return null;
-  }
-
-  return normalized;
-}
-
-function parseLooseMinuteInput(rawInput: string): number | null {
-  const trimmed = rawInput.trim();
-  if (!trimmed) {
-    return null;
-  }
-
-  const parsed = Number(trimmed);
-  if (!Number.isFinite(parsed)) {
-    return null;
-  }
-
-  return Math.floor(parsed);
-}
-
-type TaskMetaField = "totalMinutes" | "scheduledFor" | "dueAt";
-
-type TaskMetaInputs = {
-  totalMinutesInput: string;
-  scheduledForInput: string;
-  dueAtInput: string;
-};
-
-const TASK_META_PAIR_PRIORITY: Record<TaskMetaField, TaskMetaField[]> = {
-  totalMinutes: ["scheduledFor", "dueAt"],
-  scheduledFor: ["totalMinutes", "dueAt"],
-  dueAt: ["totalMinutes", "scheduledFor"]
-};
-
-function isTaskTotalMinutesInRange(totalMinutes: number): boolean {
-  return totalMinutes >= MIN_TASK_TOTAL_MINUTES && totalMinutes <= MAX_TASK_TOTAL_MINUTES;
-}
-
-function getTaskMetaConstraintFeedback(
-  totalMinutes: number | null,
-  scheduledFor: Date | null,
-  dueAt: Date | null
-): string | null {
-  if (totalMinutes !== null && !isTaskTotalMinutesInRange(totalMinutes)) {
-    return `총 소요 시간은 ${MIN_TASK_TOTAL_MINUTES}~${MAX_TASK_TOTAL_MINUTES}분 범위로 입력해주세요.`;
-  }
-
-  if (scheduledFor && dueAt && scheduledFor.getTime() > dueAt.getTime()) {
-    return "시작 예정 시간은 마감 시간보다 늦을 수 없습니다.";
-  }
-
-  return null;
-}
-
-function buildTaskSummary(rawInput: string): string {
-  return rawInput.trim().replace(/\s+/g, " ").slice(0, 60);
-}
-
-function parseDateTimeLocalInput(rawInput: string): Date | null {
-  const trimmed = rawInput.trim();
-  if (!trimmed) {
-    return null;
-  }
-
-  const timestamp = Date.parse(trimmed);
-  if (!Number.isFinite(timestamp)) {
-    return null;
-  }
-
-  return new Date(timestamp);
-}
-
-function formatDateTimeLocalInput(date: Date): string {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  const hours = String(date.getHours()).padStart(2, "0");
-  const minutes = String(date.getMinutes()).padStart(2, "0");
-  return `${year}-${month}-${day}T${hours}:${minutes}`;
-}
-
-function addMinutesToDate(date: Date, minutes: number): Date {
-  return new Date(date.getTime() + minutes * 60_000);
-}
-
-function getDiffMinutes(start: Date, end: Date): number {
-  return Math.round((end.getTime() - start.getTime()) / 60_000);
-}
-
-function parseOptionalDateTimeInput(rawInput: string): string | undefined {
-  const trimmed = rawInput.trim();
-  if (!trimmed) {
-    return undefined;
-  }
-
-  const timestamp = Date.parse(trimmed);
-  if (!Number.isFinite(timestamp)) {
-    return undefined;
-  }
-
-  return new Date(timestamp).toISOString();
-}
-
-function buildNextRescheduleDate(now = new Date()): string {
-  const next = new Date(now);
-  next.setDate(next.getDate() + 1);
-  next.setHours(9, 0, 0, 0);
-  return next.toISOString();
-}
-
-function isBudgetCountedChunkStatus(status: Chunk["status"]): boolean {
-  return status !== "archived";
-}
-
-function getTaskBudgetedChunks(chunks: Chunk[], taskId: string, excludeChunkId?: string): Chunk[] {
-  return chunks.filter((chunk) =>
-    chunk.taskId === taskId
-    && chunk.id !== excludeChunkId
-    && isBudgetCountedChunkStatus(chunk.status)
-  );
-}
-
-function getTaskBudgetUsage(chunks: Chunk[], taskId: string, excludeChunkId?: string): number {
-  return sumChunkEstMinutes(getTaskBudgetedChunks(chunks, taskId, excludeChunkId));
-}
-
-function isActionableChunkStatus(status: Chunk["status"]): boolean {
-  return ACTIONABLE_CHUNK_STATUSES.includes(status);
-}
-
-function isTaskClosedStatus(status: Chunk["status"]): boolean {
-  return status === "done" || status === "abandoned" || status === "archived";
-}
-
-function normalizeLoadedEvents(rawEvents: AppEvent[] | undefined, fallbackSessionId: string): AppEvent[] {
-  return (rawEvents ?? []).map((event) => ({
-    ...event,
-    sessionId: event.sessionId || fallbackSessionId,
-    source: event.source || "local",
-    taskId: event.taskId ?? null,
-    chunkId: event.chunkId ?? null
-  }));
-}
-
-function formatDateTime(date: Date): string {
-  return new Intl.DateTimeFormat("ko-KR", {
-    month: "long",
-    day: "numeric",
-    weekday: "short",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit"
-  }).format(date);
-}
-
-function formatClock(totalSeconds: number): string {
-  const safe = Math.max(0, Math.floor(totalSeconds));
-  const minutes = Math.floor(safe / 60);
-  const seconds = safe % 60;
-  return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
-}
-
-function formatOptionalDateTime(isoValue?: string): string {
-  if (!isoValue) {
-    return "미설정";
-  }
-
-  return new Date(isoValue).toLocaleString("ko-KR", {
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit"
-  });
-}
-
-function chunkStatusLabel(status: Chunk["status"]): string {
-  if (status === "running") {
-    return "진행 중";
-  }
-  if (status === "paused") {
-    return "일시정지";
-  }
-  if (status === "done") {
-    return "완료";
-  }
-  if (status === "abandoned") {
-    return "중단";
-  }
-  if (status === "archived") {
-    return "보관됨";
-  }
-  return "대기";
-}
-
-function taskStatusLabel(status: Task["status"]): string {
-  if (status === "in_progress") {
-    return "진행 중";
-  }
-  if (status === "done") {
-    return "완료";
-  }
-  if (status === "archived") {
-    return "보관됨";
-  }
-  return "대기";
-}
-
-function orderChunks(list: Chunk[]): Chunk[] {
-  return [...list].sort((a, b) => a.order - b.order);
-}
-
-function getXpProgressPercent(stats: StatsState): number {
-  const maxXp = 100 + (stats.level - 1) * 45;
-  if (maxXp <= 0) {
-    return 0;
-  }
-  return Math.min(100, Math.round((stats.xp / maxXp) * 100));
-}
-
-function pointsToString(points: Array<[number, number]>): string {
-  return points.map(([x, y]) => `${x},${y}`).join(" ");
-}
-
-function formatPercentValue(value: number | null): string {
-  if (value === null) {
-    return "데이터 없음";
-  }
-  return `${value}%`;
-}
-
-function formatTimeToStart(seconds: number | null): string {
-  if (seconds === null) {
-    return "데이터 없음";
-  }
-
-  const minutes = Math.floor(seconds / 60);
-  const remainSeconds = seconds % 60;
-  return `${minutes}분 ${String(remainSeconds).padStart(2, "0")}초`;
-}
-
-function buildRadarShape(stats: FiveStats): { data: string; grid: string[] } {
-  const center = 60;
-  const radius = 48;
-
-  const axes = STAT_META.map((_, index) => {
-    const angle = (-Math.PI / 2) + (index * Math.PI * 2) / STAT_META.length;
-    const x = center + Math.cos(angle) * radius;
-    const y = center + Math.sin(angle) * radius;
-    return [x, y] as [number, number];
-  });
-
-  const grid = [0.25, 0.5, 0.75, 1].map((ratio) =>
-    pointsToString(
-      axes.map(([x, y]) => [
-        center + (x - center) * ratio,
-        center + (y - center) * ratio
-      ])
-    )
-  );
-
-  const data = pointsToString(
-    axes.map(([x, y], index) => {
-      const key = STAT_META[index].key;
-      const ratio = Math.max(0, Math.min(1, stats[key] / 100));
-      return [
-        center + (x - center) * ratio,
-        center + (y - center) * ratio
-      ] as [number, number];
-    })
-  );
-
-  return { data, grid };
-}
-
-function buildInitialState(): PersistedState {
-  return {
-    tasks: [],
-    chunks: [],
-    timerSessions: [],
-    stats: createInitialStats(),
-    settings: DEFAULT_SETTINGS,
-    events: [],
-    activeTaskId: null,
-    activeTab: "home",
-    remainingSecondsByChunk: {}
-  };
-}
-
-function withReorderedTaskChunks(chunks: Chunk[], taskId: string): Chunk[] {
-  const targetChunks = orderChunks(chunks.filter((chunk) => chunk.taskId === taskId));
-  const reorderedMap = new Map(
-    targetChunks.map((chunk, index) => [
-      chunk.id,
-      {
-        ...chunk,
-        order: index + 1
-      }
-    ])
-  );
-
-  return chunks.map((chunk) => reorderedMap.get(chunk.id) ?? chunk);
-}
-
-function formatEventMeta(meta?: AppEvent["meta"]): string {
-  if (!meta) {
-    return "";
-  }
-
-  return Object.entries(meta)
-    .slice(0, 3)
-    .map(([key, value]) => `${key}:${String(value)}`)
-    .join(" · ");
-}
-
 export function MvpDashboard() {
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [chunks, setChunks] = useState<Chunk[]>([]);
-  const [timerSessions, setTimerSessions] = useState<TimerSession[]>([]);
-  const [stats, setStats] = useState<StatsState>(createInitialStats());
-  const [settings, setSettings] = useState<UserSettings>(DEFAULT_SETTINGS);
-  const [events, setEvents] = useState<AppEvent[]>([]);
-  const [activeTaskId, setActiveTaskId] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<TabKey>("home");
-  const [remainingSecondsByChunk, setRemainingSecondsByChunk] = useState<Record<string, number>>({});
+  const sessionIdRef = useRef(crypto.randomUUID());
+  const {
+    coreState,
+    tasks,
+    chunks,
+    stats,
+    settings,
+    events,
+    activeTaskId,
+    activeTab,
+    remainingSecondsByChunk,
+    hydrated,
+    setTasks,
+    setChunks,
+    setTimerSessions,
+    setStats,
+    setSettings,
+    setEvents,
+    setActiveTaskId,
+    setActiveTab,
+    setRemainingSecondsByChunk,
+    resetCoreState
+  } = useMvpStore({ sessionId: sessionIdRef.current });
 
   const [taskInput, setTaskInput] = useState("");
   const [taskTotalMinutesInput, setTaskTotalMinutesInput] = useState(String(DEFAULT_TASK_TOTAL_MINUTES));
@@ -516,7 +228,6 @@ export function MvpDashboard() {
   const [clock, setClock] = useState(new Date());
   const [currentChunkId, setCurrentChunkId] = useState<string | null>(null);
   const [expandedHomeTaskId, setExpandedHomeTaskId] = useState<string | null>(null);
-  const [hydrated, setHydrated] = useState(false);
   const [notificationCapability, setNotificationCapability] = useState<NotificationCapability>(
     DEFAULT_NOTIFICATION_CAPABILITY
   );
@@ -531,7 +242,6 @@ export function MvpDashboard() {
   const [syncMessage, setSyncMessage] = useState("동기화 대기 중");
 
   const aiAdapterRef = useRef(createAiFallbackAdapter());
-  const sessionIdRef = useRef(crypto.randomUUID());
   const tickAccumulatorRef = useRef(createTimerElapsedAccumulator());
   const sttRecognitionRef = useRef<SpeechRecognitionLike | null>(null);
   const sttFinalTranscriptRef = useRef("");
@@ -551,20 +261,17 @@ export function MvpDashboard() {
   });
 
   const activeTask = useMemo(
-    () => tasks.find((task) => task.id === activeTaskId) ?? null,
-    [tasks, activeTaskId]
+    () => selectActiveTask(coreState),
+    [coreState]
   );
 
-  const activeTaskChunks = useMemo(() => {
-    if (!activeTaskId) {
-      return [];
-    }
-    return orderChunks(chunks.filter((chunk) => chunk.taskId === activeTaskId));
-  }, [chunks, activeTaskId]);
-
+  const activeTaskChunks = useMemo(
+    () => selectActiveTaskChunks(coreState),
+    [coreState]
+  );
   const runningChunk = useMemo(
-    () => chunks.find((chunk) => chunk.status === "running") ?? null,
-    [chunks]
+    () => selectRunningChunk(coreState),
+    [coreState]
   );
   const executionLockedChunk = useMemo(
     () => chunks.find((chunk) => chunk.status === "running" || chunk.status === "paused") ?? null,
@@ -577,13 +284,10 @@ export function MvpDashboard() {
     [chunks, activeTaskId]
   );
 
-  const completionRate = useMemo(() => {
-    if (chunks.length === 0) {
-      return 0;
-    }
-    const doneCount = chunks.filter((chunk) => chunk.status === "done").length;
-    return Math.round((doneCount / chunks.length) * 100);
-  }, [chunks]);
+  const completionRate = useMemo(
+    () => selectCompletionRate(coreState),
+    [coreState]
+  );
 
   const xpProgressPercent = getXpProgressPercent(stats);
   const kpis = useMemo(() => computeMvpKpis(events), [events]);
@@ -617,36 +321,6 @@ export function MvpDashboard() {
     }, 1000);
 
     return () => window.clearInterval(tick);
-  }, []);
-
-  useEffect(() => {
-    const loaded = loadPersistedState();
-    if (loaded) {
-      const loadedChunkMinutesByTask = (loaded.chunks ?? []).reduce<Record<string, number>>((acc, chunk) => {
-        acc[chunk.taskId] = (acc[chunk.taskId] ?? 0) + chunk.estMinutes;
-        return acc;
-      }, {});
-
-      setTasks(
-        (loaded.tasks ?? []).map((task) => ({
-          ...task,
-          summary: task.summary ?? task.title,
-          totalMinutes: clampTaskTotalMinutes(
-            task.totalMinutes,
-            loadedChunkMinutesByTask[task.id] ?? DEFAULT_TASK_TOTAL_MINUTES
-          )
-        }))
-      );
-      setChunks(loaded.chunks ?? []);
-      setTimerSessions(loaded.timerSessions ?? []);
-      setStats(rollDailyStats(loaded.stats ?? createInitialStats()));
-      setSettings(loaded.settings ?? DEFAULT_SETTINGS);
-      setEvents(normalizeLoadedEvents(loaded.events, sessionIdRef.current));
-      setActiveTaskId(loaded.activeTaskId ?? null);
-      setActiveTab((loaded.activeTab ?? "home") as TabKey);
-      setRemainingSecondsByChunk(loaded.remainingSecondsByChunk ?? {});
-    }
-    setHydrated(true);
   }, []);
 
   useEffect(() => {
@@ -690,35 +364,6 @@ export function MvpDashboard() {
   }, []);
 
   useEffect(() => {
-    if (!hydrated) {
-      return;
-    }
-
-    savePersistedState({
-      tasks,
-      chunks,
-      timerSessions,
-      stats,
-      settings,
-      events,
-      activeTaskId,
-      activeTab,
-      remainingSecondsByChunk
-    });
-  }, [
-    hydrated,
-    tasks,
-    chunks,
-    timerSessions,
-    stats,
-    settings,
-    events,
-    activeTaskId,
-    activeTab,
-    remainingSecondsByChunk
-  ]);
-
-  useEffect(() => {
     if (tasks.length === 0) {
       if (activeTaskId !== null) {
         setActiveTaskId(null);
@@ -737,7 +382,7 @@ export function MvpDashboard() {
     if (nextTask) {
       setActiveTaskId(nextTask.id);
     }
-  }, [tasks, activeTaskId]);
+  }, [tasks, activeTaskId, setActiveTaskId]);
 
   useEffect(() => {
     if (!expandedHomeTaskId) {
@@ -814,7 +459,7 @@ export function MvpDashboard() {
       window.clearInterval(intervalId);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, [runningChunk]);
+  }, [runningChunk, setRemainingSecondsByChunk]);
 
   useEffect(() => {
     if (!runningChunk || !settings.hapticEnabled) {
@@ -850,7 +495,7 @@ export function MvpDashboard() {
         )
       );
     }
-  }, [remainingSecondsByChunk, runningChunk, settings.hapticEnabled]);
+  }, [remainingSecondsByChunk, runningChunk, settings.hapticEnabled, setEvents]);
 
   useEffect(() => {
     setTasks((prev) => {
@@ -911,7 +556,7 @@ export function MvpDashboard() {
       const changed = next.some((task, index) => task !== prev[index]);
       return changed ? next : prev;
     });
-  }, [chunks]);
+  }, [chunks, setTasks]);
 
   const upsertTimerSession = (chunkId: string, nextState: TimerSession["state"], nowIso: string) => {
     setTimerSessions((prev) => {
@@ -2192,17 +1837,7 @@ export function MvpDashboard() {
       return;
     }
 
-    const initial = buildInitialState();
-
-    setTasks(initial.tasks);
-    setChunks(initial.chunks);
-    setTimerSessions(initial.timerSessions);
-    setStats(initial.stats);
-    setSettings(initial.settings);
-    setEvents(initial.events);
-    setActiveTaskId(initial.activeTaskId);
-    setActiveTab(initial.activeTab);
-    setRemainingSecondsByChunk(initial.remainingSecondsByChunk);
+    resetCoreState();
     setCurrentChunkId(null);
     tickAccumulatorRef.current = createTimerElapsedAccumulator();
     resetSttTranscriptBuffers();
@@ -2229,15 +1864,18 @@ export function MvpDashboard() {
     ?? activeTaskChunks.find((chunk) => isActionableChunkStatus(chunk.status))
     ?? null;
 
-  const homeChunk = runningChunk ?? currentChunk;
-
-  const homeTask = homeChunk
-    ? tasks.find((task) => task.id === homeChunk.taskId) ?? activeTask
-    : activeTask;
-
-  const homeRemaining = homeChunk
-    ? remainingSecondsByChunk[homeChunk.id] ?? homeChunk.estMinutes * 60
-    : 0;
+  const homeChunk = useMemo(
+    () => selectHomeChunk(coreState, currentChunkId),
+    [coreState, currentChunkId]
+  );
+  const homeTask = useMemo(
+    () => selectHomeTask(coreState, currentChunkId),
+    [coreState, currentChunkId]
+  );
+  const homeRemaining = useMemo(
+    () => selectHomeRemaining(coreState, currentChunkId),
+    [coreState, currentChunkId]
+  );
   const homeTaskBudgetUsage = homeTask ? getTaskBudgetUsage(chunks, homeTask.id) : 0;
   const runningOwnerTask = runningChunk
     ? tasks.find((task) => task.id === runningChunk.taskId) ?? null

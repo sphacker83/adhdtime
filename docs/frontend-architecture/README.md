@@ -10,6 +10,10 @@ Last Updated: 2026-02-27
   - 단계별 실행 계획(Phase), 완료 기준, 리스크/롤백 전략
 - `adr-template.md`
   - 아키텍처 의사결정(ADR) 기록 템플릿
+- `adr-0001-phase1-shared-model-extraction.md`
+  - Phase 1 경로/경계 의사결정 기록
+- `adr-0002-phase2-core-state-boundary.md`
+  - Phase 2 상태 경계/저장 경로 단일화 의사결정 기록
 
 ## 권장 사용 순서
 
