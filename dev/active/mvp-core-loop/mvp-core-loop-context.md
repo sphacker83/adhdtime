@@ -26,6 +26,11 @@ Last Updated: 2026-02-28
 - 손상된 localStorage 방어 로직 추가(필드별 타입가드 + 안전 기본값 복구)
 - 실행 중 미션가 홈에서 항상 일관되게 보이도록 표시 대상 정합화
 - 실행 중 미션 삭제 시 타이머 세션 종료/누수 방지 처리
+- 퀘스트 추천을 50개 일상형 퀘스트 JSON 기반 문장 유사도 검색으로 확장(`features/mvp/lib/missioning.ts`, `docs/adhd_mission_presets.json`)
+- 검색 실패/검증 실패 시 자동 생성 fallback 제거(`features/mvp/components/mvp-dashboard.tsx`)
+- 퀘스트/미션 매핑 문서 추가(`docs/QUEST_MISSION_MAP.md`)
+- 일상형 퀘스트 카탈로그 문서 추가(`docs/DAILY_LIFE_QUEST_CATALOG_50.md`)
+- 유사도 튜닝: 제목 벡터 반영, intent 힌트 점수 추가, 신호 임계값 완화(`features/mvp/lib/missioning.ts`)
 - `npm run typecheck`, `npm run lint`, `npm run test:mvp`, `npm run build` 통과
 
 ### 🟡 IN PROGRESS

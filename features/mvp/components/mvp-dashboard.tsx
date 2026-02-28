@@ -2,11 +2,9 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  createAiFallbackAdapter,
   enforceMissionBudget,
   generateLocalMissioning,
   mapMissioningResultToMissions,
-  generateTemplateMissioning,
   isWithinTaskMissionBudget,
   sumMissionEstMinutes,
   validateMissioningResult
@@ -253,7 +251,6 @@ export function MvpDashboard() {
   const [syncConflict, setSyncConflict] = useState<ExternalSyncConflict | null>(null);
   const [syncMessage, setSyncMessage] = useState("동기화 대기 중");
 
-  const aiAdapterRef = useRef(createAiFallbackAdapter());
   const tickAccumulatorRef = useRef(createTimerElapsedAccumulator());
   const sttRecognitionRef = useRef<SpeechRecognitionLike | null>(null);
   const sttFinalTranscriptRef = useRef("");
@@ -1066,29 +1063,17 @@ export function MvpDashboard() {
       const taskId = crypto.randomUUID();
       const summary = buildTaskSummary(rawInput);
       const missioningStartedAt = Date.now();
-      let source: EventSource = "local";
-      let missioning = generateLocalMissioning(taskId, rawInput);
-
+      const source: EventSource = "local";
+      const missioning = generateLocalMissioning(taskId, rawInput);
       if (!missioning) {
-        source = "ai";
-        try {
-          missioning = await aiAdapterRef.current.generate({ taskId, title: rawInput });
-        } catch {
-          missioning = null;
-        }
+        setFeedback("입력과 유사한 퀘스트/미션 추천을 찾지 못했습니다. 문장을 조금 더 구체적으로 입력해주세요.");
+        return false;
       }
 
-      if (!missioning) {
-        source = "local";
-        missioning = generateTemplateMissioning(taskId, rawInput);
-      }
-
-      let usedValidationFallback = false;
       const validation = validateMissioningResult(missioning);
       if (!validation.ok) {
-        usedValidationFallback = true;
-        source = "local";
-        missioning = generateTemplateMissioning(taskId, rawInput);
+        setFeedback("추천된 미션 검증에 실패했습니다. 입력 문장을 바꿔 다시 시도해주세요.");
+        return false;
       }
 
       const missioningLatencyMs = Date.now() - missioningStartedAt;
@@ -1146,11 +1131,7 @@ export function MvpDashboard() {
       setQuestComposerMode("create");
       setEditingTaskId(null);
       setActiveTab("home");
-      setFeedback(
-        source === "local"
-          ? "로컬 청킹으로 바로 시작할 수 있게 준비했어요."
-          : "AI 폴백으로 청킹을 완료했어요."
-      );
+      setFeedback("문장 유사도 기반 추천으로 바로 시작할 수 있게 준비했어요.");
 
       logEvent({
         eventName: "task_created",
@@ -1175,8 +1156,7 @@ export function MvpDashboard() {
           adjustedForBudget: missioning.missions.length !== nextMissions.length
             || sumMissionEstMinutes(missioning.missions) !== sumMissionEstMinutes(nextMissions),
           missioningLatencyMs,
-          withinTenSeconds: missioningLatencyMs <= 10_000,
-          usedValidationFallback
+          withinTenSeconds: missioningLatencyMs <= 10_000
         }
       });
       return true;

@@ -7,7 +7,7 @@
 JSON 프리셋 메타(`keywords`, `keyword_weights`, `intent`, `priority`, `negative_keywords`, `examples`) 기반 점수 추천으로 리팩터링한다.
 
 [참조 데이터]
-`/Users/ethan/Workspace/dev/adhdtime/docs/adhd_mission_presets_50.json`
+`/Users/ethan/Workspace/dev/adhdtime/docs/adhd_mission_presets.json`
 - 각 항목 구조: `{ schema_version, meta, task }`
 - `meta` 필드:
   - `keywords: string[]`
@@ -57,4 +57,3 @@ JSON 프리셋 메타(`keywords`, `keyword_weights`, `intent`, `priority`, `nega
 - strict TypeScript 에러 없어야 함
 - `resolveJsonModule` 기반 JSON import 사용
 - 필요한 타입은 `missioning.ts` 내부에 명시적으로 선언
-

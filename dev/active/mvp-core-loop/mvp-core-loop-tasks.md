@@ -58,6 +58,15 @@ Last Updated: 2026-02-28
 - 최근 실행 결과 (2026-02-27): `typecheck` 통과, `lint` 통과, `test:mvp` 통과, `build` 통과
 - MVP-009 카피 반영 재검증 (2026-02-27): `npm run typecheck` 통과, `npm run lint` 통과
 
+## Session Update (2026-02-28, Similarity Quest Recommendation)
+- [x] `docs/adhd_mission_presets.json`을 일상형 퀘스트 50개 기준으로 재구성
+- [x] 문장 유사도 기반 추천(코사인 + 토큰 오버랩 + 실행성 가산) 적용
+- [x] 유사도 튜닝(제목 유사도 반영, intent 힌트 가산, 신호 임계값 완화)
+- [x] 검색 실패 시 강제 템플릿 생성 fallback 제거(`mvp-dashboard.tsx`)
+- [x] 퀘스트/미션 매핑 문서 갱신(`docs/QUEST_MISSION_MAP.md`, 50 quests)
+- [x] 일상형 퀘스트 카탈로그 문서 작성(`docs/DAILY_LIFE_QUEST_CATALOG_50.md`)
+- [x] 검증 게이트 재실행(`typecheck/lint/test:mvp`)
+
 ## Session Close (2026-02-28)
 
 - [x] `npm run verify:mvp` 통합 점검 PASS 확인
