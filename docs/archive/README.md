@@ -3,7 +3,7 @@
 Last Updated: 2026-02-28
 
 ## 2026-02-28-legacy-cleanup
-아래 항목은 현재 기준 문서(`docs/PRD.md`, `docs/DEVELOPMENT_PLAN.md` 등)로 통합되어 운영 대상에서 제외된 레거시 자료입니다.
+아래 항목은 현재 기준 문서(`docs/PRD.md`, `docs/TRACEABILITY_MATRIX.md` 등)로 통합되어 운영 대상에서 제외된 레거시 자료입니다.
 
 - `adhd-timer-app-dev-plan.md`
 - `adhd-timer-app-mvp-prd.md`
@@ -16,3 +16,11 @@ Last Updated: 2026-02-28
 
 - `frontend-architecture/` 전체
 - `WORK_STATUS_2026-02-28.md`
+
+## 2026-02-28-core-doc-pruning-pass2
+핵심 문서 최소화 기준으로 추가 제외된 보조 운영 문서입니다.
+
+- `DEVELOPMENT_PLAN.md`
+- `QUEST_NLU_PRODUCTION_RUNBOOK.md`
+- `QUEST_MISSION_MAP.md`
+- `mvp-009-recovery-copy-guide.md`

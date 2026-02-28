@@ -37,7 +37,7 @@ Last Updated: 2026-02-28
 - [x] MVP-003 재청킹/재등록 상태 전이 정합화 (`archived`/`abandoned` + 연관 필드)
   - 검증 포인트: `features/mvp/components/mvp-dashboard.tsx` (`archived`/`abandoned` 상태 전이, `parentMissionId`, `rescheduledFor`, `mission_abandoned` 이벤트)
 - [x] MVP-009 복귀 UX 카피/피드백 일관화(재청킹/재등록/차단 톤 통일 + 가이드 문서화)
-  - 검증 포인트: `features/mvp/components/mvp-dashboard.tsx` (복귀/차단 피드백 문구, CTA 라벨), `docs/mvp-009-recovery-copy-guide.md`
+  - 검증 포인트: `features/mvp/components/mvp-dashboard.tsx` (복귀/차단 피드백 문구, CTA 라벨), `docs/archive/2026-02-28-core-doc-pruning-pass2/mvp-009-recovery-copy-guide.md`
 - [x] 새 상태값(`abandoned`/`archived`) UI 배지 및 실행 가능 상태 필터 완성
   - 검증 포인트: `features/mvp/components/mvp-dashboard.module.css` (`.status_abandoned`, `.status_archived`), `features/mvp/components/mvp-dashboard.tsx` (`isActionableMissionStatus` 기반 필터/버튼 비활성화)
 - [x] MVP-011 Phase 4 검증 게이트(typecheck/lint/build) 절차 문서화 및 최신 실행 확인
@@ -63,7 +63,7 @@ Last Updated: 2026-02-28
 - [x] 문장 유사도 기반 추천(코사인 + 토큰 오버랩 + 실행성 가산) 적용
 - [x] 유사도 튜닝(제목 유사도 반영, intent 힌트 가산, 신호 임계값 완화)
 - [x] 검색 실패 시 강제 템플릿 생성 fallback 제거(`mvp-dashboard.tsx`)
-- [x] 퀘스트/미션 매핑 문서 갱신(`docs/QUEST_MISSION_MAP.md`, 50 quests)
+- [x] 퀘스트/미션 매핑 문서 갱신(`docs/archive/2026-02-28-core-doc-pruning-pass2/QUEST_MISSION_MAP.md`, 50 quests)
 - [x] 일상형 퀘스트 카탈로그 문서 작성(`docs/DAILY_LIFE_QUEST_CATALOG_50.md`)
 - [x] 검증 게이트 재실행(`typecheck/lint/test:mvp`)
 

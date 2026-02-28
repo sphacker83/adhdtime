@@ -592,4 +592,4 @@ Online 게이트(부분 배포 72시간):
 
 3. 전체 배포(100%)
 - 24시간 집중 모니터링 후 안정화 모드 전환
-- 운영 절차는 `QUEST_NLU_PRODUCTION_RUNBOOK.md`를 단일 기준으로 따른다
+- 운영 절차는 `docs/archive/2026-02-28-core-doc-pruning-pass2/QUEST_NLU_PRODUCTION_RUNBOOK.md`를 단일 기준으로 따른다

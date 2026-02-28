@@ -1,7 +1,7 @@
 # MVP Core Loop Implementation Issues
 
 Last Updated: 2026-02-28
-Source Docs: `docs/PRD.md` v3.0, `docs/USECASE.md` v2.0, `docs/DEVELOPMENT_PLAN.md` v2.0
+Source Docs: `docs/PRD.md` v3.0, `docs/USECASE.md` v2.0, `docs/archive/2026-02-28-core-doc-pruning-pass2/DEVELOPMENT_PLAN.md` v2.0
 Review Method: `documentation-architect` 구조화 + `plan-reviewer` 갭 검증 기준
 
 ## 코드 기준 상태 체크리스트 (2026-02-27)
@@ -23,7 +23,7 @@ Review Method: `documentation-architect` 구조화 + `plan-reviewer` 갭 검증 
 - [x] MVP-008 청킹 검증 강화 (동사 시작/개수/시간)
   - 근거: `features/mvp/lib/missioning.ts`에서 `warnings` 추가, 개수 권장 경고, 동사 시작 권장, `estMinutes` 범위 강제
 - [x] MVP-009 복귀 UX 카피/피드백 일관화
-  - 근거: `features/mvp/components/mvp-dashboard.tsx` 재청킹/재등록/차단 피드백 톤 통일 + `docs/mvp-009-recovery-copy-guide.md` 카피 가이드 테이블 추가
+  - 근거: `features/mvp/components/mvp-dashboard.tsx` 재청킹/재등록/차단 피드백 톤 통일 + `docs/archive/2026-02-28-core-doc-pruning-pass2/mvp-009-recovery-copy-guide.md` 카피 가이드 테이블 추가
 - [x] MVP-010 이벤트 로그 조회 편의 개선
   - 근거: `features/mvp/components/mvp-dashboard.tsx` 최근 이벤트에 `source` 및 `meta` 요약 표시
 - [x] MVP-011 타입/린트/빌드 파이프라인 체크 문서화

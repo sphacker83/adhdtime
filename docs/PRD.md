@@ -2,7 +2,7 @@
 
 문서 버전: v3.3  
 작성일: 2026-02-28  
-연계 문서: `docs/USECASE.md`, `docs/DEVELOPMENT_PLAN.md`, `docs/ui/ui.png`  
+연계 문서: `docs/USECASE.md`, `docs/ui/ui.png`  
 대상: **Next.js 기반 모바일 우선 웹앱** MVP
 
 ---

@@ -28,7 +28,7 @@ Last Updated: 2026-02-28
 - 실행 중 미션 삭제 시 타이머 세션 종료/누수 방지 처리
 - 퀘스트 추천을 50개 일상형 퀘스트 JSON 기반 문장 유사도 검색으로 확장(`features/mvp/lib/missioning.ts`, `docs/adhd_mission_presets.json`)
 - 검색 실패/검증 실패 시 자동 생성 fallback 제거(`features/mvp/components/mvp-dashboard.tsx`)
-- 퀘스트/미션 매핑 문서 추가(`docs/QUEST_MISSION_MAP.md`)
+- 퀘스트/미션 매핑 문서 추가(`docs/archive/2026-02-28-core-doc-pruning-pass2/QUEST_MISSION_MAP.md`)
 - 일상형 퀘스트 카탈로그 문서 추가(`docs/DAILY_LIFE_QUEST_CATALOG_50.md`)
 - 유사도 튜닝: 제목 벡터 반영, intent 힌트 점수 추가, 신호 임계값 완화(`features/mvp/lib/missioning.ts`)
 - 헤더 롤링 팁 노출/오류성 피드백 토스트 분기 동작 정리(`features/mvp/components/mvp-dashboard.tsx`)
@@ -37,7 +37,7 @@ Last Updated: 2026-02-28
 - 미션 기반 일정 동기화 시 due-only 과업의 시작시간 재주입 버그 수정(`mvp-dashboard.tsx`)
 - 편집 모달 오픈 시 due-only 스케줄 보존(시작시간 자동 역산 표시 차단)
 - 총 소요시간 편집 중 due-only 입력의 시작시간 자동 파생 차단
-- PRD/개발플랜에 Post-MVP 성장 2축(XP vs 스탯 랭크) 및 단체 이벤트(Room 기반) 기획 반영
+- PRD/개발플랜(아카이브)에 Post-MVP 성장 2축(XP vs 스탯 랭크) 및 단체 이벤트(Room 기반) 기획 반영
 - `npm run typecheck`, `npm run lint`, `npm run test:mvp`, `npm run build` 통과
 
 ### 🟡 IN PROGRESS
@@ -100,7 +100,7 @@ Last Updated: 2026-02-28
 - 추가 요청: 일일 보상 상한(최대 5퀘스트까지 XP/스탯 지급) 정책 추가.
 - 반영 문서:
   - `docs/PRD.md` v3.3: Post-MVP 섹션에 성장 2축, 스탯 랭크(100 도달 시 랭크업), 캐릭터 랭크 평균 산식, Co-op Room Event 및 계측 이벤트 추가.
-  - `docs/DEVELOPMENT_PLAN.md` v2.3: P2 백로그(Epic G/H)로 성장/협동 확장 작업 분해.
+  - `docs/archive/2026-02-28-core-doc-pruning-pass2/DEVELOPMENT_PLAN.md` v2.3: P2 백로그(Epic G/H)로 성장/협동 확장 작업 분해.
 - 산출물:
   - `docs/GROWTH_SCORE_MODEL_V1.md` 신설(공식 점수모델 초안, 산식/분배/페이싱/악용방지/Room 연계 규칙 포함).
 - 보완 반영:

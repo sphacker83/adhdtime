@@ -2,7 +2,7 @@
 
 문서 버전: v1.0  
 작성일: 2026-02-28  
-연계 문서: `docs/PRD.md` v3.3, `docs/DEVELOPMENT_PLAN.md` v2.3
+연계 문서: `docs/PRD.md` v3.3, `docs/archive/2026-02-28-core-doc-pruning-pass2/DEVELOPMENT_PLAN.md` v2.3
 
 ---
 
