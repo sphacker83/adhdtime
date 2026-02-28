@@ -1,5 +1,11 @@
 import type { AppEvent, Chunk, StatsState, Task } from "@/features/mvp/types/domain";
 
+const DAY_IN_MS = 86_400_000;
+
+function getLocalDayNumber(date: Date): number {
+  return Math.floor(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) / DAY_IN_MS);
+}
+
 export function formatDateTime(date: Date): string {
   return new Intl.DateTimeFormat("ko-KR", {
     month: "long",
@@ -18,17 +24,38 @@ export function formatClock(totalSeconds: number): string {
   return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 }
 
-export function formatOptionalDateTime(isoValue?: string): string {
+export function formatTimeOfDayLabel(date: Date): string {
+  return `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
+}
+
+export function formatRelativeDateLabel(date: Date, now = new Date()): string {
+  const dayDiff = getLocalDayNumber(date) - getLocalDayNumber(now);
+  if (dayDiff === 0) {
+    return "오늘";
+  }
+
+  if (dayDiff === 1) {
+    return "내일";
+  }
+
+  if (dayDiff > 1) {
+    return `D-${dayDiff}`;
+  }
+
+  return `${date.getMonth() + 1}/${date.getDate()}`;
+}
+
+export function formatOptionalDateTime(isoValue?: string, now = new Date()): string {
   if (!isoValue) {
     return "미설정";
   }
 
-  return new Date(isoValue).toLocaleString("ko-KR", {
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit"
-  });
+  const parsedDate = new Date(isoValue);
+  if (Number.isNaN(parsedDate.getTime())) {
+    return "미설정";
+  }
+
+  return `${formatRelativeDateLabel(parsedDate, now)} ${formatTimeOfDayLabel(parsedDate)}`;
 }
 
 export function chunkStatusLabel(status: Chunk["status"]): string {

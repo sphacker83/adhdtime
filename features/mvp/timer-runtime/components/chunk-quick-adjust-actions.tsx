@@ -26,32 +26,36 @@ export function ChunkQuickAdjustActions({
         className={getClassName("subtleButton")}
         onClick={() => onAdjustRunningChunkMinutes(-5)}
         disabled={!canAdjustMinusFive}
+        aria-label="청크 시간 5분 감소"
       >
-        -5분
+        -5
       </button>
       <button
         type="button"
         className={getClassName("subtleButton")}
         onClick={() => onAdjustRunningChunkMinutes(-1)}
         disabled={!canAdjustMinusOne}
+        aria-label="청크 시간 1분 감소"
       >
-        -1분
+        -1
       </button>
       <button
         type="button"
         className={getClassName("subtleButton")}
         onClick={() => onAdjustRunningChunkMinutes(1)}
         disabled={!canAdjustPlusOne}
+        aria-label="청크 시간 1분 증가"
       >
-        +1분
+        +1
       </button>
       <button
         type="button"
         className={getClassName("subtleButton")}
         onClick={() => onAdjustRunningChunkMinutes(5)}
         disabled={!canAdjustPlusFive}
+        aria-label="청크 시간 5분 증가"
       >
-        +5분
+        +5
       </button>
     </div>
   );

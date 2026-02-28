@@ -7,6 +7,12 @@ import {
   type Task
 } from "@/features/mvp/types/domain";
 import type { SttCapability } from "@/features/mvp/integrations";
+import {
+  formatDateTimeLocalInput,
+  formatRelativeDateLabel,
+  formatTimeOfDayLabel,
+  parseDateTimeLocalInput
+} from "@/features/mvp/shared";
 
 type MvpDashboardStyles = Record<string, string>;
 
@@ -36,46 +42,24 @@ export interface TaskInputSectionProps {
   sttError: string | null;
 }
 
-function toDateTimeLocalValue(date: Date): string {
-  const pad = (value: number): string => String(value).padStart(2, "0");
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+interface DateButtonValue {
+  dateLabel: string;
+  timeLabel: string;
 }
 
-function parseDateTimeLocalValue(rawValue: string): Date | null {
-  const trimmed = rawValue.trim();
-  if (!trimmed) {
-    return null;
-  }
-
-  const timestamp = Date.parse(trimmed);
-  if (!Number.isFinite(timestamp)) {
-    return null;
-  }
-
-  return new Date(timestamp);
-}
-
-function formatDateButtonValue(rawValue: string): string {
-  const parsedDate = parseDateTimeLocalValue(rawValue);
+function formatDateButtonValue(rawValue: string): DateButtonValue {
+  const parsedDate = parseDateTimeLocalInput(rawValue);
   if (!parsedDate) {
-    return "--:--";
+    return {
+      dateLabel: "미정",
+      timeLabel: "--:--"
+    };
   }
 
-  const now = new Date();
-  const todayKey = `${now.getFullYear()}-${now.getMonth()}-${now.getDate()}`;
-  const tomorrow = new Date(now);
-  tomorrow.setDate(now.getDate() + 1);
-  const tomorrowKey = `${tomorrow.getFullYear()}-${tomorrow.getMonth()}-${tomorrow.getDate()}`;
-  const parsedKey = `${parsedDate.getFullYear()}-${parsedDate.getMonth()}-${parsedDate.getDate()}`;
-  const timeLabel = `${String(parsedDate.getHours()).padStart(2, "0")}:${String(parsedDate.getMinutes()).padStart(2, "0")}`;
-
-  if (parsedKey === todayKey) {
-    return `오늘 ${timeLabel}`;
-  }
-  if (parsedKey === tomorrowKey) {
-    return `내일 ${timeLabel}`;
-  }
-  return `${parsedDate.getMonth() + 1}/${parsedDate.getDate()} ${timeLabel}`;
+  return {
+    dateLabel: formatRelativeDateLabel(parsedDate),
+    timeLabel: formatTimeOfDayLabel(parsedDate)
+  };
 }
 
 function formatMinutesButtonValue(rawValue: string): string {
@@ -115,6 +99,9 @@ export function TaskInputSection({
   const [isComposerOpen, setIsComposerOpen] = useState(false);
   const scheduledForPickerRef = useRef<HTMLInputElement | null>(null);
   const dueAtPickerRef = useRef<HTMLInputElement | null>(null);
+  const scheduledForButtonValue = formatDateButtonValue(taskScheduledForInput);
+  const dueAtButtonValue = formatDateButtonValue(taskDueAtInput);
+  const durationButtonValue = formatMinutesButtonValue(taskTotalMinutesInput);
 
   const getSafeTotalMinutes = (): number => {
     const parsed = Number.parseInt(taskTotalMinutesInput, 10);
@@ -151,12 +138,12 @@ export function TaskInputSection({
       return;
     }
 
-    const parsedDate = parseDateTimeLocalValue(promptedValue);
+    const parsedDate = parseDateTimeLocalInput(promptedValue);
     if (!parsedDate) {
       return;
     }
 
-    onConfirm(toDateTimeLocalValue(parsedDate));
+    onConfirm(formatDateTimeLocalInput(parsedDate));
   };
 
   const handleDurationPrompt = (): void => {
@@ -288,7 +275,7 @@ export function TaskInputSection({
                   onClick={() =>
                     openDatePicker(
                       scheduledForPickerRef,
-                      taskScheduledForInput || toDateTimeLocalValue(new Date()),
+                      taskScheduledForInput || formatDateTimeLocalInput(new Date()),
                       onTaskScheduledForInputChange
                     )
                   }
@@ -298,7 +285,10 @@ export function TaskInputSection({
                     <span className={styles.questTimeTitle}>시작 예정</span>
                     <span className={styles.questTimeSubLabel}>(StartAt)</span>
                   </span>
-                  <strong className={styles.questTimeValue}>{formatDateButtonValue(taskScheduledForInput)}</strong>
+                  <strong className={styles.questTimeValue}>
+                    <span className={styles.questTimeValuePrimary}>{scheduledForButtonValue.dateLabel}</span>
+                    <span className={styles.questTimeValueSecondary}>{scheduledForButtonValue.timeLabel}</span>
+                  </strong>
                 </button>
                 <input
                   ref={scheduledForPickerRef}
@@ -317,7 +307,7 @@ export function TaskInputSection({
                   onClick={() =>
                     openDatePicker(
                       dueAtPickerRef,
-                      taskDueAtInput || toDateTimeLocalValue(new Date()),
+                      taskDueAtInput || formatDateTimeLocalInput(new Date()),
                       onTaskDueAtInputChange
                     )
                   }
@@ -327,7 +317,10 @@ export function TaskInputSection({
                     <span className={styles.questTimeTitle}>마감 기한</span>
                     <span className={styles.questTimeSubLabel}>(DueAt)</span>
                   </span>
-                  <strong className={styles.questTimeValue}>{formatDateButtonValue(taskDueAtInput)}</strong>
+                  <strong className={styles.questTimeValue}>
+                    <span className={styles.questTimeValuePrimary}>{dueAtButtonValue.dateLabel}</span>
+                    <span className={styles.questTimeValueSecondary}>{dueAtButtonValue.timeLabel}</span>
+                  </strong>
                 </button>
                 <input
                   ref={dueAtPickerRef}
@@ -350,7 +343,9 @@ export function TaskInputSection({
                     <span className={styles.questTimeTitle}>소요 시간</span>
                     <span className={styles.questTimeSubLabel}>(EstimateMin)</span>
                   </span>
-                  <strong className={styles.questTimeValue}>{formatMinutesButtonValue(taskTotalMinutesInput)}</strong>
+                  <strong className={`${styles.questTimeValue} ${styles.questTimeValueSingle}`}>
+                    <span className={styles.questTimeValuePrimary}>{durationButtonValue}</span>
+                  </strong>
                 </button>
               </div>
             </div>

@@ -16,6 +16,11 @@ import type { AppEvent } from "@/features/mvp/types/domain";
 
 describe("display and events model", () => {
   it("formats status and summary values", () => {
+    const baseNow = new Date(2026, 1, 27, 9, 0, 0);
+    const todayIso = new Date(2026, 1, 27, 14, 5, 0).toISOString();
+    const tomorrowIso = new Date(2026, 1, 28, 9, 15, 0).toISOString();
+    const futureIso = new Date(2026, 2, 2, 18, 20, 0).toISOString();
+
     expect(chunkStatusLabel("running")).toBe("진행 중");
     expect(chunkStatusLabel("done")).toBe("완료");
     expect(taskStatusLabel("in_progress")).toBe("진행 중");
@@ -25,6 +30,10 @@ describe("display and events model", () => {
     expect(formatPercentValue(42)).toBe("42%");
     expect(formatTimeToStart(125)).toBe("2분 05초");
     expect(formatOptionalDateTime(undefined)).toBe("미설정");
+    expect(formatOptionalDateTime(todayIso, baseNow)).toBe("오늘 14:05");
+    expect(formatOptionalDateTime(tomorrowIso, baseNow)).toBe("내일 09:15");
+    expect(formatOptionalDateTime(futureIso, baseNow)).toBe("D-3 18:20");
+    expect(formatOptionalDateTime("not-a-date", baseNow)).toBe("미설정");
   });
 
   it("computes xp progress and radar shape", () => {

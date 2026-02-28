@@ -15,23 +15,6 @@ function joinClassNames(...classNames: Array<string | undefined>): string {
   return classNames.filter(Boolean).join(" ");
 }
 
-function formatTaskClock(value: string | null | undefined): string {
-  if (!value) {
-    return "--:--";
-  }
-
-  const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) {
-    return "--:--";
-  }
-
-  return parsed.toLocaleTimeString("ko-KR", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false
-  });
-}
-
 function resolveTaskIcon(task: Task, openChunks: number): string {
   if (task.status === "done") {
     return "😺";
@@ -208,12 +191,12 @@ export function HomeView({
                     <span className={getClassName("homeTaskMetaRow")}>
                       <span className={getClassName("homeTaskMetaItem")}>
                         <span className={getClassName("homeTaskMetaIcon")} aria-hidden="true">🕒</span>
-                        <span className={getClassName("homeTaskMetaValue")}>{formatTaskClock(task.scheduledFor)} 시작</span>
+                        <span className={getClassName("homeTaskMetaValue")}>{formatOptionalDateTime(task.scheduledFor)} 시작</span>
                         <span className={getClassName("homeTaskMetaLabel")}>(Start)</span>
                       </span>
                       <span className={getClassName("homeTaskMetaItem")}>
                         <span className={getClassName("homeTaskMetaIcon")} aria-hidden="true">📅</span>
-                        <span className={getClassName("homeTaskMetaValue")}>{formatTaskClock(task.dueAt)} 마감</span>
+                        <span className={getClassName("homeTaskMetaValue")}>{formatOptionalDateTime(task.dueAt)} 마감</span>
                         <span className={getClassName("homeTaskMetaLabel")}>(Due)</span>
                       </span>
                       <span className={getClassName("homeTaskMetaItem")}>

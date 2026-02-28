@@ -57,13 +57,14 @@ import {
   isActionableChunkStatus,
   isTaskClosedStatus,
   isTaskTotalMinutesInRange,
+  normalizeTaskScheduleFromLocalInputs,
+  normalizeTaskScheduleIso,
   orderChunks,
   formatDateTime,
   formatDateTimeLocalInput,
   getXpProgressPercent,
   parseDateTimeLocalInput,
   parseLooseMinuteInput,
-  parseOptionalDateTimeInput,
   parseTaskTotalMinutesInput,
   withReorderedTaskChunks,
   buildTaskSummary,
@@ -933,18 +934,17 @@ export function MvpDashboard() {
       return;
     }
 
-    const hasScheduledForInput = taskScheduledForInput.trim().length > 0;
-    const hasDueAtInput = taskDueAtInput.trim().length > 0;
-    const scheduledFor = parseOptionalDateTimeInput(taskScheduledForInput);
-    const dueAt = parseOptionalDateTimeInput(taskDueAtInput);
-    if ((hasScheduledForInput && !scheduledFor) || (hasDueAtInput && !dueAt)) {
+    const normalizedSchedule = normalizeTaskScheduleFromLocalInputs({
+      scheduledForInput: taskScheduledForInput,
+      dueAtInput: taskDueAtInput,
+      totalMinutes: parsedTotalMinutes,
+      fallbackStartAt: new Date()
+    });
+    if (!normalizedSchedule) {
       setFeedback("일정 시간 형식이 올바르지 않습니다. 날짜와 시간을 다시 확인해주세요.");
       return;
     }
-    if (scheduledFor && dueAt && Date.parse(scheduledFor) > Date.parse(dueAt)) {
-      setFeedback("시작 예정 시간은 마감 시간보다 늦을 수 없습니다.");
-      return;
-    }
+    const { scheduledFor, dueAt } = normalizedSchedule;
 
     if (RISKY_INPUT_PATTERN.test(rawInput)) {
       logEvent({
@@ -1133,6 +1133,26 @@ export function MvpDashboard() {
       return;
     }
 
+    const normalizedActiveTaskSchedule = normalizeTaskScheduleIso({
+      scheduledFor: activeTask.scheduledFor,
+      dueAt: activeTask.dueAt,
+      totalMinutes: activeTask.totalMinutes,
+      fallbackStartAt: new Date()
+    });
+    if (normalizedActiveTaskSchedule.changed) {
+      setTasks((prev) =>
+        prev.map((task) =>
+          task.id === activeTask.id
+            ? {
+                ...task,
+                scheduledFor: normalizedActiveTaskSchedule.scheduledFor,
+                dueAt: normalizedActiveTaskSchedule.dueAt
+              }
+            : task
+        )
+      );
+    }
+
     const maxOrder = chunks
       .filter((chunk) => chunk.taskId === activeTask.id)
       .reduce((max, chunk) => Math.max(max, chunk.order), 0);
@@ -1162,11 +1182,16 @@ export function MvpDashboard() {
         chunkCount: 1,
         manual: true,
         budgetUsageBefore,
-        budgetUsageAfter
+        budgetUsageAfter,
+        normalizedSchedule: normalizedActiveTaskSchedule.changed
       }
     });
 
-    setFeedback(`수동 청크를 추가했어요. 예산 ${budgetUsageAfter}/${activeTask.totalMinutes}분`);
+    setFeedback(
+      normalizedActiveTaskSchedule.changed
+        ? `기존 일정을 정규화하고 수동 청크를 추가했어요. 예산 ${budgetUsageAfter}/${activeTask.totalMinutes}분`
+        : `수동 청크를 추가했어요. 예산 ${budgetUsageAfter}/${activeTask.totalMinutes}분`
+    );
   };
 
   const handleStartChunk = (chunkId: string) => {
