@@ -6,14 +6,14 @@ import { DEFAULT_CORE_SETTINGS, type MvpCoreState } from "./core-state.types";
 export function createInitialCoreState(): MvpCoreState {
   return {
     tasks: [],
-    chunks: [],
+    missions: [],
     timerSessions: [],
     stats: createInitialStats(),
     settings: DEFAULT_CORE_SETTINGS,
     events: [],
     activeTaskId: null,
     activeTab: "home",
-    remainingSecondsByChunk: {}
+    remainingSecondsByMission: {}
   };
 }
 
@@ -21,8 +21,8 @@ export function mvpCoreStateReducer(state: MvpCoreState, action: MvpCoreAction):
   switch (action.type) {
     case "set_tasks":
       return { ...state, tasks: resolveStateAction(state.tasks, action.updater) };
-    case "set_chunks":
-      return { ...state, chunks: resolveStateAction(state.chunks, action.updater) };
+    case "set_missions":
+      return { ...state, missions: resolveStateAction(state.missions, action.updater) };
     case "set_timer_sessions":
       return { ...state, timerSessions: resolveStateAction(state.timerSessions, action.updater) };
     case "set_stats":
@@ -35,10 +35,10 @@ export function mvpCoreStateReducer(state: MvpCoreState, action: MvpCoreAction):
       return { ...state, activeTaskId: resolveStateAction(state.activeTaskId, action.updater) };
     case "set_active_tab":
       return { ...state, activeTab: resolveStateAction(state.activeTab, action.updater) };
-    case "set_remaining_seconds_by_chunk":
+    case "set_remaining_seconds_by_mission":
       return {
         ...state,
-        remainingSecondsByChunk: resolveStateAction(state.remainingSecondsByChunk, action.updater)
+        remainingSecondsByMission: resolveStateAction(state.remainingSecondsByMission, action.updater)
       };
     case "hydrate":
       return action.state;

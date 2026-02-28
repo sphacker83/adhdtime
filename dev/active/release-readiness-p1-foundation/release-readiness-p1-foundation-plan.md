@@ -27,7 +27,7 @@ Last Updated: 2026-02-28
 1.1 KPI 계산 규칙을 코드 레벨로 고정
 - 작업: `features/mvp/lib/kpi.ts` 신설, 이벤트 기반 계산 함수 구현
 - Acceptance:
-  - Activation, Time to Start, Chunk Completion Rate, Recovery Rate, D1/D7 반환
+  - Activation, Time to Start, Mission Completion Rate, Recovery Rate, D1/D7 반환
   - 입력 이벤트가 부족할 때 `null`/0 처리 정책이 일관적
 
 1.2 KPI 시각화를 스탯 탭에 연결
@@ -64,7 +64,7 @@ Last Updated: 2026-02-28
   - `default/granted/denied/unsupported` 정확히 반영
 
 3.2 fallback 문구 및 1차 트리거 연결
-- 작업: 거부/미지원 안내 + `chunk_started` 또는 `reschedule_requested`에서 알림 트리거
+- 작업: 거부/미지원 안내 + `mission_started` 또는 `reschedule_requested`에서 알림 트리거
 - Acceptance:
   - 허용 상태에서 실제 브라우저 알림 1회 이상 확인 가능
   - 미지원/거부 시 앱 흐름은 정상 유지

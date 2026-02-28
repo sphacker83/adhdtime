@@ -11,7 +11,7 @@ Last Updated: 2026-02-28
   - `paused` 상태를 실행 잠금(`running`과 동등)으로 포함
   - `completedAt`은 `status=done`일 때만 저장
   - 시간 필드 저장 시 ISO UTC 정규화 보강
-  - 실행 잠금 중 청크 삭제 버튼 비활성화
+  - 실행 잠금 중 미션 삭제 버튼 비활성화
 - 검증 명령 통과 사실을 반영했다.
   - `npm run typecheck` PASS
   - `npm run lint` PASS
@@ -43,8 +43,8 @@ Last Updated: 2026-02-28
 | FR | 확정 상태 | 근거 구현 파일 | 검증 근거 | 비고 |
 | --- | --- | --- | --- | --- |
 | FR-01 | 완료 | `features/mvp/components/mvp-dashboard.tsx` | `typecheck/lint/test:mvp/verify:gate/build` PASS | `totalMinutes` 필수 입력/검증 반영 |
-| FR-02 | 완료 | `features/mvp/components/mvp-dashboard.tsx`, `features/mvp/lib/chunking.ts` | `typecheck/lint/test:mvp/verify:gate/build` PASS | 청킹 합계 예산(`<= totalMinutes`) 강제 |
-| FR-03 | 완료 | `features/mvp/components/mvp-dashboard.tsx` | `typecheck/lint/test:mvp/verify:gate/build` PASS | 실행 잠금 중 청크 삭제 버튼 비활성화 포함 |
+| FR-02 | 완료 | `features/mvp/components/mvp-dashboard.tsx`, `features/mvp/lib/missioning.ts` | `typecheck/lint/test:mvp/verify:gate/build` PASS | 청킹 합계 예산(`<= totalMinutes`) 강제 |
+| FR-03 | 완료 | `features/mvp/components/mvp-dashboard.tsx` | `typecheck/lint/test:mvp/verify:gate/build` PASS | 실행 잠금 중 미션 삭제 버튼 비활성화 포함 |
 | FR-05 | 완료 | `features/mvp/components/mvp-dashboard.tsx`, `features/mvp/lib/timer-accuracy.ts` | `typecheck/lint/test:mvp/verify:gate/build` PASS | 실행 중 `-1/+1` 조정 및 `15분` 상한 강제 |
 | FR-11 | 완료 | `features/mvp/components/mvp-dashboard.tsx` | `typecheck/lint/test:mvp/verify:gate/build` PASS | `paused` 포함 실행 잠금, 실행 중 정책 가드 반영 |
 | FR-12 | 완료 | `features/mvp/lib/storage.ts`, `features/mvp/components/mvp-dashboard.tsx`, `features/mvp/types/domain.ts` | `typecheck/lint/test:mvp/verify:gate/build` PASS | ISO UTC 정규화 + `completedAt(done only)` 보장 |

@@ -1,9 +1,9 @@
 export {
-  ChunkPrimaryActions,
-  type ChunkPrimaryActionsProps
-} from "./components/chunk-primary-actions";
+  MissionPrimaryActions,
+  type MissionPrimaryActionsProps
+} from "./components/mission-primary-actions";
 
 export {
-  ChunkQuickAdjustActions,
-  type ChunkQuickAdjustActionsProps
-} from "./components/chunk-quick-adjust-actions";
+  MissionQuickAdjustActions,
+  type MissionQuickAdjustActionsProps
+} from "./components/mission-quick-adjust-actions";

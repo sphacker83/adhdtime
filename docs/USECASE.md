@@ -19,7 +19,7 @@
 
 - User: 앱 사용자
 - App: Next.js 웹앱 클라이언트
-- AI Chunking Service: AI 폴백 청킹 서비스(옵션)
+- AI Missioning Service: AI 폴백 청킹 서비스(옵션)
 
 ---
 
@@ -32,7 +32,7 @@
 - `done`
 - `archived`
 
-### 3.2 Chunk 상태
+### 3.2 Mission 상태
 
 - `todo`
 - `running`
@@ -94,7 +94,7 @@ AC
 
 ## UC-02 등록 과업 청킹 생성 (FR-02)
 
-목적: 등록된 과업을 실행 가능한 청크로 변환한다.
+목적: 등록된 과업을 실행 가능한 미션로 변환한다.
 
 - Actor: User, App, AI(optional)
 - Precondition: Task 존재, `totalMinutes` 설정 완료
@@ -103,48 +103,48 @@ AC
 Main Flow
 
 1. App이 로컬 패턴 매칭을 시도한다.
-2. 로컬 성공 시 청크를 즉시 생성/표시한다.
+2. 로컬 성공 시 미션를 즉시 생성/표시한다.
 3. 로컬 실패 시 AI 폴백 호출 후 결과를 표시한다.
-4. App이 첫 청크를 현재 퀘스트로 강조한다.
+4. App이 첫 미션를 현재 퀘스트로 강조한다.
 
 Alternate / Exception
 
 - A1: 네트워크 없음 -> 로컬 템플릿 폴백
 - A2: AI 실패/타임아웃 -> 로컬 템플릿 폴백 + 재시도 버튼
-- A3: `sum(chunks.estMinutes) > task.totalMinutes` -> 생성 차단 + 시간 조정 가이드
+- A3: `sum(missions.estMinutes) > task.totalMinutes` -> 생성 차단 + 시간 조정 가이드
 - A4: 위험 입력 감지 -> 생성 차단 + 안전 안내 + `safety_blocked` 이벤트 기록
 
 Postcondition
 
-- Chunk N개 생성(status=`todo`)
+- Mission N개 생성(status=`todo`)
 
 AC
 
-- 청크는 행동 동사로 시작
-- `chunks.length` 5~12 권장
+- 미션는 행동 동사로 시작
+- `missions.length` 5~12 권장
 - `estMinutes` 2~15
-- `sum(chunks.estMinutes) <= task.totalMinutes`
+- `sum(missions.estMinutes) <= task.totalMinutes`
 - 10초 내 결과 표시(네트워크+폴백 포함)
 
 ---
 
-## UC-03 청크 수정/삭제 + 시간 수정 정책 (FR-03, FR-11)
+## UC-03 미션 수정/삭제 + 시간 수정 정책 (FR-03, FR-11)
 
 목적: 사용자가 상황에 맞게 시간을 조정하되 실행 상태에 맞는 편집 제약을 유지한다.
 
 - Actor: User, App
-- Precondition: Task/Chunk 존재
-- Trigger: 사용자가 시간 또는 청크 편집 실행
+- Precondition: Task/Mission 존재
+- Trigger: 사용자가 시간 또는 미션 편집 실행
 
 Main Flow (실행 전)
 
-1. User가 `task.totalMinutes` 또는 `chunk.estMinutes`를 수정한다.
-2. App이 제약(`estMinutes` 범위, 청크 합<=총시간)을 검증한다.
+1. User가 `task.totalMinutes` 또는 `mission.estMinutes`를 수정한다.
+2. App이 제약(`estMinutes` 범위, 미션 합<=총시간)을 검증한다.
 3. User 저장 후 App이 리스트를 즉시 갱신한다.
 
 Main Flow (실행 중)
 
-1. User가 실행 중 청크 시간 조정을 시도한다.
+1. User가 실행 중 미션 시간 조정을 시도한다.
 2. App이 상세 입력 편집을 차단하고 빠른 `+/-` 조정을 노출한다.
 3. User가 빠른 조정을 수행하면 App이 즉시 반영한다.
 
@@ -152,28 +152,28 @@ Alternate
 
 - A1: 삭제 시 `order` 재정렬
 - A2: `estMinutes` 범위 이탈(2~15) 시 오류 표시
-- A3: `sum(chunks.estMinutes) > task.totalMinutes` 시 저장 차단
+- A3: `sum(missions.estMinutes) > task.totalMinutes` 시 저장 차단
 - A4: 실행 중 `task.totalMinutes` 감소 시도 시 차단(증가만 허용)
 
 Postcondition
 
-- Chunk가 업데이트 또는 삭제된다.
+- Mission가 업데이트 또는 삭제된다.
 - 시간 정책 위반 없는 상태로 저장된다.
 
 AC
 
 - 3탭 이내 편집 완료
-- 실행 중에는 현재 청크 빠른 `+/-`만 허용
-- 삭제 후 현재 청크/리스트 동작 정상
+- 실행 중에는 현재 미션 빠른 `+/-`만 허용
+- 삭제 후 현재 미션/리스트 동작 정상
 
 ---
 
-## UC-04 청크 타이머 시작/일시정지/재개/완료 + 빠른 +/- (FR-05)
+## UC-04 미션 타이머 시작/일시정지/재개/완료 + 빠른 +/- (FR-05)
 
-목적: 청크 실행 상태를 안정적으로 관리하고 진행 중 시간 조정을 빠르게 제공한다.
+목적: 미션 실행 상태를 안정적으로 관리하고 진행 중 시간 조정을 빠르게 제공한다.
 
 - Actor: User, App
-- Precondition: Chunk status=`todo`
+- Precondition: Mission status=`todo`
 - Trigger: 시작 버튼
 
 Main Flow
@@ -183,19 +183,19 @@ Main Flow
 3. 진행 UI와 남은 시간을 표시한다.
 4. User가 일시정지/재개를 수행할 수 있다.
 5. User가 필요 시 `-1분`, `+1분` 버튼으로 시간을 빠르게 조정한다.
-6. User가 완료를 누르면 Chunk status=`done`으로 전환한다.
-7. 다음 청크를 현재 퀘스트로 자동 제안한다.
+6. User가 완료를 누르면 Mission status=`done`으로 전환한다.
+7. 다음 미션를 현재 퀘스트로 자동 제안한다.
 
 Alternate / Exception
 
 - A1: 백그라운드 전환 -> 복귀 시각 기준 재계산 정책 적용
-- A2: 실행 중 다른 청크 선택 -> 기존 세션 종료 후 새 세션 시작
+- A2: 실행 중 다른 미션 선택 -> 기존 세션 종료 후 새 세션 시작
 - A3: 빠른 조정 결과가 제약(2~15, 총시간) 위반 시 차단
 - A4: 중도 포기 -> UC-07으로 연결
 
 Postcondition
 
-- 완료 청크의 `actualSeconds` 기록
+- 완료 미션의 `actualSeconds` 기록
 - 보상 트리거 발생
 
 AC
@@ -203,7 +203,7 @@ AC
 - 타이머 1초 단위 안정 동작
 - 음수 시간/중복 실행 없음
 - 빠른 시간 조정은 1탭 동작
-- 완료 후 다음 청크 1탭 이동
+- 완료 후 다음 미션 1탭 이동
 
 ---
 
@@ -236,7 +236,7 @@ AC
 목적: 실행 행동을 즉시 강화로 연결한다.
 
 - Actor: App
-- Precondition: `chunk_completed` 또는 복귀 행동 발생
+- Precondition: `mission_completed` 또는 복귀 행동 발생
 - Trigger: 보상 대상 이벤트 발생
 
 Main Flow
@@ -258,7 +258,7 @@ AC
 목적: 실패를 복귀 행동으로 전환한다.
 
 - Actor: User, App, AI(optional)
-- Precondition: Chunk가 `running` 중 중단되었거나 장시간 미완료
+- Precondition: Mission가 `running` 중 중단되었거나 장시간 미완료
 - Trigger: 사용자가 "다시 시작" 계열 CTA 선택
 
 Main Flow (과업 재일정)
@@ -266,20 +266,20 @@ Main Flow (과업 재일정)
 1. App이 과업 재일정 옵션을 제안한다.
 2. User가 새로운 `scheduledFor`를 선택한다.
 3. App이 Task의 `scheduledFor`를 갱신한다.
-4. App이 미완료 청크를 과업과 함께 이동 처리한다.
+4. App이 미완료 미션를 과업과 함께 이동 처리한다.
 5. 회복력 보상을 반영한다.
 
 Main Flow (재청킹)
 
 1. User가 "더 작게 쪼개기"를 선택한다.
-2. App이 새 청크를 생성한다(로컬 우선, 필요 시 AI).
-3. 기존 청크를 `archived` 처리하고 새 청크에 `parentChunkId`를 기록한다.
+2. App이 새 미션를 생성한다(로컬 우선, 필요 시 AI).
+3. 기존 미션를 `archived` 처리하고 새 미션에 `parentMissionId`를 기록한다.
 4. 회복력/분해력 보상을 반영한다.
 
 AC
 
 - 재일정/재청킹 중 1개를 2탭 이내 실행 가능
-- 재일정은 Task 단위로만 수행(청크 단위 재일정 미지원)
+- 재일정은 Task 단위로만 수행(미션 단위 재일정 미지원)
 - 비난형 문구 금지
 - 재청킹 결과도 표준 스키마 + 총시간 제약 준수
 - 수행 즉시 다음 실행 CTA 제공
@@ -340,7 +340,7 @@ AC
 
 1. UC-01: `title`, `totalMinutes` 필수 검증
 2. UC-02: 청킹 10초 이내 + 총시간 제약 준수
-3. UC-02/04: 첫 청크 시작 3탭 이내, 첫 시작 3분 이내
+3. UC-02/04: 첫 미션 시작 3탭 이내, 첫 시작 3분 이내
 4. UC-04: 타이머 상태 꼬임 없음 + 실행 중 빠른 `+/-` 정상
 5. UC-05: 햅틱 ON/OFF 정상
 6. UC-06: 보상 즉시 반영

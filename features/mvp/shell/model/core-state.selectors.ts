@@ -1,61 +1,61 @@
-import { isActionableChunkStatus, orderChunks } from "@/features/mvp/shared";
-import type { Chunk, Task } from "@/features/mvp/types/domain";
+import { isActionableMissionStatus, orderMissions } from "@/features/mvp/shared";
+import type { Mission, Task } from "@/features/mvp/types/domain";
 import type { MvpCoreState } from "./core-state.types";
 
 export function selectActiveTask(state: MvpCoreState): Task | null {
   return state.tasks.find((task) => task.id === state.activeTaskId) ?? null;
 }
 
-export function selectActiveTaskChunks(state: MvpCoreState): Chunk[] {
+export function selectActiveTaskMissions(state: MvpCoreState): Mission[] {
   if (!state.activeTaskId) {
     return [];
   }
 
-  return orderChunks(state.chunks.filter((chunk) => chunk.taskId === state.activeTaskId));
+  return orderMissions(state.missions.filter((mission) => mission.taskId === state.activeTaskId));
 }
 
-export function selectRunningChunk(state: MvpCoreState): Chunk | null {
-  return state.chunks.find((chunk) => chunk.status === "running") ?? null;
+export function selectRunningMission(state: MvpCoreState): Mission | null {
+  return state.missions.find((mission) => mission.status === "running") ?? null;
 }
 
 export function selectCompletionRate(state: MvpCoreState): number {
-  if (state.chunks.length === 0) {
+  if (state.missions.length === 0) {
     return 0;
   }
 
-  const doneCount = state.chunks.filter((chunk) => chunk.status === "done").length;
-  return Math.round((doneCount / state.chunks.length) * 100);
+  const doneCount = state.missions.filter((mission) => mission.status === "done").length;
+  return Math.round((doneCount / state.missions.length) * 100);
 }
 
-export function selectHomeChunk(state: MvpCoreState, currentChunkId: string | null = null): Chunk | null {
-  return selectRunningChunk(state) ?? selectCurrentChunk(state, currentChunkId);
+export function selectHomeMission(state: MvpCoreState, currentMissionId: string | null = null): Mission | null {
+  return selectRunningMission(state) ?? selectCurrentMission(state, currentMissionId);
 }
 
-export function selectHomeTask(state: MvpCoreState, currentChunkId: string | null = null): Task | null {
+export function selectHomeTask(state: MvpCoreState, currentMissionId: string | null = null): Task | null {
   const activeTask = selectActiveTask(state);
-  const homeChunk = selectHomeChunk(state, currentChunkId);
-  if (!homeChunk) {
+  const homeMission = selectHomeMission(state, currentMissionId);
+  if (!homeMission) {
     return activeTask;
   }
 
-  return state.tasks.find((task) => task.id === homeChunk.taskId) ?? activeTask;
+  return state.tasks.find((task) => task.id === homeMission.taskId) ?? activeTask;
 }
 
-export function selectHomeRemaining(state: MvpCoreState, currentChunkId: string | null = null): number {
-  const homeChunk = selectHomeChunk(state, currentChunkId);
-  if (!homeChunk) {
+export function selectHomeRemaining(state: MvpCoreState, currentMissionId: string | null = null): number {
+  const homeMission = selectHomeMission(state, currentMissionId);
+  if (!homeMission) {
     return 0;
   }
 
-  return state.remainingSecondsByChunk[homeChunk.id] ?? homeChunk.estMinutes * 60;
+  return state.remainingSecondsByMission[homeMission.id] ?? homeMission.estMinutes * 60;
 }
 
-function selectCurrentChunk(state: MvpCoreState, currentChunkId: string | null): Chunk | null {
-  const activeTaskChunks = selectActiveTaskChunks(state);
+function selectCurrentMission(state: MvpCoreState, currentMissionId: string | null): Mission | null {
+  const activeTaskMissions = selectActiveTaskMissions(state);
 
   return (
-    activeTaskChunks.find((chunk) => chunk.id === currentChunkId && isActionableChunkStatus(chunk.status))
-    ?? activeTaskChunks.find((chunk) => isActionableChunkStatus(chunk.status))
+    activeTaskMissions.find((mission) => mission.id === currentMissionId && isActionableMissionStatus(mission.status))
+    ?? activeTaskMissions.find((mission) => isActionableMissionStatus(mission.status))
     ?? null
   );
 }

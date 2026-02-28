@@ -11,13 +11,13 @@ Last Updated: 2026-02-28
   - 다음 미션 아이콘 도입을 위한 타입/생성/저장 경로 확인
   - 헤더 정합(`오늘의 달성도` 텍스트+링, 하단 시간줄) 수정 지점 확인
 - 문서 선행 원칙에 따라 `plan/context/tasks` 재작성 완료
-- `Chunk.iconKey` 모델 추가 및 생성/저장 경로 반영(`domain/chunking/storage`)
+- `Mission.iconKey` 모델 추가 및 생성/저장 경로 반영(`domain/missioning/storage`)
 - 플로팅 `퀘스트 생성` 버튼을 전 탭 우하단 고정 노출로 변경
 - 퀘스트 생성 성공 시 모달 자동 닫힘 적용
 - 기본 소요시간 표시 `--` 반영
 - 현재 퀘스트 카드 구조 변경:
   - 타이틀 `퀘스트 : [이름]`
-  - `#분 청크` 제거
+  - `#분 미션` 제거
   - 예상소요시간/마감시간/마감까지 남은 시간 표시
   - 다음 미션 섹션을 CTA 아래로 이동
 - 다음 미션 개선:
@@ -84,7 +84,7 @@ Last Updated: 2026-02-28
   - 하단 네비 탭 라벨 크기 상향
   - 중앙 CTA 라벨을 `퀘스트`/`생성` 2줄 고정
   - 현재 퀘스트 우측 중앙에 대형 몬스터 + 에너지 링서클 배치
-  - 에너지 링을 `remainingSecondsByChunk` 합산 비율에 연동(타이머 감소/완료 즉시 반영)
+  - 에너지 링을 `remainingSecondsByMission` 합산 비율에 연동(타이머 감소/완료 즉시 반영)
   - Playwright 캡처 추가:
     - `output/playwright/round6-home.png`
     - `output/playwright/round6-modal.png`
@@ -126,13 +126,13 @@ Last Updated: 2026-02-28
   - 퀘스트 추가 모달 `create/edit` 모드 분리:
     - 생성 모드: `AI 퀘스트 생성`
     - 편집 모드: `퀘스트 수정`
-  - 청크 수정에서 `prompt` 제거, 팝업 폼(미션 제목/소요시간)으로 전환
-  - 대기 목록 펼침 시 청크 DnD 순서 변경 지원
-  - 펼침 청크 표기를 `미션 제목 + 소요시간(분)`만 남기도록 단순화
+  - 미션 수정에서 `prompt` 제거, 팝업 폼(미션 제목/소요시간)으로 전환
+  - 대기 목록 펼침 시 미션 DnD 순서 변경 지원
+  - 펼침 미션 표기를 `미션 제목 + 소요시간(분)`만 남기도록 단순화
   - Playwright 캡처 추가:
     - `output/playwright/round14-waiting-menu.png`
     - `output/playwright/round14-quest-edit-modal.png`
-    - `output/playwright/round14-chunk-edit-modal.png`
+    - `output/playwright/round14-mission-edit-modal.png`
     - `output/playwright/round14-after-dnd.png`
   - 검증 통과:
     - `npm run typecheck`
@@ -149,7 +149,7 @@ Last Updated: 2026-02-28
 1. 이번 라운드는 `MvpDashboard` 경로만 수정한다. (`PhaseOneDashboard` 미사용)
 2. 퀘스트 생성 CTA는 하단 네비 중앙 돌출 원형 버튼으로 유지한다(플로팅 사용 안 함).
 3. 생성 모달 닫힘은 `onGenerateTask` 성공 boolean 반환으로 제어한다.
-4. 미션 아이콘은 `Chunk.iconKey` optional 필드로 도입해 기존 데이터와 호환한다.
+4. 미션 아이콘은 `Mission.iconKey` optional 필드로 도입해 기존 데이터와 호환한다.
 5. 홈 뷰 편집/삭제 액션은 기존 핸들러를 재사용해 회귀 위험을 줄인다.
 6. 헤더 정합은 CSS 최하단 parity override 블록에서만 수정한다.
 
@@ -161,7 +161,7 @@ Last Updated: 2026-02-28
 - `features/mvp/task-input/components/task-input-section.tsx`
 - `features/mvp/task-list/components/home-view.tsx`
 - `features/mvp/types/domain.ts`
-- `features/mvp/lib/chunking.ts`
+- `features/mvp/lib/missioning.ts`
 - `features/mvp/lib/storage.ts`
 - `features/mvp/shared/model/display-utils.ts`
 - `dev/active/mobile-first-ui-image-parity/mobile-first-ui-image-parity-plan.md`

@@ -5,10 +5,10 @@ import {
   hydrateCoreState,
   mvpCoreStateReducer,
   setActiveTaskId,
-  setChunks,
+  setMissions,
   setTasks
 } from "./core-state";
-import type { Chunk, Task } from "@/features/mvp/types/domain";
+import type { Mission, Task } from "@/features/mvp/types/domain";
 
 function createTask(id: string): Task {
   return {
@@ -20,12 +20,12 @@ function createTask(id: string): Task {
   };
 }
 
-function createChunk(id: string, taskId: string): Chunk {
+function createMission(id: string, taskId: string): Mission {
   return {
     id,
     taskId,
     order: 1,
-    action: `chunk-${id}`,
+    action: `mission-${id}`,
     estMinutes: 5,
     status: "todo"
   };
@@ -36,28 +36,28 @@ describe("core state reducer/actions", () => {
     const initial = createInitialCoreState();
 
     expect(initial.tasks).toEqual([]);
-    expect(initial.chunks).toEqual([]);
+    expect(initial.missions).toEqual([]);
     expect(initial.activeTab).toBe("home");
     expect(initial.activeTaskId).toBeNull();
     expect(initial.settings).toEqual(DEFAULT_CORE_SETTINGS);
   });
 
-  it("applies set_tasks and set_chunks actions", () => {
+  it("applies set_tasks and set_missions actions", () => {
     const initial = createInitialCoreState();
     const firstTask = createTask("t1");
     const secondTask = createTask("t2");
-    const firstChunk = createChunk("c1", "t1");
+    const firstMission = createMission("c1", "t1");
 
     const withTask = mvpCoreStateReducer(initial, setTasks([firstTask]));
     const withTaskUpdater = mvpCoreStateReducer(
       withTask,
       setTasks((prev) => [...prev, secondTask])
     );
-    const withChunk = mvpCoreStateReducer(withTaskUpdater, setChunks([firstChunk]));
+    const withMission = mvpCoreStateReducer(withTaskUpdater, setMissions([firstMission]));
 
     expect(withTask.tasks).toEqual([firstTask]);
     expect(withTaskUpdater.tasks).toEqual([firstTask, secondTask]);
-    expect(withChunk.chunks).toEqual([firstChunk]);
+    expect(withMission.missions).toEqual([firstMission]);
   });
 
   it("applies set_active_task_id action", () => {
@@ -73,10 +73,10 @@ describe("core state reducer/actions", () => {
     const snapshot = {
       ...initial,
       tasks: [createTask("t1")],
-      chunks: [createChunk("c1", "t1")],
+      missions: [createMission("c1", "t1")],
       activeTaskId: "t1" as string | null,
       activeTab: "tasks" as const,
-      remainingSecondsByChunk: { c1: 120 }
+      remainingSecondsByMission: { c1: 120 }
     };
 
     const next = mvpCoreStateReducer(initial, hydrateCoreState(snapshot));

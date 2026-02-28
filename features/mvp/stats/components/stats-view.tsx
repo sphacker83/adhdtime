@@ -34,7 +34,7 @@ export function StatsView({
 
       <div className={styles.reportGrid}>
         <article>
-          <p>완료 청크</p>
+          <p>완료 미션</p>
           <strong>{stats.todayCompleted}</strong>
         </article>
         <article>
@@ -68,9 +68,9 @@ export function StatsView({
           </article>
           <article>
             <p>Completion Rate</p>
-            <strong>{formatPercentValue(kpis.chunkCompletionRate.value)}</strong>
+            <strong>{formatPercentValue(kpis.missionCompletionRate.value)}</strong>
             <span>
-              {kpis.samples.completedChunks}/{kpis.samples.generatedChunks} chunks
+              {kpis.samples.completedMissions}/{kpis.samples.generatedMissions} missions
             </span>
           </article>
           <article>

@@ -19,7 +19,7 @@ Last Updated: 2026-02-28
   - `features/mvp/shared/types/task-meta.ts`
   - `features/mvp/shared/model/task-meta-constraints.ts`
   - `features/mvp/shared/model/task-schedule.ts`
-  - `features/mvp/shared/model/chunk-runtime.ts`
+  - `features/mvp/shared/model/mission-runtime.ts`
   - `features/mvp/shared/model/display-utils.ts`
   - `features/mvp/shared/model/radar-shape.ts`
   - `features/mvp/shared/model/events-normalize.ts`
@@ -32,7 +32,7 @@ Last Updated: 2026-02-28
   - `npm run build`
 - 추출 유틸 단위 테스트 추가
   - `features/mvp/shared/model/task-meta-and-schedule.test.ts`
-  - `features/mvp/shared/model/chunk-runtime.test.ts`
+  - `features/mvp/shared/model/mission-runtime.test.ts`
   - `features/mvp/shared/model/display-and-events.test.ts`
 - ADR 기록 추가
   - `docs/frontend-architecture/adr-0001-phase1-shared-model-extraction.md`
@@ -137,9 +137,9 @@ Last Updated: 2026-02-28
   - 홈 탭 뷰 모듈
 - `features/mvp/task-list/components/tasks-view.tsx`
   - 할 일 탭 뷰 모듈
-- `features/mvp/timer-runtime/components/chunk-primary-actions.tsx`
+- `features/mvp/timer-runtime/components/mission-primary-actions.tsx`
   - 실행 컨트롤(시작/일시정지/완료)
-- `features/mvp/timer-runtime/components/chunk-quick-adjust-actions.tsx`
+- `features/mvp/timer-runtime/components/mission-quick-adjust-actions.tsx`
   - 실행 중 시간 미세 조정 컨트롤
 - `features/mvp/recovery/components/recovery-actions.tsx`
   - 복구 액션(다시 나누기/내일로 이동)
@@ -155,8 +155,8 @@ Last Updated: 2026-02-28
   - 입력 검증/제약 피드백/요약 정규화
 - `features/mvp/shared/model/task-schedule.ts`
   - 일정 입력 파싱/포맷/시간 계산
-- `features/mvp/shared/model/chunk-runtime.ts`
-  - 청크 예산/상태/정렬 로직
+- `features/mvp/shared/model/mission-runtime.ts`
+  - 미션 예산/상태/정렬 로직
 - `features/mvp/shared/model/display-utils.ts`
   - 화면 표시 포맷/지표 문자열 변환
 - `features/mvp/shared/model/radar-shape.ts`

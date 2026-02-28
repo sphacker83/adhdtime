@@ -1,4 +1,4 @@
-import type { AppEvent, Chunk, StatsState, Task } from "@/features/mvp/types/domain";
+import type { AppEvent, Mission, StatsState, Task } from "@/features/mvp/types/domain";
 
 const DAY_IN_MS = 86_400_000;
 
@@ -58,7 +58,7 @@ export function formatOptionalDateTime(isoValue?: string, now = new Date()): str
   return `${formatRelativeDateLabel(parsedDate, now)} ${formatTimeOfDayLabel(parsedDate)}`;
 }
 
-export function chunkStatusLabel(status: Chunk["status"]): string {
+export function missionStatusLabel(status: Mission["status"]): string {
   if (status === "running") {
     return "진행 중";
   }

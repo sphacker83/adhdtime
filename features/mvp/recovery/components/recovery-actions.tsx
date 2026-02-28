@@ -1,22 +1,22 @@
-import { isActionableChunkStatus } from "@/features/mvp/shared";
-import type { Chunk } from "@/features/mvp/types/domain";
+import { isActionableMissionStatus } from "@/features/mvp/shared";
+import type { Mission } from "@/features/mvp/types/domain";
 
 type CssModuleClassMap = Readonly<Record<string, string>>;
 
 export interface RecoveryActionsProps {
   styles: CssModuleClassMap;
-  chunk: Pick<Chunk, "id" | "status">;
-  onRechunk: (chunkId: string) => void;
-  onReschedule: (chunkId: string) => void;
+  mission: Pick<Mission, "id" | "status">;
+  onRemission: (missionId: string) => void;
+  onReschedule: (missionId: string) => void;
 }
 
 export function RecoveryActions({
   styles,
-  chunk,
-  onRechunk,
+  mission,
+  onRemission,
   onReschedule
 }: RecoveryActionsProps) {
-  const isActionable = isActionableChunkStatus(chunk.status);
+  const isActionable = isActionableMissionStatus(mission.status);
   const getClassName = (classKey: string) => styles[classKey] ?? "";
 
   return (
@@ -24,7 +24,7 @@ export function RecoveryActions({
       <button
         type="button"
         className={getClassName("subtleButton")}
-        onClick={() => onRechunk(chunk.id)}
+        onClick={() => onRemission(mission.id)}
         disabled={!isActionable}
       >
         더 작게 다시 나누기
@@ -32,7 +32,7 @@ export function RecoveryActions({
       <button
         type="button"
         className={getClassName("subtleButton")}
-        onClick={() => onReschedule(chunk.id)}
+        onClick={() => onReschedule(mission.id)}
         disabled={!isActionable}
       >
         내일로 다시 등록

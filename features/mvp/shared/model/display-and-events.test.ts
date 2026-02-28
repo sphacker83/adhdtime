@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   STAT_META,
   buildRadarShape,
-  chunkStatusLabel,
+  missionStatusLabel,
   formatClock,
   formatEventMeta,
   formatOptionalDateTime,
@@ -21,8 +21,8 @@ describe("display and events model", () => {
     const tomorrowIso = new Date(2026, 1, 28, 9, 15, 0).toISOString();
     const futureIso = new Date(2026, 2, 2, 18, 20, 0).toISOString();
 
-    expect(chunkStatusLabel("running")).toBe("진행 중");
-    expect(chunkStatusLabel("done")).toBe("완료");
+    expect(missionStatusLabel("running")).toBe("진행 중");
+    expect(missionStatusLabel("done")).toBe("완료");
     expect(taskStatusLabel("in_progress")).toBe("진행 중");
     expect(taskStatusLabel("todo")).toBe("대기");
     expect(formatClock(65)).toBe("01:05");
@@ -74,7 +74,7 @@ describe("display and events model", () => {
         sessionId: "",
         source: "local",
         taskId: null,
-        chunkId: null,
+        missionId: null,
         meta: {
           a: 1,
           b: true,
@@ -87,7 +87,7 @@ describe("display and events model", () => {
     const normalized = normalizeLoadedEvents(events, "fallback-session");
     expect(normalized[0]?.sessionId).toBe("fallback-session");
     expect(normalized[0]?.taskId).toBeNull();
-    expect(normalized[0]?.chunkId).toBeNull();
+    expect(normalized[0]?.missionId).toBeNull();
     expect(formatEventMeta(events[0]?.meta)).toContain("a:1");
   });
 });

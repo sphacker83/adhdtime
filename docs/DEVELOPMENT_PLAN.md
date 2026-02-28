@@ -26,8 +26,8 @@ Last Updated: 2026-02-28
 - 플랫폼: Next.js(App Router) 기반 모바일 우선 웹앱
 - 저장: 로컬 우선(IndexedDB/LocalStorage)
 - 과업 생성: `title` 필수, `totalMinutes` 미입력 시 기본 60분
-- 청킹: 로컬 패턴 우선 + AI 폴백, `sum(chunks.estMinutes) <= totalMinutes` 강제
-- 재일정: Task 단위 기준 + 청크 이동 메타(`rescheduledFor`) 보조 저장
+- 청킹: 로컬 패턴 우선 + AI 폴백, `sum(missions.estMinutes) <= totalMinutes` 강제
+- 재일정: Task 단위 기준 + 미션 이동 메타(`rescheduledFor`) 보조 저장
 - 시간 필드: `createdAt/scheduledFor/startedAt/dueAt/completedAt` 정합 규칙 고정
 - 알림/STT/동기화: 코어 게이트 외 실험 경로로 UI/로컬 mock 포함
 - 범위 원칙: P0 외 요구사항은 백로그로 이관
@@ -43,7 +43,7 @@ Last Updated: 2026-02-28
 ## 3.2 문서-구현 동기화 포인트 (2026-02-28)
 
 - 이벤트 계약은 현재 구현 이벤트명을 기준으로 정렬한다.
-- `chunk_edited`, `chunk_abandoned` 계측은 후속 우선순위로 분리한다.
+- `mission_edited`, `mission_abandoned` 계측은 후속 우선순위로 분리한다.
 - UI parity 라운드에서 반응형/헤더/탭바/FAB 레이아웃 보정은 P0 품질 항목으로 취급한다.
 
 ## 3.1 FR 진행 상태 동기화 (Round 2 확정)
@@ -55,7 +55,7 @@ Last Updated: 2026-02-28
   - `paused` 상태 실행 잠금 포함
   - `completedAt`는 `done`일 때만 저장
   - ISO UTC 정규화 보강
-  - 실행 잠금 중 청크 삭제 버튼 비활성화
+  - 실행 잠금 중 미션 삭제 버튼 비활성화
 - 검증 명령 통과
   - `npm run typecheck` PASS
   - `npm run lint` PASS
@@ -66,8 +66,8 @@ Last Updated: 2026-02-28
 | FR | 확정 상태 | 근거 파일 | 비고 |
 | --- | --- | --- | --- |
 | FR-01 | 완료 | `features/mvp/components/mvp-dashboard.tsx` | 과업 직접 등록 + `totalMinutes` 입력/검증 동작 |
-| FR-02 | 완료 | `features/mvp/components/mvp-dashboard.tsx`, `features/mvp/lib/chunking.ts` | 청킹 총시간 예산 강제(`sum <= totalMinutes`) |
-| FR-03 | 완료 | `features/mvp/components/mvp-dashboard.tsx` | 청크 편집/삭제 + 실행 잠금 시 삭제 비활성화 |
+| FR-02 | 완료 | `features/mvp/components/mvp-dashboard.tsx`, `features/mvp/lib/missioning.ts` | 청킹 총시간 예산 강제(`sum <= totalMinutes`) |
+| FR-03 | 완료 | `features/mvp/components/mvp-dashboard.tsx` | 미션 편집/삭제 + 실행 잠금 시 삭제 비활성화 |
 | FR-05 | 완료 | `features/mvp/components/mvp-dashboard.tsx`, `features/mvp/lib/timer-accuracy.ts` | 타이머 실행 + 실행 중 빠른 `-1/+1` 조정 |
 | FR-11 | 완료 | `features/mvp/components/mvp-dashboard.tsx` | 실행 전/중 시간 수정 정책 가드(`running/paused` 잠금 포함) |
 | FR-12 | 완료 | `features/mvp/lib/storage.ts`, `features/mvp/components/mvp-dashboard.tsx`, `features/mvp/types/domain.ts` | 시간 필드 ISO UTC 정규화 + `completedAt(done only)` |
@@ -90,9 +90,9 @@ Last Updated: 2026-02-28
 
 - 타이머 상태 머신 구현(`running/paused/ended`)
 - 시작/일시정지/재개/완료 UI/동작 연결
-- 실행 중 청크 빠른 `-1분/+1분` 액션 UI 구현
+- 실행 중 미션 빠른 `-1분/+1분` 액션 UI 구현
 - 실행 전/중 시간 수정 정책 가드(폼 편집 제한, 총시간 증가/감소 규칙) 구현
-- 완료 후 다음 청크 자동 포커스
+- 완료 후 다음 미션 자동 포커스
 - 백그라운드 복귀 재계산 정책 적용
 - 5분 햅틱 + 설정 토글
 
@@ -102,12 +102,12 @@ Last Updated: 2026-02-28
 - 완료/복귀 이벤트 기반 보상 반영
 - 스탯(리포트) 화면 구현(완료 수/완료율/스탯 변화)
 - 복귀 루프 기본(과업 재일정/재청킹) 구현
-- 재일정 시 Task 단위 일정 이동 + 미완료 청크 동반 이동 처리
+- 재일정 시 Task 단위 일정 이동 + 미완료 미션 동반 이동 처리
 - 복귀 동선 2탭 이내 검증
 
 ### Week 4 - 안전/계측/QA/릴리즈
 
-- 이벤트 택소노미 누락 점검 및 보강(`task_time_updated`, `task_rescheduled`, `chunk_time_adjusted`)
+- 이벤트 택소노미 누락 점검 및 보강(`task_time_updated`, `task_rescheduled`, `mission_time_adjusted`)
 - KPI 계산 파이프라인(Activation/Time to Start/Recovery/D1/D7/Time Budget Fit)
 - 위험 입력 차단, rawInput 장기 저장 방지 검증
 - 시간 필드 정합성 회귀 테스트(`createdAt/scheduledFor/startedAt/dueAt/completedAt`)
@@ -124,7 +124,7 @@ Last Updated: 2026-02-28
 
 | 에픽 | 진행도(확정 범위) | 완료 티켓(확정 반영) | 근거 |
 | --- | --- | --- | --- |
-| Epic A. 홈/과업등록/청킹 | 완료 | A-03, A-04, A-06, A-08 | `features/mvp/components/mvp-dashboard.tsx`, `features/mvp/lib/chunking.ts` |
+| Epic A. 홈/과업등록/청킹 | 완료 | A-03, A-04, A-06, A-08 | `features/mvp/components/mvp-dashboard.tsx`, `features/mvp/lib/missioning.ts` |
 | Epic B. 타이머/실행/시간조정/햅틱 | 완료 | B-01, B-03, B-04, B-05 | `features/mvp/components/mvp-dashboard.tsx`, `features/mvp/lib/timer-accuracy.ts` |
 | Epic E. 계측/안전/프라이버시 | 완료 | E-05 | `features/mvp/lib/storage.ts`, `features/mvp/types/domain.ts` |
 | Epic F. QA/릴리즈 | 완료 | F-05 | `npm run typecheck`, `npm run lint`, `npm run test:mvp`, `npm run verify:gate`, `npm run build` PASS |
@@ -138,16 +138,16 @@ Last Updated: 2026-02-28
 5. A-05 로컬 청킹 룰셋(JSON)
 6. A-06 청킹 결과 스키마 validator + 총시간 제약
 7. A-07 AI 폴백 어댑터
-8. A-08 청크 리스트 + 현재 청크 강조
+8. A-08 미션 리스트 + 현재 미션 강조
 
 ## Epic B. 타이머/실행/시간조정/햅틱 (P0)
 
 1. B-01 타이머 상태 머신
-2. B-02 현재 청크 확장 카드 UI
+2. B-02 현재 미션 확장 카드 UI
 3. B-03 시작/일시정지/재개/완료 액션
 4. B-04 실행 중 빠른 `-1분/+1분` 조정
 5. B-05 실행 전/중 시간 수정 정책 가드
-6. B-06 완료 후 다음 청크 자동 포커스
+6. B-06 완료 후 다음 미션 자동 포커스
 7. B-07 백그라운드 복귀 시 재계산 정책
 8. B-08 5분 햅틱 스케줄러 + 설정 토글
 
@@ -163,8 +163,8 @@ Last Updated: 2026-02-28
 
 1. D-01 미완료/중단 상태 전이 설계(`abandoned`, `archived`)
 2. D-02 과업 재일정 CTA + `task.scheduledFor` 갱신 처리
-3. D-03 재일정 시 미완료 청크 동반 이동 규칙 구현
-4. D-04 재청킹 동선 + `parentChunkId` 연결 + 총시간 제약
+3. D-03 재일정 시 미완료 미션 동반 이동 규칙 구현
+4. D-04 재청킹 동선 + `parentMissionId` 연결 + 총시간 제약
 5. D-05 복귀 행동 보상(회복력/분해력) 반영
 6. D-06 비난형 카피 제거 점검
 
@@ -181,7 +181,7 @@ Last Updated: 2026-02-28
 
 1. F-01 수동 시나리오 체크리스트 실행
 2. F-02 도메인 유틸 테스트(청킹/타이머/XP/시간정합)
-3. F-03 컴포넌트 테스트(현재 청크 카드/복귀 CTA/빠른 시간조정)
+3. F-03 컴포넌트 테스트(현재 미션 카드/복귀 CTA/빠른 시간조정)
 4. F-04 E2E 스모크(등록->청킹->완료->복귀)
 5. F-05 릴리즈 노트 초안/배포 체크
 
@@ -193,7 +193,7 @@ Last Updated: 2026-02-28
 
 1. 과업 직접 등록(`title`, `totalMinutes`) + 선택 일정 저장
 2. 과업 청킹 생성(10초 이내, 총시간 제약 준수)
-3. 실행 전 시간 수정(`task.totalMinutes`, `chunk.estMinutes`) 정상
+3. 실행 전 시간 수정(`task.totalMinutes`, `mission.estMinutes`) 정상
 4. 타이머 일시정지/재개/완료 및 실행 중 빠른 `+/-` 조정
 5. 실행 중 `task.totalMinutes` 감소 차단/증가 허용 동작
 6. 5분 햅틱 ON/OFF 확인
@@ -206,7 +206,7 @@ Last Updated: 2026-02-28
 
 1. 도메인 테스트: 청킹 스키마, 총시간 제약, 타이머 상태 전이, XP 계산
 2. 정책 테스트: 실행 전/중 시간 수정 가드, Task 단위 재일정
-3. UI 테스트: 현재 청크 카드, 빠른 시간조정 버튼, 복귀 CTA, 설정 토글
+3. UI 테스트: 현재 미션 카드, 빠른 시간조정 버튼, 복귀 CTA, 설정 토글
 4. E2E 스모크: 핵심 루프 + 복귀 루프 + 시간 필드 검증
 
 ---
@@ -215,12 +215,12 @@ Last Updated: 2026-02-28
 
 1. 과업 등록 시 `title`, `totalMinutes` 필수값 검증
 2. 청킹 결과 10초 이내 표시 + 총시간 제약 준수
-3. 첫 청크 시작 3탭 이내 / 3분 이내
+3. 첫 미션 시작 3탭 이내 / 3분 이내
 4. 타이머 상태 꼬임 0건 + 실행 중 빠른 `+/-` 동작
 5. 햅틱 ON/OFF 정상
 6. 보상 및 상태 카드 즉시 반영
 7. 복귀 동선(과업 재일정/재청킹) 2탭 이내
-8. 재일정이 Task 단위로 동작(청크 단위 재일정 없음)
+8. 재일정이 Task 단위로 동작(미션 단위 재일정 없음)
 9. 필수 이벤트 누락 없음
 10. rawInput 장기 저장 없음
 11. 시간 필드 정합성 규칙 위반 없음

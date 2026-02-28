@@ -2,12 +2,12 @@
 아래 요구사항대로 구현하고, 실제 파일 수정 + 테스트 실행 + 결과 보고까지 완료해라.
 
 [작업 목표]
-`/Users/ethan/Workspace/dev/adhdtime/features/mvp/lib/chunking.ts`의 로컬 추천 로직을
+`/Users/ethan/Workspace/dev/adhdtime/features/mvp/lib/missioning.ts`의 로컬 추천 로직을
 하드코딩 키워드(`LOCAL_RULES.find`) 중심에서
 JSON 프리셋 메타(`keywords`, `keyword_weights`, `intent`, `priority`, `negative_keywords`, `examples`) 기반 점수 추천으로 리팩터링한다.
 
 [참조 데이터]
-`/Users/ethan/Workspace/dev/adhdtime/docs/adhd_chunk_presets_50.json`
+`/Users/ethan/Workspace/dev/adhdtime/docs/adhd_mission_presets_50.json`
 - 각 항목 구조: `{ schema_version, meta, task }`
 - `meta` 필드:
   - `keywords: string[]`
@@ -20,7 +20,7 @@ JSON 프리셋 메타(`keywords`, `keyword_weights`, `intent`, `priority`, `nega
 
 [반드시 지킬 요구사항]
 1) 기존 fallback 흐름 유지
-- `generateLocalChunking`에서 JSON 추천 실패 시 기존 `LOCAL_RULES` 매칭 사용
+- `generateLocalMissioning`에서 JSON 추천 실패 시 기존 `LOCAL_RULES` 매칭 사용
 - 그것도 실패하면 기존 흐름대로 `null` 반환 (상위에서 AI/기본 템플릿 fallback 유지)
 
 2) 점수 모델 구현
@@ -32,7 +32,7 @@ JSON 프리셋 메타(`keywords`, `keyword_weights`, `intent`, `priority`, `nega
 - ADHD 실행성 가산:
   - `task.difficulty` 낮을수록 가산
   - `task.estimated_time_min` 짧을수록 가산
-  - 첫 chunk가 1~2분이면 가산
+  - 첫 mission가 1~2분이면 가산
 - 동점 정렬 규칙:
   1. 총점 desc
   2. priority desc
@@ -47,7 +47,7 @@ JSON 프리셋 메타(`keywords`, `keyword_weights`, `intent`, `priority`, `nega
   - `sleep_wake_routine` 계열이 우선되도록 점수 설계
 
 4) 프리셋 변환
-- JSON `task.chunks` -> `ChunkTemplate[]` 변환:
+- JSON `task.missions` -> `MissionTemplate[]` 변환:
   - `step -> action`
   - `min -> estMinutes`
   - `done -> notes`
@@ -56,5 +56,5 @@ JSON 프리셋 메타(`keywords`, `keyword_weights`, `intent`, `priority`, `nega
 5) 타입 안정성
 - strict TypeScript 에러 없어야 함
 - `resolveJsonModule` 기반 JSON import 사용
-- 필요한 타입은 `chunking.ts` 내부에 명시적으로 선언
+- 필요한 타입은 `missioning.ts` 내부에 명시적으로 선언
 

@@ -35,7 +35,7 @@
   - 대시보드 import를 구조적으로 단순화
   - 테스트 타깃을 모듈 단위로 고정 가능
 - 적용 범위:
-  - task-meta/schedule/chunk-runtime/display/radar/events normalize
+  - task-meta/schedule/mission-runtime/display/radar/events normalize
   - `mvp-dashboard.tsx`의 관련 로컬 함수 제거 및 import 치환
 
 ## Alternatives Considered
@@ -62,7 +62,7 @@
 ## Validation Plan
 
 - 수동 시나리오:
-  - 과업 생성/청크 생성/타이머 동작/복구 플로우 확인
+  - 과업 생성/미션 생성/타이머 동작/복구 플로우 확인
 - 자동 테스트:
   - `npm run typecheck`
   - `npm run lint`

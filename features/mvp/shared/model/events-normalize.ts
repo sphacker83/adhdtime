@@ -6,6 +6,6 @@ export function normalizeLoadedEvents(rawEvents: AppEvent[] | undefined, fallbac
     sessionId: event.sessionId || fallbackSessionId,
     source: event.source || "local",
     taskId: event.taskId ?? null,
-    chunkId: event.chunkId ?? null
+    missionId: event.missionId ?? null
   }));
 }

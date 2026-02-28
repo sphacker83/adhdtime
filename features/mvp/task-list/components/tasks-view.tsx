@@ -1,12 +1,12 @@
 import {
-  chunkStatusLabel,
+  missionStatusLabel,
   formatClock,
   formatOptionalDateTime,
-  isActionableChunkStatus,
+  isActionableMissionStatus,
   taskStatusLabel
 } from "@/features/mvp/shared";
-import { ChunkPrimaryActions } from "@/features/mvp/timer-runtime";
-import type { Chunk, Task } from "@/features/mvp/types/domain";
+import { MissionPrimaryActions } from "@/features/mvp/timer-runtime";
+import type { Mission, Task } from "@/features/mvp/types/domain";
 
 type CssModuleClassMap = Readonly<Record<string, string>>;
 
@@ -20,17 +20,17 @@ export interface TasksViewProps {
   activeTask: Task | null;
   activeTaskId: string | null;
   activeTaskBudgetUsage: number;
-  activeTaskChunks: Chunk[];
-  currentChunkId: string | null;
-  remainingSecondsByChunk: Record<string, number>;
+  activeTaskMissions: Mission[];
+  currentMissionId: string | null;
+  remainingSecondsByMission: Record<string, number>;
   isExecutionLocked: boolean;
   onSetActiveTaskId: (taskId: string) => void;
   onEditTaskTotalMinutes: (task: Task) => void;
-  onStartChunk: (chunkId: string) => void;
-  onPauseChunk: (chunkId: string) => void;
-  onCompleteChunk: (chunkId: string) => void;
-  onEditChunk: (chunk: Chunk) => void;
-  onDeleteChunk: (chunk: Chunk) => void;
+  onStartMission: (missionId: string) => void;
+  onPauseMission: (missionId: string) => void;
+  onCompleteMission: (missionId: string) => void;
+  onEditMission: (mission: Mission) => void;
+  onDeleteMission: (mission: Mission) => void;
 }
 
 export function TasksView({
@@ -39,34 +39,34 @@ export function TasksView({
   activeTask,
   activeTaskId,
   activeTaskBudgetUsage,
-  activeTaskChunks,
-  currentChunkId,
-  remainingSecondsByChunk,
+  activeTaskMissions,
+  currentMissionId,
+  remainingSecondsByMission,
   isExecutionLocked,
   onSetActiveTaskId,
   onEditTaskTotalMinutes,
-  onStartChunk,
-  onPauseChunk,
-  onCompleteChunk,
-  onEditChunk,
-  onDeleteChunk
+  onStartMission,
+  onPauseMission,
+  onCompleteMission,
+  onEditMission,
+  onDeleteMission
 }: TasksViewProps) {
   const getClassName = (classKey: string) => styles[classKey] ?? "";
-  const currentChunk =
-    activeTaskChunks.find((chunk) => chunk.id === currentChunkId && isActionableChunkStatus(chunk.status))
-    ?? activeTaskChunks.find((chunk) => isActionableChunkStatus(chunk.status))
+  const currentMission =
+    activeTaskMissions.find((mission) => mission.id === currentMissionId && isActionableMissionStatus(mission.status))
+    ?? activeTaskMissions.find((mission) => isActionableMissionStatus(mission.status))
     ?? null;
 
   return (
     <section className={getClassName("listCard")}>
       <header className={getClassName("listHeader")}>
-        <h3>청크 목록</h3>
+        <h3>미션 목록</h3>
         <p>{activeTask ? activeTask.title : "과업을 선택하세요"}</p>
       </header>
       {activeTask ? (
         <div className={getClassName("taskBudgetRow")}>
           <p className={getClassName("helperText")}>
-            총 {activeTask.totalMinutes}분 · 청크 합계 {activeTaskBudgetUsage}분 · 상태 {taskStatusLabel(activeTask.status)}
+            총 {activeTask.totalMinutes}분 · 미션 합계 {activeTaskBudgetUsage}분 · 상태 {taskStatusLabel(activeTask.status)}
             {" "}· 시작 예정 {formatOptionalDateTime(activeTask.scheduledFor)} · 마감 {formatOptionalDateTime(activeTask.dueAt)}
           </p>
           <button
@@ -92,32 +92,32 @@ export function TasksView({
         ))}
       </div>
 
-      <ul className={getClassName("chunkList")}>
-        {activeTaskChunks.length === 0 ? <li className={getClassName("emptyRow")}>선택된 과업의 청크가 없습니다.</li> : null}
-        {activeTaskChunks.map((chunk) => {
-          const remaining = remainingSecondsByChunk[chunk.id] ?? chunk.estMinutes * 60;
+      <ul className={getClassName("missionList")}>
+        {activeTaskMissions.length === 0 ? <li className={getClassName("emptyRow")}>선택된 과업의 미션가 없습니다.</li> : null}
+        {activeTaskMissions.map((mission) => {
+          const remaining = remainingSecondsByMission[mission.id] ?? mission.estMinutes * 60;
           return (
             <li
-              key={chunk.id}
+              key={mission.id}
               className={joinClassNames(
-                getClassName("chunkItem"),
-                currentChunk?.id === chunk.id ? getClassName("chunkItemCurrent") : undefined
+                getClassName("missionItem"),
+                currentMission?.id === mission.id ? getClassName("missionItemCurrent") : undefined
               )}
             >
               <div>
-                <p className={getClassName("chunkOrder")}>#{chunk.order}</p>
-                <h4>{chunk.action}</h4>
-                <p className={getClassName("chunkInfo")}>
-                  {chunk.estMinutes}분 · {formatClock(remaining)} · {chunkStatusLabel(chunk.status)}
+                <p className={getClassName("missionOrder")}>#{mission.order}</p>
+                <h4>{mission.action}</h4>
+                <p className={getClassName("missionInfo")}>
+                  {mission.estMinutes}분 · {formatClock(remaining)} · {missionStatusLabel(mission.status)}
                 </p>
               </div>
-              <div className={getClassName("chunkButtons")}>
-                <ChunkPrimaryActions
+              <div className={getClassName("missionButtons")}>
+                <MissionPrimaryActions
                   styles={styles}
-                  chunk={chunk}
-                  onStartChunk={onStartChunk}
-                  onPauseChunk={onPauseChunk}
-                  onCompleteChunk={onCompleteChunk}
+                  mission={mission}
+                  onStartMission={onStartMission}
+                  onPauseMission={onPauseMission}
+                  onCompleteMission={onCompleteMission}
                   startButtonClassKey="smallButton"
                   pauseButtonClassKey="smallButton"
                   completeButtonClassKey="smallButton"
@@ -125,7 +125,7 @@ export function TasksView({
                 <button
                   type="button"
                   className={getClassName("smallButton")}
-                  onClick={() => onEditChunk(chunk)}
+                  onClick={() => onEditMission(mission)}
                   disabled={isExecutionLocked}
                 >
                   수정
@@ -133,7 +133,7 @@ export function TasksView({
                 <button
                   type="button"
                   className={getClassName("smallButtonDanger")}
-                  onClick={() => onDeleteChunk(chunk)}
+                  onClick={() => onDeleteMission(mission)}
                   disabled={isExecutionLocked}
                 >
                   삭제

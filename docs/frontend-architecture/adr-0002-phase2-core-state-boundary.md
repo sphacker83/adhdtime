@@ -13,7 +13,7 @@
 Phase 1 이후에도 `features/mvp/components/mvp-dashboard.tsx` 내부에 상태 저장/복원(hydration/persist)과 reducer wiring이 함께 남아 있었다.
 
 - 현재 상태:
-  - core 상태(`tasks/chunks/timerSessions/stats/settings/events/activeTaskId/activeTab/remainingSecondsByChunk`)를 대시보드에서 직접 관리
+  - core 상태(`tasks/missions/timerSessions/stats/settings/events/activeTaskId/activeTab/remainingSecondsByMission`)를 대시보드에서 직접 관리
   - hydration/persist 로직이 대시보드 effect에 결합
   - 파생 상태 계산이 컴포넌트 내부 `useMemo`에 분산
 - 문제점:
@@ -42,7 +42,7 @@ Phase 1 이후에도 `features/mvp/components/mvp-dashboard.tsx` 내부에 상�
 - 적용 범위:
   - 대시보드 core 상태 wiring
   - hydration/persist/reset 흐름
-  - 주요 파생 상태 selector화(active task/chunks/running/completion/home)
+  - 주요 파생 상태 selector화(active task/missions/running/completion/home)
 
 ## Alternatives Considered
 
@@ -69,7 +69,7 @@ Phase 1 이후에도 `features/mvp/components/mvp-dashboard.tsx` 내부에 상�
 ## Validation Plan
 
 - 수동 시나리오:
-  - 과업 생성/청크 생성/타이머 시작-일시정지-완료/리셋
+  - 과업 생성/미션 생성/타이머 시작-일시정지-완료/리셋
 - 자동 테스트:
   - `npm run typecheck`
   - `npm run lint`

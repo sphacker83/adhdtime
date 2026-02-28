@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useReducer, useState, type SetStateAction } from "react";
-import { clampTaskTotalMinutes } from "@/features/mvp/lib/chunking";
+import { clampTaskTotalMinutes } from "@/features/mvp/lib/missioning";
 import { rollDailyStats } from "@/features/mvp/lib/reward";
 import { loadPersistedState, savePersistedState } from "@/features/mvp/lib/storage";
 import {
@@ -10,9 +10,9 @@ import {
   mvpCoreStateReducer,
   setActiveTab as setActiveTabAction,
   setActiveTaskId as setActiveTaskIdAction,
-  setChunks as setChunksAction,
+  setMissions as setMissionsAction,
   setEvents as setEventsAction,
-  setRemainingSecondsByChunk as setRemainingSecondsByChunkAction,
+  setRemainingSecondsByMission as setRemainingSecondsByMissionAction,
   setSettings as setSettingsAction,
   setStats as setStatsAction,
   setTasks as setTasksAction,
@@ -20,7 +20,7 @@ import {
   type MvpCoreState
 } from "@/features/mvp/shell/model/core-state";
 import { normalizeLoadedEvents } from "@/features/mvp/shared";
-import type { AppEvent, Chunk, PersistedState, StatsState, Task, TimerSession, UserSettings } from "@/features/mvp/types/domain";
+import type { AppEvent, Mission, PersistedState, StatsState, Task, TimerSession, UserSettings } from "@/features/mvp/types/domain";
 
 const DEFAULT_TASK_TOTAL_MINUTES = 60;
 
@@ -32,20 +32,20 @@ interface UseMvpStoreResult extends MvpCoreState {
   coreState: MvpCoreState;
   hydrated: boolean;
   setTasks: (updater: SetStateAction<Task[]>) => void;
-  setChunks: (updater: SetStateAction<Chunk[]>) => void;
+  setMissions: (updater: SetStateAction<Mission[]>) => void;
   setTimerSessions: (updater: SetStateAction<TimerSession[]>) => void;
   setStats: (updater: SetStateAction<StatsState>) => void;
   setSettings: (updater: SetStateAction<UserSettings>) => void;
   setEvents: (updater: SetStateAction<AppEvent[]>) => void;
   setActiveTaskId: (updater: SetStateAction<string | null>) => void;
   setActiveTab: (updater: SetStateAction<PersistedState["activeTab"]>) => void;
-  setRemainingSecondsByChunk: (updater: SetStateAction<Record<string, number>>) => void;
+  setRemainingSecondsByMission: (updater: SetStateAction<Record<string, number>>) => void;
   resetCoreState: () => void;
 }
 
 function buildHydratedCoreState(loaded: PersistedState, sessionId: string): MvpCoreState {
-  const loadedChunkMinutesByTask = loaded.chunks.reduce<Record<string, number>>((acc, chunk) => {
-    acc[chunk.taskId] = (acc[chunk.taskId] ?? 0) + chunk.estMinutes;
+  const loadedMissionMinutesByTask = loaded.missions.reduce<Record<string, number>>((acc, mission) => {
+    acc[mission.taskId] = (acc[mission.taskId] ?? 0) + mission.estMinutes;
     return acc;
   }, {});
 
@@ -55,17 +55,17 @@ function buildHydratedCoreState(loaded: PersistedState, sessionId: string): MvpC
       summary: task.summary ?? task.title,
       totalMinutes: clampTaskTotalMinutes(
         task.totalMinutes,
-        loadedChunkMinutesByTask[task.id] ?? DEFAULT_TASK_TOTAL_MINUTES
+        loadedMissionMinutesByTask[task.id] ?? DEFAULT_TASK_TOTAL_MINUTES
       )
     })),
-    chunks: loaded.chunks,
+    missions: loaded.missions,
     timerSessions: loaded.timerSessions,
     stats: rollDailyStats(loaded.stats),
     settings: loaded.settings,
     events: normalizeLoadedEvents(loaded.events, sessionId),
     activeTaskId: loaded.activeTaskId,
     activeTab: loaded.activeTab,
-    remainingSecondsByChunk: loaded.remainingSecondsByChunk
+    remainingSecondsByMission: loaded.remainingSecondsByMission
   };
 }
 
@@ -77,8 +77,8 @@ export function useMvpStore(params: UseMvpStoreParams): UseMvpStoreResult {
   const setTasks = useCallback((updater: SetStateAction<Task[]>) => {
     dispatchCoreState(setTasksAction(updater));
   }, []);
-  const setChunks = useCallback((updater: SetStateAction<Chunk[]>) => {
-    dispatchCoreState(setChunksAction(updater));
+  const setMissions = useCallback((updater: SetStateAction<Mission[]>) => {
+    dispatchCoreState(setMissionsAction(updater));
   }, []);
   const setTimerSessions = useCallback((updater: SetStateAction<TimerSession[]>) => {
     dispatchCoreState(setTimerSessionsAction(updater));
@@ -98,8 +98,8 @@ export function useMvpStore(params: UseMvpStoreParams): UseMvpStoreResult {
   const setActiveTab = useCallback((updater: SetStateAction<PersistedState["activeTab"]>) => {
     dispatchCoreState(setActiveTabAction(updater));
   }, []);
-  const setRemainingSecondsByChunk = useCallback((updater: SetStateAction<Record<string, number>>) => {
-    dispatchCoreState(setRemainingSecondsByChunkAction(updater));
+  const setRemainingSecondsByMission = useCallback((updater: SetStateAction<Record<string, number>>) => {
+    dispatchCoreState(setRemainingSecondsByMissionAction(updater));
   }, []);
   const resetCoreState = useCallback(() => {
     dispatchCoreState(hydrateCoreState(createInitialCoreState()));
@@ -126,14 +126,14 @@ export function useMvpStore(params: UseMvpStoreParams): UseMvpStoreResult {
     ...coreState,
     hydrated,
     setTasks,
-    setChunks,
+    setMissions,
     setTimerSessions,
     setStats,
     setSettings,
     setEvents,
     setActiveTaskId,
     setActiveTab,
-    setRemainingSecondsByChunk,
+    setRemainingSecondsByMission,
     resetCoreState
   };
 }

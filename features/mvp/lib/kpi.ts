@@ -4,12 +4,12 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 
 const REQUIRED_EVENT_NAMES: EventName[] = [
   "task_created",
-  "chunk_generated",
-  "chunk_started",
-  "chunk_paused",
-  "chunk_completed",
-  "chunk_abandoned",
-  "rechunk_requested",
+  "mission_generated",
+  "mission_started",
+  "mission_paused",
+  "mission_completed",
+  "mission_abandoned",
+  "remission_requested",
   "reschedule_requested",
   "xp_gained",
   "level_up",
@@ -31,7 +31,7 @@ export interface MvpKpiSummary {
   activationRate: KpiMetric;
   averageTimeToStartMs: number | null;
   averageTimeToStartSeconds: number | null;
-  chunkCompletionRate: KpiMetric;
+  missionCompletionRate: KpiMetric;
   recoveryRate: KpiMetric;
   d1Retention: KpiMetric;
   d7Retention: KpiMetric;
@@ -40,8 +40,8 @@ export interface MvpKpiSummary {
     tasksCreated: number;
     tasksStarted: number;
     tasksAbandoned: number;
-    generatedChunks: number;
-    completedChunks: number;
+    generatedMissions: number;
+    completedMissions: number;
   };
   eventCoverage: Record<EventName, boolean>;
 }
@@ -82,8 +82,8 @@ function createMetric(numerator: number, denominator: number): KpiMetric {
   };
 }
 
-function extractChunkCount(event: AppEvent): number {
-  const rawCount = event.meta?.chunkCount;
+function extractMissionCount(event: AppEvent): number {
+  const rawCount = event.meta?.missionCount;
   if (typeof rawCount !== "number" || !Number.isFinite(rawCount)) {
     return 0;
   }
@@ -123,8 +123,8 @@ export function computeMvpKpis(events: AppEvent[]): MvpKpiSummary {
   const abandonedAtByTaskId = new Map<string, number[]>();
   const recoveryEventsByTaskId = new Map<string, number[]>();
 
-  let generatedChunks = 0;
-  let completedChunks = 0;
+  let generatedMissions = 0;
+  let completedMissions = 0;
 
   normalized.forEach((event) => {
     const currentEvents = eventsBySessionId.get(event.sessionId) ?? [];
@@ -142,28 +142,28 @@ export function computeMvpKpis(events: AppEvent[]): MvpKpiSummary {
       }
     }
 
-    if (event.eventName === "chunk_started" && event.taskId) {
+    if (event.eventName === "mission_started" && event.taskId) {
       const prev = firstStartedAtByTaskId.get(event.taskId);
       if (prev === undefined || event.timestampMs < prev) {
         firstStartedAtByTaskId.set(event.taskId, event.timestampMs);
       }
     }
 
-    if (event.eventName === "chunk_generated") {
-      generatedChunks += extractChunkCount(event);
+    if (event.eventName === "mission_generated") {
+      generatedMissions += extractMissionCount(event);
     }
 
-    if (event.eventName === "chunk_completed") {
-      completedChunks += 1;
+    if (event.eventName === "mission_completed") {
+      completedMissions += 1;
     }
 
-    if (event.eventName === "chunk_abandoned" && event.taskId) {
+    if (event.eventName === "mission_abandoned" && event.taskId) {
       const abandonedAt = abandonedAtByTaskId.get(event.taskId) ?? [];
       abandonedAt.push(event.timestampMs);
       abandonedAtByTaskId.set(event.taskId, abandonedAt);
     }
 
-    if ((event.eventName === "rechunk_requested" || event.eventName === "reschedule_requested") && event.taskId) {
+    if ((event.eventName === "remission_requested" || event.eventName === "reschedule_requested") && event.taskId) {
       const recovered = recoveryEventsByTaskId.get(event.taskId) ?? [];
       recovered.push(event.timestampMs);
       recoveryEventsByTaskId.set(event.taskId, recovered);
@@ -176,7 +176,7 @@ export function computeMvpKpis(events: AppEvent[]): MvpKpiSummary {
   activationSessions.forEach(([sessionId, firstEventMs]) => {
     const sessionEvents = eventsBySessionId.get(sessionId) ?? [];
     const completedWithin24h = sessionEvents.some(
-      (event) => event.eventName === "chunk_completed"
+      (event) => event.eventName === "mission_completed"
         && event.timestampMs >= firstEventMs
         && event.timestampMs <= firstEventMs + DAY_MS
     );
@@ -223,7 +223,7 @@ export function computeMvpKpis(events: AppEvent[]): MvpKpiSummary {
     activationRate: createMetric(activationHits, activationSessions.length),
     averageTimeToStartMs,
     averageTimeToStartSeconds: averageTimeToStartMs === null ? null : Math.round(averageTimeToStartMs / 1000),
-    chunkCompletionRate: createMetric(completedChunks, generatedChunks),
+    missionCompletionRate: createMetric(completedMissions, generatedMissions),
     recoveryRate: createMetric(recoveredWithin24hCount, abandonedTasks.length),
     d1Retention: createMetric(d1Hits, retentionDenominator),
     d7Retention: createMetric(d7Hits, retentionDenominator),
@@ -232,8 +232,8 @@ export function computeMvpKpis(events: AppEvent[]): MvpKpiSummary {
       tasksCreated: createdAtByTaskId.size,
       tasksStarted: firstStartedAtByTaskId.size,
       tasksAbandoned: abandonedTasks.length,
-      generatedChunks,
-      completedChunks
+      generatedMissions,
+      completedMissions
     },
     eventCoverage: createEventCoverageMap(normalized)
   };

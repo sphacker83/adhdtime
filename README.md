@@ -8,8 +8,8 @@ ADHD 친화형 실행 보조 웹앱입니다.
 ### MVP P0 코어 루프 (구현됨)
 - 텍스트 과업 입력
 - 로컬 우선 청킹 + AI 폴백(현재는 모의 어댑터 기반)
-- 청크 수정/삭제/순서 재정렬
-- 청크 타이머(시작/일시정지/재개/완료)
+- 미션 수정/삭제/순서 재정렬
+- 미션 타이머(시작/일시정지/재개/완료)
 - 5분 미세 햅틱 ON/OFF
 - 보상(XP/레벨/5스탯) 즉시 반영
 - 복귀 루프(재청킹/내일로 재등록)
@@ -83,4 +83,4 @@ dev/active/                 # Dev Docs(세션 복구용 context/tasks/plan)
 
 - AI 청킹은 실제 외부 모델 호출이 아니라 `createAiFallbackAdapter` 기반 모의 폴백입니다.
 - 외부 캘린더 동기화는 실제 OAuth 연동이 아니라 상태 전이 Mock입니다.
-- 알림은 현재 `chunk_started`/`reschedule_requested` 이벤트 트리거 중심입니다.
+- 알림은 현재 `mission_started`/`reschedule_requested` 이벤트 트리거 중심입니다.

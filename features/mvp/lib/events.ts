@@ -7,7 +7,7 @@ export function createEvent(params: {
   sessionId: string;
   source: EventSource;
   taskId?: string;
-  chunkId?: string;
+  missionId?: string;
   meta?: AppEvent["meta"];
 }): AppEvent {
   return {
@@ -17,7 +17,7 @@ export function createEvent(params: {
     source: params.source,
     timestamp: new Date().toISOString(),
     taskId: params.taskId ?? null,
-    chunkId: params.chunkId ?? null,
+    missionId: params.missionId ?? null,
     meta: params.meta
   };
 }

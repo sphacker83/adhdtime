@@ -1,7 +1,7 @@
 import type { SetStateAction } from "react";
 import type {
   AppEvent,
-  Chunk,
+  Mission,
   StatsState,
   Task,
   TimerSession,
@@ -14,9 +14,9 @@ export type SetTasksAction = {
   updater: SetStateAction<Task[]>;
 };
 
-export type SetChunksAction = {
-  type: "set_chunks";
-  updater: SetStateAction<Chunk[]>;
+export type SetMissionsAction = {
+  type: "set_missions";
+  updater: SetStateAction<Mission[]>;
 };
 
 export type SetTimerSessionsAction = {
@@ -49,8 +49,8 @@ export type SetActiveTabAction = {
   updater: SetStateAction<MvpCoreTab>;
 };
 
-export type SetRemainingSecondsByChunkAction = {
-  type: "set_remaining_seconds_by_chunk";
+export type SetRemainingSecondsByMissionAction = {
+  type: "set_remaining_seconds_by_mission";
   updater: SetStateAction<Record<string, number>>;
 };
 
@@ -61,22 +61,22 @@ export type HydrateCoreStateAction = {
 
 export type MvpCoreAction =
   | SetTasksAction
-  | SetChunksAction
+  | SetMissionsAction
   | SetTimerSessionsAction
   | SetStatsAction
   | SetSettingsAction
   | SetEventsAction
   | SetActiveTaskIdAction
   | SetActiveTabAction
-  | SetRemainingSecondsByChunkAction
+  | SetRemainingSecondsByMissionAction
   | HydrateCoreStateAction;
 
 export function setTasks(updater: SetStateAction<Task[]>): SetTasksAction {
   return { type: "set_tasks", updater };
 }
 
-export function setChunks(updater: SetStateAction<Chunk[]>): SetChunksAction {
-  return { type: "set_chunks", updater };
+export function setMissions(updater: SetStateAction<Mission[]>): SetMissionsAction {
+  return { type: "set_missions", updater };
 }
 
 export function setTimerSessions(updater: SetStateAction<TimerSession[]>): SetTimerSessionsAction {
@@ -103,10 +103,10 @@ export function setActiveTab(updater: SetStateAction<MvpCoreTab>): SetActiveTabA
   return { type: "set_active_tab", updater };
 }
 
-export function setRemainingSecondsByChunk(
+export function setRemainingSecondsByMission(
   updater: SetStateAction<Record<string, number>>
-): SetRemainingSecondsByChunkAction {
-  return { type: "set_remaining_seconds_by_chunk", updater };
+): SetRemainingSecondsByMissionAction {
+  return { type: "set_remaining_seconds_by_mission", updater };
 }
 
 export function hydrateCoreState(state: MvpCoreState): HydrateCoreStateAction {

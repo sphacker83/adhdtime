@@ -3,18 +3,18 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   createAiFallbackAdapter,
-  enforceChunkBudget,
-  generateLocalChunking,
-  mapChunkingResultToChunks,
-  generateTemplateChunking,
-  isWithinTaskChunkBudget,
-  sumChunkEstMinutes,
-  validateChunkingResult
-} from "@/features/mvp/lib/chunking";
+  enforceMissionBudget,
+  generateLocalMissioning,
+  mapMissioningResultToMissions,
+  generateTemplateMissioning,
+  isWithinTaskMissionBudget,
+  sumMissionEstMinutes,
+  validateMissioningResult
+} from "@/features/mvp/lib/missioning";
 import { appendEvent, createEvent } from "@/features/mvp/lib/events";
 import { computeMvpKpis } from "@/features/mvp/lib/kpi";
 import {
-  applyChunkCompletionReward,
+  applyMissionCompletionReward,
   applyRecoveryReward
 } from "@/features/mvp/lib/reward";
 import {
@@ -37,12 +37,12 @@ import { SettingsView } from "@/features/mvp/settings";
 import { useMvpStore } from "@/features/mvp/shell/hooks/use-mvp-store";
 import {
   selectActiveTask,
-  selectActiveTaskChunks,
+  selectActiveTaskMissions,
   selectCompletionRate,
-  selectHomeChunk,
+  selectHomeMission,
   selectHomeRemaining,
   selectHomeTask,
-  selectRunningChunk
+  selectRunningMission
 } from "@/features/mvp/shell/model/core-state";
 import { StatsView } from "@/features/mvp/stats";
 import {
@@ -53,40 +53,40 @@ import {
   buildRadarShape,
   getTaskMetaConstraintFeedback,
   getTaskBudgetUsage,
-  getTaskBudgetedChunks,
+  getTaskBudgetedMissions,
   getDiffMinutes,
-  isActionableChunkStatus,
+  isActionableMissionStatus,
   isTaskClosedStatus,
   isTaskTotalMinutesInRange,
   normalizeTaskScheduleFromLocalInputs,
   normalizeTaskScheduleIso,
-  orderChunks,
+  orderMissions,
   formatDateTime,
   formatDateTimeLocalInput,
   getXpProgressPercent,
   parseDateTimeLocalInput,
   parseLooseMinuteInput,
   parseTaskTotalMinutesInput,
-  reorderTaskChunksKeepingLocked,
-  withReorderedTaskChunks,
+  reorderTaskMissionsKeepingLocked,
+  withReorderedTaskMissions,
   buildTaskSummary,
   type TaskMetaField,
   type TaskMetaInputs
 } from "@/features/mvp/shared";
 import {
-  applyElapsedToChunkRemaining,
+  applyElapsedToMissionRemaining,
   applyElapsedWindow,
   createTimerElapsedAccumulator
 } from "@/features/mvp/lib/timer-accuracy";
 import { TaskInputSection } from "@/features/mvp/task-input";
 import { HomeView, TasksView } from "@/features/mvp/task-list";
 import {
-  MAX_CHUNK_EST_MINUTES,
+  MAX_MISSION_EST_MINUTES,
   MAX_TASK_TOTAL_MINUTES,
-  MIN_CHUNK_EST_MINUTES,
+  MIN_MISSION_EST_MINUTES,
   MIN_TASK_TOTAL_MINUTES,
   type AppEvent,
-  type Chunk,
+  type Mission,
   type EventSource,
   type Task,
   type TimerSession
@@ -108,8 +108,8 @@ const DEFAULT_TASK_TOTAL_MINUTES = 60;
 
 const RECOVERY_FEEDBACK = {
   safetyBlocked: "괜찮아요. 안전을 위해 이 입력은 청킹하지 않았어요. 안전한 할 일로 다시 입력해 주세요.",
-  rechunked: "괜찮아요. 더 작은 단계로 다시 나눴어요. 첫 단계부터 이어가요.",
-  rescheduled: "괜찮아요. 내일로 다시 등록했어요. 바로 시작할 청크를 준비해뒀어요."
+  remissioned: "괜찮아요. 더 작은 단계로 다시 나눴어요. 첫 단계부터 이어가요.",
+  rescheduled: "괜찮아요. 내일로 다시 등록했어요. 바로 시작할 미션를 준비해뒀어요."
 } as const;
 
 const DEFAULT_NOTIFICATION_CAPABILITY: NotificationCapability = {
@@ -201,23 +201,23 @@ export function MvpDashboard() {
   const {
     coreState,
     tasks,
-    chunks,
+    missions,
     stats,
     settings,
     events,
     activeTaskId,
     activeTab,
-    remainingSecondsByChunk,
+    remainingSecondsByMission,
     hydrated,
     setTasks,
-    setChunks,
+    setMissions,
     setTimerSessions,
     setStats,
     setSettings,
     setEvents,
     setActiveTaskId,
     setActiveTab,
-    setRemainingSecondsByChunk,
+    setRemainingSecondsByMission,
     resetCoreState
   } = useMvpStore({ sessionId: sessionIdRef.current });
 
@@ -230,15 +230,15 @@ export function MvpDashboard() {
   const [isQuestComposerOpen, setIsQuestComposerOpen] = useState(false);
   const [questComposerMode, setQuestComposerMode] = useState<"create" | "edit">("create");
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
-  const [chunkEditDraft, setChunkEditDraft] = useState<{
-    chunkId: string;
+  const [missionEditDraft, setMissionEditDraft] = useState<{
+    missionId: string;
     action: string;
     estMinutesInput: string;
   } | null>(null);
-  const [chunkEditError, setChunkEditError] = useState<string | null>(null);
+  const [missionEditError, setMissionEditError] = useState<string | null>(null);
   const [, setFeedback] = useState<string>("오늘은 가장 작은 행동부터 시작해요.");
   const [clock, setClock] = useState(new Date());
-  const [currentChunkId, setCurrentChunkId] = useState<string | null>(null);
+  const [currentMissionId, setCurrentMissionId] = useState<string | null>(null);
   const [expandedHomeTaskId, setExpandedHomeTaskId] = useState<string | null>(null);
   const [notificationCapability, setNotificationCapability] = useState<NotificationCapability>(
     DEFAULT_NOTIFICATION_CAPABILITY
@@ -259,7 +259,7 @@ export function MvpDashboard() {
   const sttFinalTranscriptRef = useRef("");
   const sttInterimTranscriptRef = useRef("");
   const syncMockAdapterRef = useRef(createSyncMockAdapter("GOOGLE_CALENDAR"));
-  const lastHapticBucketByChunkRef = useRef<Record<string, number>>({});
+  const lastHapticBucketByMissionRef = useRef<Record<string, number>>({});
   const taskMetaEditingFieldRef = useRef<TaskMetaField | null>(null);
   const taskMetaLastDistinctEditedFieldRef = useRef<TaskMetaField | null>(null);
   const gateMetricsRef = useRef<{
@@ -277,23 +277,23 @@ export function MvpDashboard() {
     [coreState]
   );
 
-  const activeTaskChunks = useMemo(
-    () => selectActiveTaskChunks(coreState),
+  const activeTaskMissions = useMemo(
+    () => selectActiveTaskMissions(coreState),
     [coreState]
   );
-  const runningChunk = useMemo(
-    () => selectRunningChunk(coreState),
+  const runningMission = useMemo(
+    () => selectRunningMission(coreState),
     [coreState]
   );
-  const executionLockedChunk = useMemo(
-    () => chunks.find((chunk) => chunk.status === "running" || chunk.status === "paused") ?? null,
-    [chunks]
+  const executionLockedMission = useMemo(
+    () => missions.find((mission) => mission.status === "running" || mission.status === "paused") ?? null,
+    [missions]
   );
-  const executionLockedTaskId = executionLockedChunk?.taskId ?? null;
-  const isExecutionLocked = executionLockedChunk !== null;
+  const executionLockedTaskId = executionLockedMission?.taskId ?? null;
+  const isExecutionLocked = executionLockedMission !== null;
   const activeTaskBudgetUsage = useMemo(
-    () => (activeTaskId ? getTaskBudgetUsage(chunks, activeTaskId) : 0),
-    [chunks, activeTaskId]
+    () => (activeTaskId ? getTaskBudgetUsage(missions, activeTaskId) : 0),
+    [missions, activeTaskId]
   );
 
   const completionRate = useMemo(
@@ -388,9 +388,9 @@ export function MvpDashboard() {
     setIsQuestComposerOpen(true);
   };
 
-  const closeChunkEditModal = () => {
-    setChunkEditDraft(null);
-    setChunkEditError(null);
+  const closeMissionEditModal = () => {
+    setMissionEditDraft(null);
+    setMissionEditError(null);
   };
 
   useEffect(() => {
@@ -474,36 +474,36 @@ export function MvpDashboard() {
 
   useEffect(() => {
     if (!activeTaskId) {
-      if (currentChunkId !== null) {
-        setCurrentChunkId(null);
+      if (currentMissionId !== null) {
+        setCurrentMissionId(null);
       }
       return;
     }
 
-    const usableChunks = activeTaskChunks.filter((chunk) => isActionableChunkStatus(chunk.status));
-    if (usableChunks.length === 0) {
-      if (currentChunkId !== null) {
-        setCurrentChunkId(null);
+    const usableMissions = activeTaskMissions.filter((mission) => isActionableMissionStatus(mission.status));
+    if (usableMissions.length === 0) {
+      if (currentMissionId !== null) {
+        setCurrentMissionId(null);
       }
       return;
     }
 
-    if (currentChunkId && usableChunks.some((chunk) => chunk.id === currentChunkId)) {
+    if (currentMissionId && usableMissions.some((mission) => mission.id === currentMissionId)) {
       return;
     }
 
-    const nextChunk = usableChunks.find((chunk) => chunk.status === "running") ?? usableChunks[0];
-    setCurrentChunkId(nextChunk.id);
-  }, [activeTaskId, activeTaskChunks, currentChunkId]);
+    const nextMission = usableMissions.find((mission) => mission.status === "running") ?? usableMissions[0];
+    setCurrentMissionId(nextMission.id);
+  }, [activeTaskId, activeTaskMissions, currentMissionId]);
 
   useEffect(() => {
-    if (!runningChunk) {
+    if (!runningMission) {
       tickAccumulatorRef.current = createTimerElapsedAccumulator();
       return;
     }
 
     const applyTick = () => {
-      if (!runningChunk) {
+      if (!runningMission) {
         return;
       }
 
@@ -513,11 +513,11 @@ export function MvpDashboard() {
       });
       tickAccumulatorRef.current = tickResult.nextAccumulator;
 
-      setRemainingSecondsByChunk((prev) => {
-        return applyElapsedToChunkRemaining({
-          remainingSecondsByChunk: prev,
-          chunkId: runningChunk.id,
-          chunkTotalSeconds: runningChunk.estMinutes * 60,
+      setRemainingSecondsByMission((prev) => {
+        return applyElapsedToMissionRemaining({
+          remainingSecondsByMission: prev,
+          missionId: runningMission.id,
+          missionTotalSeconds: runningMission.estMinutes * 60,
           elapsedSeconds: tickResult.elapsedSeconds
         });
       });
@@ -537,21 +537,21 @@ export function MvpDashboard() {
       window.clearInterval(intervalId);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, [runningChunk, setRemainingSecondsByChunk]);
+  }, [runningMission, setRemainingSecondsByMission]);
 
   useEffect(() => {
-    if (!runningChunk || !settings.hapticEnabled) {
+    if (!runningMission || !settings.hapticEnabled) {
       return;
     }
 
-    const total = runningChunk.estMinutes * 60;
-    const remaining = remainingSecondsByChunk[runningChunk.id] ?? total;
+    const total = runningMission.estMinutes * 60;
+    const remaining = remainingSecondsByMission[runningMission.id] ?? total;
     const elapsed = Math.max(0, total - remaining);
     const currentBucket = Math.floor(elapsed / 300);
-    const previousBucket = lastHapticBucketByChunkRef.current[runningChunk.id] ?? 0;
+    const previousBucket = lastHapticBucketByMissionRef.current[runningMission.id] ?? 0;
 
     if (currentBucket > previousBucket && currentBucket > 0) {
-      lastHapticBucketByChunkRef.current[runningChunk.id] = currentBucket;
+      lastHapticBucketByMissionRef.current[runningMission.id] = currentBucket;
 
       if (typeof navigator !== "undefined" && "vibrate" in navigator) {
         navigator.vibrate(35);
@@ -564,8 +564,8 @@ export function MvpDashboard() {
             eventName: "haptic_fired",
             sessionId: sessionIdRef.current,
             source: "local",
-            taskId: runningChunk.taskId,
-            chunkId: runningChunk.id,
+            taskId: runningMission.taskId,
+            missionId: runningMission.id,
             meta: {
               minuteMark: currentBucket * 5
             }
@@ -573,7 +573,7 @@ export function MvpDashboard() {
         )
       );
     }
-  }, [remainingSecondsByChunk, runningChunk, settings.hapticEnabled, setEvents]);
+  }, [remainingSecondsByMission, runningMission, settings.hapticEnabled, setEvents]);
 
   useEffect(() => {
     setTasks((prev) => {
@@ -598,9 +598,9 @@ export function MvpDashboard() {
         const nextScheduledFor = normalizedSchedule.scheduledFor;
         const nextDueAt = normalizedSchedule.dueAt;
 
-        const taskChunks = chunks.filter((chunk) => chunk.taskId === task.id);
-        const openTaskChunks = taskChunks.filter((chunk) => !isTaskClosedStatus(chunk.status));
-        if (taskChunks.length === 0) {
+        const taskMissions = missions.filter((mission) => mission.taskId === task.id);
+        const openTaskMissions = taskMissions.filter((mission) => !isTaskClosedStatus(mission.status));
+        if (taskMissions.length === 0) {
           if (task.scheduledFor === nextScheduledFor && task.dueAt === nextDueAt) {
             return task;
           }
@@ -612,14 +612,14 @@ export function MvpDashboard() {
           };
         }
 
-        const allClosed = taskChunks.every((chunk) => isTaskClosedStatus(chunk.status));
-        const hasRunningOrPaused = openTaskChunks.some((chunk) => chunk.status === "running" || chunk.status === "paused");
-        const inferredStartedAt = openTaskChunks
-          .map((chunk) => chunk.startedAt)
+        const allClosed = taskMissions.every((mission) => isTaskClosedStatus(mission.status));
+        const hasRunningOrPaused = openTaskMissions.some((mission) => mission.status === "running" || mission.status === "paused");
+        const inferredStartedAt = openTaskMissions
+          .map((mission) => mission.startedAt)
           .filter((startedAt): startedAt is string => Boolean(startedAt))
           .sort((a, b) => Date.parse(a) - Date.parse(b))[0];
-        const inferredCompletedAt = taskChunks
-          .map((chunk) => chunk.completedAt)
+        const inferredCompletedAt = taskMissions
+          .map((mission) => mission.completedAt)
           .filter((completedAt): completedAt is string => Boolean(completedAt))
           .sort((a, b) => Date.parse(b) - Date.parse(a))[0];
 
@@ -657,12 +657,12 @@ export function MvpDashboard() {
       const changed = next.some((task, index) => task !== prev[index]);
       return changed ? next : prev;
     });
-  }, [chunks, setTasks]);
+  }, [missions, setTasks]);
 
-  const upsertTimerSession = (chunkId: string, nextState: TimerSession["state"], nowIso: string) => {
+  const upsertTimerSession = (missionId: string, nextState: TimerSession["state"], nowIso: string) => {
     setTimerSessions((prev) => {
       const activeSessionIndex = prev.findIndex(
-        (session) => session.chunkId === chunkId && session.state !== "ended"
+        (session) => session.missionId === missionId && session.state !== "ended"
       );
 
       if (activeSessionIndex === -1) {
@@ -673,7 +673,7 @@ export function MvpDashboard() {
         return [
           {
             id: crypto.randomUUID(),
-            chunkId,
+            missionId,
             state: nextState,
             startedAt: nowIso,
             pausedAt: nextState === "paused" ? nowIso : undefined,
@@ -712,7 +712,7 @@ export function MvpDashboard() {
     eventName: AppEvent["eventName"];
     source: EventSource;
     taskId?: string;
-    chunkId?: string;
+    missionId?: string;
     meta?: AppEvent["meta"];
   }) => {
     setEvents((prev) =>
@@ -727,9 +727,9 @@ export function MvpDashboard() {
   };
 
   const pushLoopNotification = (params: {
-    eventName: "chunk_started" | "chunk_completed" | "reschedule_requested" | "task_rescheduled";
+    eventName: "mission_started" | "mission_completed" | "reschedule_requested" | "task_rescheduled";
     taskTitle: string;
-    chunkAction: string;
+    missionAction: string;
   }) => {
     const capability = getNotificationCapability();
     setNotificationCapability(capability);
@@ -743,17 +743,17 @@ export function MvpDashboard() {
     }
 
     const title =
-      params.eventName === "chunk_started"
-        ? "청크 시작"
-        : params.eventName === "chunk_completed"
-          ? "청크 완료"
+      params.eventName === "mission_started"
+        ? "미션 시작"
+        : params.eventName === "mission_completed"
+          ? "미션 완료"
           : "내일로 재등록";
     const body =
-      params.eventName === "chunk_started"
-        ? `${params.taskTitle} · ${params.chunkAction}`
-        : params.eventName === "chunk_completed"
-          ? `${params.taskTitle} · ${params.chunkAction} 청크를 완료했어요.`
-          : `${params.taskTitle} · ${params.chunkAction} 청크를 내일로 옮겼어요.`;
+      params.eventName === "mission_started"
+        ? `${params.taskTitle} · ${params.missionAction}`
+        : params.eventName === "mission_completed"
+          ? `${params.taskTitle} · ${params.missionAction} 미션를 완료했어요.`
+          : `${params.taskTitle} · ${params.missionAction} 미션를 내일로 옮겼어요.`;
     const notification = new window.Notification(title, {
       body,
       tag: `adhdtime-${params.eventName}-${Date.now()}`
@@ -1065,38 +1065,38 @@ export function MvpDashboard() {
     try {
       const taskId = crypto.randomUUID();
       const summary = buildTaskSummary(rawInput);
-      const chunkingStartedAt = Date.now();
+      const missioningStartedAt = Date.now();
       let source: EventSource = "local";
-      let chunking = generateLocalChunking(taskId, rawInput);
+      let missioning = generateLocalMissioning(taskId, rawInput);
 
-      if (!chunking) {
+      if (!missioning) {
         source = "ai";
         try {
-          chunking = await aiAdapterRef.current.generate({ taskId, title: rawInput });
+          missioning = await aiAdapterRef.current.generate({ taskId, title: rawInput });
         } catch {
-          chunking = null;
+          missioning = null;
         }
       }
 
-      if (!chunking) {
+      if (!missioning) {
         source = "local";
-        chunking = generateTemplateChunking(taskId, rawInput);
+        missioning = generateTemplateMissioning(taskId, rawInput);
       }
 
       let usedValidationFallback = false;
-      const validation = validateChunkingResult(chunking);
+      const validation = validateMissioningResult(missioning);
       if (!validation.ok) {
         usedValidationFallback = true;
         source = "local";
-        chunking = generateTemplateChunking(taskId, rawInput);
+        missioning = generateTemplateMissioning(taskId, rawInput);
       }
 
-      const chunkingLatencyMs = Date.now() - chunkingStartedAt;
+      const missioningLatencyMs = Date.now() - missioningStartedAt;
       const createdAt = new Date().toISOString();
 
       const safeTitle = summary || "새 과업";
-      const adjustedChunkTemplates = enforceChunkBudget(chunking.chunks, parsedTotalMinutes).map((chunk, index) => ({
-        ...chunk,
+      const adjustedMissionTemplates = enforceMissionBudget(missioning.missions, parsedTotalMinutes).map((mission, index) => ({
+        ...mission,
         order: index + 1
       }));
 
@@ -1111,10 +1111,10 @@ export function MvpDashboard() {
         status: "todo"
       };
 
-      const nextChunks: Chunk[] = mapChunkingResultToChunks(
+      const nextMissions: Mission[] = mapMissioningResultToMissions(
         {
-          ...chunking,
-          chunks: adjustedChunkTemplates
+          ...missioning,
+          missions: adjustedMissionTemplates
         },
         {
           taskId,
@@ -1122,17 +1122,17 @@ export function MvpDashboard() {
         }
       );
 
-      if (!isWithinTaskChunkBudget(nextChunks, parsedTotalMinutes)) {
-        setFeedback("청크 시간 합계가 과업 총 시간 예산을 초과해 생성이 취소되었습니다.");
+      if (!isWithinTaskMissionBudget(nextMissions, parsedTotalMinutes)) {
+        setFeedback("미션 시간 합계가 과업 총 시간 예산을 초과해 생성이 취소되었습니다.");
         return false;
       }
 
       setTasks((prev) => [nextTask, ...prev]);
-      setChunks((prev) => [...nextChunks, ...prev]);
-      setRemainingSecondsByChunk((prev) => {
+      setMissions((prev) => [...nextMissions, ...prev]);
+      setRemainingSecondsByMission((prev) => {
         const next = { ...prev };
-        nextChunks.forEach((chunk) => {
-          next[chunk.id] = chunk.estMinutes * 60;
+        nextMissions.forEach((mission) => {
+          next[mission.id] = mission.estMinutes * 60;
         });
         return next;
       });
@@ -1141,7 +1141,7 @@ export function MvpDashboard() {
       gateMetricsRef.current.recoveryClickCountByTaskId[taskId] = 0;
 
       setActiveTaskId(taskId);
-      setCurrentChunkId(nextChunks[0]?.id ?? null);
+      setCurrentMissionId(nextMissions[0]?.id ?? null);
       resetTaskComposerDraft();
       setQuestComposerMode("create");
       setEditingTaskId(null);
@@ -1158,7 +1158,7 @@ export function MvpDashboard() {
         taskId,
         meta: {
           summaryLength: safeTitle.length,
-          chunkCount: nextChunks.length,
+          missionCount: nextMissions.length,
           totalMinutes: parsedTotalMinutes,
           scheduledFor: scheduledFor ?? null,
           dueAt: dueAt ?? null
@@ -1166,16 +1166,16 @@ export function MvpDashboard() {
       });
 
       logEvent({
-        eventName: "chunk_generated",
+        eventName: "mission_generated",
         source,
         taskId,
         meta: {
-          chunkCount: nextChunks.length,
-          originalChunkCount: chunking.chunks.length,
-          adjustedForBudget: chunking.chunks.length !== nextChunks.length
-            || sumChunkEstMinutes(chunking.chunks) !== sumChunkEstMinutes(nextChunks),
-          chunkingLatencyMs,
-          withinTenSeconds: chunkingLatencyMs <= 10_000,
+          missionCount: nextMissions.length,
+          originalMissionCount: missioning.missions.length,
+          adjustedForBudget: missioning.missions.length !== nextMissions.length
+            || sumMissionEstMinutes(missioning.missions) !== sumMissionEstMinutes(nextMissions),
+          missioningLatencyMs,
+          withinTenSeconds: missioningLatencyMs <= 10_000,
           usedValidationFallback
         }
       });
@@ -1225,15 +1225,15 @@ export function MvpDashboard() {
       return false;
     }
 
-    const taskHasExecutionLockedChunk = executionLockedTaskId === targetTask.id;
-    if (taskHasExecutionLockedChunk && parsedTotalMinutes < targetTask.totalMinutes) {
+    const taskHasExecutionLockedMission = executionLockedTaskId === targetTask.id;
+    if (taskHasExecutionLockedMission && parsedTotalMinutes < targetTask.totalMinutes) {
       setFeedback("실행 중에는 과업 총 시간을 줄일 수 없습니다. 증가만 가능합니다.");
       return false;
     }
 
-    const currentBudgetChunks = getTaskBudgetedChunks(chunks, targetTask.id);
-    if (!isWithinTaskChunkBudget(currentBudgetChunks, parsedTotalMinutes)) {
-      setFeedback("현재 청크 시간 합계보다 작게 과업 총 시간을 줄일 수 없습니다.");
+    const currentBudgetMissions = getTaskBudgetedMissions(missions, targetTask.id);
+    if (!isWithinTaskMissionBudget(currentBudgetMissions, parsedTotalMinutes)) {
+      setFeedback("현재 미션 시간 합계보다 작게 과업 총 시간을 줄일 수 없습니다.");
       return false;
     }
 
@@ -1276,7 +1276,7 @@ export function MvpDashboard() {
       meta: {
         previousTotalMinutes: targetTask.totalMinutes,
         nextTotalMinutes: parsedTotalMinutes,
-        updatedDuringRun: taskHasExecutionLockedChunk,
+        updatedDuringRun: taskHasExecutionLockedMission,
         titleChanged,
         scheduleChanged
       }
@@ -1293,9 +1293,9 @@ export function MvpDashboard() {
     return handleGenerateTask();
   };
 
-  const handleStartChunk = (chunkId: string) => {
-    const target = chunks.find((chunk) => chunk.id === chunkId);
-    if (!target || !isActionableChunkStatus(target.status)) {
+  const handleStartMission = (missionId: string) => {
+    const target = missions.find((mission) => mission.id === missionId);
+    if (!target || !isActionableMissionStatus(target.status)) {
       return;
     }
 
@@ -1313,28 +1313,28 @@ export function MvpDashboard() {
         : undefined;
 
     const nowIso = new Date().toISOString();
-    const runningChunkIds = chunks
-      .filter((chunk) => chunk.status === "running" && chunk.id !== chunkId)
-      .map((chunk) => chunk.id);
+    const runningMissionIds = missions
+      .filter((mission) => mission.status === "running" && mission.id !== missionId)
+      .map((mission) => mission.id);
 
-    setChunks((prev) =>
-      prev.map((chunk) => {
-        if (chunk.id === chunkId) {
+    setMissions((prev) =>
+      prev.map((mission) => {
+        if (mission.id === missionId) {
           return {
-            ...chunk,
+            ...mission,
             status: "running",
-            startedAt: chunk.startedAt ?? nowIso
+            startedAt: mission.startedAt ?? nowIso
           };
         }
 
-        if (chunk.status === "running") {
+        if (mission.status === "running") {
           return {
-            ...chunk,
+            ...mission,
             status: "paused"
           };
         }
 
-        return chunk;
+        return mission;
       })
     );
 
@@ -1351,26 +1351,26 @@ export function MvpDashboard() {
       )
     );
 
-    runningChunkIds.forEach((runningId) => {
+    runningMissionIds.forEach((runningId) => {
       upsertTimerSession(runningId, "paused", nowIso);
     });
 
-    upsertTimerSession(chunkId, "running", nowIso);
+    upsertTimerSession(missionId, "running", nowIso);
 
-    setRemainingSecondsByChunk((prev) => ({
+    setRemainingSecondsByMission((prev) => ({
       ...prev,
-      [chunkId]: prev[chunkId] ?? target.estMinutes * 60
+      [missionId]: prev[missionId] ?? target.estMinutes * 60
     }));
 
     tickAccumulatorRef.current = createTimerElapsedAccumulator(Date.now());
-    setCurrentChunkId(chunkId);
+    setCurrentMissionId(missionId);
     setActiveTaskId(target.taskId);
 
     logEvent({
-      eventName: "chunk_started",
+      eventName: "mission_started",
       source: "local",
       taskId: target.taskId,
-      chunkId,
+      missionId,
       meta: {
         startClickCount,
         firstStart: isFirstStart,
@@ -1381,83 +1381,83 @@ export function MvpDashboard() {
 
     const taskTitle = tasks.find((task) => task.id === target.taskId)?.title ?? "과업";
     pushLoopNotification({
-      eventName: "chunk_started",
+      eventName: "mission_started",
       taskTitle,
-      chunkAction: target.action
+      missionAction: target.action
     });
   };
 
-  const handlePauseChunk = (chunkId: string) => {
-    const target = chunks.find((chunk) => chunk.id === chunkId);
+  const handlePauseMission = (missionId: string) => {
+    const target = missions.find((mission) => mission.id === missionId);
     if (!target || target.status !== "running") {
       return;
     }
 
     const nowIso = new Date().toISOString();
 
-    setChunks((prev) =>
-      prev.map((chunk) =>
-        chunk.id === chunkId
+    setMissions((prev) =>
+      prev.map((mission) =>
+        mission.id === missionId
           ? {
-              ...chunk,
+              ...mission,
               status: "paused"
             }
-          : chunk
+          : mission
       )
     );
 
-    upsertTimerSession(chunkId, "paused", nowIso);
+    upsertTimerSession(missionId, "paused", nowIso);
     tickAccumulatorRef.current = createTimerElapsedAccumulator();
 
     logEvent({
-      eventName: "chunk_paused",
+      eventName: "mission_paused",
       source: "local",
       taskId: target.taskId,
-      chunkId
+      missionId
     });
   };
 
-  const handleCompleteChunk = (chunkId: string) => {
-    const target = chunks.find((chunk) => chunk.id === chunkId);
-    if (!target || !isActionableChunkStatus(target.status)) {
+  const handleCompleteMission = (missionId: string) => {
+    const target = missions.find((mission) => mission.id === missionId);
+    if (!target || !isActionableMissionStatus(target.status)) {
       return;
     }
 
     const nowIso = new Date().toISOString();
     const totalSeconds = target.estMinutes * 60;
-    const remaining = remainingSecondsByChunk[chunkId] ?? totalSeconds;
+    const remaining = remainingSecondsByMission[missionId] ?? totalSeconds;
     const actualSeconds = Math.max(1, totalSeconds - remaining);
 
-    const candidateChunks = orderChunks(
-      chunks.filter((item) => item.taskId === target.taskId && item.id !== target.id)
+    const candidateMissions = orderMissions(
+      missions.filter((item) => item.taskId === target.taskId && item.id !== target.id)
     );
-    const nextChunk = candidateChunks.find((chunk) => chunk.order > target.order && isActionableChunkStatus(chunk.status))
-      ?? candidateChunks.find((chunk) => isActionableChunkStatus(chunk.status))
+    const nextMission = candidateMissions.find((mission) => mission.order > target.order && isActionableMissionStatus(mission.status))
+      ?? candidateMissions.find((mission) => isActionableMissionStatus(mission.status))
       ?? null;
 
-    setChunks((prev) =>
-      prev.map((chunk) =>
-        chunk.id === chunkId
+    setMissions((prev) =>
+      prev.map((mission) =>
+        mission.id === missionId
           ? {
-              ...chunk,
+              ...mission,
               status: "done",
               completedAt: nowIso,
               actualSeconds
             }
-          : chunk
+          : mission
       )
     );
 
-    setRemainingSecondsByChunk((prev) => ({
+    setRemainingSecondsByMission((prev) => ({
       ...prev,
-      [chunkId]: 0
+      [missionId]: 0
     }));
 
-    upsertTimerSession(chunkId, "ended", nowIso);
-    setCurrentChunkId(nextChunk?.id ?? null);
+    upsertTimerSession(missionId, "ended", nowIso);
+    setCurrentMissionId(nextMission?.id ?? null);
     tickAccumulatorRef.current = createTimerElapsedAccumulator();
 
-    const reward = applyChunkCompletionReward({
+    const reward = applyMissionCompletionReward({
       stats,
       estMinutes: target.estMinutes,
       actualSeconds
@@ -1466,10 +1466,10 @@ export function MvpDashboard() {
     setStats(reward.nextStats);
 
     logEvent({
-      eventName: "chunk_completed",
+      eventName: "mission_completed",
       source: "local",
       taskId: target.taskId,
-      chunkId,
+      missionId,
       meta: {
         actualSeconds,
         estMinutes: target.estMinutes
@@ -1480,7 +1480,7 @@ export function MvpDashboard() {
       eventName: "xp_gained",
       source: "local",
       taskId: target.taskId,
-      chunkId,
+      missionId,
       meta: {
         xpGain: reward.xpGain
       }
@@ -1491,7 +1491,7 @@ export function MvpDashboard() {
         eventName: "level_up",
         source: "local",
         taskId: target.taskId,
-        chunkId,
+        missionId,
         meta: {
           levelUps: reward.levelUps,
           currentLevel: reward.nextStats.level
@@ -1501,77 +1501,77 @@ export function MvpDashboard() {
 
     const taskTitle = tasks.find((task) => task.id === target.taskId)?.title ?? "과업";
     pushLoopNotification({
-      eventName: "chunk_completed",
+      eventName: "mission_completed",
       taskTitle,
-      chunkAction: target.action
+      missionAction: target.action
     });
 
-    setFeedback(`좋아요. +${reward.xpGain} XP 획득! ${nextChunk ? "다음 청크로 바로 이어가요." : "오늘 루프를 완료했어요."}`);
+    setFeedback(`좋아요. +${reward.xpGain} XP 획득! ${nextMission ? "다음 미션로 바로 이어가요." : "오늘 루프를 완료했어요."}`);
   };
 
-  const handleAdjustRunningChunkMinutes = (deltaMinutes: -5 | -1 | 1 | 5) => {
-    if (!runningChunk) {
+  const handleAdjustRunningMissionMinutes = (deltaMinutes: -5 | -1 | 1 | 5) => {
+    if (!runningMission) {
       return;
     }
 
-    const ownerTask = tasks.find((task) => task.id === runningChunk.taskId);
+    const ownerTask = tasks.find((task) => task.id === runningMission.taskId);
     if (!ownerTask) {
       return;
     }
 
-    const nextMinutes = runningChunk.estMinutes + deltaMinutes;
-    if (nextMinutes < MIN_CHUNK_EST_MINUTES) {
-      setFeedback(`실행 중 청크는 최소 ${MIN_CHUNK_EST_MINUTES}분 이상이어야 합니다.`);
+    const nextMinutes = runningMission.estMinutes + deltaMinutes;
+    if (nextMinutes < MIN_MISSION_EST_MINUTES) {
+      setFeedback(`실행 중 미션는 최소 ${MIN_MISSION_EST_MINUTES}분 이상이어야 합니다.`);
       return;
     }
-    if (nextMinutes > MAX_CHUNK_EST_MINUTES) {
-      setFeedback(`실행 중 청크는 최대 ${MAX_CHUNK_EST_MINUTES}분까지만 늘릴 수 있습니다.`);
+    if (nextMinutes > MAX_MISSION_EST_MINUTES) {
+      setFeedback(`실행 중 미션는 최대 ${MAX_MISSION_EST_MINUTES}분까지만 늘릴 수 있습니다.`);
       return;
     }
 
-    const projectedChunks = [
-      ...getTaskBudgetedChunks(chunks, runningChunk.taskId, runningChunk.id),
+    const projectedMissions = [
+      ...getTaskBudgetedMissions(missions, runningMission.taskId, runningMission.id),
       {
-        ...runningChunk,
+        ...runningMission,
         estMinutes: nextMinutes
       }
     ];
-    if (!isWithinTaskChunkBudget(projectedChunks, ownerTask.totalMinutes)) {
-      setFeedback("과업 총 시간 예산을 초과해서 청크 시간을 늘릴 수 없습니다.");
+    if (!isWithinTaskMissionBudget(projectedMissions, ownerTask.totalMinutes)) {
+      setFeedback("과업 총 시간 예산을 초과해서 미션 시간을 늘릴 수 없습니다.");
       return;
     }
 
-    const previousMinutes = runningChunk.estMinutes;
+    const previousMinutes = runningMission.estMinutes;
     const nowIso = new Date().toISOString();
 
-    setChunks((prev) =>
-      prev.map((chunk) =>
-        chunk.id === runningChunk.id
+    setMissions((prev) =>
+      prev.map((mission) =>
+        mission.id === runningMission.id
           ? {
-              ...chunk,
+              ...mission,
               estMinutes: nextMinutes
             }
-          : chunk
+          : mission
       )
     );
 
-    setRemainingSecondsByChunk((prev) => {
+    setRemainingSecondsByMission((prev) => {
       const oldTotalSeconds = previousMinutes * 60;
       const nextTotalSeconds = nextMinutes * 60;
-      const currentRemaining = prev[runningChunk.id] ?? oldTotalSeconds;
+      const currentRemaining = prev[runningMission.id] ?? oldTotalSeconds;
       const progressRatio = oldTotalSeconds > 0 ? currentRemaining / oldTotalSeconds : 1;
 
       return {
         ...prev,
-        [runningChunk.id]: Math.max(0, Math.round(nextTotalSeconds * progressRatio))
+        [runningMission.id]: Math.max(0, Math.round(nextTotalSeconds * progressRatio))
       };
     });
 
     logEvent({
-      eventName: "chunk_time_adjusted",
+      eventName: "mission_time_adjusted",
       source: "user",
-      taskId: runningChunk.taskId,
-      chunkId: runningChunk.id,
+      taskId: runningMission.taskId,
+      missionId: runningMission.id,
       meta: {
         deltaMinutes,
         previousMinutes,
@@ -1580,7 +1580,7 @@ export function MvpDashboard() {
       }
     });
 
-    setFeedback(`실행 중 청크 시간을 ${nextMinutes}분으로 조정했습니다.`);
+    setFeedback(`실행 중 미션 시간을 ${nextMinutes}분으로 조정했습니다.`);
   };
 
   const handleEditTaskTotalMinutes = (task: Task) => {
@@ -1598,16 +1598,16 @@ export function MvpDashboard() {
       return;
     }
 
-    const targetChunkIds = chunks.filter((chunk) => chunk.taskId === task.id).map((chunk) => chunk.id);
-    const chunkIdSet = new Set(targetChunkIds);
+    const targetMissionIds = missions.filter((mission) => mission.taskId === task.id).map((mission) => mission.id);
+    const missionIdSet = new Set(targetMissionIds);
 
     setTasks((prev) => prev.filter((item) => item.id !== task.id));
-    setChunks((prev) => prev.filter((chunk) => chunk.taskId !== task.id));
-    setTimerSessions((prev) => prev.filter((session) => !chunkIdSet.has(session.chunkId)));
-    setRemainingSecondsByChunk((prev) => {
+    setMissions((prev) => prev.filter((mission) => mission.taskId !== task.id));
+    setTimerSessions((prev) => prev.filter((session) => !missionIdSet.has(session.missionId)));
+    setRemainingSecondsByMission((prev) => {
       const next = { ...prev };
-      targetChunkIds.forEach((chunkId) => {
-        delete next[chunkId];
+      targetMissionIds.forEach((missionId) => {
+        delete next[missionId];
       });
       return next;
     });
@@ -1618,8 +1618,8 @@ export function MvpDashboard() {
     if (expandedHomeTaskId === task.id) {
       setExpandedHomeTaskId(null);
     }
-    if (currentChunkId && chunkIdSet.has(currentChunkId)) {
-      setCurrentChunkId(null);
+    if (currentMissionId && missionIdSet.has(currentMissionId)) {
+      setCurrentMissionId(null);
     }
     delete gateMetricsRef.current.startClickCountByTaskId[task.id];
     delete gateMetricsRef.current.firstStartLoggedByTaskId[task.id];
@@ -1627,65 +1627,65 @@ export function MvpDashboard() {
     setFeedback(`퀘스트 "${task.title}"를 삭제했습니다.`);
   };
 
-  const handleEditChunk = (chunk: Chunk) => {
+  const handleEditMission = (mission: Mission) => {
     if (isExecutionLocked) {
-      setFeedback("실행 중에는 프롬프트 편집을 잠그고, 현재 청크의 ±1/±5분 조정만 허용됩니다.");
+      setFeedback("실행 중에는 프롬프트 편집을 잠그고, 현재 미션의 ±1/±5분 조정만 허용됩니다.");
       return;
     }
 
-    setChunkEditDraft({
-      chunkId: chunk.id,
-      action: chunk.action,
-      estMinutesInput: String(chunk.estMinutes)
+    setMissionEditDraft({
+      missionId: mission.id,
+      action: mission.action,
+      estMinutesInput: String(mission.estMinutes)
     });
-    setChunkEditError(null);
+    setMissionEditError(null);
   };
 
-  const handleSubmitChunkEdit = () => {
-    if (!chunkEditDraft) {
+  const handleSubmitMissionEdit = () => {
+    if (!missionEditDraft) {
       return;
     }
 
-    const targetChunk = chunks.find((chunk) => chunk.id === chunkEditDraft.chunkId);
-    if (!targetChunk) {
-      setChunkEditError("수정할 미션을 찾을 수 없습니다.");
+    const targetMission = missions.find((mission) => mission.id === missionEditDraft.missionId);
+    if (!targetMission) {
+      setMissionEditError("수정할 미션을 찾을 수 없습니다.");
       return;
     }
 
-    const nextAction = chunkEditDraft.action.trim();
+    const nextAction = missionEditDraft.action.trim();
     if (!nextAction) {
-      setChunkEditError("미션 제목을 입력해주세요.");
+      setMissionEditError("미션 제목을 입력해주세요.");
       return;
     }
 
-    const parsedMinutes = Number(chunkEditDraft.estMinutesInput);
+    const parsedMinutes = Number(missionEditDraft.estMinutesInput);
     if (!Number.isFinite(parsedMinutes)) {
-      setChunkEditError("소요 시간은 숫자로 입력해주세요.");
+      setMissionEditError("소요 시간은 숫자로 입력해주세요.");
       return;
     }
 
     const nextMinutes = clampMinuteInput(parsedMinutes);
-    const ownerTask = tasks.find((task) => task.id === targetChunk.taskId);
+    const ownerTask = tasks.find((task) => task.id === targetMission.taskId);
     if (!ownerTask) {
-      setChunkEditError("미션 소유 퀘스트를 찾을 수 없습니다.");
+      setMissionEditError("미션 소유 퀘스트를 찾을 수 없습니다.");
       return;
     }
 
-    const projectedBudgetChunks = [
-      ...getTaskBudgetedChunks(chunks, targetChunk.taskId, targetChunk.id),
+    const projectedBudgetMissions = [
+      ...getTaskBudgetedMissions(missions, targetMission.taskId, targetMission.id),
       {
-        ...targetChunk,
+        ...targetMission,
         estMinutes: nextMinutes
       }
     ];
-    if (!isWithinTaskChunkBudget(projectedBudgetChunks, ownerTask.totalMinutes)) {
-      setChunkEditError("과업 총 시간 예산을 초과하여 청크 시간을 수정할 수 없습니다.");
+    if (!isWithinTaskMissionBudget(projectedBudgetMissions, ownerTask.totalMinutes)) {
+      setMissionEditError("과업 총 시간 예산을 초과하여 미션 시간을 수정할 수 없습니다.");
       return;
     }
 
-    setChunks((prev) =>
+    setMissions((prev) =>
       prev.map((item) =>
-        item.id === targetChunk.id
+        item.id === targetMission.id
           ? {
               ...item,
               action: nextAction,
@@ -1695,106 +1695,106 @@ export function MvpDashboard() {
       )
     );
 
-    setRemainingSecondsByChunk((prev) => {
-      if (targetChunk.status === "done") {
+    setRemainingSecondsByMission((prev) => {
+      if (targetMission.status === "done") {
         return prev;
       }
 
-      const oldTotal = targetChunk.estMinutes * 60;
+      const oldTotal = targetMission.estMinutes * 60;
       const newTotal = nextMinutes * 60;
-      const current = prev[targetChunk.id] ?? oldTotal;
+      const current = prev[targetMission.id] ?? oldTotal;
       const ratio = oldTotal > 0 ? current / oldTotal : 1;
 
       return {
         ...prev,
-        [targetChunk.id]: Math.max(0, Math.round(newTotal * ratio))
+        [targetMission.id]: Math.max(0, Math.round(newTotal * ratio))
       };
     });
 
     setFeedback("미션 정보를 수정했습니다.");
-    closeChunkEditModal();
+    closeMissionEditModal();
   };
 
-  const handleReorderTaskChunks = (taskId: string, draggedChunkId: string, targetChunkId: string) => {
-    if (draggedChunkId === targetChunkId) {
+  const handleReorderTaskMissions = (taskId: string, draggedMissionId: string, targetMissionId: string) => {
+    if (draggedMissionId === targetMissionId) {
       return;
     }
     if (executionLockedTaskId === taskId) {
-      setFeedback("실행 중인 퀘스트는 청크 순서를 변경할 수 없습니다.");
+      setFeedback("실행 중인 퀘스트는 미션 순서를 변경할 수 없습니다.");
       return;
     }
 
-    const orderedTaskChunks = orderChunks(chunks.filter((chunk) => chunk.taskId === taskId));
-    const reorderedTaskChunks = reorderTaskChunksKeepingLocked(orderedTaskChunks, draggedChunkId, targetChunkId);
-    if (!reorderedTaskChunks) {
+    const orderedTaskMissions = orderMissions(missions.filter((mission) => mission.taskId === taskId));
+    const reorderedTaskMissions = reorderTaskMissionsKeepingLocked(orderedTaskMissions, draggedMissionId, targetMissionId);
+    if (!reorderedTaskMissions) {
       setFeedback("실행 중이거나 완료된 미션은 순서를 변경할 수 없습니다.");
       return;
     }
 
-    const nextOrderById = new Map(reorderedTaskChunks.map((chunk, index) => [chunk.id, index + 1]));
-    setChunks((prev) =>
-      prev.map((chunk) =>
-        chunk.taskId === taskId && nextOrderById.has(chunk.id)
+    const nextOrderById = new Map(reorderedTaskMissions.map((mission, index) => [mission.id, index + 1]));
+    setMissions((prev) =>
+      prev.map((mission) =>
+        mission.taskId === taskId && nextOrderById.has(mission.id)
           ? {
-              ...chunk,
-              order: nextOrderById.get(chunk.id) ?? chunk.order
+              ...mission,
+              order: nextOrderById.get(mission.id) ?? mission.order
             }
-          : chunk
+          : mission
       )
     );
 
     if (activeTaskId === taskId) {
-      const nextPrimaryChunk = reorderedTaskChunks.find((chunk) => isActionableChunkStatus(chunk.status)) ?? null;
-      if (!nextPrimaryChunk) {
-        if (currentChunkId !== null) {
-          setCurrentChunkId(null);
+      const nextPrimaryMission = reorderedTaskMissions.find((mission) => isActionableMissionStatus(mission.status)) ?? null;
+      if (!nextPrimaryMission) {
+        if (currentMissionId !== null) {
+          setCurrentMissionId(null);
         }
-      } else if (currentChunkId !== nextPrimaryChunk.id) {
-        setCurrentChunkId(nextPrimaryChunk.id);
+      } else if (currentMissionId !== nextPrimaryMission.id) {
+        setCurrentMissionId(nextPrimaryMission.id);
       }
     }
 
-    setFeedback("청크 순서를 변경했습니다.");
+    setFeedback("미션 순서를 변경했습니다.");
   };
 
-  const handleDeleteChunk = (chunk: Chunk) => {
-    const ok = window.confirm("이 청크를 삭제할까요?");
+  const handleDeleteMission = (mission: Mission) => {
+    const ok = window.confirm("이 미션를 삭제할까요?");
     if (!ok) {
       return;
     }
 
-    const isDeletingRunningChunk = chunk.status === "running";
+    const isDeletingRunningMission = mission.status === "running";
     const nowIso = new Date().toISOString();
-    const nextCandidate = orderChunks(
-      chunks.filter((item) => item.taskId === chunk.taskId && item.id !== chunk.id)
-    ).find((item) => isActionableChunkStatus(item.status)) ?? null;
+    const nextCandidate = orderMissions(
+      missions.filter((item) => item.taskId === mission.taskId && item.id !== mission.id)
+    ).find((item) => isActionableMissionStatus(item.status)) ?? null;
 
-    setChunks((prev) => withReorderedTaskChunks(prev.filter((item) => item.id !== chunk.id), chunk.taskId));
+    setMissions((prev) => withReorderedTaskMissions(prev.filter((item) => item.id !== mission.id), mission.taskId));
 
-    setRemainingSecondsByChunk((prev) => {
+    setRemainingSecondsByMission((prev) => {
       const next = { ...prev };
-      delete next[chunk.id];
+      delete next[mission.id];
       return next;
     });
 
-    if (isDeletingRunningChunk) {
-      upsertTimerSession(chunk.id, "ended", nowIso);
+    if (isDeletingRunningMission) {
+      upsertTimerSession(mission.id, "ended", nowIso);
       tickAccumulatorRef.current = createTimerElapsedAccumulator();
-      delete lastHapticBucketByChunkRef.current[chunk.id];
+      delete lastHapticBucketByMissionRef.current[mission.id];
     }
 
-    if (currentChunkId === chunk.id || isDeletingRunningChunk) {
-      setCurrentChunkId(nextCandidate?.id ?? null);
+    if (currentMissionId === mission.id || isDeletingRunningMission) {
+      setCurrentMissionId(nextCandidate?.id ?? null);
     }
   };
 
-  const handleRechunk = (targetChunkId = currentChunkId) => {
-    if (!targetChunkId) {
+  const handleRemission = (targetMissionId = currentMissionId) => {
+    if (!targetMissionId) {
       return;
     }
 
-    const target = chunks.find((chunk) => chunk.id === targetChunkId);
-    if (!target || !isActionableChunkStatus(target.status)) {
+    const target = missions.find((mission) => mission.id === targetMissionId);
+    if (!target || !isActionableMissionStatus(target.status)) {
       return;
     }
     const ownerTask = tasks.find((task) => task.id === target.taskId);
@@ -1808,7 +1808,7 @@ export function MvpDashboard() {
 
     const nowIso = new Date().toISOString();
 
-    const newChunks: Chunk[] = [
+    const newMissions: Mission[] = [
       {
         id: crypto.randomUUID(),
         taskId: target.taskId,
@@ -1817,7 +1817,7 @@ export function MvpDashboard() {
         estMinutes: Math.max(2, Math.floor(target.estMinutes / 2)),
         status: "todo",
         iconKey: target.iconKey,
-        parentChunkId: target.id
+        parentMissionId: target.id
       },
       {
         id: crypto.randomUUID(),
@@ -1827,50 +1827,50 @@ export function MvpDashboard() {
         estMinutes: Math.max(2, target.estMinutes - Math.max(2, Math.floor(target.estMinutes / 2))),
         status: "todo",
         iconKey: target.iconKey,
-        parentChunkId: target.id
+        parentMissionId: target.id
       }
     ];
 
-    const projectedBudgetChunks = [
-      ...getTaskBudgetedChunks(chunks, target.taskId, target.id),
-      ...newChunks
+    const projectedBudgetMissions = [
+      ...getTaskBudgetedMissions(missions, target.taskId, target.id),
+      ...newMissions
     ];
-    if (!isWithinTaskChunkBudget(projectedBudgetChunks, ownerTask.totalMinutes)) {
-      setFeedback("리청크 결과가 과업 총 시간 예산을 초과해서 적용할 수 없습니다.");
+    if (!isWithinTaskMissionBudget(projectedBudgetMissions, ownerTask.totalMinutes)) {
+      setFeedback("리미션 결과가 과업 총 시간 예산을 초과해서 적용할 수 없습니다.");
       return;
     }
 
-    setChunks((prev) => {
-      const shifted: Chunk[] = prev.map((chunk): Chunk => {
-        if (chunk.id === target.id) {
+    setMissions((prev) => {
+      const shifted: Mission[] = prev.map((mission): Mission => {
+        if (mission.id === target.id) {
           return {
-            ...chunk,
+            ...mission,
             status: "archived"
           };
         }
 
-        if (chunk.taskId !== target.taskId) {
-          return chunk;
+        if (mission.taskId !== target.taskId) {
+          return mission;
         }
 
-        if (chunk.order > target.order) {
+        if (mission.order > target.order) {
           return {
-            ...chunk,
-            order: chunk.order + 2
+            ...mission,
+            order: mission.order + 2
           };
         }
 
-        return chunk;
+        return mission;
       });
 
-      return withReorderedTaskChunks([...shifted, ...newChunks], target.taskId);
+      return withReorderedTaskMissions([...shifted, ...newMissions], target.taskId);
     });
 
-    setRemainingSecondsByChunk((prev) => {
+    setRemainingSecondsByMission((prev) => {
       const next = { ...prev };
       next[target.id] = 0;
-      newChunks.forEach((chunk) => {
-        next[chunk.id] = chunk.estMinutes * 60;
+      newMissions.forEach((mission) => {
+        next[mission.id] = mission.estMinutes * 60;
       });
       return next;
     });
@@ -1881,17 +1881,17 @@ export function MvpDashboard() {
     const recovery = applyRecoveryReward(stats);
     setStats(recovery.nextStats);
 
-    setCurrentChunkId(newChunks[0].id);
+    setCurrentMissionId(newMissions[0].id);
     setActiveTaskId(target.taskId);
 
     logEvent({
-      eventName: "rechunk_requested",
+      eventName: "remission_requested",
       source: "local",
       taskId: target.taskId,
-      chunkId: target.id,
+      missionId: target.id,
       meta: {
-        parentChunkId: target.id,
-        newChunkCount: newChunks.length,
+        parentMissionId: target.id,
+        newMissionCount: newMissions.length,
         recoveryClickCount
       }
     });
@@ -1900,24 +1900,24 @@ export function MvpDashboard() {
       eventName: "xp_gained",
       source: "local",
       taskId: target.taskId,
-      chunkId: target.id,
+      missionId: target.id,
       meta: {
         xpGain: recovery.xpGain,
-        reason: "rechunk",
+        reason: "remission",
         recoveryClickCount
       }
     });
 
-    setFeedback(RECOVERY_FEEDBACK.rechunked);
+    setFeedback(RECOVERY_FEEDBACK.remissioned);
   };
 
-  const handleReschedule = (targetChunkId = currentChunkId) => {
-    if (!targetChunkId) {
+  const handleReschedule = (targetMissionId = currentMissionId) => {
+    if (!targetMissionId) {
       return;
     }
 
-    const target = chunks.find((chunk) => chunk.id === targetChunkId);
-    if (!target || !isActionableChunkStatus(target.status)) {
+    const target = missions.find((mission) => mission.id === targetMissionId);
+    if (!target || !isActionableMissionStatus(target.status)) {
       return;
     }
     const ownerTask = tasks.find((task) => task.id === target.taskId);
@@ -1931,12 +1931,12 @@ export function MvpDashboard() {
 
     const nowIso = new Date().toISOString();
     const rescheduledFor = buildNextRescheduleDate();
-    const movedChunks = orderChunks(
-      chunks.filter((chunk) => chunk.taskId === target.taskId && isActionableChunkStatus(chunk.status))
+    const movedMissions = orderMissions(
+      missions.filter((mission) => mission.taskId === target.taskId && isActionableMissionStatus(mission.status))
     );
-    const activeSessionChunkIds = movedChunks
-      .filter((chunk) => chunk.status === "running" || chunk.status === "paused")
-      .map((chunk) => chunk.id);
+    const activeSessionMissionIds = movedMissions
+      .filter((mission) => mission.status === "running" || mission.status === "paused")
+      .map((mission) => mission.id);
 
     setTasks((prev) =>
       prev.map((task) =>
@@ -1953,14 +1953,14 @@ export function MvpDashboard() {
       )
     );
 
-    setChunks((prev) =>
-      prev.map((chunk) => {
-        if (chunk.taskId !== target.taskId || !isActionableChunkStatus(chunk.status)) {
-          return chunk;
+    setMissions((prev) =>
+      prev.map((mission) => {
+        if (mission.taskId !== target.taskId || !isActionableMissionStatus(mission.status)) {
+          return mission;
         }
 
         return {
-          ...chunk,
+          ...mission,
           status: "todo",
           startedAt: undefined,
           rescheduledFor
@@ -1968,19 +1968,19 @@ export function MvpDashboard() {
       })
     );
 
-    setRemainingSecondsByChunk((prev) => {
+    setRemainingSecondsByMission((prev) => {
       const next = { ...prev };
-      movedChunks.forEach((chunk) => {
-        next[chunk.id] = Math.max(0, prev[chunk.id] ?? chunk.estMinutes * 60);
+      movedMissions.forEach((mission) => {
+        next[mission.id] = Math.max(0, prev[mission.id] ?? mission.estMinutes * 60);
       });
       return next;
     });
 
-    activeSessionChunkIds.forEach((sessionChunkId) => {
-      upsertTimerSession(sessionChunkId, "ended", nowIso);
+    activeSessionMissionIds.forEach((sessionMissionId) => {
+      upsertTimerSession(sessionMissionId, "ended", nowIso);
     });
     tickAccumulatorRef.current = createTimerElapsedAccumulator();
-    setCurrentChunkId(movedChunks[0]?.id ?? null);
+    setCurrentMissionId(movedMissions[0]?.id ?? null);
     setActiveTaskId(target.taskId);
 
     const recovery = applyRecoveryReward(stats);
@@ -1990,10 +1990,10 @@ export function MvpDashboard() {
       eventName: "task_rescheduled",
       source: "local",
       taskId: target.taskId,
-      chunkId: target.id,
+      missionId: target.id,
       meta: {
         rescheduledFor,
-        movedChunkCount: movedChunks.length,
+        movedMissionCount: movedMissions.length,
         recoveryClickCount
       }
     });
@@ -2002,10 +2002,10 @@ export function MvpDashboard() {
       eventName: "reschedule_requested",
       source: "local",
       taskId: target.taskId,
-      chunkId: target.id,
+      missionId: target.id,
       meta: {
         rescheduledFor,
-        movedChunkCount: movedChunks.length,
+        movedMissionCount: movedMissions.length,
         recoveryClickCount
       }
     });
@@ -2014,7 +2014,7 @@ export function MvpDashboard() {
       eventName: "xp_gained",
       source: "local",
       taskId: target.taskId,
-      chunkId: target.id,
+      missionId: target.id,
       meta: {
         xpGain: recovery.xpGain,
         reason: "reschedule",
@@ -2028,7 +2028,7 @@ export function MvpDashboard() {
     pushLoopNotification({
       eventName: "task_rescheduled",
       taskTitle,
-      chunkAction: target.action
+      missionAction: target.action
     });
   };
 
@@ -2039,7 +2039,7 @@ export function MvpDashboard() {
     }
 
     resetCoreState();
-    setCurrentChunkId(null);
+    setCurrentMissionId(null);
     tickAccumulatorRef.current = createTimerElapsedAccumulator();
     resetSttTranscriptBuffers();
     setSttError(null);
@@ -2060,47 +2060,47 @@ export function MvpDashboard() {
     setFeedback("초기화 완료. 새 루프를 시작해보세요.");
   };
 
-  const homeChunk = useMemo(
-    () => selectHomeChunk(coreState, currentChunkId),
-    [coreState, currentChunkId]
+  const homeMission = useMemo(
+    () => selectHomeMission(coreState, currentMissionId),
+    [coreState, currentMissionId]
   );
   const homeTask = useMemo(
-    () => selectHomeTask(coreState, currentChunkId),
-    [coreState, currentChunkId]
+    () => selectHomeTask(coreState, currentMissionId),
+    [coreState, currentMissionId]
   );
   const homeRemaining = useMemo(
-    () => selectHomeRemaining(coreState, currentChunkId),
-    [coreState, currentChunkId]
+    () => selectHomeRemaining(coreState, currentMissionId),
+    [coreState, currentMissionId]
   );
-  const homeTaskBudgetUsage = homeTask ? getTaskBudgetUsage(chunks, homeTask.id) : 0;
-  const runningOwnerTask = runningChunk
-    ? tasks.find((task) => task.id === runningChunk.taskId) ?? null
+  const homeTaskBudgetUsage = homeTask ? getTaskBudgetUsage(missions, homeTask.id) : 0;
+  const runningOwnerTask = runningMission
+    ? tasks.find((task) => task.id === runningMission.taskId) ?? null
     : null;
-  const canAdjustRunningChunkMinutes = (deltaMinutes: -5 | -1 | 1 | 5): boolean => {
-    if (!runningChunk || !runningOwnerTask) {
+  const canAdjustRunningMissionMinutes = (deltaMinutes: -5 | -1 | 1 | 5): boolean => {
+    if (!runningMission || !runningOwnerTask) {
       return false;
     }
 
-    const nextMinutes = runningChunk.estMinutes + deltaMinutes;
-    if (nextMinutes < MIN_CHUNK_EST_MINUTES || nextMinutes > MAX_CHUNK_EST_MINUTES) {
+    const nextMinutes = runningMission.estMinutes + deltaMinutes;
+    if (nextMinutes < MIN_MISSION_EST_MINUTES || nextMinutes > MAX_MISSION_EST_MINUTES) {
       return false;
     }
 
-    return isWithinTaskChunkBudget(
+    return isWithinTaskMissionBudget(
       [
-        ...getTaskBudgetedChunks(chunks, runningChunk.taskId, runningChunk.id),
+        ...getTaskBudgetedMissions(missions, runningMission.taskId, runningMission.id),
         {
-          ...runningChunk,
+          ...runningMission,
           estMinutes: nextMinutes
         }
       ],
       runningOwnerTask.totalMinutes
     );
   };
-  const canAdjustMinusFive = canAdjustRunningChunkMinutes(-5);
-  const canAdjustMinusOne = canAdjustRunningChunkMinutes(-1);
-  const canAdjustPlusOne = canAdjustRunningChunkMinutes(1);
-  const canAdjustPlusFive = canAdjustRunningChunkMinutes(5);
+  const canAdjustMinusFive = canAdjustRunningMissionMinutes(-5);
+  const canAdjustMinusOne = canAdjustRunningMissionMinutes(-1);
+  const canAdjustPlusOne = canAdjustRunningMissionMinutes(1);
+  const canAdjustPlusFive = canAdjustRunningMissionMinutes(5);
 
   const homeTaskCards = tasks.filter((task) => task.status !== "archived" && task.status !== "done");
 
@@ -2156,10 +2156,10 @@ export function MvpDashboard() {
           sttError={sttError}
         />
 
-        {chunkEditDraft ? (
+        {missionEditDraft ? (
           <div
             className={styles.questModalBackdrop}
-            onClick={closeChunkEditModal}
+            onClick={closeMissionEditModal}
             role="presentation"
           >
             <section
@@ -2174,37 +2174,37 @@ export function MvpDashboard() {
                 <button
                   type="button"
                   className={styles.subtleButton}
-                  onClick={closeChunkEditModal}
+                  onClick={closeMissionEditModal}
                   aria-label="미션 수정 모달 닫기"
                 >
                   ✕
                 </button>
               </header>
 
-              <div className={styles.chunkEditForm}>
-                <label className={styles.metaField} htmlFor="chunk-edit-action">
+              <div className={styles.missionEditForm}>
+                <label className={styles.metaField} htmlFor="mission-edit-action">
                   <span>미션 제목</span>
                   <input
-                    id="chunk-edit-action"
-                    value={chunkEditDraft.action}
+                    id="mission-edit-action"
+                    value={missionEditDraft.action}
                     onChange={(event) =>
-                      setChunkEditDraft((prev) => (prev ? { ...prev, action: event.target.value } : prev))
+                      setMissionEditDraft((prev) => (prev ? { ...prev, action: event.target.value } : prev))
                     }
                     className={styles.input}
                     placeholder="미션 제목"
                   />
                 </label>
 
-                <label className={styles.metaField} htmlFor="chunk-edit-minutes">
+                <label className={styles.metaField} htmlFor="mission-edit-minutes">
                   <span>소요 시간(분)</span>
                   <input
-                    id="chunk-edit-minutes"
+                    id="mission-edit-minutes"
                     type="number"
-                    min={MIN_CHUNK_EST_MINUTES}
-                    max={MAX_CHUNK_EST_MINUTES}
-                    value={chunkEditDraft.estMinutesInput}
+                    min={MIN_MISSION_EST_MINUTES}
+                    max={MAX_MISSION_EST_MINUTES}
+                    value={missionEditDraft.estMinutesInput}
                     onChange={(event) =>
-                      setChunkEditDraft((prev) => (prev ? { ...prev, estMinutesInput: event.target.value } : prev))
+                      setMissionEditDraft((prev) => (prev ? { ...prev, estMinutesInput: event.target.value } : prev))
                     }
                     className={styles.input}
                     inputMode="numeric"
@@ -2212,13 +2212,13 @@ export function MvpDashboard() {
                 </label>
               </div>
 
-              {chunkEditError ? <p className={styles.errorText}>{chunkEditError}</p> : null}
+              {missionEditError ? <p className={styles.errorText}>{missionEditError}</p> : null}
 
               <div className={styles.questModalFooter}>
                 <button
                   type="button"
                   className={styles.primaryButton}
-                  onClick={handleSubmitChunkEdit}
+                  onClick={handleSubmitMissionEdit}
                 >
                   미션 저장
                 </button>
@@ -2289,35 +2289,35 @@ export function MvpDashboard() {
         {activeTab === "home" ? (
           <HomeView
             styles={styles}
-            homeChunk={homeChunk}
+            homeMission={homeMission}
             homeTask={homeTask}
             homeRemaining={homeRemaining}
             homeTaskBudgetUsage={homeTaskBudgetUsage}
             completionRate={completionRate}
             homeTaskCards={homeTaskCards}
-            chunks={chunks}
+            missions={missions}
             expandedHomeTaskId={expandedHomeTaskId}
-            remainingSecondsByChunk={remainingSecondsByChunk}
+            remainingSecondsByMission={remainingSecondsByMission}
             isExecutionLocked={isExecutionLocked}
             onSetActiveTaskId={setActiveTaskId}
             onToggleExpandedHomeTaskId={(taskId) => {
               setExpandedHomeTaskId((prev) => (prev === taskId ? null : taskId));
             }}
-            onStartChunk={handleStartChunk}
-            onPauseChunk={handlePauseChunk}
-            onCompleteChunk={handleCompleteChunk}
-            onAdjustRunningChunkMinutes={handleAdjustRunningChunkMinutes}
+            onStartMission={handleStartMission}
+            onPauseMission={handlePauseMission}
+            onCompleteMission={handleCompleteMission}
+            onAdjustRunningMissionMinutes={handleAdjustRunningMissionMinutes}
             canAdjustMinusFive={canAdjustMinusFive}
             canAdjustMinusOne={canAdjustMinusOne}
             canAdjustPlusOne={canAdjustPlusOne}
             canAdjustPlusFive={canAdjustPlusFive}
-            onRechunk={handleRechunk}
+            onRemission={handleRemission}
             onReschedule={handleReschedule}
             onEditTaskTotalMinutes={handleEditTaskTotalMinutes}
             onDeleteTask={handleDeleteTask}
-            onReorderTaskChunks={handleReorderTaskChunks}
-            onEditChunk={handleEditChunk}
-            onDeleteChunk={handleDeleteChunk}
+            onReorderTaskMissions={handleReorderTaskMissions}
+            onEditMission={handleEditMission}
+            onDeleteMission={handleDeleteMission}
           />
         ) : null}
 
@@ -2328,17 +2328,17 @@ export function MvpDashboard() {
             activeTask={activeTask}
             activeTaskId={activeTaskId}
             activeTaskBudgetUsage={activeTaskBudgetUsage}
-            activeTaskChunks={activeTaskChunks}
-            currentChunkId={currentChunkId}
-            remainingSecondsByChunk={remainingSecondsByChunk}
+            activeTaskMissions={activeTaskMissions}
+            currentMissionId={currentMissionId}
+            remainingSecondsByMission={remainingSecondsByMission}
             isExecutionLocked={isExecutionLocked}
             onSetActiveTaskId={setActiveTaskId}
             onEditTaskTotalMinutes={handleEditTaskTotalMinutes}
-            onStartChunk={handleStartChunk}
-            onPauseChunk={handlePauseChunk}
-            onCompleteChunk={handleCompleteChunk}
-            onEditChunk={handleEditChunk}
-            onDeleteChunk={handleDeleteChunk}
+            onStartMission={handleStartMission}
+            onPauseMission={handlePauseMission}
+            onCompleteMission={handleCompleteMission}
+            onEditMission={handleEditMission}
+            onDeleteMission={handleDeleteMission}
           />
         ) : null}
 

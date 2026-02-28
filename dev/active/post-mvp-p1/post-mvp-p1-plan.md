@@ -29,7 +29,7 @@ MVP 코어 루프 안정화 이후 P1은 사용자 재참여율과 입력 접근
 작업:
 - capability/permission 헬퍼 연결
 - 권한 요청 버튼과 상태 배지 UI
-- 최소 1개 알림 시나리오(예: 청크 시작/복귀 리마인더) 연결
+- 최소 1개 알림 시나리오(예: 미션 시작/복귀 리마인더) 연결
 
 Acceptance Criteria:
 - 지원 브라우저에서 권한 상태(`default/granted/denied`)가 정확히 표시된다.

@@ -78,27 +78,27 @@ export function reduceRemainingSeconds(remainingSeconds: number, elapsedSeconds:
   return Math.max(0, safeRemainingSeconds - safeElapsedSeconds);
 }
 
-export function applyElapsedToChunkRemaining(params: {
-  remainingSecondsByChunk: Record<string, number>;
-  chunkId: string;
-  chunkTotalSeconds: number;
+export function applyElapsedToMissionRemaining(params: {
+  remainingSecondsByMission: Record<string, number>;
+  missionId: string;
+  missionTotalSeconds: number;
   elapsedSeconds: number;
 }): Record<string, number> {
   const safeElapsedSeconds = Math.max(0, toSafeInt(params.elapsedSeconds, 0));
   if (safeElapsedSeconds <= 0) {
-    return params.remainingSecondsByChunk;
+    return params.remainingSecondsByMission;
   }
 
   const currentSeconds =
-    params.remainingSecondsByChunk[params.chunkId] ?? Math.max(0, toSafeInt(params.chunkTotalSeconds, 0));
+    params.remainingSecondsByMission[params.missionId] ?? Math.max(0, toSafeInt(params.missionTotalSeconds, 0));
   const nextSeconds = reduceRemainingSeconds(currentSeconds, safeElapsedSeconds);
 
   if (nextSeconds === currentSeconds) {
-    return params.remainingSecondsByChunk;
+    return params.remainingSecondsByMission;
   }
 
   return {
-    ...params.remainingSecondsByChunk,
-    [params.chunkId]: nextSeconds
+    ...params.remainingSecondsByMission,
+    [params.missionId]: nextSeconds
   };
 }

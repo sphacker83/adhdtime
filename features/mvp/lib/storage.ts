@@ -2,8 +2,8 @@ import {
   MAX_TASK_TOTAL_MINUTES,
   MIN_TASK_TOTAL_MINUTES,
   type AppEvent,
-  type Chunk,
-  type ChunkStatus,
+  type Mission,
+  type MissionStatus,
   type EventMetaValue,
   type EventName,
   type EventSource,
@@ -19,20 +19,20 @@ import { createInitialStats } from "@/features/mvp/lib/reward";
 
 const STORAGE_KEY = "adhdtime:mvp-state:v1";
 const TASK_STATUS_VALUES: Task["status"][] = ["todo", "in_progress", "done", "archived"];
-const CHUNK_STATUS_VALUES: ChunkStatus[] = ["todo", "running", "paused", "done", "abandoned", "archived"];
+const MISSION_STATUS_VALUES: MissionStatus[] = ["todo", "running", "paused", "done", "abandoned", "archived"];
 const TIMER_SESSION_STATE_VALUES: TimerSessionState[] = ["running", "paused", "ended"];
 const ACTIVE_TAB_VALUES: PersistedState["activeTab"][] = ["home", "tasks", "stats", "settings"];
 const EVENT_NAME_VALUES: EventName[] = [
   "task_created",
-  "chunk_generated",
-  "chunk_started",
-  "chunk_paused",
-  "chunk_completed",
-  "chunk_abandoned",
-  "rechunk_requested",
+  "mission_generated",
+  "mission_started",
+  "mission_paused",
+  "mission_completed",
+  "mission_abandoned",
+  "remission_requested",
   "reschedule_requested",
   "task_rescheduled",
-  "chunk_time_adjusted",
+  "mission_time_adjusted",
   "task_time_updated",
   "xp_gained",
   "level_up",
@@ -63,8 +63,8 @@ function isTaskStatus(value: unknown): value is Task["status"] {
   return isString(value) && TASK_STATUS_VALUES.includes(value as Task["status"]);
 }
 
-function isChunkStatus(value: unknown): value is ChunkStatus {
-  return isString(value) && CHUNK_STATUS_VALUES.includes(value as ChunkStatus);
+function isMissionStatus(value: unknown): value is MissionStatus {
+  return isString(value) && MISSION_STATUS_VALUES.includes(value as MissionStatus);
 }
 
 function isTimerSessionState(value: unknown): value is TimerSessionState {
@@ -104,7 +104,7 @@ function sanitizeTaskTotalMinutes(totalMinutes: unknown, fallbackMinutes: number
   return Math.min(MAX_TASK_TOTAL_MINUTES, Math.max(MIN_TASK_TOTAL_MINUTES, Math.floor(rawValue)));
 }
 
-function sanitizeChunkIconKey(value: unknown): string | undefined {
+function sanitizeMissionIconKey(value: unknown): string | undefined {
   if (!isString(value)) {
     return undefined;
   }
@@ -113,12 +113,12 @@ function sanitizeChunkIconKey(value: unknown): string | undefined {
   return normalized.length > 0 ? normalized : undefined;
 }
 
-function buildChunkMinuteFallbackByTaskId(chunks: Chunk[]): Map<string, number> {
+function buildMissionMinuteFallbackByTaskId(missions: Mission[]): Map<string, number> {
   const taskMinutes = new Map<string, number>();
 
-  chunks.forEach((chunk) => {
-    const current = taskMinutes.get(chunk.taskId) ?? 0;
-    taskMinutes.set(chunk.taskId, current + Math.max(0, Math.floor(chunk.estMinutes)));
+  missions.forEach((mission) => {
+    const current = taskMinutes.get(mission.taskId) ?? 0;
+    taskMinutes.set(mission.taskId, current + Math.max(0, Math.floor(mission.estMinutes)));
   });
 
   return taskMinutes;
@@ -127,28 +127,28 @@ function buildChunkMinuteFallbackByTaskId(chunks: Chunk[]): Map<string, number> 
 interface TaskTimelineFallback {
   startedAt?: string;
   completedAt?: string;
-  hasOpenChunks: boolean;
+  hasOpenMissions: boolean;
 }
 
-function buildTaskTimelineFallbackByTaskId(chunks: Chunk[]): Map<string, TaskTimelineFallback> {
+function buildTaskTimelineFallbackByTaskId(missions: Mission[]): Map<string, TaskTimelineFallback> {
   const timelineByTaskId = new Map<string, TaskTimelineFallback>();
 
-  chunks.forEach((chunk) => {
-    const current = timelineByTaskId.get(chunk.taskId) ?? { hasOpenChunks: false };
+  missions.forEach((mission) => {
+    const current = timelineByTaskId.get(mission.taskId) ?? { hasOpenMissions: false };
 
-    if (chunk.startedAt && (!current.startedAt || Date.parse(chunk.startedAt) < Date.parse(current.startedAt))) {
-      current.startedAt = chunk.startedAt;
+    if (mission.startedAt && (!current.startedAt || Date.parse(mission.startedAt) < Date.parse(current.startedAt))) {
+      current.startedAt = mission.startedAt;
     }
 
-    if (chunk.completedAt && (!current.completedAt || Date.parse(chunk.completedAt) > Date.parse(current.completedAt))) {
-      current.completedAt = chunk.completedAt;
+    if (mission.completedAt && (!current.completedAt || Date.parse(mission.completedAt) > Date.parse(current.completedAt))) {
+      current.completedAt = mission.completedAt;
     }
 
-    if (chunk.status === "todo" || chunk.status === "running" || chunk.status === "paused") {
-      current.hasOpenChunks = true;
+    if (mission.status === "todo" || mission.status === "running" || mission.status === "paused") {
+      current.hasOpenMissions = true;
     }
 
-    timelineByTaskId.set(chunk.taskId, current);
+    timelineByTaskId.set(mission.taskId, current);
   });
 
   return timelineByTaskId;
@@ -196,7 +196,7 @@ function sanitizeTaskRecord(
   };
 }
 
-function isChunk(value: unknown): value is Chunk {
+function isMission(value: unknown): value is Mission {
   if (!isRecord(value)) {
     return false;
   }
@@ -207,11 +207,11 @@ function isChunk(value: unknown): value is Chunk {
     && isNumber(value.order)
     && isString(value.action)
     && isNumber(value.estMinutes)
-    && isChunkStatus(value.status)
+    && isMissionStatus(value.status)
     && (value.startedAt === undefined || isString(value.startedAt))
     && (value.completedAt === undefined || isString(value.completedAt))
     && (value.actualSeconds === undefined || isNumber(value.actualSeconds))
-    && (value.parentChunkId === undefined || isString(value.parentChunkId))
+    && (value.parentMissionId === undefined || isString(value.parentMissionId))
     && (value.rescheduledFor === undefined || isString(value.rescheduledFor))
     && (value.iconKey === undefined || isString(value.iconKey))
   );
@@ -224,7 +224,7 @@ function isTimerSession(value: unknown): value is TimerSession {
 
   return (
     isString(value.id)
-    && isString(value.chunkId)
+    && isString(value.missionId)
     && isTimerSessionState(value.state)
     && isString(value.startedAt)
     && (value.pausedAt === undefined || isString(value.pausedAt))
@@ -257,7 +257,7 @@ function isAppEvent(value: unknown): value is AppEvent {
     && isString(value.sessionId)
     && isEventSource(value.source)
     && (value.taskId === null || isString(value.taskId))
-    && (value.chunkId === null || isString(value.chunkId))
+    && (value.missionId === null || isString(value.missionId))
     && (value.meta === undefined || isEventMeta(value.meta))
   );
 }
@@ -300,10 +300,10 @@ export function sanitizeTaskSummary(rawInput: string): string {
   return normalized || FALLBACK_TASK_SUMMARY;
 }
 
-function sanitizeChunkForStorage(chunk: Chunk): Chunk {
+function sanitizeMissionForStorage(mission: Mission): Mission {
   return {
-    ...chunk,
-    iconKey: sanitizeChunkIconKey(chunk.iconKey)
+    ...mission,
+    iconKey: sanitizeMissionIconKey(mission.iconKey)
   };
 }
 
@@ -334,25 +334,25 @@ function sanitizeTaskForStorage(task: Task, minuteFallbackByTaskId: Map<string, 
 }
 
 function sanitizeStateForStorage(state: PersistedState): PersistedState {
-  const sanitizedChunks = state.chunks.map((chunk) => sanitizeChunkForStorage(chunk));
-  const minuteFallbackByTaskId = buildChunkMinuteFallbackByTaskId(sanitizedChunks);
+  const sanitizedMissions = state.missions.map((mission) => sanitizeMissionForStorage(mission));
+  const minuteFallbackByTaskId = buildMissionMinuteFallbackByTaskId(sanitizedMissions);
 
   return {
     ...state,
-    chunks: sanitizedChunks,
+    missions: sanitizedMissions,
     tasks: state.tasks.map((task) => sanitizeTaskForStorage(task, minuteFallbackByTaskId))
   };
 }
 
-function sanitizeRemainingSecondsByChunk(value: unknown): Record<string, number> {
+function sanitizeRemainingSecondsByMission(value: unknown): Record<string, number> {
   if (!isRecord(value)) {
     return {};
   }
 
   const next: Record<string, number> = {};
-  Object.entries(value).forEach(([chunkId, seconds]) => {
-    if (isString(chunkId) && isNumber(seconds)) {
-      next[chunkId] = Math.max(0, Math.floor(seconds));
+  Object.entries(value).forEach(([missionId, seconds]) => {
+    if (isString(missionId) && isNumber(seconds)) {
+      next[missionId] = Math.max(0, Math.floor(seconds));
     }
   });
   return next;
@@ -374,13 +374,13 @@ export function loadPersistedState(): PersistedState | null {
       return null;
     }
 
-    const sanitizedChunks = Array.isArray(parsed.chunks)
-      ? parsed.chunks
-        .filter((chunk): chunk is Chunk => isChunk(chunk))
-        .map((chunk) => sanitizeChunkForStorage(chunk))
+    const sanitizedMissions = Array.isArray(parsed.missions)
+      ? parsed.missions
+        .filter((mission): mission is Mission => isMission(mission))
+        .map((mission) => sanitizeMissionForStorage(mission))
       : [];
-    const minuteFallbackByTaskId = buildChunkMinuteFallbackByTaskId(sanitizedChunks);
-    const timelineFallbackByTaskId = buildTaskTimelineFallbackByTaskId(sanitizedChunks);
+    const minuteFallbackByTaskId = buildMissionMinuteFallbackByTaskId(sanitizedMissions);
+    const timelineFallbackByTaskId = buildTaskTimelineFallbackByTaskId(sanitizedMissions);
     const sanitizedTasks = Array.isArray(parsed.tasks)
       ? parsed.tasks
         .map((task) => sanitizeTaskRecord(task, minuteFallbackByTaskId, timelineFallbackByTaskId))
@@ -396,18 +396,18 @@ export function loadPersistedState(): PersistedState | null {
     const sanitizedSettings = isUserSettings(parsed.settings) ? parsed.settings : { hapticEnabled: true };
     const sanitizedActiveTaskId = isString(parsed.activeTaskId) ? parsed.activeTaskId : null;
     const sanitizedActiveTab = isActiveTab(parsed.activeTab) ? parsed.activeTab : "home";
-    const sanitizedRemainingSecondsByChunk = sanitizeRemainingSecondsByChunk(parsed.remainingSecondsByChunk);
+    const sanitizedRemainingSecondsByMission = sanitizeRemainingSecondsByMission(parsed.remainingSecondsByMission);
 
     return {
       tasks: sanitizedTasks,
-      chunks: sanitizedChunks,
+      missions: sanitizedMissions,
       timerSessions: sanitizedTimerSessions,
       stats: sanitizedStats,
       settings: sanitizedSettings,
       events: sanitizedEvents,
       activeTaskId: sanitizedActiveTaskId,
       activeTab: sanitizedActiveTab,
-      remainingSecondsByChunk: sanitizedRemainingSecondsByChunk
+      remainingSecondsByMission: sanitizedRemainingSecondsByMission
     };
   } catch {
     return null;

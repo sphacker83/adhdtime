@@ -65,7 +65,7 @@ export function SettingsView({
             <p className={styles.fallbackText}>{notificationFallbackText}</p>
           ) : (
             <p className={styles.helperText}>
-              chunk_started/chunk_completed/task_rescheduled 이벤트 시 1회 알림을 보냅니다.
+              mission_started/mission_completed/task_rescheduled 이벤트 시 1회 알림을 보냅니다.
             </p>
           )}
         </div>
@@ -144,7 +144,7 @@ export function SettingsView({
       <div className={styles.settingsRow}>
         <div className={styles.settingsBody}>
           <strong>데이터 초기화</strong>
-          <p>로컬에 저장된 과업/청크/스탯을 모두 삭제합니다.</p>
+          <p>로컬에 저장된 과업/미션/스탯을 모두 삭제합니다.</p>
         </div>
         <button type="button" className={styles.smallButtonDanger} onClick={onResetAll}>
           초기화

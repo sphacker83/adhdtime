@@ -1,20 +1,20 @@
 export type TaskStatus = "todo" | "in_progress" | "done" | "archived";
-export type ChunkStatus = "todo" | "running" | "paused" | "done" | "abandoned" | "archived";
+export type MissionStatus = "todo" | "running" | "paused" | "done" | "abandoned" | "archived";
 export type TimerSessionState = "running" | "paused" | "ended";
 export type EventSource = "local" | "ai" | "system" | "user";
-export type ChunkIconKey = string;
+export type MissionIconKey = string;
 
 export type EventName =
   | "task_created"
-  | "chunk_generated"
-  | "chunk_started"
-  | "chunk_paused"
-  | "chunk_completed"
-  | "chunk_abandoned"
-  | "rechunk_requested"
+  | "mission_generated"
+  | "mission_started"
+  | "mission_paused"
+  | "mission_completed"
+  | "mission_abandoned"
+  | "remission_requested"
   | "reschedule_requested"
   | "task_rescheduled"
-  | "chunk_time_adjusted"
+  | "mission_time_adjusted"
   | "task_time_updated"
   | "xp_gained"
   | "level_up"
@@ -24,10 +24,10 @@ export type EventName =
 export const TASK_SUMMARY_MAX_LENGTH = 60;
 export const MIN_TASK_TOTAL_MINUTES = 10;
 export const MAX_TASK_TOTAL_MINUTES = 480;
-export const MIN_CHUNK_EST_MINUTES = 2;
-export const MAX_CHUNK_EST_MINUTES = 15;
-export const RECOMMENDED_MIN_CHUNK_COUNT = 5;
-export const RECOMMENDED_MAX_CHUNK_COUNT = 12;
+export const MIN_MISSION_EST_MINUTES = 2;
+export const MAX_MISSION_EST_MINUTES = 15;
+export const RECOMMENDED_MIN_MISSION_COUNT = 5;
+export const RECOMMENDED_MAX_MISSION_COUNT = 12;
 
 export interface Task {
   id: string;
@@ -42,24 +42,24 @@ export interface Task {
   status: TaskStatus;
 }
 
-export interface Chunk {
+export interface Mission {
   id: string;
   taskId: string;
   order: number;
   action: string;
   estMinutes: number;
-  status: ChunkStatus;
-  iconKey?: ChunkIconKey;
+  status: MissionStatus;
+  iconKey?: MissionIconKey;
   startedAt?: string;
   completedAt?: string;
   actualSeconds?: number;
-  parentChunkId?: string;
+  parentMissionId?: string;
   rescheduledFor?: string;
 }
 
 export interface TimerSession {
   id: string;
-  chunkId: string;
+  missionId: string;
   state: TimerSessionState;
   startedAt: string;
   pausedAt?: string;
@@ -97,33 +97,33 @@ export interface AppEvent {
   sessionId: string;
   source: EventSource;
   taskId: string | null;
-  chunkId: string | null;
+  missionId: string | null;
   meta?: Record<string, EventMetaValue>;
 }
 
-export interface ChunkTemplate {
+export interface MissionTemplate {
   action: string;
   estMinutes: number;
   difficulty: number;
   notes: string;
-  iconKey?: ChunkIconKey;
+  iconKey?: MissionIconKey;
 }
 
-export interface ChunkDraft {
-  chunkId: string;
+export interface MissionDraft {
+  missionId: string;
   order: number;
   action: string;
   estMinutes: number;
   difficulty: number;
   notes: string;
-  iconKey?: ChunkIconKey;
+  iconKey?: MissionIconKey;
 }
 
-export interface ChunkingResult {
+export interface MissioningResult {
   taskId: string;
   title: string;
   context: string;
-  chunks: ChunkDraft[];
+  missions: MissionDraft[];
   safety: {
     requiresCaution: boolean;
     notes: string;
@@ -132,12 +132,12 @@ export interface ChunkingResult {
 
 export interface PersistedState {
   tasks: Task[];
-  chunks: Chunk[];
+  missions: Mission[];
   timerSessions: TimerSession[];
   stats: StatsState;
   settings: UserSettings;
   events: AppEvent[];
   activeTaskId: string | null;
   activeTab: "home" | "tasks" | "stats" | "settings";
-  remainingSecondsByChunk: Record<string, number>;
+  remainingSecondsByMission: Record<string, number>;
 }

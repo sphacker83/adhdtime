@@ -74,7 +74,7 @@ export interface RewardOutcome {
   statGain: FiveStats;
 }
 
-export function applyChunkCompletionReward(params: {
+export function applyMissionCompletionReward(params: {
   stats: StatsState;
   estMinutes: number;
   actualSeconds: number;

@@ -127,7 +127,7 @@ describe("task-meta constraints and schedule model", () => {
     expect(invalid).toBeNull();
   });
 
-  it("normalizes persisted task schedule for manual chunk path", () => {
+  it("normalizes persisted task schedule for manual mission path", () => {
     const normalizedEmpty = normalizeTaskScheduleIso({
       totalMinutes: 40,
       fallbackStartAt: new Date("2026-03-01T09:00:00.000Z")

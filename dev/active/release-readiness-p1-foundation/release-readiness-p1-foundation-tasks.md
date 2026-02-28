@@ -89,14 +89,14 @@ Acceptance (Round 2 확정)
 - [x] `paused` 상태를 실행 잠금으로 포함
 - [x] `completedAt`는 `done` 상태일 때만 저장
 - [x] 시간 필드 저장 시 ISO UTC 정규화 보강
-- [x] 실행 잠금 중 청크 삭제 버튼 비활성화
+- [x] 실행 잠금 중 미션 삭제 버튼 비활성화
 
 ## Round 2 확정 결과
 
 | FR | 상태 | 근거 파일 | 검증 결과 | 비고 |
 | --- | --- | --- | --- | --- |
 | FR-01 | 완료 | `features/mvp/components/mvp-dashboard.tsx` | `typecheck/lint/test:mvp/verify:gate/build` PASS | `title + totalMinutes` 입력/검증 동작 |
-| FR-02 | 완료 | `features/mvp/components/mvp-dashboard.tsx`, `features/mvp/lib/chunking.ts` | `typecheck/lint/test:mvp/verify:gate/build` PASS | 청킹 총합 예산 강제 |
+| FR-02 | 완료 | `features/mvp/components/mvp-dashboard.tsx`, `features/mvp/lib/missioning.ts` | `typecheck/lint/test:mvp/verify:gate/build` PASS | 청킹 총합 예산 강제 |
 | FR-03 | 완료 | `features/mvp/components/mvp-dashboard.tsx` | `typecheck/lint/test:mvp/verify:gate/build` PASS | 편집/삭제 정책 + 실행 잠금 삭제 비활성화 |
 | FR-05 | 완료 | `features/mvp/components/mvp-dashboard.tsx`, `features/mvp/lib/timer-accuracy.ts` | `typecheck/lint/test:mvp/verify:gate/build` PASS | 실행 중 `-1/+1` 조정 및 상한 강제 |
 | FR-11 | 완료 | `features/mvp/components/mvp-dashboard.tsx` | `typecheck/lint/test:mvp/verify:gate/build` PASS | `running/paused` 잠금 정책 반영 |

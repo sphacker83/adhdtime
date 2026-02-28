@@ -7,21 +7,21 @@ Review Method: `documentation-architect` 구조화 + `plan-reviewer` 갭 검증 
 ## 코드 기준 상태 체크리스트 (2026-02-27)
 - 참고: 아래 상세 항목의 `Why`는 이슈 등록 당시 맥락이며, 현재 상태는 본 체크리스트를 우선합니다.
 - [x] MVP-001 도메인 타입 PRD v3 정합화
-  - 근거: `features/mvp/types/domain.ts`에 `summary`, `abandoned/archived`, `parentChunkId`, `rescheduledFor` 반영
+  - 근거: `features/mvp/types/domain.ts`에 `summary`, `abandoned/archived`, `parentMissionId`, `rescheduledFor` 반영
 - [x] MVP-002 안전 차단 이벤트(`safety_blocked`) 추가
   - 근거: `features/mvp/components/mvp-dashboard.tsx` 위험 입력 분기에서 `safety_blocked` 이벤트 기록
 - [x] MVP-003 복귀 루프 상태 전이 정합화 (재청킹/재등록)
-  - 근거: 재청킹 시 원본 `archived` + 신생 `parentChunkId`, 재등록 시 `abandoned` + `rescheduledFor`, `chunk_abandoned` 이벤트 기록
+  - 근거: 재청킹 시 원본 `archived` + 신생 `parentMissionId`, 재등록 시 `abandoned` + `rescheduledFor`, `mission_abandoned` 이벤트 기록
 - [x] MVP-004 이벤트 공통 필드 확장(`sessionId`, `source` 표준)
   - 근거: `features/mvp/lib/events.ts` 공통 필드 강제 + 대시보드 `sessionIdRef` 기반 로깅
 - [x] MVP-005 릴리즈 게이트 계측 훅 구현 (10초/3탭/2탭/3분)
-  - 근거: `chunkingLatencyMs`, `startClickCount`, `recoveryClickCount`, `timeToFirstStartMs` 메타 기록
+  - 근거: `missioningLatencyMs`, `startClickCount`, `recoveryClickCount`, `timeToFirstStartMs` 메타 기록
 - [x] MVP-006 rawInput 최소 저장 정책 구현
-  - 근거: `features/mvp/lib/chunking.ts`의 `normalizeTaskSummary`(길이 제한) + `features/mvp/components/mvp-dashboard.tsx` 저장 시 요약값 사용
+  - 근거: `features/mvp/lib/missioning.ts`의 `normalizeTaskSummary`(길이 제한) + `features/mvp/components/mvp-dashboard.tsx` 저장 시 요약값 사용
 - [x] MVP-007 타이머 정확도 회귀 테스트 기준 확정
   - 근거: `features/mvp/lib/timer-accuracy.ts` 순수 함수 + `features/mvp/lib/timer-accuracy.test.ts` 3개 케이스(10분 드리프트, 백그라운드 복귀, 0초 클램프) + `npm run test:mvp` 통과
 - [x] MVP-008 청킹 검증 강화 (동사 시작/개수/시간)
-  - 근거: `features/mvp/lib/chunking.ts`에서 `warnings` 추가, 개수 권장 경고, 동사 시작 권장, `estMinutes` 범위 강제
+  - 근거: `features/mvp/lib/missioning.ts`에서 `warnings` 추가, 개수 권장 경고, 동사 시작 권장, `estMinutes` 범위 강제
 - [x] MVP-009 복귀 UX 카피/피드백 일관화
   - 근거: `features/mvp/components/mvp-dashboard.tsx` 재청킹/재등록/차단 피드백 톤 통일 + `docs/mvp-009-recovery-copy-guide.md` 카피 가이드 테이블 추가
 - [x] MVP-010 이벤트 로그 조회 편의 개선
@@ -35,14 +35,14 @@ Review Method: `documentation-architect` 구조화 + `plan-reviewer` 갭 검증 
 
 ### MVP-001 도메인 타입 PRD v3 정합화
 - Priority: P0-Critical
-- Why: 현재 타입이 PRD v3 상태/필드와 불일치 (`abandoned`, `archived`, `parentChunkId`, `rescheduledFor`, `summary` 누락)
+- Why: 현재 타입이 PRD v3 상태/필드와 불일치 (`abandoned`, `archived`, `parentMissionId`, `rescheduledFor`, `summary` 누락)
 - Scope:
   - `features/mvp/types/domain.ts`
   - `features/mvp/components/mvp-dashboard.tsx`
   - `features/mvp/lib/storage.ts`
 - AC:
-  - `ChunkStatus`에 `abandoned`, `archived` 포함
-  - `Task.summary`, `Chunk.parentChunkId`, `Chunk.rescheduledFor` 포함
+  - `MissionStatus`에 `abandoned`, `archived` 포함
+  - `Task.summary`, `Mission.parentMissionId`, `Mission.rescheduledFor` 포함
   - 컴파일 에러 없이 기존 플로우 동작 유지
 - Depends On: 없음
 - Estimate: M
@@ -63,14 +63,14 @@ Review Method: `documentation-architect` 구조화 + `plan-reviewer` 갭 검증 
 
 ### MVP-003 복귀 루프 상태 전이 정합화 (재청킹/재등록)
 - Priority: P0-Critical
-- Why: 현재 재청킹은 원본 청크 삭제, 재등록은 순서 이동만 수행해 PRD의 상태/추적 요구를 만족하지 못함
+- Why: 현재 재청킹은 원본 미션 삭제, 재등록은 순서 이동만 수행해 PRD의 상태/추적 요구를 만족하지 못함
 - Scope:
   - `features/mvp/components/mvp-dashboard.tsx`
   - `features/mvp/types/domain.ts`
 - AC:
-  - 재청킹 시 원본 청크 `archived`, 신생 청크 `parentChunkId` 연결
-  - 재등록 시 대상 청크 `abandoned` 처리 + `rescheduledFor` 기록
-  - `rechunk_requested`, `reschedule_requested`, `chunk_abandoned` 이벤트가 일관되게 기록
+  - 재청킹 시 원본 미션 `archived`, 신생 미션 `parentMissionId` 연결
+  - 재등록 시 대상 미션 `abandoned` 처리 + `rescheduledFor` 기록
+  - `remission_requested`, `reschedule_requested`, `mission_abandoned` 이벤트가 일관되게 기록
 - Depends On: MVP-001
 - Estimate: M
 
@@ -110,7 +110,7 @@ Review Method: `documentation-architect` 구조화 + `plan-reviewer` 갭 검증 
 - Why: 현재 `Task.title`이 원문 그대로 저장되어 장기 저장 최소화 정책이 약함
 - Scope:
   - `features/mvp/components/mvp-dashboard.tsx`
-  - `features/mvp/lib/chunking.ts`
+  - `features/mvp/lib/missioning.ts`
   - `features/mvp/types/domain.ts`
 - AC:
   - 저장용 필드(`summary`)는 정규화/길이 제한 정책 적용
@@ -136,9 +136,9 @@ Review Method: `documentation-architect` 구조화 + `plan-reviewer` 갭 검증 
 - Priority: P0-High
 - Why: validator가 일부 조건만 약하게 검증해 문서 계약과 차이 가능
 - Scope:
-  - `features/mvp/lib/chunking.ts`
+  - `features/mvp/lib/missioning.ts`
 - AC:
-  - `chunks.length` 권장 범위 체크(경고 또는 폴백 정책 명확화)
+  - `missions.length` 권장 범위 체크(경고 또는 폴백 정책 명확화)
   - action 동사성 판정 규칙 보강
   - `estMinutes` 2~15 강제 및 메시지 표준화
 - Depends On: 없음

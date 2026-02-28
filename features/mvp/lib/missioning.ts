@@ -1,30 +1,30 @@
 import {
-  type Chunk,
-  type ChunkDraft,
-  type ChunkIconKey,
+  type Mission,
+  type MissionDraft,
+  type MissionIconKey,
   MAX_TASK_TOTAL_MINUTES,
-  MAX_CHUNK_EST_MINUTES,
+  MAX_MISSION_EST_MINUTES,
   MIN_TASK_TOTAL_MINUTES,
-  MIN_CHUNK_EST_MINUTES,
-  RECOMMENDED_MAX_CHUNK_COUNT,
-  RECOMMENDED_MIN_CHUNK_COUNT,
+  MIN_MISSION_EST_MINUTES,
+  RECOMMENDED_MAX_MISSION_COUNT,
+  RECOMMENDED_MIN_MISSION_COUNT,
   TASK_SUMMARY_MAX_LENGTH,
-  type ChunkTemplate,
-  type ChunkingResult
+  type MissionTemplate,
+  type MissioningResult
 } from "@/features/mvp/types/domain";
-import chunkPresetsJson from "@/docs/adhd_chunk_presets_50.json";
+import missionPresetsJson from "@/docs/adhd_mission_presets_50.json";
 
-export interface ChunkingValidationResult {
+export interface MissioningValidationResult {
   ok: boolean;
   errors: string[];
   warnings: string[];
 }
 
-export interface AiChunkingAdapter {
-  generate: (params: { taskId: string; title: string }) => Promise<ChunkingResult>;
+export interface AiMissioningAdapter {
+  generate: (params: { taskId: string; title: string }) => Promise<MissioningResult>;
 }
 
-interface ChunkPresetMeta {
+interface MissionPresetMeta {
   keywords: string[];
   keyword_weights: Record<string, number>;
   intent: string;
@@ -34,23 +34,23 @@ interface ChunkPresetMeta {
   updated_at: string;
 }
 
-interface ChunkPresetTaskChunk {
+interface MissionPresetTaskMission {
   step: string;
   min: number;
   done: string;
 }
 
-interface ChunkPresetTask {
+interface MissionPresetTask {
   id: string;
   estimated_time_min: number;
   difficulty: number;
-  chunks: ChunkPresetTaskChunk[];
+  missions: MissionPresetTaskMission[];
 }
 
-interface ChunkPreset {
+interface MissionPreset {
   schema_version: string;
-  meta: ChunkPresetMeta;
-  task: ChunkPresetTask;
+  meta: MissionPresetMeta;
+  task: MissionPresetTask;
 }
 
 interface IntentProfile {
@@ -65,7 +65,7 @@ interface IntentSignalScore {
 }
 
 interface ScoredPresetCandidate {
-  preset: ChunkPreset;
+  preset: MissionPreset;
   totalScore: number;
   priority: number;
   difficulty: number;
@@ -78,10 +78,10 @@ const PRESET_NEGATIVE_KEYWORD_PENALTY = 7;
 const PRESET_KEYWORD_FALLBACK_WEIGHT = 1;
 const PRESET_MIN_SIGNAL_SCORE = 2;
 const PRESET_MIN_EXAMPLE_SCORE = 3;
-const DEFAULT_CHUNK_NOTE = "완료 조건 체크";
+const DEFAULT_MISSION_NOTE = "완료 조건 체크";
 
-const JSON_PRESETS: readonly ChunkPreset[] = Array.isArray(chunkPresetsJson)
-  ? (chunkPresetsJson as unknown as readonly ChunkPreset[])
+const JSON_PRESETS: readonly MissionPreset[] = Array.isArray(missionPresetsJson)
+  ? (missionPresetsJson as unknown as readonly MissionPreset[])
   : [];
 
 
@@ -93,10 +93,10 @@ const ACTION_CONTAINS_VERB_PATTERN =
   /(하기|해보기|작성|정리|확인|검토|실행|준비|제출|저장|기록|예약|마무리|요약|복습|정돈|정하|적기|읽기|풀기|버리기|담기|옮기기|닦기|고르기|체크|보내|시작|종료)/;
 const ACTION_KOREAN_DECLARATIVE_END_PATTERN = /[가-힣]+(다|요)(\([^)]*\))?$/;
 
-const EST_MINUTES_RANGE_LABEL = `${MIN_CHUNK_EST_MINUTES}~${MAX_CHUNK_EST_MINUTES}분`;
-const CHUNK_COUNT_RECOMMENDED_LABEL = `${RECOMMENDED_MIN_CHUNK_COUNT}~${RECOMMENDED_MAX_CHUNK_COUNT}개`;
-const DEFAULT_CHUNK_ICON_KEY: ChunkIconKey = "default";
-const CHUNK_ICON_RULES: Array<{ iconKey: ChunkIconKey; keywords: string[] }> = [
+const EST_MINUTES_RANGE_LABEL = `${MIN_MISSION_EST_MINUTES}~${MAX_MISSION_EST_MINUTES}분`;
+const MISSION_COUNT_RECOMMENDED_LABEL = `${RECOMMENDED_MIN_MISSION_COUNT}~${RECOMMENDED_MAX_MISSION_COUNT}개`;
+const DEFAULT_MISSION_ICON_KEY: MissionIconKey = "default";
+const MISSION_ICON_RULES: Array<{ iconKey: MissionIconKey; keywords: string[] }> = [
   { iconKey: "routine", keywords: ["알람", "기상", "취침", "잠", "루틴", "아침", "저녁", "세면", "물", "침대"] },
   { iconKey: "organize", keywords: ["정리", "청소", "정돈", "분류", "버리", "치우", "옮기", "정렬"] },
   { iconKey: "record", keywords: ["작성", "적기", "기록", "메모", "입력", "정리노트"] },
@@ -112,8 +112,8 @@ export function clampTaskTotalMinutes(totalMinutes: number, fallback = MIN_TASK_
 }
 
 function clampMinutes(minutes: number): number {
-  const safeMinutes = Number.isFinite(minutes) ? Math.floor(minutes) : MIN_CHUNK_EST_MINUTES;
-  return Math.min(MAX_CHUNK_EST_MINUTES, Math.max(MIN_CHUNK_EST_MINUTES, safeMinutes));
+  const safeMinutes = Number.isFinite(minutes) ? Math.floor(minutes) : MIN_MISSION_EST_MINUTES;
+  return Math.min(MAX_MISSION_EST_MINUTES, Math.max(MIN_MISSION_EST_MINUTES, safeMinutes));
 }
 
 function clampDifficulty(difficulty: number, fallback = 2): number {
@@ -121,41 +121,41 @@ function clampDifficulty(difficulty: number, fallback = 2): number {
   return Math.min(3, Math.max(1, safeDifficulty));
 }
 
-export function sumChunkEstMinutes<T extends { estMinutes: number }>(chunks: T[]): number {
-  return chunks.reduce((sum, chunk) => sum + clampMinutes(chunk.estMinutes), 0);
+export function sumMissionEstMinutes<T extends { estMinutes: number }>(missions: T[]): number {
+  return missions.reduce((sum, mission) => sum + clampMinutes(mission.estMinutes), 0);
 }
 
-export function isWithinTaskChunkBudget<T extends { estMinutes: number }>(chunks: T[], totalMinutes: number): boolean {
-  return sumChunkEstMinutes(chunks) <= clampTaskTotalMinutes(totalMinutes);
+export function isWithinTaskMissionBudget<T extends { estMinutes: number }>(missions: T[], totalMinutes: number): boolean {
+  return sumMissionEstMinutes(missions) <= clampTaskTotalMinutes(totalMinutes);
 }
 
-export function enforceChunkBudget<T extends { estMinutes: number }>(chunks: T[], totalMinutes: number): T[] {
+export function enforceMissionBudget<T extends { estMinutes: number }>(missions: T[], totalMinutes: number): T[] {
   const budget = clampTaskTotalMinutes(totalMinutes);
-  const maxChunkCount = Math.max(1, Math.floor(budget / MIN_CHUNK_EST_MINUTES));
-  const normalized = chunks.slice(0, maxChunkCount).map(
-    (chunk) =>
+  const maxMissionCount = Math.max(1, Math.floor(budget / MIN_MISSION_EST_MINUTES));
+  const normalized = missions.slice(0, maxMissionCount).map(
+    (mission) =>
       ({
-        ...chunk,
-        estMinutes: clampMinutes(chunk.estMinutes)
+        ...mission,
+        estMinutes: clampMinutes(mission.estMinutes)
       }) as T
   );
 
-  let total = sumChunkEstMinutes(normalized);
+  let total = sumMissionEstMinutes(normalized);
   if (total <= budget) {
     return normalized;
   }
 
   for (let index = normalized.length - 1; index >= 0 && total > budget; index -= 1) {
-    const chunk = normalized[index];
-    const reducible = chunk.estMinutes - MIN_CHUNK_EST_MINUTES;
+    const mission = normalized[index];
+    const reducible = mission.estMinutes - MIN_MISSION_EST_MINUTES;
     if (reducible <= 0) {
       continue;
     }
 
     const reduceBy = Math.min(reducible, total - budget);
     normalized[index] = {
-      ...chunk,
-      estMinutes: chunk.estMinutes - reduceBy
+      ...mission,
+      estMinutes: mission.estMinutes - reduceBy
     };
     total -= reduceBy;
   }
@@ -190,7 +190,7 @@ function compactIconScoreText(input: string): string {
   return normalizeScoreText(input).replace(/\s+/g, "");
 }
 
-function resolveChunkIconKey(action: string, notes?: string, rawIconKey?: unknown): ChunkIconKey {
+function resolveMissionIconKey(action: string, notes?: string, rawIconKey?: unknown): MissionIconKey {
   if (isNonEmptyString(rawIconKey)) {
     return rawIconKey.trim();
   }
@@ -199,7 +199,7 @@ function resolveChunkIconKey(action: string, notes?: string, rawIconKey?: unknow
   const notesText = compactIconScoreText(notes ?? "");
   const targetText = `${actionText}${notesText}`;
 
-  for (const rule of CHUNK_ICON_RULES) {
+  for (const rule of MISSION_ICON_RULES) {
     const hasMatch = rule.keywords.some((keyword) => {
       const compactKeyword = compactIconScoreText(keyword);
       return compactKeyword.length > 0 && targetText.includes(compactKeyword);
@@ -209,7 +209,7 @@ function resolveChunkIconKey(action: string, notes?: string, rawIconKey?: unknow
     }
   }
 
-  return DEFAULT_CHUNK_ICON_KEY;
+  return DEFAULT_MISSION_ICON_KEY;
 }
 
 function hasScoreTerm(normalizedInput: string, compactInput: string, term: string): boolean {
@@ -263,7 +263,7 @@ function scoreExampleMatch(normalizedInput: string, compactInput: string, exampl
   return overlapRatio * 10;
 }
 
-function buildIntentProfiles(presets: readonly ChunkPreset[]): Record<string, IntentProfile> {
+function buildIntentProfiles(presets: readonly MissionPreset[]): Record<string, IntentProfile> {
   const profileMap = new Map<string, { keywords: Set<string>; examples: Set<string> }>();
 
   presets.forEach((preset) => {
@@ -338,7 +338,7 @@ function computeIntentSignalScores(normalizedTitle: string, compactTitle: string
 }
 
 function scoreKeywordWeights(
-  meta: ChunkPresetMeta,
+  meta: MissionPresetMeta,
   normalizedTitle: string,
   compactTitle: string
 ): { score: number; hitCount: number } {
@@ -376,7 +376,7 @@ function scoreKeywordWeights(
   };
 }
 
-function scoreNegativeKeywords(meta: ChunkPresetMeta, normalizedTitle: string, compactTitle: string): number {
+function scoreNegativeKeywords(meta: MissionPresetMeta, normalizedTitle: string, compactTitle: string): number {
   return meta.negative_keywords.reduce((penalty, keyword) => {
     if (!hasScoreTerm(normalizedTitle, compactTitle, keyword)) {
       return penalty;
@@ -386,20 +386,20 @@ function scoreNegativeKeywords(meta: ChunkPresetMeta, normalizedTitle: string, c
   }, 0);
 }
 
-function scoreAdhdExecution(task: ChunkPresetTask): number {
+function scoreAdhdExecution(task: MissionPresetTask): number {
   const difficulty = clampDifficulty(task.difficulty);
   const estimatedTime = Number.isFinite(task.estimated_time_min)
     ? Math.max(1, Math.floor(task.estimated_time_min))
-    : MAX_CHUNK_EST_MINUTES;
-  const firstChunkMin = Number.isFinite(task.chunks[0]?.min)
-    ? Math.max(1, Math.floor(task.chunks[0].min))
-    : MAX_CHUNK_EST_MINUTES;
+    : MAX_MISSION_EST_MINUTES;
+  const firstMissionMin = Number.isFinite(task.missions[0]?.min)
+    ? Math.max(1, Math.floor(task.missions[0].min))
+    : MAX_MISSION_EST_MINUTES;
 
   const difficultyBonus = (4 - difficulty) * 2.5;
   const shortTimeBonus = Math.max(0, 15 - estimatedTime) * 0.4;
-  const firstChunkBonus = firstChunkMin >= 1 && firstChunkMin <= 2 ? 2.5 : 0;
+  const firstMissionBonus = firstMissionMin >= 1 && firstMissionMin <= 2 ? 2.5 : 0;
 
-  return difficultyBonus + shortTimeBonus + firstChunkBonus;
+  return difficultyBonus + shortTimeBonus + firstMissionBonus;
 }
 
 function compareScoredPresetCandidates(a: ScoredPresetCandidate, b: ScoredPresetCandidate): number {
@@ -422,29 +422,29 @@ function compareScoredPresetCandidates(a: ScoredPresetCandidate, b: ScoredPreset
   return a.taskId.localeCompare(b.taskId, "en");
 }
 
-function mapPresetChunksToTemplates(preset: ChunkPreset): ChunkTemplate[] | null {
-  if (!Array.isArray(preset.task.chunks) || preset.task.chunks.length === 0) {
+function mapPresetMissionsToTemplates(preset: MissionPreset): MissionTemplate[] | null {
+  if (!Array.isArray(preset.task.missions) || preset.task.missions.length === 0) {
     return null;
   }
 
   const difficulty = clampDifficulty(preset.task.difficulty);
-  const templates = preset.task.chunks
-    .map((chunk): ChunkTemplate | null => {
-      const action = normalizeActionText(chunk.step ?? "");
+  const templates = preset.task.missions
+    .map((mission): MissionTemplate | null => {
+      const action = normalizeActionText(mission.step ?? "");
       if (!action) {
         return null;
       }
 
-      const notes = normalizeActionText(chunk.done ?? "") || DEFAULT_CHUNK_NOTE;
+      const notes = normalizeActionText(mission.done ?? "") || DEFAULT_MISSION_NOTE;
       return {
         action,
-        estMinutes: clampMinutes(chunk.min),
+        estMinutes: clampMinutes(mission.min),
         difficulty,
         notes,
-        iconKey: resolveChunkIconKey(action, notes)
+        iconKey: resolveMissionIconKey(action, notes)
       };
     })
-    .filter((template): template is ChunkTemplate => template !== null);
+    .filter((template): template is MissionTemplate => template !== null);
 
   return templates.length > 0 ? templates : null;
 }
@@ -470,7 +470,7 @@ function scorePresetCandidates(title: string): ScoredPresetCandidate[] {
     const difficulty = clampDifficulty(preset.task.difficulty);
     const estimatedTimeMin = Number.isFinite(preset.task.estimated_time_min)
       ? Math.max(1, Math.floor(preset.task.estimated_time_min))
-      : MAX_CHUNK_EST_MINUTES;
+      : MAX_MISSION_EST_MINUTES;
     const negativePenalty = scoreNegativeKeywords(preset.meta, normalizedTitle, compactTitle);
     const adhdScore = scoreAdhdExecution(preset.task);
     const safeIntentScore = intentSignal?.score ?? 0;
@@ -506,10 +506,10 @@ function scorePresetCandidates(title: string): ScoredPresetCandidate[] {
   }, []);
 }
 
-function selectJsonPresetTemplates(title: string): ChunkTemplate[] | null {
+function selectJsonPresetTemplates(title: string): MissionTemplate[] | null {
   const rankedCandidates = scorePresetCandidates(title).sort(compareScoredPresetCandidates);
   for (const candidate of rankedCandidates) {
-    const mappedTemplates = mapPresetChunksToTemplates(candidate.preset);
+    const mappedTemplates = mapPresetMissionsToTemplates(candidate.preset);
     if (mappedTemplates) {
       return mappedTemplates;
     }
@@ -547,24 +547,24 @@ function analyzeActionQuality(action: string): { isActionable: boolean; startsWi
 }
 
 function buildEstMinutesRangeError(index: number): string {
-  return `chunks[${index}].estMinutes는 ${EST_MINUTES_RANGE_LABEL} 범위여야 합니다.`;
+  return `missions[${index}].estMinutes는 ${EST_MINUTES_RANGE_LABEL} 범위여야 합니다.`;
 }
 
-function buildResult(taskId: string, title: string, templates: ChunkTemplate[]): ChunkingResult {
+function buildResult(taskId: string, title: string, templates: MissionTemplate[]): MissioningResult {
   const safeTitle = normalizeTitle(title);
 
   return {
     taskId,
     title: safeTitle,
     context: safeTitle,
-    chunks: templates.map((template, index) => ({
-      chunkId: crypto.randomUUID(),
+    missions: templates.map((template, index) => ({
+      missionId: crypto.randomUUID(),
       order: index + 1,
       action: template.action,
       estMinutes: clampMinutes(template.estMinutes),
       difficulty: clampDifficulty(template.difficulty),
       notes: template.notes,
-      iconKey: resolveChunkIconKey(template.action, template.notes, template.iconKey)
+      iconKey: resolveMissionIconKey(template.action, template.notes, template.iconKey)
     })),
     safety: {
       requiresCaution: false,
@@ -573,7 +573,7 @@ function buildResult(taskId: string, title: string, templates: ChunkTemplate[]):
   };
 }
 
-function buildDefaultTemplates(title: string): ChunkTemplate[] {
+function buildDefaultTemplates(title: string): MissionTemplate[] {
   const safeTitle = normalizeTitle(title);
 
   return [
@@ -582,43 +582,43 @@ function buildDefaultTemplates(title: string): ChunkTemplate[] {
     { action: `첫 행동을 10분 안에 끝낼 만큼 작게 쪼개기`, estMinutes: 6, difficulty: 2, notes: "작은 단위 유지" },
     { action: `핵심 행동 1개 바로 실행하기`, estMinutes: 10, difficulty: 2, notes: "타이머와 함께 시작" },
     { action: `진행 상태를 2문장으로 기록하기`, estMinutes: 4, difficulty: 1, notes: "다음 행동 연결" },
-    { action: `다음 청크를 예약하고 마무리하기`, estMinutes: 3, difficulty: 1, notes: "복귀 마찰 줄이기" }
+    { action: `다음 미션를 예약하고 마무리하기`, estMinutes: 3, difficulty: 1, notes: "복귀 마찰 줄이기" }
   ].map((template) => ({
     ...template,
-    iconKey: resolveChunkIconKey(template.action, template.notes)
+    iconKey: resolveMissionIconKey(template.action, template.notes)
   }));
 }
 
-export function withNormalizedChunkIcons(payload: ChunkingResult): ChunkingResult {
+export function withNormalizedMissionIcons(payload: MissioningResult): MissioningResult {
   return {
     ...payload,
-    chunks: payload.chunks.map((chunk): ChunkDraft => ({
-      ...chunk,
-      iconKey: resolveChunkIconKey(chunk.action, chunk.notes, chunk.iconKey)
+    missions: payload.missions.map((mission): MissionDraft => ({
+      ...mission,
+      iconKey: resolveMissionIconKey(mission.action, mission.notes, mission.iconKey)
     }))
   };
 }
 
-export function mapChunkingResultToChunks(
-  payload: ChunkingResult,
-  options?: { taskId?: string; status?: Chunk["status"] }
-): Chunk[] {
-  const normalized = withNormalizedChunkIcons(payload);
+export function mapMissioningResultToMissions(
+  payload: MissioningResult,
+  options?: { taskId?: string; status?: Mission["status"] }
+): Mission[] {
+  const normalized = withNormalizedMissionIcons(payload);
   const taskId = options?.taskId ?? normalized.taskId;
   const status = options?.status ?? "todo";
 
-  return normalized.chunks.map((chunk): Chunk => ({
-    id: chunk.chunkId,
+  return normalized.missions.map((mission): Mission => ({
+    id: mission.missionId,
     taskId,
-    order: chunk.order,
-    action: chunk.action,
-    estMinutes: clampMinutes(chunk.estMinutes),
+    order: mission.order,
+    action: mission.action,
+    estMinutes: clampMinutes(mission.estMinutes),
     status,
-    iconKey: chunk.iconKey
+    iconKey: mission.iconKey
   }));
 }
 
-export function generateLocalChunking(taskId: string, title: string): ChunkingResult | null {
+export function generateLocalMissioning(taskId: string, title: string): MissioningResult | null {
   const jsonTemplates = selectJsonPresetTemplates(title);
   if (jsonTemplates) {
     return buildResult(taskId, title, jsonTemplates);
@@ -626,23 +626,23 @@ export function generateLocalChunking(taskId: string, title: string): ChunkingRe
   return null;
 }
 
-export function generateTemplateChunking(taskId: string, title: string): ChunkingResult {
+export function generateTemplateMissioning(taskId: string, title: string): MissioningResult {
   return buildResult(taskId, title, buildDefaultTemplates(title));
 }
 
-export function createAiFallbackAdapter(delayMs = 600): AiChunkingAdapter {
+export function createAiFallbackAdapter(delayMs = 600): AiMissioningAdapter {
   return {
     async generate({ taskId, title }) {
       await new Promise((resolve) => window.setTimeout(resolve, delayMs));
-      return generateTemplateChunking(taskId, title);
+      return generateTemplateMissioning(taskId, title);
     }
   };
 }
 
-export function validateChunkingResult(payload: ChunkingResult): ChunkingValidationResult {
+export function validateMissioningResult(payload: MissioningResult): MissioningValidationResult {
   const errors: string[] = [];
   const warnings: string[] = [];
-  payload.chunks = withNormalizedChunkIcons(payload).chunks;
+  payload.missions = withNormalizedMissionIcons(payload).missions;
 
   if (!payload.taskId.trim()) {
     errors.push("taskId가 비어 있습니다.");
@@ -652,8 +652,8 @@ export function validateChunkingResult(payload: ChunkingResult): ChunkingValidat
     errors.push("title이 비어 있습니다.");
   }
 
-  if (!Array.isArray(payload.chunks) || payload.chunks.length === 0) {
-    errors.push("chunks가 비어 있습니다.");
+  if (!Array.isArray(payload.missions) || payload.missions.length === 0) {
+    errors.push("missions가 비어 있습니다.");
     return {
       ok: false,
       errors,
@@ -661,39 +661,39 @@ export function validateChunkingResult(payload: ChunkingResult): ChunkingValidat
     };
   }
 
-  if (payload.chunks.length < RECOMMENDED_MIN_CHUNK_COUNT || payload.chunks.length > RECOMMENDED_MAX_CHUNK_COUNT) {
+  if (payload.missions.length < RECOMMENDED_MIN_MISSION_COUNT || payload.missions.length > RECOMMENDED_MAX_MISSION_COUNT) {
     warnings.push(
-      `chunks 개수는 ${CHUNK_COUNT_RECOMMENDED_LABEL}를 권장합니다. 현재 ${payload.chunks.length}개이며, 생성은 경고만 남기고 계속 진행됩니다.`
+      `missions 개수는 ${MISSION_COUNT_RECOMMENDED_LABEL}를 권장합니다. 현재 ${payload.missions.length}개이며, 생성은 경고만 남기고 계속 진행됩니다.`
     );
   }
 
   let nonVerbStartCount = 0;
 
-  payload.chunks.forEach((chunk, index) => {
-    if (!chunk.chunkId.trim()) {
-      errors.push(`chunks[${index}].chunkId가 비어 있습니다.`);
+  payload.missions.forEach((mission, index) => {
+    if (!mission.missionId.trim()) {
+      errors.push(`missions[${index}].missionId가 비어 있습니다.`);
     }
 
-    const normalizedAction = normalizeActionText(chunk.action);
+    const normalizedAction = normalizeActionText(mission.action);
     if (!normalizedAction) {
-      errors.push(`chunks[${index}].action이 비어 있습니다.`);
+      errors.push(`missions[${index}].action이 비어 있습니다.`);
     }
 
-    if (chunk.order !== index + 1) {
-      errors.push(`chunks[${index}]의 순서가 올바르지 않습니다.`);
+    if (mission.order !== index + 1) {
+      errors.push(`missions[${index}]의 순서가 올바르지 않습니다.`);
     }
 
     if (
-      !Number.isFinite(chunk.estMinutes)
-      || chunk.estMinutes < MIN_CHUNK_EST_MINUTES
-      || chunk.estMinutes > MAX_CHUNK_EST_MINUTES
+      !Number.isFinite(mission.estMinutes)
+      || mission.estMinutes < MIN_MISSION_EST_MINUTES
+      || mission.estMinutes > MAX_MISSION_EST_MINUTES
     ) {
       errors.push(buildEstMinutesRangeError(index));
     }
 
     const actionQuality = analyzeActionQuality(normalizedAction);
     if (!actionQuality.isActionable) {
-      errors.push(`chunks[${index}]는 실행 가능한 행동 문장이어야 합니다.`);
+      errors.push(`missions[${index}]는 실행 가능한 행동 문장이어야 합니다.`);
     }
 
     if (actionQuality.isActionable && !actionQuality.startsWithVerb) {
@@ -702,7 +702,7 @@ export function validateChunkingResult(payload: ChunkingResult): ChunkingValidat
   });
 
   if (nonVerbStartCount > 0) {
-    warnings.push(`action은 동사 시작을 권장합니다. 현재 ${nonVerbStartCount}개 청크가 동사형 시작이 아닙니다.`);
+    warnings.push(`action은 동사 시작을 권장합니다. 현재 ${nonVerbStartCount}개 미션가 동사형 시작이 아닙니다.`);
   }
 
   return {

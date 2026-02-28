@@ -33,8 +33,8 @@ Phase 2 이후에도 `mvp-dashboard.tsx`는 탭별 JSX와 기능 UI 조각(입�
   - `features/mvp/task-list/components/tasks-view.tsx`
   - `features/mvp/stats/components/stats-view.tsx`
   - `features/mvp/settings/components/settings-view.tsx`
-  - `features/mvp/timer-runtime/components/chunk-primary-actions.tsx`
-  - `features/mvp/timer-runtime/components/chunk-quick-adjust-actions.tsx`
+  - `features/mvp/timer-runtime/components/mission-primary-actions.tsx`
+  - `features/mvp/timer-runtime/components/mission-quick-adjust-actions.tsx`
   - `features/mvp/recovery/components/recovery-actions.tsx`
   - 각 feature 공개 API `index.ts`
 - 선택 근거:

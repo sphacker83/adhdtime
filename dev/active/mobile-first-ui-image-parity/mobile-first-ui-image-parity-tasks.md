@@ -11,10 +11,10 @@ Acceptance:
 - [x] 구현 전에 AC/리스크/검증 항목이 문서로 확정됨
 
 ## Phase 1: 데이터 모델 + 생성 경로 ✅ COMPLETE
-- [x] `Chunk.iconKey`/`ChunkDraft.iconKey` 타입 추가
+- [x] `Mission.iconKey`/`MissionDraft.iconKey` 타입 추가
 - [x] 청킹 생성 경로(`local/template/ai`)에서 아이콘 매핑 추가
-- [x] `ChunkingResult -> Chunk` 매핑에 `iconKey` 포함
-- [x] 리청크/수동 변경 경로에서 아이콘 계승
+- [x] `MissioningResult -> Mission` 매핑에 `iconKey` 포함
+- [x] 리미션/수동 변경 경로에서 아이콘 계승
 - [x] storage validator에 `iconKey` optional 반영
 
 Acceptance:
@@ -34,7 +34,7 @@ Acceptance:
 
 ## Phase 3: 현재 퀘스트 카드/다음 미션 구조 ✅ COMPLETE
 - [x] 현재 퀘스트 타이틀을 `퀘스트 : [퀘스트명]`으로 변경
-- [x] `#분 청크` 텍스트 제거
+- [x] `#분 미션` 텍스트 제거
 - [x] `예상소요시간 / 마감시간 / 마감까지 남은 시간` 표시
 - [x] 다음 미션 위치를 CTA(시작/일시정지/완료) 아래로 이동
 - [x] 다음 미션 상태 텍스트(`대기`) 제거
@@ -108,8 +108,8 @@ Acceptance:
 - [x] 하단 네비 한글 라벨 폰트 크기 상향
 - [x] 중앙 CTA 라벨 `퀘스트/생성` 2줄 고정
 - [x] 현재 퀘스트 우측 중앙 대형 몬스터 + 링서클 UI 구현
-- [x] 링 에너지 비율을 청크 합산 남은시간에 연동
-- [x] 청크 완료 시 에너지 즉시 감소 확인
+- [x] 링 에너지 비율을 미션 합산 남은시간에 연동
+- [x] 미션 완료 시 에너지 즉시 감소 확인
 - [x] Playwright 캡처 + `typecheck/lint/test:mvp` 재검증
 
 ## Phase 11: 퀘스트 카드 배치 미세조정 (2026-02-28) ✅ COMPLETE
@@ -135,14 +135,14 @@ Acceptance:
 - [x] 아이콘 1개가 2줄 텍스트를 커버하는 메타 구조 보정
 - [x] Playwright 캡처 + `typecheck/lint/test:mvp` 재검증
 
-## Phase 14: 퀘스트/청크 편집 플로우 통합 (2026-02-28) ✅ COMPLETE
+## Phase 14: 퀘스트/미션 편집 플로우 통합 (2026-02-28) ✅ COMPLETE
 - [x] 퀘스트 모달 `create/edit` 모드 분기(`AI 퀘스트 생성`/`퀘스트 수정`) 도입
 - [x] 대기중 퀘스트 카드의 단일 수정 버튼 제거
 - [x] 메뉴 아이콘 기반 `수정/삭제` 액션 적용
 - [x] 퀘스트 수정 액션을 동일 모달 편집 모드로 연결
-- [x] 청크 수정 `prompt` 제거 + 팝업 폼(미션 제목/소요시간) 적용
-- [x] 펼친 대기 청크 리스트 DnD 순서 변경 구현
-- [x] 펼친 청크 표시를 `미션 제목 + 소요시간(분)`만 유지하도록 단순화
+- [x] 미션 수정 `prompt` 제거 + 팝업 폼(미션 제목/소요시간) 적용
+- [x] 펼친 대기 미션 리스트 DnD 순서 변경 구현
+- [x] 펼친 미션 표시를 `미션 제목 + 소요시간(분)`만 유지하도록 단순화
 - [x] Playwright 캡처 + `typecheck/lint/test:mvp` 재검증
 
 ## Session Close (2026-02-28)

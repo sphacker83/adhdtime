@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  applyElapsedToChunkRemaining,
+  applyElapsedToMissionRemaining,
   applyElapsedWindow,
   createTimerElapsedAccumulator,
   reduceRemainingSeconds
@@ -108,17 +108,17 @@ describe("timer-accuracy", () => {
   });
 
   it("clamps remaining time to zero for very large elapsed values", () => {
-    const nextMap = applyElapsedToChunkRemaining({
-      remainingSecondsByChunk: {},
-      chunkId: "chunk-1",
-      chunkTotalSeconds: 45,
+    const nextMap = applyElapsedToMissionRemaining({
+      remainingSecondsByMission: {},
+      missionId: "mission-1",
+      missionTotalSeconds: 45,
       elapsedSeconds: 120
     });
 
-    if (nextMap["chunk-1"] !== 0) {
-      throw new Error(`Expected chunk remaining to be 0, got ${String(nextMap["chunk-1"])}`);
+    if (nextMap["mission-1"] !== 0) {
+      throw new Error(`Expected mission remaining to be 0, got ${String(nextMap["mission-1"])}`);
     }
 
-    expect(nextMap["chunk-1"]).toBe(0);
+    expect(nextMap["mission-1"]).toBe(0);
   });
 });

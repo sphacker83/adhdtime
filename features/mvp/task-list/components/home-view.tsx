@@ -1,15 +1,15 @@
 import { useState, type DragEvent, type MouseEvent } from "react";
 import { RecoveryActions } from "@/features/mvp/recovery";
 import {
-  chunkStatusLabel,
+  missionStatusLabel,
   formatClock,
   formatOptionalDateTime,
-  isActionableChunkStatus,
-  isReorderableChunkStatus,
-  orderChunks
+  isActionableMissionStatus,
+  isReorderableMissionStatus,
+  orderMissions
 } from "@/features/mvp/shared";
-import { ChunkPrimaryActions, ChunkQuickAdjustActions } from "@/features/mvp/timer-runtime";
-import type { Chunk, Task } from "@/features/mvp/types/domain";
+import { MissionPrimaryActions, MissionQuickAdjustActions } from "@/features/mvp/timer-runtime";
+import type { Mission, Task } from "@/features/mvp/types/domain";
 
 type CssModuleClassMap = Readonly<Record<string, string>>;
 
@@ -17,16 +17,16 @@ function joinClassNames(...classNames: Array<string | undefined>): string {
   return classNames.filter(Boolean).join(" ");
 }
 
-function resolveTaskIcon(task: Task, openChunks: number): string {
+function resolveTaskIcon(task: Task, openMissions: number): string {
   if (task.status === "done") {
     return "😺";
   }
 
   if (task.status === "in_progress") {
-    return openChunks <= 1 ? "👾" : "😈";
+    return openMissions <= 1 ? "👾" : "😈";
   }
 
-  if (openChunks <= 1) {
+  if (openMissions <= 1) {
     return "🧊";
   }
 
@@ -49,12 +49,12 @@ function resolveMissionIcon(iconKey?: string): string {
   return "🧩";
 }
 
-function resolveCurrentQuestMonsterIcon(task: Task | null, openChunks: number): string {
+function resolveCurrentQuestMonsterIcon(task: Task | null, openMissions: number): string {
   if (!task) {
     return "👾";
   }
 
-  return resolveTaskIcon(task, openChunks);
+  return resolveTaskIcon(task, openMissions);
 }
 
 function formatRemainingToDeadline(isoValue?: string, now = new Date()): string {
@@ -90,98 +90,98 @@ function formatRemainingToDeadline(isoValue?: string, now = new Date()): string 
 
 export interface HomeViewProps {
   styles: CssModuleClassMap;
-  homeChunk: Chunk | null;
+  homeMission: Mission | null;
   homeTask: Task | null;
   homeRemaining: number;
   homeTaskBudgetUsage: number;
   completionRate: number;
   homeTaskCards: Task[];
-  chunks: Chunk[];
+  missions: Mission[];
   expandedHomeTaskId: string | null;
-  remainingSecondsByChunk: Record<string, number>;
+  remainingSecondsByMission: Record<string, number>;
   isExecutionLocked: boolean;
   onSetActiveTaskId: (taskId: string) => void;
   onToggleExpandedHomeTaskId: (taskId: string) => void;
-  onStartChunk: (chunkId: string) => void;
-  onPauseChunk: (chunkId: string) => void;
-  onCompleteChunk: (chunkId: string) => void;
-  onAdjustRunningChunkMinutes: (deltaMinutes: -5 | -1 | 1 | 5) => void;
+  onStartMission: (missionId: string) => void;
+  onPauseMission: (missionId: string) => void;
+  onCompleteMission: (missionId: string) => void;
+  onAdjustRunningMissionMinutes: (deltaMinutes: -5 | -1 | 1 | 5) => void;
   canAdjustMinusFive: boolean;
   canAdjustMinusOne: boolean;
   canAdjustPlusOne: boolean;
   canAdjustPlusFive: boolean;
-  onRechunk: (chunkId: string) => void;
-  onReschedule: (chunkId: string) => void;
+  onRemission: (missionId: string) => void;
+  onReschedule: (missionId: string) => void;
   onEditTaskTotalMinutes: (task: Task) => void;
   onDeleteTask: (task: Task) => void;
-  onReorderTaskChunks: (taskId: string, draggedChunkId: string, targetChunkId: string) => void;
-  onEditChunk: (chunk: Chunk) => void;
-  onDeleteChunk: (chunk: Chunk) => void;
+  onReorderTaskMissions: (taskId: string, draggedMissionId: string, targetMissionId: string) => void;
+  onEditMission: (mission: Mission) => void;
+  onDeleteMission: (mission: Mission) => void;
 }
 
 export function HomeView({
   styles,
-  homeChunk,
+  homeMission,
   homeTask,
   homeRemaining,
   homeTaskBudgetUsage,
   completionRate,
   homeTaskCards,
-  chunks,
+  missions,
   expandedHomeTaskId,
-  remainingSecondsByChunk,
+  remainingSecondsByMission,
   isExecutionLocked,
   onSetActiveTaskId,
   onToggleExpandedHomeTaskId,
-  onStartChunk,
-  onPauseChunk,
-  onCompleteChunk,
-  onAdjustRunningChunkMinutes,
+  onStartMission,
+  onPauseMission,
+  onCompleteMission,
+  onAdjustRunningMissionMinutes,
   canAdjustMinusFive,
   canAdjustMinusOne,
   canAdjustPlusOne,
   canAdjustPlusFive,
-  onRechunk,
+  onRemission,
   onReschedule,
   onEditTaskTotalMinutes,
   onDeleteTask,
-  onReorderTaskChunks,
-  onEditChunk,
-  onDeleteChunk
+  onReorderTaskMissions,
+  onEditMission,
+  onDeleteMission
 }: HomeViewProps) {
   const getClassName = (classKey: string) => styles[classKey] ?? "";
-  const [draggingChunkId, setDraggingChunkId] = useState<string | null>(null);
-  const [dragOverChunkId, setDragOverChunkId] = useState<string | null>(null);
+  const [draggingMissionId, setDraggingMissionId] = useState<string | null>(null);
+  const [dragOverMissionId, setDragOverMissionId] = useState<string | null>(null);
   const waitingTasks = homeTaskCards.filter((task) => task.status !== "done");
-  const homeTaskActionableChunks = homeTask
-    ? orderChunks(chunks.filter((chunk) => chunk.taskId === homeTask.id && isActionableChunkStatus(chunk.status)))
+  const homeTaskActionableMissions = homeTask
+    ? orderMissions(missions.filter((mission) => mission.taskId === homeTask.id && isActionableMissionStatus(mission.status)))
     : [];
-  const nextActionableChunks = (() => {
-    if (!homeChunk) {
-      return [] as Chunk[];
+  const nextActionableMissions = (() => {
+    if (!homeMission) {
+      return [] as Mission[];
     }
 
-    const currentIndex = homeTaskActionableChunks.findIndex((chunk) => chunk.id === homeChunk.id);
-    const followingChunks = currentIndex >= 0
-      ? homeTaskActionableChunks.slice(currentIndex + 1)
-      : homeTaskActionableChunks.filter((chunk) => chunk.id !== homeChunk.id);
+    const currentIndex = homeTaskActionableMissions.findIndex((mission) => mission.id === homeMission.id);
+    const followingMissions = currentIndex >= 0
+      ? homeTaskActionableMissions.slice(currentIndex + 1)
+      : homeTaskActionableMissions.filter((mission) => mission.id !== homeMission.id);
 
-    return followingChunks.slice(0, 3);
+    return followingMissions.slice(0, 3);
   })();
-  const currentQuestTitle = homeChunk ? (homeTask?.title ?? homeChunk.action) : "없음";
+  const currentQuestTitle = homeMission ? (homeTask?.title ?? homeMission.action) : "없음";
   const expectedDurationText = homeTask ? `${homeTaskBudgetUsage}/${homeTask.totalMinutes}분` : "--";
   const dueAtText = homeTask?.dueAt ? formatOptionalDateTime(homeTask.dueAt) : "--";
   const dueRemainingText = formatRemainingToDeadline(homeTask?.dueAt);
-  const homeTaskBudgetedChunks = homeTask
-    ? chunks.filter((chunk) => chunk.taskId === homeTask.id && chunk.status !== "archived")
+  const homeTaskBudgetedMissions = homeTask
+    ? missions.filter((mission) => mission.taskId === homeTask.id && mission.status !== "archived")
     : [];
-  const totalEnergySeconds = homeTaskBudgetedChunks.reduce((total, chunk) => total + chunk.estMinutes * 60, 0);
-  const remainingEnergySeconds = homeTaskBudgetedChunks.reduce((total, chunk) => {
-    if (chunk.status === "done" || chunk.status === "abandoned") {
+  const totalEnergySeconds = homeTaskBudgetedMissions.reduce((total, mission) => total + mission.estMinutes * 60, 0);
+  const remainingEnergySeconds = homeTaskBudgetedMissions.reduce((total, mission) => {
+    if (mission.status === "done" || mission.status === "abandoned") {
       return total;
     }
 
-    return total + Math.max(0, remainingSecondsByChunk[chunk.id] ?? chunk.estMinutes * 60);
+    return total + Math.max(0, remainingSecondsByMission[mission.id] ?? mission.estMinutes * 60);
   }, 0);
   const energyRatio = totalEnergySeconds > 0 ? Math.max(0, Math.min(1, remainingEnergySeconds / totalEnergySeconds)) : 0;
   const energyPercent = Math.round(energyRatio * 100);
@@ -194,7 +194,7 @@ export function HomeView({
   const dueCardBorderColor = `hsl(${energyHue} 48% 72%)`;
   const dueCardBackgroundColor = `hsl(${energyHue} 74% 94%)`;
   const dueCardTextColor = `hsl(${energyHue} 58% 28%)`;
-  const currentQuestMonsterIcon = resolveCurrentQuestMonsterIcon(homeTask, homeTaskActionableChunks.length);
+  const currentQuestMonsterIcon = resolveCurrentQuestMonsterIcon(homeTask, homeTaskActionableMissions.length);
   const currentQuestMonsterRingStyle = {
     background: `conic-gradient(${ringAccentColor} 0deg ${energyAngle}deg, ${ringTrackColor} ${energyAngle}deg 360deg)`,
     boxShadow: `inset 0 0 0 1px ${ringTrackColor}, 0 6px 12px ${ringGlowColor}`
@@ -221,40 +221,40 @@ export function HomeView({
   };
 
   const clearDragState = () => {
-    setDraggingChunkId(null);
-    setDragOverChunkId(null);
+    setDraggingMissionId(null);
+    setDragOverMissionId(null);
   };
 
-  const handleChunkDragStart = (event: DragEvent<HTMLLIElement>, chunkId: string, canReorder: boolean) => {
+  const handleMissionDragStart = (event: DragEvent<HTMLLIElement>, missionId: string, canReorder: boolean) => {
     if (!canReorder) {
       event.preventDefault();
       return;
     }
     event.dataTransfer.effectAllowed = "move";
-    event.dataTransfer.setData("text/plain", chunkId);
-    setDraggingChunkId(chunkId);
-    setDragOverChunkId(null);
+    event.dataTransfer.setData("text/plain", missionId);
+    setDraggingMissionId(missionId);
+    setDragOverMissionId(null);
   };
 
-  const handleChunkDragOver = (
+  const handleMissionDragOver = (
     event: DragEvent<HTMLLIElement>,
-    targetChunkId: string,
+    targetMissionId: string,
     targetCanAcceptDrop: boolean
   ) => {
-    if (!draggingChunkId || draggingChunkId === targetChunkId || !targetCanAcceptDrop) {
+    if (!draggingMissionId || draggingMissionId === targetMissionId || !targetCanAcceptDrop) {
       return;
     }
     event.preventDefault();
     event.dataTransfer.dropEffect = "move";
-    if (dragOverChunkId !== targetChunkId) {
-      setDragOverChunkId(targetChunkId);
+    if (dragOverMissionId !== targetMissionId) {
+      setDragOverMissionId(targetMissionId);
     }
   };
 
-  const handleChunkDrop = (
+  const handleMissionDrop = (
     event: DragEvent<HTMLLIElement>,
     taskId: string,
-    targetChunkId: string,
+    targetMissionId: string,
     targetCanAcceptDrop: boolean
   ) => {
     if (!targetCanAcceptDrop) {
@@ -262,27 +262,27 @@ export function HomeView({
       return;
     }
     event.preventDefault();
-    const draggedChunkId = draggingChunkId || event.dataTransfer.getData("text/plain");
-    if (!draggedChunkId || draggedChunkId === targetChunkId) {
+    const draggedMissionId = draggingMissionId || event.dataTransfer.getData("text/plain");
+    if (!draggedMissionId || draggedMissionId === targetMissionId) {
       clearDragState();
       return;
     }
-    onReorderTaskChunks(taskId, draggedChunkId, targetChunkId);
+    onReorderTaskMissions(taskId, draggedMissionId, targetMissionId);
     clearDragState();
   };
 
   return (
     <>
-      <section className={getClassName("currentChunkCard")}>
+      <section className={getClassName("currentMissionCard")}>
         <header className={getClassName("currentQuestHeader")}>
           <p className={getClassName("sectionLabel")}>{`퀘스트: ${currentQuestTitle}`}</p>
         </header>
 
-        {homeChunk ? (
+        {homeMission ? (
           <>
             <div className={getClassName("currentQuestMainGrid")}>
               <div className={getClassName("currentQuestTitleBlock")}>
-                <h2>{homeChunk.action}</h2>
+                <h2>{homeMission.action}</h2>
               </div>
               <p className={getClassName("timerValue")}>{formatClock(homeRemaining)}</p>
               <div className={getClassName("currentQuestMonsterWrap")}>
@@ -323,22 +323,22 @@ export function HomeView({
             </div>
 
             <div className={getClassName("actionRow")}>
-              <ChunkPrimaryActions
+              <MissionPrimaryActions
                 styles={styles}
-                chunk={homeChunk}
-                onStartChunk={onStartChunk}
-                onPauseChunk={onPauseChunk}
-                onCompleteChunk={onCompleteChunk}
+                mission={homeMission}
+                onStartMission={onStartMission}
+                onPauseMission={onPauseMission}
+                onCompleteMission={onCompleteMission}
                 startButtonClassKey="primaryButton"
                 pauseButtonClassKey="ghostButton"
                 completeButtonClassKey="successButton"
               />
             </div>
 
-            {homeChunk.status === "running" ? (
-              <ChunkQuickAdjustActions
+            {homeMission.status === "running" ? (
+              <MissionQuickAdjustActions
                 styles={styles}
-                onAdjustRunningChunkMinutes={onAdjustRunningChunkMinutes}
+                onAdjustRunningMissionMinutes={onAdjustRunningMissionMinutes}
                 canAdjustMinusFive={canAdjustMinusFive}
                 canAdjustMinusOne={canAdjustMinusOne}
                 canAdjustPlusOne={canAdjustPlusOne}
@@ -348,22 +348,22 @@ export function HomeView({
 
             <section className={getClassName("nextMissionSection")} aria-label="다음 미션">
               <p className={getClassName("nextMissionTitle")}>다음 미션</p>
-              {nextActionableChunks.length > 0 ? (
+              {nextActionableMissions.length > 0 ? (
                 <ol className={getClassName("nextMissionList")}>
-                  {nextActionableChunks.map((chunk) => (
-                    <li key={chunk.id} className={getClassName("nextMissionItem")}>
+                  {nextActionableMissions.map((mission) => (
+                    <li key={mission.id} className={getClassName("nextMissionItem")}>
                       <span className={getClassName("nextMissionLead")}>
-                        <span className={getClassName("nextMissionIcon")} aria-hidden="true">{resolveMissionIcon(chunk.iconKey)}</span>
+                        <span className={getClassName("nextMissionIcon")} aria-hidden="true">{resolveMissionIcon(mission.iconKey)}</span>
                         <span className={getClassName("nextMissionContent")}>
-                          <span className={getClassName("nextMissionAction")}>{chunk.action}</span>
-                          <span className={getClassName("nextMissionMeta")}>{chunk.estMinutes}분</span>
+                          <span className={getClassName("nextMissionAction")}>{mission.action}</span>
+                          <span className={getClassName("nextMissionMeta")}>{mission.estMinutes}분</span>
                         </span>
                       </span>
                       <span className={getClassName("nextMissionButtons")}>
                         <button
                           type="button"
                           className={joinClassNames(getClassName("smallButton"), getClassName("missionIconButton"))}
-                          onClick={() => onEditChunk(chunk)}
+                          onClick={() => onEditMission(mission)}
                           disabled={isExecutionLocked}
                           aria-label="미션 수정"
                           title="미션 수정"
@@ -373,7 +373,7 @@ export function HomeView({
                         <button
                           type="button"
                           className={joinClassNames(getClassName("smallButtonDanger"), getClassName("missionIconButton"))}
-                          onClick={() => onDeleteChunk(chunk)}
+                          onClick={() => onDeleteMission(mission)}
                           disabled={isExecutionLocked}
                           aria-label="미션 삭제"
                           title="미션 삭제"
@@ -385,19 +385,19 @@ export function HomeView({
                   ))}
                 </ol>
               ) : (
-                <p className={getClassName("nextMissionEmpty")}>현재 청크 이후의 미션이 없습니다.</p>
+                <p className={getClassName("nextMissionEmpty")}>현재 미션 이후의 미션이 없습니다.</p>
               )}
             </section>
             <RecoveryActions
               styles={styles}
-              chunk={homeChunk}
-              onRechunk={onRechunk}
+              mission={homeMission}
+              onRemission={onRemission}
               onReschedule={onReschedule}
             />
             <p className={getClassName("vibrationHint")}>⏰ 5분마다 미세 진동 알림</p>
           </>
         ) : (
-          <p className={getClassName("helperText")}>입력창에서 할 일을 넣고 첫 청크를 만들어보세요.</p>
+          <p className={getClassName("helperText")}>입력창에서 할 일을 넣고 첫 미션를 만들어보세요.</p>
         )}
       </section>
 
@@ -410,13 +410,13 @@ export function HomeView({
         <ul className={getClassName("taskPreviewList")}>
           {waitingTasks.length === 0 ? <li className={getClassName("emptyRow")}>대기 중인 과업이 없습니다.</li> : null}
           {waitingTasks.map((task) => {
-            const orderedVisibleTaskChunks = orderChunks(
-              chunks.filter((chunk) => chunk.taskId === task.id && chunk.status !== "archived")
+            const orderedVisibleTaskMissions = orderMissions(
+              missions.filter((mission) => mission.taskId === task.id && mission.status !== "archived")
             );
-            const actionableTaskChunks = orderedVisibleTaskChunks.filter((chunk) => isActionableChunkStatus(chunk.status));
-            const openChunks = actionableTaskChunks.length;
+            const actionableTaskMissions = orderedVisibleTaskMissions.filter((mission) => isActionableMissionStatus(mission.status));
+            const openMissions = actionableTaskMissions.length;
             const isExpanded = expandedHomeTaskId === task.id;
-            const estimatedMinutes = actionableTaskChunks.reduce((total, chunk) => total + chunk.estMinutes, 0);
+            const estimatedMinutes = actionableTaskMissions.reduce((total, mission) => total + mission.estMinutes, 0);
 
             return (
               <li key={task.id} className={getClassName("homeTaskItem")}>
@@ -429,15 +429,15 @@ export function HomeView({
                       onToggleExpandedHomeTaskId(task.id);
                     }}
                     aria-expanded={isExpanded}
-                    aria-controls={`home-task-chunks-${task.id}`}
+                    aria-controls={`home-task-missions-${task.id}`}
                   >
                     <span className={getClassName("homeTaskMonster")} aria-hidden="true">
-                      {resolveTaskIcon(task, openChunks)}
+                      {resolveTaskIcon(task, openMissions)}
                     </span>
                     <span className={getClassName("homeTaskMain")}>
                       <span className={getClassName("homeTaskTitleRow")}>
                         <span className={getClassName("homeTaskTitle")}>{task.title}</span>
-                        <strong className={getClassName("homeTaskRemaining")}>{openChunks}개 남음</strong>
+                        <strong className={getClassName("homeTaskRemaining")}>{openMissions}개 남음</strong>
                       </span>
                       <span className={getClassName("homeTaskMetaRow")}>
                         <span className={getClassName("homeTaskMetaItem")}>
@@ -484,42 +484,42 @@ export function HomeView({
                   </details>
                 </div>
                 {isExpanded ? (
-                  <ul id={`home-task-chunks-${task.id}`} className={getClassName("homeTaskChunkList")}>
-                    {orderedVisibleTaskChunks.length === 0 ? (
-                      <li className={getClassName("homeTaskChunkEmpty")}>청크가 없습니다.</li>
+                  <ul id={`home-task-missions-${task.id}`} className={getClassName("homeTaskMissionList")}>
+                    {orderedVisibleTaskMissions.length === 0 ? (
+                      <li className={getClassName("homeTaskMissionEmpty")}>미션가 없습니다.</li>
                     ) : null}
-                    {orderedVisibleTaskChunks.map((chunk) => {
-                      const isChunkReorderable = isReorderableChunkStatus(chunk.status);
-                      const isDragging = draggingChunkId === chunk.id;
-                      const isDragOver = dragOverChunkId === chunk.id && draggingChunkId !== chunk.id && isChunkReorderable;
+                    {orderedVisibleTaskMissions.map((mission) => {
+                      const isMissionReorderable = isReorderableMissionStatus(mission.status);
+                      const isDragging = draggingMissionId === mission.id;
+                      const isDragOver = dragOverMissionId === mission.id && draggingMissionId !== mission.id && isMissionReorderable;
                       return (
                         <li
-                          key={chunk.id}
+                          key={mission.id}
                           className={joinClassNames(
-                            getClassName("homeTaskChunkRow"),
-                            isChunkReorderable ? getClassName("homeTaskChunkDraggable") : getClassName("homeTaskChunkLocked"),
-                            chunk.status === "done" ? getClassName("homeTaskChunkDone") : undefined,
-                            isDragging ? getClassName("homeTaskChunkDragging") : undefined,
-                            isDragOver ? getClassName("homeTaskChunkDragOver") : undefined
+                            getClassName("homeTaskMissionRow"),
+                            isMissionReorderable ? getClassName("homeTaskMissionDraggable") : getClassName("homeTaskMissionLocked"),
+                            mission.status === "done" ? getClassName("homeTaskMissionDone") : undefined,
+                            isDragging ? getClassName("homeTaskMissionDragging") : undefined,
+                            isDragOver ? getClassName("homeTaskMissionDragOver") : undefined
                           )}
-                          draggable={isChunkReorderable}
-                          onDragStart={(event) => handleChunkDragStart(event, chunk.id, isChunkReorderable)}
-                          onDragOver={(event) => handleChunkDragOver(event, chunk.id, isChunkReorderable)}
-                          onDrop={(event) => handleChunkDrop(event, task.id, chunk.id, isChunkReorderable)}
+                          draggable={isMissionReorderable}
+                          onDragStart={(event) => handleMissionDragStart(event, mission.id, isMissionReorderable)}
+                          onDragOver={(event) => handleMissionDragOver(event, mission.id, isMissionReorderable)}
+                          onDrop={(event) => handleMissionDrop(event, task.id, mission.id, isMissionReorderable)}
                           onDragEnd={clearDragState}
                         >
-                          <span className={getClassName("homeTaskChunkDragHandle")} aria-hidden="true">⠿</span>
-                          <span className={getClassName("homeTaskChunkBody")}>
-                            <span className={getClassName("homeTaskChunkAction")}>{chunk.action}</span>
-                            <span className={getClassName("homeTaskChunkInfo")}>
-                              {`${chunk.estMinutes}분 · ${chunkStatusLabel(chunk.status)}`}
+                          <span className={getClassName("homeTaskMissionDragHandle")} aria-hidden="true">⠿</span>
+                          <span className={getClassName("homeTaskMissionBody")}>
+                            <span className={getClassName("homeTaskMissionAction")}>{mission.action}</span>
+                            <span className={getClassName("homeTaskMissionInfo")}>
+                              {`${mission.estMinutes}분 · ${missionStatusLabel(mission.status)}`}
                             </span>
                           </span>
-                          <span className={getClassName("homeTaskChunkButtons")}>
+                          <span className={getClassName("homeTaskMissionButtons")}>
                             <button
                               type="button"
                               className={joinClassNames(getClassName("smallButton"), getClassName("missionIconButton"))}
-                              onClick={() => onEditChunk(chunk)}
+                              onClick={() => onEditMission(mission)}
                               disabled={isExecutionLocked}
                               aria-label="미션 수정"
                               title="미션 수정"
@@ -529,7 +529,7 @@ export function HomeView({
                             <button
                               type="button"
                               className={joinClassNames(getClassName("smallButtonDanger"), getClassName("missionIconButton"))}
-                              onClick={() => onDeleteChunk(chunk)}
+                              onClick={() => onDeleteMission(mission)}
                               disabled={isExecutionLocked}
                               aria-label="미션 삭제"
                               title="미션 삭제"

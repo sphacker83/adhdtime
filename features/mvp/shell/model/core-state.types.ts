@@ -9,12 +9,12 @@ export type MvpCoreTab = PersistedState["activeTab"];
 export type MvpCoreState = Pick<
   PersistedState,
   | "tasks"
-  | "chunks"
+  | "missions"
   | "timerSessions"
   | "stats"
   | "settings"
   | "events"
   | "activeTaskId"
   | "activeTab"
-  | "remainingSecondsByChunk"
+  | "remainingSecondsByMission"
 >;

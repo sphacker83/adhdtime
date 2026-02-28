@@ -12,12 +12,12 @@ MVP 핵심 KPI를 이벤트 로그에서 일관되게 계산하고, 스탯 탭 �
 필수 이벤트 목록(코드 상수와 동일):
 
 - `task_created`
-- `chunk_generated`
-- `chunk_started`
-- `chunk_paused`
-- `chunk_completed`
-- `chunk_abandoned`
-- `rechunk_requested`
+- `mission_generated`
+- `mission_started`
+- `mission_paused`
+- `mission_completed`
+- `mission_abandoned`
+- `remission_requested`
 - `reschedule_requested`
 - `xp_gained`
 - `level_up`
@@ -30,7 +30,7 @@ MVP 핵심 KPI를 이벤트 로그에서 일관되게 계산하고, 스탯 탭 �
 - `timestamp` (ISO8601)
 - `sessionId`
 - `taskId` (nullable)
-- `chunkId` (nullable)
+- `missionId` (nullable)
 - `source` (`local` | `ai` | `system` | `user`)
 - `meta` (옵션)
 
@@ -48,26 +48,26 @@ MVP 핵심 KPI를 이벤트 로그에서 일관되게 계산하고, 스탯 탭 �
 ### 4.1 Activation Rate
 
 - 분모: 유효 timestamp를 가진 `sessionId` 수
-- 분자: 세션 첫 이벤트 시각부터 24시간 내 `chunk_completed`가 1회 이상 있는 세션 수
+- 분자: 세션 첫 이벤트 시각부터 24시간 내 `mission_completed`가 1회 이상 있는 세션 수
 - 공식: `activation = 분자 / 분모 * 100`
 
 ### 4.2 Time to Start
 
-- 표본: `task_created(taskId)`와 동일 `taskId`의 첫 `chunk_started`가 모두 존재하고, 시작시각 >= 생성시각인 과업
-- 값: 각 과업 `(firstChunkStartedAt - taskCreatedAt)`의 평균(ms)
+- 표본: `task_created(taskId)`와 동일 `taskId`의 첫 `mission_started`가 모두 존재하고, 시작시각 >= 생성시각인 과업
+- 값: 각 과업 `(firstMissionStartedAt - taskCreatedAt)`의 평균(ms)
 - 표시: `averageTimeToStartMs`, `averageTimeToStartSeconds`
 
-### 4.3 Chunk Completion Rate
+### 4.3 Mission Completion Rate
 
-- 분모: `chunk_generated.meta.chunkCount`의 합  
+- 분모: `mission_generated.meta.missionCount`의 합  
   - 규칙: 음수/NaN/누락은 0 처리, 소수는 내림
-- 분자: `chunk_completed` 이벤트 수
+- 분자: `mission_completed` 이벤트 수
 - 공식: `completion = 분자 / 분모 * 100`
 
 ### 4.4 Recovery Rate
 
-- 분모: `chunk_abandoned` 이벤트가 1회 이상 있는 `taskId` 수
-- 분자: 같은 `taskId`에서 abandon 시각 이후 24시간 내 `rechunk_requested` 또는 `reschedule_requested`가 1회 이상 있는 과업 수
+- 분모: `mission_abandoned` 이벤트가 1회 이상 있는 `taskId` 수
+- 분자: 같은 `taskId`에서 abandon 시각 이후 24시간 내 `remission_requested` 또는 `reschedule_requested`가 1회 이상 있는 과업 수
 - 공식: `recovery = 분자 / 분모 * 100`
 
 ### 4.5 D1 / D7 Retention
@@ -88,7 +88,7 @@ MVP 핵심 KPI를 이벤트 로그에서 일관되게 계산하고, 스탯 탭 �
 - 사용자 단위: D1/D7은 세션과 무관하게 단일 사용자 타임라인 기준
 - 과업 단위: `taskId` 기준
 - 표본 정보(`samples`) 동시 제공:
-  - `sessions`, `tasksCreated`, `tasksStarted`, `tasksAbandoned`, `generatedChunks`, `completedChunks`
+  - `sessions`, `tasksCreated`, `tasksStarted`, `tasksAbandoned`, `generatedMissions`, `completedMissions`
 
 ## 6) 이벤트 커버리지 정책
 
@@ -111,5 +111,5 @@ MVP 핵심 KPI를 이벤트 로그에서 일관되게 계산하고, 스탯 탭 �
 ## 8) 운영 주의사항
 
 - 로컬 큐 400개 상한으로 인해 장기 분석에는 데이터 손실 가능성이 있다.
-- `chunk_generated.meta.chunkCount` 누락 시 Completion Rate 분모가 낮아질 수 있다.
+- `mission_generated.meta.missionCount` 누락 시 Completion Rate 분모가 낮아질 수 있다.
 - D1/D7은 세션 경계를 보지 않고 사용자 최초 이벤트 기준 윈도우로 집계된다.

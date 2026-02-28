@@ -7,12 +7,12 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 
 const EXPECTED_REQUIRED_EVENTS = [
   "task_created",
-  "chunk_generated",
-  "chunk_started",
-  "chunk_paused",
-  "chunk_completed",
-  "chunk_abandoned",
-  "rechunk_requested",
+  "mission_generated",
+  "mission_started",
+  "mission_paused",
+  "mission_completed",
+  "mission_abandoned",
+  "remission_requested",
   "reschedule_requested",
   "xp_gained",
   "level_up",
@@ -50,7 +50,7 @@ function isValidPercent(value) {
   return isFiniteNumber(value) && value >= 0 && value <= 100;
 }
 
-function createEvent({ eventName, timestampMs, sessionId, taskId = null, chunkId = null, meta }) {
+function createEvent({ eventName, timestampMs, sessionId, taskId = null, missionId = null, meta }) {
   return {
     id: `${eventName}-${sessionId}-${timestampMs}`,
     eventName,
@@ -58,7 +58,7 @@ function createEvent({ eventName, timestampMs, sessionId, taskId = null, chunkId
     sessionId,
     source: "local",
     taskId,
-    chunkId,
+    missionId,
     meta
   };
 }
@@ -102,17 +102,17 @@ function verifyKpiComputability(computeMvpKpis) {
   const events = [
     createEvent({ eventName: "task_created", timestampMs: baseMs, sessionId: "s1", taskId: "t1" }),
     createEvent({
-      eventName: "chunk_generated",
+      eventName: "mission_generated",
       timestampMs: baseMs + 1_000,
       sessionId: "s1",
       taskId: "t1",
-      meta: { chunkCount: 3 }
+      meta: { missionCount: 3 }
     }),
-    createEvent({ eventName: "chunk_started", timestampMs: baseMs + 2_000, sessionId: "s1", taskId: "t1" }),
-    createEvent({ eventName: "chunk_paused", timestampMs: baseMs + 3_000, sessionId: "s1", taskId: "t1" }),
-    createEvent({ eventName: "chunk_completed", timestampMs: baseMs + 4_000, sessionId: "s1", taskId: "t1" }),
-    createEvent({ eventName: "chunk_abandoned", timestampMs: baseMs + 5_000, sessionId: "s1", taskId: "t1" }),
-    createEvent({ eventName: "rechunk_requested", timestampMs: baseMs + 6_000, sessionId: "s1", taskId: "t1" }),
+    createEvent({ eventName: "mission_started", timestampMs: baseMs + 2_000, sessionId: "s1", taskId: "t1" }),
+    createEvent({ eventName: "mission_paused", timestampMs: baseMs + 3_000, sessionId: "s1", taskId: "t1" }),
+    createEvent({ eventName: "mission_completed", timestampMs: baseMs + 4_000, sessionId: "s1", taskId: "t1" }),
+    createEvent({ eventName: "mission_abandoned", timestampMs: baseMs + 5_000, sessionId: "s1", taskId: "t1" }),
+    createEvent({ eventName: "remission_requested", timestampMs: baseMs + 6_000, sessionId: "s1", taskId: "t1" }),
     createEvent({ eventName: "reschedule_requested", timestampMs: baseMs + 7_000, sessionId: "s1", taskId: "t1" }),
     createEvent({ eventName: "xp_gained", timestampMs: baseMs + 8_000, sessionId: "s1", taskId: "t1" }),
     createEvent({ eventName: "level_up", timestampMs: baseMs + 9_000, sessionId: "s1", taskId: "t1" }),
@@ -139,7 +139,7 @@ function verifyKpiComputability(computeMvpKpis) {
   const kpiCheckResults = [
     typeof summary.activationRate.value === "number",
     typeof summary.averageTimeToStartMs === "number",
-    typeof summary.chunkCompletionRate.value === "number",
+    typeof summary.missionCompletionRate.value === "number",
     typeof summary.recoveryRate.value === "number",
     typeof summary.d1Retention.value === "number",
     typeof summary.d7Retention.value === "number"
@@ -153,7 +153,7 @@ function verifyKpiComputability(computeMvpKpis) {
 
   const ratioMetricChecks = [
     ["activationRate", summary.activationRate],
-    ["chunkCompletionRate", summary.chunkCompletionRate],
+    ["missionCompletionRate", summary.missionCompletionRate],
     ["recoveryRate", summary.recoveryRate],
     ["d1Retention", summary.d1Retention],
     ["d7Retention", summary.d7Retention]
@@ -178,8 +178,8 @@ function verifyKpiComputability(computeMvpKpis) {
     ["samples.tasksCreated", summary.samples.tasksCreated],
     ["samples.tasksStarted", summary.samples.tasksStarted],
     ["samples.tasksAbandoned", summary.samples.tasksAbandoned],
-    ["samples.generatedChunks", summary.samples.generatedChunks],
-    ["samples.completedChunks", summary.samples.completedChunks]
+    ["samples.generatedMissions", summary.samples.generatedMissions],
+    ["samples.completedMissions", summary.samples.completedMissions]
   ];
 
   scalarMetricChecks.forEach(([metricName, value]) => {
@@ -196,7 +196,7 @@ function verifyKpiComputability(computeMvpKpis) {
   const emptySafe = [
     emptySummary.activationRate.value === null,
     emptySummary.averageTimeToStartMs === null,
-    emptySummary.chunkCompletionRate.value === null,
+    emptySummary.missionCompletionRate.value === null,
     emptySummary.recoveryRate.value === null,
     emptySummary.d1Retention.value === null,
     emptySummary.d7Retention.value === null

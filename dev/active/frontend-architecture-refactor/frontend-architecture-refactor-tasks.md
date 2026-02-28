@@ -26,7 +26,7 @@ Last Updated: 2026-02-28
   - `features/mvp/shared/types/task-meta.ts`
   - `features/mvp/shared/model/task-meta-constraints.ts`
   - `features/mvp/shared/model/task-schedule.ts`
-  - `features/mvp/shared/model/chunk-runtime.ts`
+  - `features/mvp/shared/model/mission-runtime.ts`
   - `features/mvp/shared/model/display-utils.ts`
   - `features/mvp/shared/model/radar-shape.ts`
   - `features/mvp/shared/model/events-normalize.ts`
@@ -36,7 +36,7 @@ Last Updated: 2026-02-28
 - [x] `npm run build` 확인
 - [x] 추출 유틸 단위 테스트 추가
   - `features/mvp/shared/model/task-meta-and-schedule.test.ts`
-  - `features/mvp/shared/model/chunk-runtime.test.ts`
+  - `features/mvp/shared/model/mission-runtime.test.ts`
   - `features/mvp/shared/model/display-and-events.test.ts`
 - [x] `shared/model` 최종 경로 규칙에 맞춘 재배치 확정
 - [x] Phase 1 완료 판정 및 Phase 2 진입 기준 확정
@@ -85,8 +85,8 @@ Last Updated: 2026-02-28
   - `features/mvp/task-list/components/tasks-view.tsx`
   - `features/mvp/task-list/index.ts`
 - [x] `timer-runtime` 모듈 분리
-  - `features/mvp/timer-runtime/components/chunk-primary-actions.tsx`
-  - `features/mvp/timer-runtime/components/chunk-quick-adjust-actions.tsx`
+  - `features/mvp/timer-runtime/components/mission-primary-actions.tsx`
+  - `features/mvp/timer-runtime/components/mission-quick-adjust-actions.tsx`
   - `features/mvp/timer-runtime/index.ts`
 - [x] `recovery` 모듈 분리
   - `features/mvp/recovery/components/recovery-actions.tsx`

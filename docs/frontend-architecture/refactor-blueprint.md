@@ -43,12 +43,12 @@ features/
       components/
       hooks/
       index.ts
-    task-input/                    # 입력/STT/청크 생성 폼
+    task-input/                    # 입력/STT/미션 생성 폼
       components/
       hooks/
       model/
       index.ts
-    task-list/                     # 과업/청크 리스트 및 폴딩
+    task-list/                     # 과업/미션 리스트 및 폴딩
       components/
       hooks/
       model/

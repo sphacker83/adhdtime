@@ -77,7 +77,7 @@
 
 .statusCard,
 .inputCard,
-.currentChunkCard,
+.currentMissionCard,
 .listCard {
   background: rgba(255, 255, 255, 0.9);
   border: 1px solid rgba(29, 47, 80, 0.12);
@@ -353,7 +353,7 @@
   color: #6f4a16;
 }
 
-.currentChunkCard h2 {
+.currentMissionCard h2 {
   margin: 2px 0;
   font-size: 1.1rem;
   line-height: 1.35;
@@ -381,7 +381,7 @@
   color: #1b2c4f;
 }
 
-.chunkMetaRow {
+.missionMetaRow {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -390,7 +390,7 @@
   color: #475471;
 }
 
-.chunkBudget {
+.missionBudget {
   margin: 8px 0 0;
   color: #4d5d7f;
   font-size: 12px;
@@ -536,7 +536,7 @@
 }
 
 .taskPreviewList,
-.chunkList,
+.missionList,
 .eventBlock ul {
   margin: 0;
   padding: 0;
@@ -581,7 +581,7 @@
   font-size: 12px;
 }
 
-.homeTaskChunkList {
+.homeTaskMissionList {
   margin: 0;
   padding: 0 12px 12px;
   list-style: none;
@@ -589,7 +589,7 @@
   gap: 6px;
 }
 
-.homeTaskChunkRow {
+.homeTaskMissionRow {
   display: grid;
   gap: 2px;
   border: 1px solid rgba(45, 68, 110, 0.14);
@@ -598,17 +598,17 @@
   background: #fff;
 }
 
-.homeTaskChunkAction {
+.homeTaskMissionAction {
   font-size: 13px;
   color: #24395f;
 }
 
-.homeTaskChunkInfo {
+.homeTaskMissionInfo {
   font-size: 12px;
   color: #5b6883;
 }
 
-.homeTaskChunkEmpty {
+.homeTaskMissionEmpty {
   font-size: 12px;
   color: #687792;
 }
@@ -648,7 +648,7 @@
   color: #fff;
 }
 
-.chunkItem {
+.missionItem {
   border: 1px solid rgba(39, 60, 96, 0.16);
   border-radius: 12px;
   padding: 10px;
@@ -657,24 +657,24 @@
   background: rgba(255, 255, 255, 0.85);
 }
 
-.chunkItemCurrent {
+.missionItemCurrent {
   border-color: rgba(13, 159, 111, 0.5);
   box-shadow: 0 0 0 2px rgba(13, 159, 111, 0.16);
 }
 
-.chunkOrder,
-.chunkInfo {
+.missionOrder,
+.missionInfo {
   margin: 0;
   font-size: 12px;
   color: #5b6883;
 }
 
-.chunkItem h4 {
+.missionItem h4 {
   margin: 2px 0;
   font-size: 15px;
 }
 
-.chunkButtons {
+.missionButtons {
   display: flex;
   gap: 6px;
   flex-wrap: wrap;
@@ -1120,7 +1120,7 @@
 
 .statusCard,
 .inputCard,
-.currentChunkCard,
+.currentMissionCard,
 .listCard {
   border: 1px solid #d5e0ef;
   border-radius: 14px;
@@ -1314,7 +1314,7 @@
   font-size: 11px;
 }
 
-.currentChunkCard h2 {
+.currentMissionCard h2 {
   margin: 0;
   font-size: 1.9rem;
   line-height: 1.1;
@@ -1366,7 +1366,7 @@
   color: #101826;
 }
 
-.chunkMetaRow {
+.missionMetaRow {
   margin-bottom: 8px;
   font-size: 12px;
   color: #556683;
@@ -1388,7 +1388,7 @@
   gap: 7px;
 }
 
-.chunkBudget {
+.missionBudget {
   font-size: 11px;
 }
 
@@ -1573,21 +1573,21 @@
   line-height: 1;
 }
 
-.homeTaskChunkList {
+.homeTaskMissionList {
   padding: 0 6px 6px;
 }
 
-.homeTaskChunkRow {
+.homeTaskMissionRow {
   border-radius: 9px;
   border-color: #d4e0f0;
 }
 
-.homeTaskChunkAction {
+.homeTaskMissionAction {
   font-size: 12px;
 }
 
-.homeTaskChunkInfo,
-.homeTaskChunkEmpty,
+.homeTaskMissionInfo,
+.homeTaskMissionEmpty,
 .emptyRow {
   font-size: 11px;
 }
@@ -2062,7 +2062,7 @@
 
 .statusCard,
 .inputCard,
-.currentChunkCard,
+.currentMissionCard,
 .listCard {
   border-radius: 14px;
   border: 1px solid #d4dfef;
@@ -2122,7 +2122,7 @@
   display: none;
 }
 
-.chunkMetaRow {
+.missionMetaRow {
   justify-content: flex-end;
 }
 
@@ -2407,13 +2407,13 @@
   white-space: nowrap;
 }
 
-.homeTaskChunkRow {
+.homeTaskMissionRow {
   grid-template-columns: 14px minmax(0, 1fr) auto;
   align-items: center;
   gap: 8px;
 }
 
-.homeTaskChunkDragHandle {
+.homeTaskMissionDragHandle {
   font-size: 12px;
   color: #89a0bf;
   line-height: 1;
@@ -2421,41 +2421,41 @@
   user-select: none;
 }
 
-.homeTaskChunkDraggable {
+.homeTaskMissionDraggable {
   cursor: grab;
 }
 
-.homeTaskChunkLocked {
+.homeTaskMissionLocked {
   cursor: default;
   opacity: 0.86;
 }
 
-.homeTaskChunkDragging {
+.homeTaskMissionDragging {
   opacity: 0.6;
 }
 
-.homeTaskChunkDragOver {
+.homeTaskMissionDragOver {
   border-color: #7eafe4;
   box-shadow: 0 0 0 2px rgba(126, 175, 228, 0.24);
 }
 
-.homeTaskChunkDone .homeTaskChunkAction {
+.homeTaskMissionDone .homeTaskMissionAction {
   color: #657b9c;
   text-decoration: line-through;
 }
 
-.homeTaskChunkLocked .homeTaskChunkDragHandle {
+.homeTaskMissionLocked .homeTaskMissionDragHandle {
   cursor: not-allowed;
   opacity: 0.38;
 }
 
-.homeTaskChunkBody {
+.homeTaskMissionBody {
   min-width: 0;
   display: grid;
   gap: 2px;
 }
 
-.homeTaskChunkButtons {
+.homeTaskMissionButtons {
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -2480,7 +2480,7 @@
   width: min(560px, calc(100% - 6px));
 }
 
-.chunkEditForm {
+.missionEditForm {
   display: grid;
   gap: 8px;
 }
