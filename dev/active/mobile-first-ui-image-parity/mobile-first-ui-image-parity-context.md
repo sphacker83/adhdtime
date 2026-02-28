@@ -32,6 +32,15 @@ Last Updated: 2026-02-28
   - 상단 공백(패딩/갭/그림자) 축소
   - 달성도 텍스트 우측 정렬 및 링 크기/간격 재조정
   - 본문 시작 간격 동기화
+- 반응형 hotfix 적용:
+  - 헤더/탭바 `max-width` 캡 제거로 좌우 full-width 정렬
+  - 하단 탭바 하단 여백 누적 해소(`shell padding`, `tabBar padding` 재조정)
+  - 모달 오픈 시 탭바 가림 방지(z-index 재정렬)
+  - 현재 퀘스트의 `현재 미션`, `1개 +`, `대기` 칩 제거
+- Playwright 실측 검증 완료:
+  - `output/playwright/before-fix-home.png`
+  - `output/playwright/after-fix-home.png`
+  - `output/playwright/after-fix-modal-open.png`
 - 검증 통과:
   - `npm run typecheck`
   - `npm run lint`

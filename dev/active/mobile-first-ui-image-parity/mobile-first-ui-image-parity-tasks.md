@@ -67,4 +67,11 @@ Acceptance:
 1. [x] `npm run typecheck`
 2. [x] `npm run lint`
 3. [x] `npm run test:mvp`
-4. [ ] 수동 QA: 헤더/플로팅/현재퀘스트/다음미션/대기목록
+4. [x] 수동 QA: 헤더/플로팅/현재퀘스트/다음미션/대기목록
+
+## Phase 6: Responsive Hotfix (2026-02-28) ✅ COMPLETE
+- [x] 헤더 `max-width` 캡 제거 후 좌우 full-width 정렬
+- [x] 하단 탭바 z-index/폭/하단 safe-area 중복 여백 제거
+- [x] 헤더 상단 공백(패딩/높이/갭) 축소
+- [x] `현재 미션`, `1개 +`, `대기` 칩 제거
+- [x] Playwright 모바일 캡처로 수정 전/후 검증

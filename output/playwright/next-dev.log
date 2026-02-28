@@ -1,0 +1,11 @@
+
+> adhdtime@0.1.0 dev
+> next dev
+
+▲ Next.js 16.1.6 (Turbopack)
+- Local:         http://localhost:3301
+- Network:       http://192.168.0.16:3301
+
+✓ Starting...
+✓ Ready in 266ms
+ GET / 200 in 229ms (compile: 128ms, render: 101ms)

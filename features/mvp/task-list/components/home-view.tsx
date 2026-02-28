@@ -136,7 +136,6 @@ export function HomeView({
   onDeleteChunk
 }: HomeViewProps) {
   const getClassName = (classKey: string) => styles[classKey] ?? "";
-  const statusClassName = homeChunk ? getClassName(`status_${homeChunk.status}`) : "";
   const waitingTasks = homeTaskCards.filter((task) => task.status !== "done");
   const homeTaskActionableChunks = homeTask
     ? orderChunks(chunks.filter((chunk) => chunk.taskId === homeTask.id && isActionableChunkStatus(chunk.status)))
@@ -163,7 +162,6 @@ export function HomeView({
       <section className={getClassName("currentChunkCard")}>
         <header className={getClassName("currentQuestHeader")}>
           <p className={getClassName("sectionLabel")}>{`퀘스트 : ${currentQuestTitle}`}</p>
-          <strong className={getClassName("currentQuestCount")}>{homeChunk ? "1개 +" : "0개 +"}</strong>
         </header>
 
         {homeChunk ? (
@@ -171,16 +169,10 @@ export function HomeView({
             <div className={getClassName("currentQuestTop")}>
               <div>
                 <h2>{homeChunk.action}</h2>
-                <p className={getClassName("taskTitle")}>현재 미션</p>
               </div>
               <span className={getClassName("currentQuestMonster")} aria-hidden="true">👾</span>
             </div>
             <p className={getClassName("timerValue")}>{formatClock(homeRemaining)}</p>
-            <div className={getClassName("chunkMetaRow")}>
-              <span className={joinClassNames(getClassName("statusBadge"), statusClassName)}>
-                {chunkStatusLabel(homeChunk.status)}
-              </span>
-            </div>
             <div className={getClassName("currentQuestInfoGrid")}>
               <p className={getClassName("currentQuestInfoItem")}>
                 <span className={getClassName("currentQuestInfoLabel")}>예상소요시간</span>
