@@ -97,6 +97,14 @@ Last Updated: 2026-02-28
   - Playwright 캡처 추가:
     - `output/playwright/round7-home-empty.png`
     - `output/playwright/round7-home-with-quest.png`
+- Round 8 퀘스트 카드 강조 보정 완료:
+  - 우측 링서클 영역을 고정폭(132px)으로 확보
+  - 몬스터 링/아이콘 크기 확대(링 122px, 몬스터 66px)
+  - 타이머 숫자 크기/굵기 강화(`clamp(3.4rem, 14.4vw, 4.8rem)`, weight 900)
+  - 상단 2x2 배치의 행/열 간격 재정렬
+  - Playwright 캡처 추가:
+    - `output/playwright/round8-home-empty.png`
+    - `output/playwright/round8-home-with-quest.png`
 - 문서 체계 정리:
   - 비어 있던 사이드 플랜 트랙 `dev/active/task-json-preset-scoring-side-plan`을 `dev/archive/`로 이동
 - 검증 통과:
@@ -106,7 +114,6 @@ Last Updated: 2026-02-28
 
 ### 🟡 IN PROGRESS
 - `/docs/ui/main_ui.png` 대비 헤더 픽셀 미세 보정(폰트 렌더링 차이) 수동 QA
-- Round 6: 하단 네비 타이포 재조정 + 퀘스트 몬스터 에너지 링 구현
 
 ### ⚠️ BLOCKERS
 - `/docs/ui/main_ui.png` 원본 폰트/디자인 토큰 미제공으로 픽셀 단위 100% 동일성은 수동 미세 보정 필요

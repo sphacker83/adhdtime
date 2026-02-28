@@ -119,3 +119,11 @@ Acceptance:
 - [x] 하단 네비 라벨 크기 추가 상향 + 영어 라벨 제거 유지
 - [x] Playwright 캡처(`round7-home-empty`, `round7-home-with-quest`)
 - [x] `typecheck/lint/test:mvp` 재검증
+
+## Phase 12: 퀘스트 강조 보정 (2026-02-28) ✅ COMPLETE
+- [x] 우측 링서클 고정폭 영역 확보(132px)
+- [x] 링/몬스터 크기 확대(122px/66px)
+- [x] 타이머 숫자 크기/굵기 강화
+- [x] `미션 제목/에너지%`, `타이머/링서클` 간격 재정렬
+- [x] Playwright 캡처(`round8-home-empty`, `round8-home-with-quest`)
+- [x] `typecheck/lint/test:mvp` 재검증
