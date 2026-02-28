@@ -1,6 +1,6 @@
 # Frontend Architecture Refactor - Context
 
-Last Updated: 2026-02-27
+Last Updated: 2026-02-28
 
 ## SESSION PROGRESS
 
@@ -54,18 +54,50 @@ Last Updated: 2026-02-27
   - `npm run build`
 - ADR 기록 추가
   - `docs/frontend-architecture/adr-0002-phase2-core-state-boundary.md`
+- Phase 3 탭/화면 분해 완료
+  - `features/mvp/task-list/components/home-view.tsx`
+  - `features/mvp/task-list/components/tasks-view.tsx`
+  - `features/mvp/stats/components/stats-view.tsx`
+  - `features/mvp/settings/components/settings-view.tsx`
+  - `features/mvp/components/mvp-dashboard.tsx` 탭별 view 조립 전환
+- Phase 4 기능 모듈 분해 완료
+  - `features/mvp/task-input/*`
+  - `features/mvp/task-list/*`
+  - `features/mvp/timer-runtime/*`
+  - `features/mvp/recovery/*`
+  - 각 feature `index.ts` 공개 API 경계 추가
+- 회귀 게이트(Phase 3~4) 통과
+  - `npm run typecheck`
+  - `npm run lint -- features/mvp/components/mvp-dashboard.tsx ...`
+  - `npm run test:mvp`
+  - `npm run build`
+- Phase 5 integrations 계층 분리 완료
+  - `features/mvp/integrations/notification/notification-adapter.ts`
+  - `features/mvp/integrations/stt/stt-adapter.ts`
+  - `features/mvp/integrations/sync/sync-domain.ts`
+  - `features/mvp/integrations/sync/sync-mock-adapter.ts`
+  - `features/mvp/integrations/index.ts`
+  - `mvp-dashboard` 및 분리 view에서 `features/p1/*` 직접 의존 제거
+- 회귀 게이트(Phase 5) 통과
+  - `npm run typecheck`
+  - `npm run lint -- features/mvp/components/mvp-dashboard.tsx ...`
+  - `npm run test:mvp`
+  - `npm run build`
+  - `npm run verify:mvp`
+- ADR 기록 추가
+  - `docs/frontend-architecture/adr-0004-phase5-integrations-boundary.md`
 
 ### 🟡 IN PROGRESS
-- Phase 3 준비
-  - 탭/화면 단위 컴포넌트 분해 경계(홈/할 일/스탯/설정) 확정
+- Phase 6 준비
+  - 미사용 로직/스타일 정리 후보 수집 및 테스트 갭 보강 포인트 정리
 
 ### ⏳ NOT STARTED
-- Phase 3~6 본 구현
+- Phase 6 본 구현
 
 ### ⚠️ BLOCKERS / DECISIONS NEEDED
 - Blocker 없음
 - 결정 필요:
-  - Phase 3 분해 시 각 View의 props 계약을 shell/selectors 기준으로 고정할지 여부
+  - Phase 6에서 `mvp-dashboard.tsx` 추가 축소를 우선할지, `mvp-dashboard.module.css` 분할을 우선할지
 
 ## Key Decisions
 
@@ -73,6 +105,8 @@ Last Updated: 2026-02-27
 - feature 내부는 공개 API(`index.ts`) 경유 참조를 원칙으로 한다.
 - reducer는 순수 함수로 유지하고 브라우저 API는 integrations 계층으로 격리한다.
 - hydration/persist/reset 경계는 `useMvpStore`에 집중하고 UI는 오케스트레이션만 담당한다.
+- Phase 3/4에서는 탭 렌더링과 기능 UI를 분리하되, 도메인 핸들러 시그니처는 유지해 behavior parity를 우선한다.
+- Phase 5에서는 `mvp` feature 내부 연동 접근을 `features/mvp/integrations/*`로 통일해 cross-feature 결합을 제거한다.
 
 ## Key Files
 
@@ -90,6 +124,24 @@ Last Updated: 2026-02-27
   - 순수 reducer 및 updater 해석
 - `features/mvp/shell/model/core-state.selectors.ts`
   - 파생 상태 selector 집합
+- `features/mvp/task-input/components/task-input-section.tsx`
+  - 입력/STT/메타 폼 뷰 모듈
+- `features/mvp/task-list/components/home-view.tsx`
+  - 홈 탭 뷰 모듈
+- `features/mvp/task-list/components/tasks-view.tsx`
+  - 할 일 탭 뷰 모듈
+- `features/mvp/timer-runtime/components/chunk-primary-actions.tsx`
+  - 실행 컨트롤(시작/일시정지/완료)
+- `features/mvp/timer-runtime/components/chunk-quick-adjust-actions.tsx`
+  - 실행 중 시간 미세 조정 컨트롤
+- `features/mvp/recovery/components/recovery-actions.tsx`
+  - 복구 액션(다시 나누기/내일로 이동)
+- `features/mvp/integrations/notification/notification-adapter.ts`
+  - 알림 capability/권한/표시 가능 여부 adapter
+- `features/mvp/integrations/stt/stt-adapter.ts`
+  - STT capability/recognition adapter
+- `features/mvp/integrations/sync/sync-mock-adapter.ts`
+  - 외부 sync mock adapter 및 transition 모델
 - `features/mvp/shared/types/task-meta.ts`
   - Task meta 입력 타입/우선순위 규칙
 - `features/mvp/shared/model/task-meta-constraints.ts`
@@ -108,6 +160,10 @@ Last Updated: 2026-02-27
   - Phase 1 경로/경계 의사결정 기록
 - `docs/frontend-architecture/adr-0002-phase2-core-state-boundary.md`
   - Phase 2 상태 경계/저장 경로 의사결정 기록
+- `docs/frontend-architecture/adr-0003-phase3-phase4-view-feature-modules.md`
+  - Phase 3~4 뷰/기능 모듈 분해 의사결정 기록
+- `docs/frontend-architecture/adr-0004-phase5-integrations-boundary.md`
+  - Phase 5 integrations 경계 의사결정 기록
 - `docs/frontend-architecture/refactor-blueprint.md`
   - 목표 구조/규칙 정의
 - `docs/frontend-architecture/refactor-roadmap.md`
@@ -115,6 +171,6 @@ Last Updated: 2026-02-27
 
 ## Quick Resume
 
-1. Phase 3의 View 분해 단위를 고정한다(`HomeView`, `TasksView`, `StatsView`, `SettingsView`).
-2. `mvp-dashboard.tsx` 렌더링 블록을 탭별 컴포넌트로 분리하고 shell 조립 책임만 남긴다.
-3. 분해 후 회귀 게이트(typecheck/lint/test:mvp/build)를 다시 통과시킨다.
+1. Phase 6 정리 대상(미사용 상태/함수/CSS rule)을 목록화한다.
+2. `mvp-dashboard.tsx`와 `mvp-dashboard.module.css`를 정리 우선순위에 따라 축소한다.
+3. 정리 후 회귀 게이트(typecheck/lint/test:mvp/build/verify:mvp)를 다시 통과시킨다.

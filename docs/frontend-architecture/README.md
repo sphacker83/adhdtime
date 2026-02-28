@@ -1,6 +1,6 @@
 # Frontend Architecture Docs
 
-Last Updated: 2026-02-27
+Last Updated: 2026-02-28
 
 ## 문서 목록
 
@@ -14,6 +14,10 @@ Last Updated: 2026-02-27
   - Phase 1 경로/경계 의사결정 기록
 - `adr-0002-phase2-core-state-boundary.md`
   - Phase 2 상태 경계/저장 경로 단일화 의사결정 기록
+- `adr-0003-phase3-phase4-view-feature-modules.md`
+  - Phase 3~4 탭 뷰/기능 모듈 분해 의사결정 기록
+- `adr-0004-phase5-integrations-boundary.md`
+  - Phase 5 integrations 계층 분리 의사결정 기록
 
 ## 권장 사용 순서
 

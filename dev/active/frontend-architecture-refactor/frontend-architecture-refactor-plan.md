@@ -1,6 +1,6 @@
 # Frontend Architecture Refactor - Plan
 
-Last Updated: 2026-02-27
+Last Updated: 2026-02-28
 
 ## Executive Summary
 
@@ -10,9 +10,10 @@ Last Updated: 2026-02-27
 
 - 라우트 엔트리: `app/page.tsx` -> `MvpDashboard` 단일 진입
 - 핵심 병목:
-  - `features/mvp/components/mvp-dashboard.tsx` 2,541 lines (Phase 2 경계 분해 반영)
+  - `features/mvp/components/mvp-dashboard.tsx` 2,078 lines (Phase 4 모듈 분해 반영)
   - `features/mvp/components/mvp-dashboard.module.css` 988 lines
-- 결과: UI/도메인/연동/저장/로깅이 단일 컴포넌트에 결합
+- 결과: shell 조립 레이어로 축소가 진행되었고 탭/기능 UI는 feature 모듈로 분리됨
+- 연동 경계: notification/stt/sync adapter가 `features/mvp/integrations/*`로 분리됨
 
 ## Progress Snapshot
 
@@ -25,8 +26,19 @@ Last Updated: 2026-02-27
   - `useMvpStore` 도입으로 hydration/persist/reset 경로 단일화
   - `mvp-dashboard.tsx`에서 store hook + selector 기반 상태 경계 적용
   - `core-state`/`selectors` 단위 테스트 추가 + 회귀 게이트 통과
-- Phase 3: 다음 착수 대상
-  - 탭/화면 단위 컴포넌트 분해
+- Phase 3: 완료
+  - 홈/할 일/스탯/설정 탭 뷰 컴포넌트 분리
+  - shell에서 탭별 뷰를 props 계약으로 조립
+- Phase 4: 완료
+  - `task-input`, `task-list`, `timer-runtime`, `recovery` 모듈 분리
+  - feature별 공개 API(`index.ts`) 경계 도입
+  - 기존 동작 유지 상태로 회귀 게이트 통과
+- Phase 5: 완료
+  - notification/stt/sync adapter를 `features/mvp/integrations/*` 계층으로 분리
+  - `mvp` 영역의 `features/p1/*` 직접 import 제거
+  - capability/권한/동기화 mock 경계 표준화 유지 + 회귀 게이트 통과
+- Phase 6: 다음 착수 대상
+  - 미사용 코드/스타일 정리 및 하드닝
 
 ## Target State
 
@@ -67,3 +79,5 @@ Last Updated: 2026-02-27
 - `docs/frontend-architecture/adr-template.md`
 - `docs/frontend-architecture/adr-0001-phase1-shared-model-extraction.md`
 - `docs/frontend-architecture/adr-0002-phase2-core-state-boundary.md`
+- `docs/frontend-architecture/adr-0003-phase3-phase4-view-feature-modules.md`
+- `docs/frontend-architecture/adr-0004-phase5-integrations-boundary.md`

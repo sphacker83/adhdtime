@@ -16,6 +16,23 @@ import {
   applyChunkCompletionReward,
   applyRecoveryReward
 } from "@/features/mvp/lib/reward";
+import {
+  canShowNotification,
+  createSttRecognition,
+  createSyncMockAdapter,
+  getNotificationCapability,
+  getSttCapability,
+  requestNotificationPermission,
+  type ExternalSyncConflict,
+  type ExternalSyncJobStatus,
+  type NotificationCapability,
+  type NotificationPermissionState,
+  type SpeechRecognitionEventLike,
+  type SpeechRecognitionLike,
+  type SttCapability,
+  type SyncMockOutcome
+} from "@/features/mvp/integrations";
+import { SettingsView } from "@/features/mvp/settings";
 import { useMvpStore } from "@/features/mvp/shell/hooks/use-mvp-store";
 import {
   selectActiveTask,
@@ -26,6 +43,7 @@ import {
   selectHomeTask,
   selectRunningChunk
 } from "@/features/mvp/shell/model/core-state";
+import { StatsView } from "@/features/mvp/stats";
 import {
   STAT_META,
   TASK_META_PAIR_PRIORITY,
@@ -40,16 +58,9 @@ import {
   isTaskClosedStatus,
   isTaskTotalMinutesInRange,
   orderChunks,
-  chunkStatusLabel,
-  formatClock,
   formatDateTime,
   formatDateTimeLocalInput,
-  formatEventMeta,
-  formatOptionalDateTime,
-  formatPercentValue,
-  formatTimeToStart,
   getXpProgressPercent,
-  taskStatusLabel,
   parseDateTimeLocalInput,
   parseLooseMinuteInput,
   parseOptionalDateTimeInput,
@@ -64,6 +75,8 @@ import {
   applyElapsedWindow,
   createTimerElapsedAccumulator
 } from "@/features/mvp/lib/timer-accuracy";
+import { TaskInputSection } from "@/features/mvp/task-input";
+import { HomeView, TasksView } from "@/features/mvp/task-list";
 import {
   MAX_CHUNK_EST_MINUTES,
   MAX_TASK_TOTAL_MINUTES,
@@ -75,21 +88,6 @@ import {
   type Task,
   type TimerSession
 } from "@/features/mvp/types/domain";
-import {
-  canShowNotification,
-  createSttRecognition,
-  createSyncMockAdapter,
-  getNotificationCapability,
-  getSttCapability,
-  requestNotificationPermission,
-  type NotificationCapability,
-  type NotificationPermissionState,
-  type SpeechRecognitionEventLike,
-  type SpeechRecognitionLike,
-  type SttCapability,
-  type SyncMockOutcome
-} from "@/features/p1/helpers";
-import type { ExternalSyncConflict, ExternalSyncJobStatus } from "@/features/p1/types";
 import styles from "./mvp-dashboard.module.css";
 
 const TAB_ITEMS = [
@@ -1859,11 +1857,6 @@ export function MvpDashboard() {
     setFeedback("초기화 완료. 새 루프를 시작해보세요.");
   };
 
-  const currentChunk =
-    activeTaskChunks.find((chunk) => chunk.id === currentChunkId && isActionableChunkStatus(chunk.status))
-    ?? activeTaskChunks.find((chunk) => isActionableChunkStatus(chunk.status))
-    ?? null;
-
   const homeChunk = useMemo(
     () => selectHomeChunk(coreState, currentChunkId),
     [coreState, currentChunkId]
@@ -1958,577 +1951,114 @@ export function MvpDashboard() {
           </div>
         </section>
 
-        <section className={styles.inputCard}>
-          <div className={styles.capabilityHeader}>
-            <label className={styles.inputLabel} htmlFor="task-input">
-              무지성 태스크 청킹
-            </label>
-            <span className={`${styles.capabilityBadge} ${styles[`capability_${sttSupportState}`]}`}>
-              STT {sttSupportState}
-            </span>
-          </div>
-          <div className={styles.inputRow}>
-            <div className={styles.inputWithStt}>
-              <input
-                id="task-input"
-                value={taskInput}
-                onChange={(event) => setTaskInput(event.target.value)}
-                placeholder="예: 방 청소, 제안서 마무리, 메일 답장"
-                className={`${styles.input} ${styles.inputWithSttPadding}`}
-              />
-              <button
-                type="button"
-                className={isSttListening ? `${styles.sttIconButton} ${styles.sttIconButtonActive}` : styles.sttIconButton}
-                onClick={isSttListening ? handleStopStt : handleStartStt}
-                disabled={!sttCapability.canStartRecognition && !isSttListening}
-                aria-label={isSttListening ? "음성 입력 중지" : "음성 입력 시작"}
-                title={isSttListening ? "음성 입력 중지" : "음성 입력 시작"}
-              >
-                <span aria-hidden="true">{isSttListening ? "■" : "🎙"}</span>
-              </button>
-            </div>
-            <button
-              type="button"
-              className={styles.ghostButton}
-              onClick={handleGenerateManualChunk}
-              disabled={isExecutionLocked || !activeTask}
-            >
-              청크 생성
-            </button>
-            <button
-              type="button"
-              className={styles.primaryButton}
-              disabled={isGenerating}
-              onClick={handleGenerateTask}
-            >
-              {isGenerating ? "생성 중..." : "AI가 쪼개기"}
-            </button>
-          </div>
-          <div className={styles.taskMetaGrid}>
-            <label className={styles.metaField} htmlFor="task-total-minutes">
-              <span>총 소요 시간(필수)</span>
-              <input
-                id="task-total-minutes"
-                type="number"
-                min={MIN_TASK_TOTAL_MINUTES}
-                max={MAX_TASK_TOTAL_MINUTES}
-                value={taskTotalMinutesInput}
-                onChange={(event) => handleTaskTotalMinutesInputChange(event.target.value)}
-                className={styles.input}
-                inputMode="numeric"
-                required
-              />
-            </label>
-            <label className={styles.metaField} htmlFor="task-scheduled-for">
-              <span>시작 예정(선택)</span>
-              <input
-                id="task-scheduled-for"
-                type="datetime-local"
-                value={taskScheduledForInput}
-                onChange={(event) => handleTaskScheduledForInputChange(event.target.value)}
-                className={styles.input}
-              />
-            </label>
-            <label className={styles.metaField} htmlFor="task-due-at">
-              <span>마감(선택)</span>
-              <input
-                id="task-due-at"
-                type="datetime-local"
-                value={taskDueAtInput}
-                onChange={(event) => handleTaskDueAtInputChange(event.target.value)}
-                className={styles.input}
-              />
-            </label>
-          </div>
-          <p className={styles.helperText}>
-            총 시간은 {MIN_TASK_TOTAL_MINUTES}~{MAX_TASK_TOTAL_MINUTES}분 범위이며, 시작 예정 시간은 마감보다 늦을 수 없습니다.
-          </p>
-          {taskMetaFeedback ? <p className={styles.errorText}>{taskMetaFeedback}</p> : null}
-          <p className={styles.helperText}>로컬 패턴 우선, 필요 시 AI 폴백으로 청킹합니다. STT 엔진: {sttCapability.engine}</p>
-          {sttTranscript ? <p className={styles.transcriptPreview}>미리보기: {sttTranscript}</p> : null}
-          {sttError ? <p className={styles.errorText}>{sttError}</p> : null}
-          {!sttCapability.canStartRecognition ? (
-            <p className={styles.fallbackText}>STT를 지원하지 않는 환경입니다. 직접 텍스트 입력을 사용해주세요.</p>
-          ) : null}
-        </section>
+        <TaskInputSection
+          styles={styles}
+          sttSupportState={sttSupportState}
+          taskInput={taskInput}
+          onTaskInputChange={setTaskInput}
+          isSttListening={isSttListening}
+          onStartStt={handleStartStt}
+          onStopStt={handleStopStt}
+          sttCapability={sttCapability}
+          onGenerateManualChunk={handleGenerateManualChunk}
+          isExecutionLocked={isExecutionLocked}
+          activeTask={activeTask}
+          onGenerateTask={() => void handleGenerateTask()}
+          isGenerating={isGenerating}
+          taskTotalMinutesInput={taskTotalMinutesInput}
+          onTaskTotalMinutesInputChange={handleTaskTotalMinutesInputChange}
+          taskScheduledForInput={taskScheduledForInput}
+          onTaskScheduledForInputChange={handleTaskScheduledForInputChange}
+          taskDueAtInput={taskDueAtInput}
+          onTaskDueAtInputChange={handleTaskDueAtInputChange}
+          taskMetaFeedback={taskMetaFeedback}
+          sttTranscript={sttTranscript}
+          sttError={sttError}
+        />
 
         {activeTab === "home" ? (
-          <>
-            <section className={styles.currentChunkCard}>
-              <header>
-                <p className={styles.sectionLabel}>현재 퀘스트</p>
-                <h2>{homeChunk ? homeChunk.action : "진행할 청크가 없어요"}</h2>
-                {homeTask ? <p className={styles.taskTitle}>과업: {homeTask.title}</p> : null}
-              </header>
-
-              {homeChunk ? (
-                <>
-                  <p className={styles.timerValue}>{formatClock(homeRemaining)}</p>
-                  <div className={styles.chunkMetaRow}>
-                    <span>{homeChunk.estMinutes}분 청크</span>
-                    <span className={`${styles.statusBadge} ${styles[`status_${homeChunk.status}`]}`}>
-                      {chunkStatusLabel(homeChunk.status)}
-                    </span>
-                  </div>
-                  {homeTask ? (
-                    <p className={styles.chunkBudget}>
-                      예산 {homeTaskBudgetUsage}/{homeTask.totalMinutes}분 · 시작 예정 {formatOptionalDateTime(homeTask.scheduledFor)}
-                      {" "}· 마감 {formatOptionalDateTime(homeTask.dueAt)}
-                    </p>
-                  ) : null}
-
-                  <div className={styles.actionRow}>
-                    <button
-                      type="button"
-                      className={styles.primaryButton}
-                      onClick={() => handleStartChunk(homeChunk.id)}
-                      disabled={!isActionableChunkStatus(homeChunk.status) || homeChunk.status === "running"}
-                    >
-                      시작
-                    </button>
-                    <button
-                      type="button"
-                      className={styles.ghostButton}
-                      onClick={() => handlePauseChunk(homeChunk.id)}
-                      disabled={homeChunk.status !== "running"}
-                    >
-                      일시정지
-                    </button>
-                    <button
-                      type="button"
-                      className={styles.successButton}
-                      onClick={() => handleCompleteChunk(homeChunk.id)}
-                      disabled={!isActionableChunkStatus(homeChunk.status)}
-                    >
-                      완료
-                    </button>
-                  </div>
-
-                  {homeChunk.status === "running" ? (
-                    <div className={styles.quickAdjustRow}>
-                      <button
-                        type="button"
-                        className={styles.subtleButton}
-                        onClick={() => handleAdjustRunningChunkMinutes(-5)}
-                        disabled={!canAdjustMinusFive}
-                      >
-                        -5분
-                      </button>
-                      <button
-                        type="button"
-                        className={styles.subtleButton}
-                        onClick={() => handleAdjustRunningChunkMinutes(-1)}
-                        disabled={!canAdjustMinusOne}
-                      >
-                        -1분
-                      </button>
-                      <button
-                        type="button"
-                        className={styles.subtleButton}
-                        onClick={() => handleAdjustRunningChunkMinutes(1)}
-                        disabled={!canAdjustPlusOne}
-                      >
-                        +1분
-                      </button>
-                      <button
-                        type="button"
-                        className={styles.subtleButton}
-                        onClick={() => handleAdjustRunningChunkMinutes(5)}
-                        disabled={!canAdjustPlusFive}
-                      >
-                        +5분
-                      </button>
-                    </div>
-                  ) : null}
-
-                  <div className={styles.recoveryRow}>
-                    <button
-                      type="button"
-                      className={styles.subtleButton}
-                      onClick={() => handleRechunk(homeChunk.id)}
-                      disabled={!isActionableChunkStatus(homeChunk.status)}
-                    >
-                      더 작게 다시 나누기
-                    </button>
-                    <button
-                      type="button"
-                      className={styles.subtleButton}
-                      onClick={() => handleReschedule(homeChunk.id)}
-                      disabled={!isActionableChunkStatus(homeChunk.status)}
-                    >
-                      내일로 다시 등록
-                    </button>
-                  </div>
-                </>
-              ) : (
-                <p className={styles.helperText}>입력창에서 할 일을 넣고 첫 청크를 만들어보세요.</p>
-              )}
-            </section>
-
-            <section className={styles.listCard}>
-              <header className={styles.listHeader}>
-                <h3>오늘의 퀘스트</h3>
-                <p>완료율 {completionRate}%</p>
-              </header>
-
-              <ul className={styles.taskPreviewList}>
-                {homeTaskCards.length === 0 ? <li className={styles.emptyRow}>아직 생성된 과업이 없습니다.</li> : null}
-                {homeTaskCards.map((task) => {
-                  const actionableTaskChunks = orderChunks(
-                    chunks.filter((chunk) => chunk.taskId === task.id && isActionableChunkStatus(chunk.status))
-                  );
-                  const openChunks = actionableTaskChunks.length;
-                  const isExpanded = expandedHomeTaskId === task.id;
-                  return (
-                    <li key={task.id} className={styles.homeTaskItem}>
-                      <button
-                        type="button"
-                        className={styles.homeTaskToggle}
-                        onClick={() => {
-                          setActiveTaskId(task.id);
-                          setExpandedHomeTaskId((prev) => (prev === task.id ? null : task.id));
-                        }}
-                        aria-expanded={isExpanded}
-                        aria-controls={`home-task-chunks-${task.id}`}
-                      >
-                        <span className={styles.homeTaskTitle}>{task.title}</span>
-                        <strong>{openChunks}개 남음</strong>
-                        <span className={styles.homeTaskChevron} aria-hidden="true">
-                          {isExpanded ? "▾" : "▸"}
-                        </span>
-                      </button>
-                      {isExpanded ? (
-                        <ul id={`home-task-chunks-${task.id}`} className={styles.homeTaskChunkList}>
-                          {actionableTaskChunks.length === 0 ? (
-                            <li className={styles.homeTaskChunkEmpty}>청크가 없습니다.</li>
-                          ) : null}
-                          {actionableTaskChunks.map((chunk) => {
-                            const remaining = remainingSecondsByChunk[chunk.id] ?? chunk.estMinutes * 60;
-                            return (
-                              <li key={chunk.id} className={styles.homeTaskChunkRow}>
-                                <span className={styles.homeTaskChunkAction}>{chunk.action}</span>
-                                <span className={styles.homeTaskChunkInfo}>
-                                  {chunk.estMinutes}분 · {formatClock(remaining)} · {chunkStatusLabel(chunk.status)}
-                                </span>
-                              </li>
-                            );
-                          })}
-                        </ul>
-                      ) : null}
-                    </li>
-                  );
-                })}
-              </ul>
-            </section>
-          </>
+          <HomeView
+            styles={styles}
+            homeChunk={homeChunk}
+            homeTask={homeTask}
+            homeRemaining={homeRemaining}
+            homeTaskBudgetUsage={homeTaskBudgetUsage}
+            completionRate={completionRate}
+            homeTaskCards={homeTaskCards}
+            chunks={chunks}
+            expandedHomeTaskId={expandedHomeTaskId}
+            remainingSecondsByChunk={remainingSecondsByChunk}
+            onSetActiveTaskId={setActiveTaskId}
+            onToggleExpandedHomeTaskId={(taskId) => {
+              setExpandedHomeTaskId((prev) => (prev === taskId ? null : taskId));
+            }}
+            onStartChunk={handleStartChunk}
+            onPauseChunk={handlePauseChunk}
+            onCompleteChunk={handleCompleteChunk}
+            onAdjustRunningChunkMinutes={handleAdjustRunningChunkMinutes}
+            canAdjustMinusFive={canAdjustMinusFive}
+            canAdjustMinusOne={canAdjustMinusOne}
+            canAdjustPlusOne={canAdjustPlusOne}
+            canAdjustPlusFive={canAdjustPlusFive}
+            onRechunk={handleRechunk}
+            onReschedule={handleReschedule}
+          />
         ) : null}
 
         {activeTab === "tasks" ? (
-          <section className={styles.listCard}>
-            <header className={styles.listHeader}>
-              <h3>청크 목록</h3>
-              <p>{activeTask ? activeTask.title : "과업을 선택하세요"}</p>
-            </header>
-            {activeTask ? (
-              <div className={styles.taskBudgetRow}>
-                <p className={styles.helperText}>
-                  총 {activeTask.totalMinutes}분 · 청크 합계 {activeTaskBudgetUsage}분 · 상태 {taskStatusLabel(activeTask.status)}
-                  {" "}· 시작 예정 {formatOptionalDateTime(activeTask.scheduledFor)} · 마감 {formatOptionalDateTime(activeTask.dueAt)}
-                </p>
-                <button
-                  type="button"
-                  className={styles.smallButton}
-                  onClick={() => handleEditTaskTotalMinutes(activeTask)}
-                >
-                  총 시간 수정
-                </button>
-              </div>
-            ) : null}
-
-            <div className={styles.taskSelector}>
-              {tasks.map((task) => (
-                <button
-                  key={task.id}
-                  type="button"
-                  className={task.id === activeTaskId ? styles.taskChipActive : styles.taskChip}
-                  onClick={() => setActiveTaskId(task.id)}
-                >
-                  {task.title}
-                </button>
-              ))}
-            </div>
-
-            <ul className={styles.chunkList}>
-              {activeTaskChunks.length === 0 ? <li className={styles.emptyRow}>선택된 과업의 청크가 없습니다.</li> : null}
-              {activeTaskChunks.map((chunk) => {
-                const remaining = remainingSecondsByChunk[chunk.id] ?? chunk.estMinutes * 60;
-                return (
-                  <li
-                    key={chunk.id}
-                    className={`${styles.chunkItem} ${currentChunk?.id === chunk.id ? styles.chunkItemCurrent : ""}`}
-                  >
-                    <div>
-                      <p className={styles.chunkOrder}>#{chunk.order}</p>
-                      <h4>{chunk.action}</h4>
-                      <p className={styles.chunkInfo}>
-                        {chunk.estMinutes}분 · {formatClock(remaining)} · {chunkStatusLabel(chunk.status)}
-                      </p>
-                    </div>
-                    <div className={styles.chunkButtons}>
-                      <button
-                        type="button"
-                        className={styles.smallButton}
-                        onClick={() => handleStartChunk(chunk.id)}
-                        disabled={!isActionableChunkStatus(chunk.status) || chunk.status === "running"}
-                      >
-                        시작
-                      </button>
-                      <button
-                        type="button"
-                        className={styles.smallButton}
-                        onClick={() => handlePauseChunk(chunk.id)}
-                        disabled={chunk.status !== "running"}
-                      >
-                        일시정지
-                      </button>
-                      <button
-                        type="button"
-                        className={styles.smallButton}
-                        onClick={() => handleCompleteChunk(chunk.id)}
-                        disabled={!isActionableChunkStatus(chunk.status)}
-                      >
-                        완료
-                      </button>
-                      <button
-                        type="button"
-                        className={styles.smallButton}
-                        onClick={() => handleEditChunk(chunk)}
-                        disabled={isExecutionLocked}
-                      >
-                        수정
-                      </button>
-                      <button
-                        type="button"
-                        className={styles.smallButtonDanger}
-                        onClick={() => handleDeleteChunk(chunk)}
-                        disabled={isExecutionLocked}
-                      >
-                        삭제
-                      </button>
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
-          </section>
+          <TasksView
+            styles={styles}
+            tasks={tasks}
+            activeTask={activeTask}
+            activeTaskId={activeTaskId}
+            activeTaskBudgetUsage={activeTaskBudgetUsage}
+            activeTaskChunks={activeTaskChunks}
+            currentChunkId={currentChunkId}
+            remainingSecondsByChunk={remainingSecondsByChunk}
+            isExecutionLocked={isExecutionLocked}
+            onSetActiveTaskId={setActiveTaskId}
+            onEditTaskTotalMinutes={handleEditTaskTotalMinutes}
+            onStartChunk={handleStartChunk}
+            onPauseChunk={handlePauseChunk}
+            onCompleteChunk={handleCompleteChunk}
+            onEditChunk={handleEditChunk}
+            onDeleteChunk={handleDeleteChunk}
+          />
         ) : null}
 
         {activeTab === "stats" ? (
-          <section className={styles.listCard}>
-            <header className={styles.listHeader}>
-              <h3>오늘 리포트</h3>
-              <p>5초 안에 확인하는 요약</p>
-            </header>
-
-            <div className={styles.reportGrid}>
-              <article>
-                <p>완료 청크</p>
-                <strong>{stats.todayCompleted}</strong>
-              </article>
-              <article>
-                <p>완료율</p>
-                <strong>{completionRate}%</strong>
-              </article>
-              <article>
-                <p>획득 XP</p>
-                <strong>+{stats.todayXpGain}</strong>
-              </article>
-              <article>
-                <p>다시 시작 점수</p>
-                <strong>+{stats.todayStatGain.recovery}</strong>
-              </article>
-            </div>
-
-            <div className={styles.kpiBlock}>
-              <h4>MVP KPI 스냅샷</h4>
-              <div className={styles.kpiGrid}>
-                <article>
-                  <p>Activation</p>
-                  <strong>{formatPercentValue(kpis.activationRate.value)}</strong>
-                  <span>
-                    {kpis.activationRate.numerator}/{kpis.activationRate.denominator}
-                  </span>
-                </article>
-                <article>
-                  <p>Time to Start</p>
-                  <strong>{formatTimeToStart(kpis.averageTimeToStartSeconds)}</strong>
-                  <span>{kpis.samples.tasksStarted}개 과업 기준</span>
-                </article>
-                <article>
-                  <p>Completion Rate</p>
-                  <strong>{formatPercentValue(kpis.chunkCompletionRate.value)}</strong>
-                  <span>
-                    {kpis.samples.completedChunks}/{kpis.samples.generatedChunks} chunks
-                  </span>
-                </article>
-                <article>
-                  <p>Recovery Rate</p>
-                  <strong>{formatPercentValue(kpis.recoveryRate.value)}</strong>
-                  <span>
-                    {kpis.recoveryRate.numerator}/{kpis.recoveryRate.denominator}
-                  </span>
-                </article>
-                <article>
-                  <p>D1 Retention</p>
-                  <strong>{formatPercentValue(kpis.d1Retention.value)}</strong>
-                  <span>사용자 타임라인 기준</span>
-                </article>
-                <article>
-                  <p>D7 Retention</p>
-                  <strong>{formatPercentValue(kpis.d7Retention.value)}</strong>
-                  <span>사용자 타임라인 기준</span>
-                </article>
-              </div>
-              <p className={styles.helperText}>
-                이벤트 샘플: 세션 {kpis.samples.sessions}개 · 과업 {kpis.samples.tasksCreated}개 · 중단 과업 {kpis.samples.tasksAbandoned}개
-              </p>
-            </div>
-
-            <div className={styles.eventBlock}>
-              <h4>최근 이벤트</h4>
-              <ul>
-                {events.slice(0, 8).map((event) => {
-                  const metaText = formatEventMeta(event.meta);
-                  return (
-                    <li key={event.id}>
-                      <div className={styles.eventInfo}>
-                        <strong>{event.eventName}</strong>
-                        <span className={styles.eventMeta}>
-                          [{event.source}]
-                          {metaText ? ` ${metaText}` : ""}
-                        </span>
-                      </div>
-                      <time suppressHydrationWarning>{new Date(event.timestamp).toLocaleTimeString("ko-KR")}</time>
-                    </li>
-                  );
-                })}
-                {events.length === 0 ? <li className={styles.emptyRow}>아직 이벤트가 없습니다.</li> : null}
-              </ul>
-            </div>
-          </section>
+          <StatsView
+            styles={styles}
+            stats={stats}
+            completionRate={completionRate}
+            kpis={kpis}
+            events={events}
+          />
         ) : null}
 
         {activeTab === "settings" ? (
-          <section className={styles.listCard}>
-            <header className={styles.listHeader}>
-              <h3>설정</h3>
-              <p>실행 흐름에 필요한 최소 옵션</p>
-            </header>
-
-            <div className={styles.settingsRow}>
-              <div className={styles.settingsBody}>
-                <strong>브라우저 알림</strong>
-                <p>
-                  상태{" "}
-                  <span className={`${styles.capabilityBadge} ${styles[`capability_${notificationState}`]}`}>
-                    {notificationState}
-                  </span>
-                </p>
-                {notificationFallbackText ? (
-                  <p className={styles.fallbackText}>{notificationFallbackText}</p>
-                ) : (
-                  <p className={styles.helperText}>
-                    chunk_started/chunk_completed/task_rescheduled 이벤트 시 1회 알림을 보냅니다.
-                  </p>
-                )}
-              </div>
-              <button
-                type="button"
-                className={styles.smallButton}
-                onClick={() => void handleRequestNotification()}
-                disabled={!notificationCapability.canRequestPermission || isRequestingNotificationPermission}
-              >
-                {isRequestingNotificationPermission ? "요청 중..." : "권한 요청"}
-              </button>
-            </div>
-
-            <div className={styles.settingsRow}>
-              <div className={styles.settingsBody}>
-                <strong>5분 미세 햅틱</strong>
-                <p>진행 중 5분마다 짧게 진동합니다.</p>
-              </div>
-              <label className={styles.toggle}>
-                <input
-                  type="checkbox"
-                  checked={settings.hapticEnabled}
-                  onChange={(event) => {
-                    setSettings((prev) => ({
-                      ...prev,
-                      hapticEnabled: event.target.checked
-                    }));
-                  }}
-                />
-                <span>{settings.hapticEnabled ? "ON" : "OFF"}</span>
-              </label>
-            </div>
-
-            <div className={styles.settingsRow}>
-              <div className={styles.settingsBody}>
-                <strong>외부 동기화 Mock</strong>
-                <p>
-                  상태{" "}
-                  <span className={`${styles.capabilityBadge} ${styles[`syncStatus_${syncStatusLabel}`]}`}>
-                    {syncStatusLabel}
-                  </span>
-                  {syncLastJobId ? ` · job ${syncLastJobId.slice(0, 8)}` : ""}
-                </p>
-                <p>{syncMessage}</p>
-                {syncConflict ? (
-                  <p className={styles.conflictText}>
-                    conflict: {syncConflict.localEntityId} ↔ {syncConflict.sourceEventId}
-                  </p>
-                ) : null}
-              </div>
-              <div className={styles.syncButtonRow}>
-                <button
-                  type="button"
-                  className={styles.smallButton}
-                  onClick={() => void handleRunSyncMock("SUCCESS")}
-                  disabled={isSyncBusy}
-                >
-                  성공
-                </button>
-                <button
-                  type="button"
-                  className={styles.smallButton}
-                  onClick={() => void handleRunSyncMock("FAILED")}
-                  disabled={isSyncBusy}
-                >
-                  실패
-                </button>
-                <button
-                  type="button"
-                  className={styles.smallButtonDanger}
-                  onClick={() => void handleRunSyncMock("CONFLICT")}
-                  disabled={isSyncBusy}
-                >
-                  충돌
-                </button>
-              </div>
-            </div>
-
-            <div className={styles.settingsRow}>
-              <div className={styles.settingsBody}>
-                <strong>데이터 초기화</strong>
-                <p>로컬에 저장된 과업/청크/스탯을 모두 삭제합니다.</p>
-              </div>
-              <button type="button" className={styles.smallButtonDanger} onClick={handleResetAll}>
-                초기화
-              </button>
-            </div>
-
-            <p className={styles.helperText}>원문 입력 텍스트는 로컬 저장을 최소화하도록 과업 제목만 유지합니다.</p>
-          </section>
+          <SettingsView
+            styles={styles}
+            notificationState={notificationState}
+            notificationFallbackText={notificationFallbackText}
+            notificationCapability={notificationCapability}
+            isRequestingNotificationPermission={isRequestingNotificationPermission}
+            onRequestNotification={handleRequestNotification}
+            settings={settings}
+            onHapticEnabledChange={(enabled) => {
+              setSettings((prev) => ({
+                ...prev,
+                hapticEnabled: enabled
+              }));
+            }}
+            syncStatusLabel={syncStatusLabel}
+            syncMessage={syncMessage}
+            syncLastJobId={syncLastJobId}
+            syncConflict={syncConflict}
+            isSyncBusy={isSyncBusy}
+            onRunSyncMock={handleRunSyncMock}
+            onResetAll={handleResetAll}
+          />
         ) : null}
       </main>
 

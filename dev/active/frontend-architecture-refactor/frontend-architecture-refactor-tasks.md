@@ -1,15 +1,15 @@
 # Frontend Architecture Refactor - Tasks
 
-Last Updated: 2026-02-27
+Last Updated: 2026-02-28
 
 ## Phase Checklist
 
 - [x] Phase 0: 아키텍처/로드맵/ADR/Dev Docs 기반 문서 세팅
 - [x] Phase 1: 순수 함수/타입/상수 추출
 - [x] Phase 2: 상태 경계(reducer/action/selector) 재구성
-- [ ] Phase 3: 탭/화면 단위 컴포넌트 분해
-- [ ] Phase 4: 기능 모듈 분해(task-input/task-list/timer-runtime/recovery)
-- [ ] Phase 5: integrations 계층 분리(notification/stt/sync)
+- [x] Phase 3: 탭/화면 단위 컴포넌트 분해
+- [x] Phase 4: 기능 모듈 분해(task-input/task-list/timer-runtime/recovery)
+- [x] Phase 5: integrations 계층 분리(notification/stt/sync)
 - [ ] Phase 6: 정리/회귀 강화/마감
 
 ## Phase 0: 문서 세팅 ✅
@@ -64,25 +64,50 @@ Last Updated: 2026-02-27
 
 ## Phase 3: 탭/화면 단위 분해
 
-- [ ] 홈/할 일/스탯/설정 뷰 컴포넌트 분리
-- [ ] 탭별 props 계약 정의
-- [ ] shell 레이어 조립 책임만 유지
-- [ ] 회귀 확인(typecheck/lint/test:mvp)
+- [x] 홈/할 일/스탯/설정 뷰 컴포넌트 분리
+  - `features/mvp/task-list/components/home-view.tsx`
+  - `features/mvp/task-list/components/tasks-view.tsx`
+  - `features/mvp/stats/components/stats-view.tsx`
+  - `features/mvp/settings/components/settings-view.tsx`
+- [x] 탭별 props 계약 정의
+  - 각 view별 `*Props` 타입 명시
+- [x] shell 레이어 조립 책임만 유지
+  - `features/mvp/components/mvp-dashboard.tsx`는 핸들러/상태 오케스트레이션 중심으로 정리
+- [x] 회귀 확인(typecheck/lint/test:mvp/build)
 
 ## Phase 4: 기능 모듈 분해
 
-- [ ] `task-input` 모듈 분리
-- [ ] `task-list` 모듈 분리
-- [ ] `timer-runtime` 모듈 분리
-- [ ] `recovery` 모듈 분리
-- [ ] 회귀 확인(typecheck/lint/test:mvp)
+- [x] `task-input` 모듈 분리
+  - `features/mvp/task-input/components/task-input-section.tsx`
+  - `features/mvp/task-input/index.ts`
+- [x] `task-list` 모듈 분리
+  - `features/mvp/task-list/components/home-view.tsx`
+  - `features/mvp/task-list/components/tasks-view.tsx`
+  - `features/mvp/task-list/index.ts`
+- [x] `timer-runtime` 모듈 분리
+  - `features/mvp/timer-runtime/components/chunk-primary-actions.tsx`
+  - `features/mvp/timer-runtime/components/chunk-quick-adjust-actions.tsx`
+  - `features/mvp/timer-runtime/index.ts`
+- [x] `recovery` 모듈 분리
+  - `features/mvp/recovery/components/recovery-actions.tsx`
+  - `features/mvp/recovery/index.ts`
+- [x] 회귀 확인(typecheck/lint/test:mvp/build)
 
 ## Phase 5: integrations 분리
 
-- [ ] notification/stt/sync 어댑터 분리
-- [ ] capability/권한/오류 처리 표준화
-- [ ] UI 레이어 직접 API 접근 제거
-- [ ] 회귀 확인(typecheck/lint/test:mvp)
+- [x] notification/stt/sync 어댑터 분리
+  - `features/mvp/integrations/notification/*`
+  - `features/mvp/integrations/stt/*`
+  - `features/mvp/integrations/sync/*`
+  - `features/mvp/integrations/index.ts`
+- [x] capability/권한/오류 처리 표준화
+  - 알림 capability/권한 요청 경로 adapter 고정
+  - STT capability/recognition 생성 경로 adapter 고정
+  - sync mock transition 경로 adapter 고정
+- [x] UI 레이어 직접 API 접근 제거
+  - `features/mvp/components/mvp-dashboard.tsx`의 `features/p1/*` 직접 import 제거
+  - `mvp` feature는 `features/mvp/integrations`만 통해 연동 접근
+- [x] 회귀 확인(typecheck/lint/test:mvp/build/verify:mvp)
 
 ## Phase 6: 정리 및 마감
 
