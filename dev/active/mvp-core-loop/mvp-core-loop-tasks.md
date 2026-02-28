@@ -101,6 +101,17 @@ Last Updated: 2026-02-28
 - [x] 성장 점수 모델 단일 기획 문서 신설(`docs/GROWTH_SCORE_MODEL_V1.md`)
 - [x] 보완 반영: 일일 보상 상한(Daily Cap, 5퀘스트) 규칙을 모델/PRD/개발플랜에 동기화
 
+## Session Update (2026-02-28, Daily Reward Gate Implementation)
+- [x] `reward.ts`에 04:00 로컬 리셋 기준 `getDateKey` 반영
+- [x] `xp_gained` 이벤트 로그 기반 오늘 보상된 task 집합/게이트 helper 추가
+- [x] no-reward `RewardOutcome` helper 추가(미션 완료 경로 `todayCompleted` 증가 지원)
+- [x] `mvp-dashboard.tsx` 완료/리미션/재등록 보상 트리거에 게이트 적용
+- [x] 보상 지급 시에만 `xp_gained`/`level_up` 기록하도록 분기 적용
+- [x] `mission_completed` meta에 `rewardGranted`/`rewardReason` 기록
+- [x] 한도 도달/중복 보상 차단 사용자 피드백 문구 추가
+- [x] `features/mvp/lib/reward.test.ts` 신규 추가 및 4개 시나리오 검증
+- [x] 검증 실행: `npm run test:mvp` PASS, `npx vitest run features/mvp/lib/reward.test.ts` PASS
+
 ## Session Close (2026-02-28)
 
 - [x] `npm run verify:mvp` 통합 점검 PASS 확인

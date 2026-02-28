@@ -109,6 +109,17 @@ Last Updated: 2026-02-28
   - `DEVELOPMENT_PLAN`: Epic G에 `G-05 일일 보상 상한` 구현 항목 추가.
 - 상태: 구현 변경 없이 기획/문서 반영 완료.
 
+## Session Notes (2026-02-28, Daily Reward Gate Implementation)
+- 요구사항: 로컬 타임존 04:00 기준으로 일일 보상 게이트를 적용하고, 하루 최대 5퀘스트 + 동일 taskId 1회 보상 제한을 실제 로직에 반영.
+- 적용:
+  - `features/mvp/lib/reward.ts`에 04:00 기준 `getDateKey`, `xp_gained` 기반 오늘 보상 task 집합 helper, 게이트 판정 helper, no-reward `RewardOutcome` helper 추가.
+  - `features/mvp/components/mvp-dashboard.tsx`의 `handleCompleteMission`/`handleRemission`/`handleReschedule`에 게이트 적용.
+  - `mission_completed` 이벤트 meta에 `rewardGranted`, `rewardReason` 필드 추가.
+  - 보상 차단 시 `xp_gained`/`level_up` 미기록, 사용자 피드백(한도 도달/동일 task 중복 보상) 분기 적용.
+- 검증:
+  - `npm run test:mvp` 통과.
+  - `npx vitest run features/mvp/lib/reward.test.ts` 통과(게이트/리셋 경계/중복 제한/no-reward todayCompleted 검증).
+
 ## Session Close (2026-02-28)
 
 - 전체 점검: `npm run verify:mvp` PASS (`typecheck/lint/test:mvp/build/verify:gate`).

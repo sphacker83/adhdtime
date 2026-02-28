@@ -14,7 +14,11 @@ import { appendEvent, createEvent } from "@/features/mvp/lib/events";
 import { computeMvpKpis } from "@/features/mvp/lib/kpi";
 import {
   applyMissionCompletionReward,
-  applyRecoveryReward
+  applyRecoveryReward,
+  createNoRewardOutcome,
+  DAILY_REWARD_TASK_LIMIT,
+  evaluateQuestRewardGate,
+  type RewardGateReason
 } from "@/features/mvp/lib/reward";
 import {
   canShowNotification,
@@ -125,6 +129,18 @@ const RECOVERY_FEEDBACK = {
   remissioned: "괜찮아요. 더 작은 단계로 다시 나눴어요. 첫 단계부터 이어가요.",
   rescheduled: "괜찮아요. 내일로 다시 등록했어요. 바로 시작할 미션를 준비해뒀어요."
 } as const;
+
+function getRewardBlockedFeedback(reason: RewardGateReason): string {
+  if (reason === "daily_limit_reached") {
+    return `오늘 보상 한도(${DAILY_REWARD_TASK_LIMIT}퀘스트)에 도달해서 XP/스탯은 지급되지 않았어요.`;
+  }
+
+  if (reason === "task_already_rewarded_today") {
+    return "오늘 이 퀘스트는 이미 보상을 받아서 XP/스탯은 지급되지 않았어요.";
+  }
+
+  return "XP/스탯 보상은 지급되지 않았어요.";
+}
 
 const DEFAULT_NOTIFICATION_CAPABILITY: NotificationCapability = {
   supported: false,
@@ -1604,11 +1620,21 @@ export function MvpDashboard() {
     setCurrentMissionId(nextMission?.id ?? null);
     tickAccumulatorRef.current = createTimerElapsedAccumulator();
 
-    const reward = applyMissionCompletionReward({
-      stats,
-      estMinutes: target.estMinutes,
-      actualSeconds
+    const rewardGate = evaluateQuestRewardGate({
+      events,
+      taskId: target.taskId,
+      now: new Date(nowIso)
     });
+    const reward = rewardGate.granted
+      ? applyMissionCompletionReward({
+          stats,
+          estMinutes: target.estMinutes,
+          actualSeconds
+        })
+      : createNoRewardOutcome({
+          stats,
+          incrementTodayCompleted: true
+        });
 
     setStats(reward.nextStats);
 
@@ -1619,21 +1645,25 @@ export function MvpDashboard() {
       missionId,
       meta: {
         actualSeconds,
-        estMinutes: target.estMinutes
+        estMinutes: target.estMinutes,
+        rewardGranted: rewardGate.granted,
+        rewardReason: rewardGate.reason
       }
     });
 
-    logEvent({
-      eventName: "xp_gained",
-      source: "local",
-      taskId: target.taskId,
-      missionId,
-      meta: {
-        xpGain: reward.xpGain
-      }
-    });
+    if (rewardGate.granted) {
+      logEvent({
+        eventName: "xp_gained",
+        source: "local",
+        taskId: target.taskId,
+        missionId,
+        meta: {
+          xpGain: reward.xpGain
+        }
+      });
+    }
 
-    if (reward.levelUps > 0) {
+    if (rewardGate.granted && reward.levelUps > 0) {
       logEvent({
         eventName: "level_up",
         source: "local",
@@ -1653,7 +1683,12 @@ export function MvpDashboard() {
       missionAction: target.action
     });
 
-    setFeedback(`좋아요. +${reward.xpGain} XP 획득! ${nextMission ? "다음 미션로 바로 이어가요." : "오늘 루프를 완료했어요."}`);
+    if (rewardGate.granted) {
+      setFeedback(`좋아요. +${reward.xpGain} XP 획득! ${nextMission ? "다음 미션로 바로 이어가요." : "오늘 루프를 완료했어요."}`);
+      return;
+    }
+
+    setFeedback(`미션은 완료했어요. ${getRewardBlockedFeedback(rewardGate.reason)} 완료 카운트는 반영됐어요.`);
   };
 
   const handleAdjustRunningMissionMinutes = (deltaMinutes: -5 | -1 | 1 | 5) => {
@@ -2025,7 +2060,14 @@ export function MvpDashboard() {
     upsertTimerSession(target.id, "ended", nowIso);
     tickAccumulatorRef.current = createTimerElapsedAccumulator();
 
-    const recovery = applyRecoveryReward(stats);
+    const rewardGate = evaluateQuestRewardGate({
+      events,
+      taskId: target.taskId,
+      now: new Date(nowIso)
+    });
+    const recovery = rewardGate.granted
+      ? applyRecoveryReward(stats)
+      : createNoRewardOutcome({ stats });
     setStats(recovery.nextStats);
 
     setCurrentMissionId(newMissions[0].id);
@@ -2043,19 +2085,40 @@ export function MvpDashboard() {
       }
     });
 
-    logEvent({
-      eventName: "xp_gained",
-      source: "local",
-      taskId: target.taskId,
-      missionId: target.id,
-      meta: {
-        xpGain: recovery.xpGain,
-        reason: "remission",
-        recoveryClickCount
-      }
-    });
+    if (rewardGate.granted) {
+      logEvent({
+        eventName: "xp_gained",
+        source: "local",
+        taskId: target.taskId,
+        missionId: target.id,
+        meta: {
+          xpGain: recovery.xpGain,
+          reason: "remission",
+          recoveryClickCount
+        }
+      });
 
-    setFeedback(RECOVERY_FEEDBACK.remissioned);
+      if (recovery.levelUps > 0) {
+        logEvent({
+          eventName: "level_up",
+          source: "local",
+          taskId: target.taskId,
+          missionId: target.id,
+          meta: {
+            levelUps: recovery.levelUps,
+            currentLevel: recovery.nextStats.level,
+            reason: "remission",
+            recoveryClickCount
+          }
+        });
+      }
+    }
+
+    setFeedback(
+      rewardGate.granted
+        ? RECOVERY_FEEDBACK.remissioned
+        : `${RECOVERY_FEEDBACK.remissioned} ${getRewardBlockedFeedback(rewardGate.reason)}`
+    );
   };
 
   const handleReschedule = (targetMissionId = currentMissionId) => {
@@ -2130,7 +2193,14 @@ export function MvpDashboard() {
     setCurrentMissionId(movedMissions[0]?.id ?? null);
     setActiveTaskId(target.taskId);
 
-    const recovery = applyRecoveryReward(stats);
+    const rewardGate = evaluateQuestRewardGate({
+      events,
+      taskId: target.taskId,
+      now: new Date(nowIso)
+    });
+    const recovery = rewardGate.granted
+      ? applyRecoveryReward(stats)
+      : createNoRewardOutcome({ stats });
     setStats(recovery.nextStats);
 
     logEvent({
@@ -2157,19 +2227,40 @@ export function MvpDashboard() {
       }
     });
 
-    logEvent({
-      eventName: "xp_gained",
-      source: "local",
-      taskId: target.taskId,
-      missionId: target.id,
-      meta: {
-        xpGain: recovery.xpGain,
-        reason: "reschedule",
-        recoveryClickCount
-      }
-    });
+    if (rewardGate.granted) {
+      logEvent({
+        eventName: "xp_gained",
+        source: "local",
+        taskId: target.taskId,
+        missionId: target.id,
+        meta: {
+          xpGain: recovery.xpGain,
+          reason: "reschedule",
+          recoveryClickCount
+        }
+      });
 
-    setFeedback(RECOVERY_FEEDBACK.rescheduled);
+      if (recovery.levelUps > 0) {
+        logEvent({
+          eventName: "level_up",
+          source: "local",
+          taskId: target.taskId,
+          missionId: target.id,
+          meta: {
+            levelUps: recovery.levelUps,
+            currentLevel: recovery.nextStats.level,
+            reason: "reschedule",
+            recoveryClickCount
+          }
+        });
+      }
+    }
+
+    setFeedback(
+      rewardGate.granted
+        ? RECOVERY_FEEDBACK.rescheduled
+        : `${RECOVERY_FEEDBACK.rescheduled} ${getRewardBlockedFeedback(rewardGate.reason)}`
+    );
 
     const taskTitle = tasks.find((task) => task.id === target.taskId)?.title ?? "과업";
     pushLoopNotification({

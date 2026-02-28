@@ -1,14 +1,101 @@
-import type { FiveStats, StatsState } from "@/features/mvp/types/domain";
+import type { AppEvent, FiveStats, StatsState } from "@/features/mvp/types/domain";
 
 const STAT_MIN = 0;
 const STAT_MAX = 100;
+export const DAILY_REWARD_RESET_HOUR = 4;
+export const DAILY_REWARD_TASK_LIMIT = 5;
+
+const EMPTY_STAT_GAIN: FiveStats = {
+  initiation: 0,
+  focus: 0,
+  breakdown: 0,
+  recovery: 0,
+  consistency: 0
+};
+
+function toLocalDateKey(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
 
 function clampStat(value: number): number {
   return Math.max(STAT_MIN, Math.min(STAT_MAX, Math.round(value)));
 }
 
 export function getDateKey(date = new Date()): string {
-  return date.toISOString().slice(0, 10);
+  const adjusted = new Date(date);
+  if (adjusted.getHours() < DAILY_REWARD_RESET_HOUR) {
+    adjusted.setDate(adjusted.getDate() - 1);
+  }
+  return toLocalDateKey(adjusted);
+}
+
+export function getTodayRewardedTaskIds(events: AppEvent[], now = new Date()): Set<string> {
+  const todayDateKey = getDateKey(now);
+  const rewardedTaskIds = new Set<string>();
+
+  events.forEach((event) => {
+    if (event.eventName !== "xp_gained" || !event.taskId) {
+      return;
+    }
+
+    const eventDate = new Date(event.timestamp);
+    if (Number.isNaN(eventDate.getTime())) {
+      return;
+    }
+
+    if (getDateKey(eventDate) === todayDateKey) {
+      rewardedTaskIds.add(event.taskId);
+    }
+  });
+
+  return rewardedTaskIds;
+}
+
+export type RewardGateReason = "granted" | "daily_limit_reached" | "task_already_rewarded_today";
+
+export interface RewardGateResult {
+  granted: boolean;
+  reason: RewardGateReason;
+  todayRewardedTaskCount: number;
+  todayRewardedTaskIds: Set<string>;
+}
+
+export function evaluateQuestRewardGate(params: {
+  events: AppEvent[];
+  taskId: string;
+  now?: Date;
+  maxRewardedTasks?: number;
+}): RewardGateResult {
+  const rewardedTaskIds = getTodayRewardedTaskIds(params.events, params.now);
+  const maxRewardedTasks = params.maxRewardedTasks ?? DAILY_REWARD_TASK_LIMIT;
+
+  if (rewardedTaskIds.has(params.taskId)) {
+    return {
+      granted: false,
+      reason: "task_already_rewarded_today",
+      todayRewardedTaskCount: rewardedTaskIds.size,
+      todayRewardedTaskIds: rewardedTaskIds
+    };
+  }
+
+  if (rewardedTaskIds.size >= maxRewardedTasks) {
+    return {
+      granted: false,
+      reason: "daily_limit_reached",
+      todayRewardedTaskCount: rewardedTaskIds.size,
+      todayRewardedTaskIds: rewardedTaskIds
+    };
+  }
+
+  return {
+    granted: true,
+    reason: "granted",
+    todayRewardedTaskCount: rewardedTaskIds.size,
+    todayRewardedTaskIds: rewardedTaskIds
+  };
 }
 
 export function createInitialStats(today = getDateKey()): StatsState {
@@ -72,6 +159,26 @@ export interface RewardOutcome {
   xpGain: number;
   levelUps: number;
   statGain: FiveStats;
+}
+
+export function createNoRewardOutcome(params: {
+  stats: StatsState;
+  today?: string;
+  incrementTodayCompleted?: boolean;
+}): RewardOutcome {
+  const safeStats = rollDailyStats(params.stats, params.today);
+  const todayCompletedIncrement = params.incrementTodayCompleted ? 1 : 0;
+  return {
+    xpGain: 0,
+    levelUps: 0,
+    statGain: {
+      ...EMPTY_STAT_GAIN
+    },
+    nextStats: {
+      ...safeStats,
+      todayCompleted: safeStats.todayCompleted + todayCompletedIncrement
+    }
+  };
 }
 
 export function applyMissionCompletionReward(params: {
