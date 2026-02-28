@@ -102,3 +102,12 @@ Acceptance:
 - [x] 모달 하단 안전 여백 동기화
 - [x] Playwright 캡처(`nav-center-cta-tuned-home`, `nav-center-cta-tuned-modal`)
 - [x] `typecheck/lint/test:mvp` 재검증
+
+## Phase 10: 네비 타이포 + 몬스터 에너지 링 (2026-02-28) ✅ COMPLETE
+- [x] 하단 네비 영어 라벨 제거
+- [x] 하단 네비 한글 라벨 폰트 크기 상향
+- [x] 중앙 CTA 라벨 `퀘스트/생성` 2줄 고정
+- [x] 현재 퀘스트 우측 중앙 대형 몬스터 + 링서클 UI 구현
+- [x] 링 에너지 비율을 청크 합산 남은시간에 연동
+- [x] 청크 완료 시 에너지 즉시 감소 확인
+- [x] Playwright 캡처 + `typecheck/lint/test:mvp` 재검증

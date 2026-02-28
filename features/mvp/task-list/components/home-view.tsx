@@ -47,6 +47,14 @@ function resolveMissionIcon(iconKey?: string): string {
   return "🧩";
 }
 
+function resolveCurrentQuestMonsterIcon(task: Task | null, openChunks: number): string {
+  if (!task) {
+    return "👾";
+  }
+
+  return resolveTaskIcon(task, openChunks);
+}
+
 function formatRemainingToDeadline(isoValue?: string, now = new Date()): string {
   if (!isoValue) {
     return "--";
@@ -156,6 +164,24 @@ export function HomeView({
   const expectedDurationText = homeTask ? `${homeTaskBudgetUsage}/${homeTask.totalMinutes}분` : "--";
   const dueAtText = homeTask?.dueAt ? formatOptionalDateTime(homeTask.dueAt) : "--";
   const dueRemainingText = formatRemainingToDeadline(homeTask?.dueAt);
+  const homeTaskBudgetedChunks = homeTask
+    ? chunks.filter((chunk) => chunk.taskId === homeTask.id && chunk.status !== "archived")
+    : [];
+  const totalEnergySeconds = homeTaskBudgetedChunks.reduce((total, chunk) => total + chunk.estMinutes * 60, 0);
+  const remainingEnergySeconds = homeTaskBudgetedChunks.reduce((total, chunk) => {
+    if (chunk.status === "done" || chunk.status === "abandoned") {
+      return total;
+    }
+
+    return total + Math.max(0, remainingSecondsByChunk[chunk.id] ?? chunk.estMinutes * 60);
+  }, 0);
+  const energyRatio = totalEnergySeconds > 0 ? Math.max(0, Math.min(1, remainingEnergySeconds / totalEnergySeconds)) : 0;
+  const energyPercent = Math.round(energyRatio * 100);
+  const energyAngle = Math.max(0, Math.min(360, energyRatio * 360));
+  const currentQuestMonsterIcon = resolveCurrentQuestMonsterIcon(homeTask, homeTaskActionableChunks.length);
+  const currentQuestMonsterRingStyle = {
+    background: `conic-gradient(#3ea2ff 0deg ${energyAngle}deg, #d8e6f6 ${energyAngle}deg 360deg)`
+  };
 
   return (
     <>
@@ -167,10 +193,21 @@ export function HomeView({
         {homeChunk ? (
           <>
             <div className={getClassName("currentQuestTop")}>
-              <div>
+              <div className={getClassName("currentQuestTitleBlock")}>
                 <h2>{homeChunk.action}</h2>
               </div>
-              <span className={getClassName("currentQuestMonster")} aria-hidden="true">👾</span>
+              <div className={getClassName("currentQuestMonsterWrap")}>
+                <div
+                  className={getClassName("currentQuestMonsterRing")}
+                  style={currentQuestMonsterRingStyle}
+                  aria-label={`퀘스트 에너지 ${energyPercent}%`}
+                >
+                  <div className={getClassName("currentQuestMonsterCore")}>
+                    <span className={getClassName("currentQuestMonster")} aria-hidden="true">{currentQuestMonsterIcon}</span>
+                  </div>
+                </div>
+                <span className={getClassName("currentQuestMonsterEnergy")}>{`${energyPercent}%`}</span>
+              </div>
             </div>
             <p className={getClassName("timerValue")}>{formatClock(homeRemaining)}</p>
             <div className={getClassName("currentQuestInfoGrid")}>

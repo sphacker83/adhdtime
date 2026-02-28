@@ -93,10 +93,10 @@ import {
 import styles from "./mvp-dashboard.module.css";
 
 const TAB_ITEMS = [
-  { key: "home", labelKr: "홈", labelEn: "HOME", icon: "🏠" },
-  { key: "tasks", labelKr: "할 일", labelEn: "TASKS", icon: "🗒️" },
-  { key: "stats", labelKr: "스탯", labelEn: "STATS", icon: "📊" },
-  { key: "settings", labelKr: "설정", labelEn: "SETTINGS", icon: "⚙️" }
+  { key: "home", label: "홈", icon: "🏠" },
+  { key: "tasks", label: "할 일", icon: "🗒️" },
+  { key: "stats", label: "스탯", icon: "📊" },
+  { key: "settings", label: "설정", icon: "⚙️" }
 ] as const;
 const LEFT_TAB_ITEMS = TAB_ITEMS.slice(0, 2);
 const RIGHT_TAB_ITEMS = TAB_ITEMS.slice(2);
@@ -2101,10 +2101,10 @@ export function MvpDashboard() {
               type="button"
               className={tab.key === activeTab ? styles.tabButtonActive : styles.tabButton}
               onClick={() => setActiveTab(tab.key)}
+              aria-label={tab.label}
             >
               <span className={styles.tabIcon} aria-hidden="true">{tab.icon}</span>
-              <span className={styles.tabLabelKr}>{tab.labelKr}</span>
-              <span className={styles.tabLabelEn}>{tab.labelEn}</span>
+              <span className={styles.tabLabelKr}>{tab.label}</span>
             </button>
           ))}
         </div>
@@ -2116,7 +2116,10 @@ export function MvpDashboard() {
           title="AI 퀘스트 생성"
         >
           <span className={styles.tabCreateIcon} aria-hidden="true">⚔️</span>
-          <span className={styles.tabCreateLabel}>퀘스트 생성</span>
+          <span className={styles.tabCreateLabel}>
+            <span className={styles.tabCreateLabelLine}>퀘스트</span>
+            <span className={styles.tabCreateLabelLine}>생성</span>
+          </span>
         </button>
         <div className={styles.tabGroup}>
           {RIGHT_TAB_ITEMS.map((tab) => (
@@ -2125,10 +2128,10 @@ export function MvpDashboard() {
               type="button"
               className={tab.key === activeTab ? styles.tabButtonActive : styles.tabButton}
               onClick={() => setActiveTab(tab.key)}
+              aria-label={tab.label}
             >
               <span className={styles.tabIcon} aria-hidden="true">{tab.icon}</span>
-              <span className={styles.tabLabelKr}>{tab.labelKr}</span>
-              <span className={styles.tabLabelEn}>{tab.labelEn}</span>
+              <span className={styles.tabLabelKr}>{tab.label}</span>
             </button>
           ))}
         </div>

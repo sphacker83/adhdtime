@@ -79,6 +79,16 @@ Last Updated: 2026-02-28
   - Playwright 캡처 추가:
     - `output/playwright/nav-center-cta-tuned-home.png`
     - `output/playwright/nav-center-cta-tuned-modal.png`
+- Round 6 네비/퀘스트 비주얼 미세조정 완료:
+  - 하단 네비 탭 영어 라벨 제거(한글만 유지)
+  - 하단 네비 탭 라벨 크기 상향
+  - 중앙 CTA 라벨을 `퀘스트`/`생성` 2줄 고정
+  - 현재 퀘스트 우측 중앙에 대형 몬스터 + 에너지 링서클 배치
+  - 에너지 링을 `remainingSecondsByChunk` 합산 비율에 연동(타이머 감소/완료 즉시 반영)
+  - Playwright 캡처 추가:
+    - `output/playwright/round6-home.png`
+    - `output/playwright/round6-modal.png`
+    - `output/playwright/round6-with-quest.png`
 - 문서 체계 정리:
   - 비어 있던 사이드 플랜 트랙 `dev/active/task-json-preset-scoring-side-plan`을 `dev/archive/`로 이동
 - 검증 통과:
@@ -88,6 +98,7 @@ Last Updated: 2026-02-28
 
 ### 🟡 IN PROGRESS
 - `/docs/ui/main_ui.png` 대비 헤더 픽셀 미세 보정(폰트 렌더링 차이) 수동 QA
+- Round 6: 하단 네비 타이포 재조정 + 퀘스트 몬스터 에너지 링 구현
 
 ### ⚠️ BLOCKERS
 - `/docs/ui/main_ui.png` 원본 폰트/디자인 토큰 미제공으로 픽셀 단위 100% 동일성은 수동 미세 보정 필요
