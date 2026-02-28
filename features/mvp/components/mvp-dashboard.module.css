@@ -549,7 +549,8 @@
   border: 1px solid rgba(45, 68, 110, 0.17);
   border-radius: 12px;
   background: #f7f9ff;
-  overflow: hidden;
+  overflow: visible;
+  position: relative;
 }
 
 .homeTaskToggle {
@@ -2360,6 +2361,11 @@
 
 .homeTaskMenu {
   position: relative;
+  z-index: 1;
+}
+
+.homeTaskMenu[open] {
+  z-index: 20;
 }
 
 .homeTaskMenuTrigger {
@@ -2385,7 +2391,7 @@
   position: absolute;
   top: calc(100% + 4px);
   right: 0;
-  z-index: 4;
+  z-index: 30;
   min-width: 74px;
   padding: 4px;
   border: 1px solid #d2dff0;

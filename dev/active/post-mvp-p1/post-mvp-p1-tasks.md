@@ -1,6 +1,6 @@
 # Post-MVP P1 Tasks
 
-Last Updated: 2026-02-27
+Last Updated: 2026-02-28
 
 ## Phase 0: 문서/스캐폴딩
 - [x] Dev Docs 3종 생성
@@ -39,3 +39,9 @@ Acceptance:
 ## Validation Gate
 1. `npm run typecheck`
 2. `npm run lint`
+
+## Session Close (2026-02-28)
+
+- [x] `npm run verify:mvp` 통합 점검 PASS 확인
+- [x] 트랙 문서(`plan/context/tasks`) `Last Updated` 동기화
+- [x] 다음 세션 재개용 핸드오프 메모 반영

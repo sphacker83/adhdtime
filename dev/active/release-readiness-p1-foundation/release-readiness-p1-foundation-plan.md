@@ -1,6 +1,6 @@
 # Release Readiness + P1 Foundation - Plan
 
-Last Updated: 2026-02-27
+Last Updated: 2026-02-28
 
 ## Executive Summary
 현재 MVP 코어 루프는 동작하지만, 릴리즈 기준과 문서 정합성 관점에서 `KPI 계산 파이프라인`, `릴리즈 게이트 자동 검증`, `P1(알림/STT/외부동기화) 최소 연결`, `문서 최신화`가 남아 있다. 이번 트랙은 이 4가지를 순차 구현해 “다음 세션에서도 바로 이어갈 수 있는 실행 가능 상태”를 만든다.

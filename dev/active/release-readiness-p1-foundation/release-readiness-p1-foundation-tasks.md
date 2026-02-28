@@ -1,6 +1,6 @@
 # Release Readiness + P1 Foundation - Tasks
 
-Last Updated: 2026-02-27
+Last Updated: 2026-02-28
 
 ## Phase 0: Baseline & Planning ✅
 - [x] 기존 Dev Docs / 코드 상태 분석
@@ -111,3 +111,9 @@ Acceptance (Round 2 확정)
 
 ## Remaining Follow-up
 - 정책성 리스크 메모 유지: FR-10(알림 정책 세부화), 외부 동기화 실연동(OAuth/API), 기타 P1 범위 항목은 별도 트랙에서 계속 관리
+
+## Session Close (2026-02-28)
+
+- [x] `npm run verify:mvp` 통합 점검 PASS 확인
+- [x] 트랙 문서(`plan/context/tasks`) `Last Updated` 동기화
+- [x] 다음 세션 재개용 핸드오프 메모 반영

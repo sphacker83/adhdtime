@@ -144,3 +144,9 @@ Acceptance:
 - [x] 펼친 대기 청크 리스트 DnD 순서 변경 구현
 - [x] 펼친 청크 표시를 `미션 제목 + 소요시간(분)`만 유지하도록 단순화
 - [x] Playwright 캡처 + `typecheck/lint/test:mvp` 재검증
+
+## Session Close (2026-02-28)
+
+- [x] `npm run verify:mvp` 통합 점검 PASS 확인
+- [x] 트랙 문서(`plan/context/tasks`) `Last Updated` 동기화
+- [x] 다음 세션 재개용 핸드오프 메모 반영

@@ -1,6 +1,6 @@
 # Post-MVP P1 Plan
 
-Last Updated: 2026-02-27
+Last Updated: 2026-02-28
 
 ## Executive Summary
 MVP 코어 루프 안정화 이후 P1은 사용자 재참여율과 입력 접근성을 높이는 준비 단계다. 우선순위는 `알림(FR-10) -> STT -> 외부 동기화` 순으로 제안한다.

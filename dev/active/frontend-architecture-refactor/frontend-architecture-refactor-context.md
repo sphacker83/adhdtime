@@ -182,3 +182,9 @@ Last Updated: 2026-02-28
 
 1. 후속 기능 작업은 `features/mvp/integrations/*` 경계를 유지한 상태로 진행한다.
 2. 신규 요구사항은 별도 `dev/active/*` 트랙을 생성해 문서/코드 동기화 원칙을 유지한다.
+
+## Session Close (2026-02-28)
+
+- 전체 점검: `npm run verify:mvp` PASS (`typecheck/lint/test:mvp/build/verify:gate`).
+- 오늘 반영: 대기 중 퀘스트 접힘 상태 메뉴 패널 잘림 UI 수정(`features/mvp/components/mvp-dashboard.module.css`), 루트 운영 가이드 `AGENTS.md` 추가.
+- 인수인계: 다음 세션 시작 시 각 트랙의 `Quick Resume` 섹션을 기준으로 이어서 진행.

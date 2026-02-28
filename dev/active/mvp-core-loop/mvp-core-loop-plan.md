@@ -1,6 +1,6 @@
 # MVP Core Loop Plan
 
-Last Updated: 2026-02-27
+Last Updated: 2026-02-28
 
 ## Executive Summary
 PRD v3 기준 P0 핵심 루프(입력 -> 청킹 -> 실행 타이머 -> 보상 -> 복귀)를 Next.js 단일 페이지에서 동작하도록 재구성한다.

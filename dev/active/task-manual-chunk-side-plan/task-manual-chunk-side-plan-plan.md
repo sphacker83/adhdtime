@@ -1,6 +1,6 @@
 # Task Manual Chunk Side Plan - Plan
 
-Last Updated: 2026-02-27
+Last Updated: 2026-02-28
 
 ## Executive Summary
 홈/입력 플로우의 청크 조작성을 높이기 위해 별도 사이드 플랜 트랙을 분리한다. 이번 트랙은 코드 구현 전 문서 기준을 먼저 확정하고, 사용자 요청 6개를 `입력 UX 개선 -> 홈 가시성 개선 -> 시간 계산 자동화` 순서로 적용한다.

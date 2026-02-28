@@ -1,6 +1,6 @@
 # Post-MVP P1 Context
 
-Last Updated: 2026-02-27
+Last Updated: 2026-02-28
 
 ## SESSION PROGRESS
 
@@ -39,3 +39,9 @@ Last Updated: 2026-02-27
 1. FR-10 알림 UI 엔트리(권한 상태/요청 버튼)부터 연결한다.
 2. STT 버튼/상태를 과업 입력 UI에 연결하고 transcript 표시까지 구현한다.
 3. 동기화 mock adapter를 추가해 `ExternalSyncJobStatus` 상태 전이 검증을 붙인다.
+
+## Session Close (2026-02-28)
+
+- 전체 점검: `npm run verify:mvp` PASS (`typecheck/lint/test:mvp/build/verify:gate`).
+- 오늘 반영: 대기 중 퀘스트 접힘 상태 메뉴 패널 잘림 UI 수정(`features/mvp/components/mvp-dashboard.module.css`), 루트 운영 가이드 `AGENTS.md` 추가.
+- 인수인계: 다음 세션 시작 시 각 트랙의 `Quick Resume` 섹션을 기준으로 이어서 진행.

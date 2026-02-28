@@ -19,11 +19,25 @@ npm run verify:mvp
 
 ## 2) 최근 실행 결과
 
-- 실행 일시: 2026-02-28 01:25~01:26 KST
+### 실행 #2 (최신)
+
+- 실행 일시: 2026-02-28 18:04 KST
 - 실행 명령: `npm run verify:mvp`
 - 최종 결과: `PASS` (exit code 0)
 
-### 단계별 요약
+| 단계 | 결과 | 핵심 로그 |
+| --- | --- | --- |
+| typecheck | PASS | `tsc --noEmit` 오류 없음 |
+| lint | PASS | `eslint .` 오류 없음 |
+| test:mvp | PASS | `8 files, 37 tests passed` |
+| build | PASS | Next.js 16.1.6 빌드 성공 |
+| verify:gate | PASS | 필수 이벤트 정의/샘플 커버리지/KPI 계산/null 안전 처리/수치 유효성 모두 PASS |
+
+### 실행 #1
+
+- 실행 일시: 2026-02-28 01:25~01:26 KST
+- 실행 명령: `npm run verify:mvp`
+- 최종 결과: `PASS` (exit code 0)
 
 | 단계 | 결과 | 핵심 로그 |
 | --- | --- | --- |

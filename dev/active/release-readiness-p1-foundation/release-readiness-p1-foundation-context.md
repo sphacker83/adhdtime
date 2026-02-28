@@ -1,6 +1,6 @@
 # Release Readiness + P1 Foundation - Context
 
-Last Updated: 2026-02-27
+Last Updated: 2026-02-28
 
 ## SESSION PROGRESS
 
@@ -52,3 +52,9 @@ Last Updated: 2026-02-27
 ## Quick Resume
 1. FR-01/02/03/05/11/12는 문서 기준 2차 확정 완료 상태로 유지한다.
 2. 후속은 정책성 리스크 메모(P1 범위)만 추적하고, 본 트랙의 P0 확정 문서는 추가 변경 없이 유지한다.
+
+## Session Close (2026-02-28)
+
+- 전체 점검: `npm run verify:mvp` PASS (`typecheck/lint/test:mvp/build/verify:gate`).
+- 오늘 반영: 대기 중 퀘스트 접힘 상태 메뉴 패널 잘림 UI 수정(`features/mvp/components/mvp-dashboard.module.css`), 루트 운영 가이드 `AGENTS.md` 추가.
+- 인수인계: 다음 세션 시작 시 각 트랙의 `Quick Resume` 섹션을 기준으로 이어서 진행.

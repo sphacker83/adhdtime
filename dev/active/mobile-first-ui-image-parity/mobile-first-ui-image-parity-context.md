@@ -172,3 +172,9 @@ Last Updated: 2026-02-28
 1. 수동 UI QA(`docs/ui/main_ui.png`, `docs/ui/add_ui.png` 비교)로 헤더/중앙 CTA/하단 바 공백을 확인한다.
 2. 필요시 `mvp-dashboard.module.css` parity override만 미세 조정한다.
 3. 최종 커밋/푸시를 진행한다.
+
+## Session Close (2026-02-28)
+
+- 전체 점검: `npm run verify:mvp` PASS (`typecheck/lint/test:mvp/build/verify:gate`).
+- 오늘 반영: 대기 중 퀘스트 접힘 상태 메뉴 패널 잘림 UI 수정(`features/mvp/components/mvp-dashboard.module.css`), 루트 운영 가이드 `AGENTS.md` 추가.
+- 인수인계: 다음 세션 시작 시 각 트랙의 `Quick Resume` 섹션을 기준으로 이어서 진행.

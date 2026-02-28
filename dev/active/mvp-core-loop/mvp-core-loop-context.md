@@ -1,6 +1,6 @@
 # MVP Core Loop Context
 
-Last Updated: 2026-02-27
+Last Updated: 2026-02-28
 
 ## SESSION PROGRESS
 
@@ -54,3 +54,9 @@ Last Updated: 2026-02-27
 1. P1 착수 문서 확인: `dev/active/post-mvp-p1/*`
 2. FR-10(알림) UI 연결부터 구현 시작
 3. 변경 후 `npm run typecheck && npm run lint && npm run test:mvp && npm run build` 재검증
+
+## Session Close (2026-02-28)
+
+- 전체 점검: `npm run verify:mvp` PASS (`typecheck/lint/test:mvp/build/verify:gate`).
+- 오늘 반영: 대기 중 퀘스트 접힘 상태 메뉴 패널 잘림 UI 수정(`features/mvp/components/mvp-dashboard.module.css`), 루트 운영 가이드 `AGENTS.md` 추가.
+- 인수인계: 다음 세션 시작 시 각 트랙의 `Quick Resume` 섹션을 기준으로 이어서 진행.
