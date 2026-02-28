@@ -67,6 +67,25 @@ Last Updated: 2026-02-28
 - [x] 일상형 퀘스트 카탈로그 문서 작성(`docs/DAILY_LIFE_QUEST_CATALOG_50.md`)
 - [x] 검증 게이트 재실행(`typecheck/lint/test:mvp`)
 
+## Session Update (2026-02-28, Dashboard Polish + Due-Only Schedule Fix)
+- [x] 헤더 롤링 팁/피드백 토스트 동작 정리(오류성 문구 토스트 유지)
+- [x] STT 입력 아이콘 우측 배치 및 입력 패딩 정합화
+- [x] 상태 카드 레이더 UI 재조정(카드 높이 과확장 방지 + 데스크톱 2열 우측 점유 강화)
+- [x] `missions` 기반 schedule 동기화에서 due-only 시작시간 재주입 버그 수정
+- [x] 편집 모달 오픈 시 due-only 시작시간 재주입 차단
+- [x] 총 소요시간 편집 시 due-only 입력에서 시작시간 자동 역산 차단
+- [x] 원인/수정 포인트 문서화
+  - 원인: `normalizeTaskScheduleIso`가 `dueAt`만 있는 과업에서 `scheduledFor`를 역산 생성
+  - 조치: 동기화 `useEffect`에도 `applyDueOnlyScheduleInputOverride` 동일 정책 적용
+- [x] 검증 게이트 재실행(`npm run typecheck`, `npm run test:mvp`, `npm run lint`)
+- [ ] 다음 확인: due-only 시나리오(생성/수정/미션 변경)에서 `scheduledFor` 자동 재주입 여부 수동 점검
+
+## Session Update (2026-02-28, Mobile Status Card Rebalance)
+- [x] 요구사항 정리: 모바일 상태 카드 2열 고정(좌측 상태 정보 / 우측 레이더), 카드 세로 확장 방지
+- [x] CSS 레이아웃 재조정 적용(`statusCard`, `levelBlock`, `radarBlock`, `radarWrap`)
+- [x] 레이더 라벨 좌표를 카드 폭에 종속되지 않게 반응형 비율 좌표로 전환
+- [x] 회귀 검증(`npm run typecheck`, `npm run lint`, `npm run test:mvp`)
+
 ## Session Close (2026-02-28)
 
 - [x] `npm run verify:mvp` 통합 점검 PASS 확인

@@ -31,6 +31,12 @@ Last Updated: 2026-02-28
 - 퀘스트/미션 매핑 문서 추가(`docs/QUEST_MISSION_MAP.md`)
 - 일상형 퀘스트 카탈로그 문서 추가(`docs/DAILY_LIFE_QUEST_CATALOG_50.md`)
 - 유사도 튜닝: 제목 벡터 반영, intent 힌트 점수 추가, 신호 임계값 완화(`features/mvp/lib/missioning.ts`)
+- 헤더 롤링 팁 노출/오류성 피드백 토스트 분기 동작 정리(`features/mvp/components/mvp-dashboard.tsx`)
+- STT 입력 아이콘 우측 고정 및 입력 패딩 정합화(`features/mvp/components/mvp-dashboard.module.css`)
+- 상태 카드 레이더 크기 재조정(카드 높이 과대 확장 억제 + 데스크톱 우측 점유 강화)
+- 미션 기반 일정 동기화 시 due-only 과업의 시작시간 재주입 버그 수정(`mvp-dashboard.tsx`)
+- 편집 모달 오픈 시 due-only 스케줄 보존(시작시간 자동 역산 표시 차단)
+- 총 소요시간 편집 중 due-only 입력의 시작시간 자동 파생 차단
 - `npm run typecheck`, `npm run lint`, `npm run test:mvp`, `npm run build` 통과
 
 ### 🟡 IN PROGRESS
@@ -59,6 +65,22 @@ Last Updated: 2026-02-28
 1. P1 착수 문서 확인: `dev/active/post-mvp-p1/*`
 2. FR-10(알림) UI 연결부터 구현 시작
 3. 변경 후 `npm run typecheck && npm run lint && npm run test:mvp && npm run build` 재검증
+
+## Session Notes (2026-02-28, Dashboard UX Polish + Due-Only Fix)
+- 원인: `missions` 변경 시 동작하는 task schedule 동기화 `useEffect`가 `normalizeTaskScheduleIso` 결과를 그대로 반영하면서, `dueAt`만 있던 과업에 `scheduledFor`를 역산 주입함.
+- 수정: `normalizeTaskScheduleIso` 직후 `applyDueOnlyScheduleInputOverride`와 동일 정책을 `task.scheduledFor/task.dueAt` 기준으로 공통 적용해, 시작시간 미입력 + 마감시간만 입력된 경우 `scheduledFor`를 `undefined`로 유지.
+- 보강: 퀘스트 편집 모달 초기 입력 구성에서도 same override를 적용해 due-only 과업을 열었을 때 시작시간이 UI에 재주입되지 않도록 수정.
+- 보강: 총 소요시간 입력으로 파생 계산 시 due-only 입력(`scheduledFor` 공란 + `dueAt` 존재) 조건에서는 `scheduledFor` 역산을 건너뛰도록 가드 추가.
+- 상태: 코드 반영 및 검증 게이트 재실행 완료(`npm run typecheck`, `npm run test:mvp`, `npm run lint` 모두 통과).
+- 다음 확인: due-only 생성/수정/미션 상태 전이 후에도 시작시간이 자동 복원되지 않는지 수동 시나리오 점검.
+
+## Session Notes (2026-02-28, Mobile Status Card Rebalance)
+- 요구사항: 카드 전체 크기 확장은 피하고, 모바일에서도 좌측 상태 정보 + 우측 레이더가 한 줄 2열로 안정적으로 보이도록 조정.
+- 적용:
+  - `statusCard` 기본 레이아웃을 모바일 포함 2열(좌: 상태/레벨/XP, 우: 레이더)로 전환.
+  - `radarWrap` 크기를 카드 폭에 맞게 축소하고 우측 정렬을 기본화.
+  - 레이더 라벨 좌표를 px 고정값에서 `%` 기반 반응형 좌표로 전환.
+- 상태: 코드 반영 및 검증 완료(`npm run typecheck`, `npm run lint`, `npm run test:mvp` 통과).
 
 ## Session Close (2026-02-28)
 

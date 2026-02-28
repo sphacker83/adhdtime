@@ -106,8 +106,8 @@ const RISKY_INPUT_PATTERN = /(자해|죽고\s?싶|폭탄|불법|마약|살인|�
 const DEFAULT_TASK_TOTAL_MINUTES = 60;
 const ROLLING_TIP_INTERVAL_MS = 5000;
 const TOAST_AUTO_DISMISS_MS = 3600;
-const RADAR_LABEL_CENTER = 110;
-const RADAR_LABEL_RADIUS = 94;
+const RADAR_LABEL_CENTER_PERCENT = 50;
+const RADAR_LABEL_RADIUS_PERCENT = 38;
 
 const ROLLING_TIPS = [
   "작게 시작하면 꾸준함이 쉬워져요.",
@@ -447,14 +447,19 @@ export function MvpDashboard() {
       totalMinutes: task.totalMinutes,
       fallbackStartAt
     });
+    const normalizedScheduleWithDueOnlyOverride = applyDueOnlyScheduleInputOverride(
+      normalizedSchedule,
+      task.scheduledFor ?? "",
+      task.dueAt ?? ""
+    ) ?? normalizedSchedule;
 
     setQuestComposerMode("edit");
     setEditingTaskId(task.id);
     setTaskInput(task.title);
     setSelectedQuestSuggestionId(null);
     setTaskTotalMinutesInput(String(task.totalMinutes));
-    setTaskScheduledForInput(formatTaskIsoToLocalInput(normalizedSchedule.scheduledFor));
-    setTaskDueAtInput(formatTaskIsoToLocalInput(normalizedSchedule.dueAt));
+    setTaskScheduledForInput(formatTaskIsoToLocalInput(normalizedScheduleWithDueOnlyOverride.scheduledFor));
+    setTaskDueAtInput(formatTaskIsoToLocalInput(normalizedScheduleWithDueOnlyOverride.dueAt));
     setTaskMetaFeedback(null);
     taskMetaEditingFieldRef.current = null;
     taskMetaLastDistinctEditedFieldRef.current = null;
@@ -697,8 +702,13 @@ export function MvpDashboard() {
           totalMinutes: task.totalMinutes,
           fallbackStartAt
         });
-        const nextScheduledFor = normalizedSchedule.scheduledFor;
-        const nextDueAt = normalizedSchedule.dueAt;
+        const normalizedScheduleWithDueOnlyOverride = applyDueOnlyScheduleInputOverride(
+          normalizedSchedule,
+          task.scheduledFor ?? "",
+          task.dueAt ?? ""
+        ) ?? normalizedSchedule;
+        const nextScheduledFor = normalizedScheduleWithDueOnlyOverride.scheduledFor;
+        const nextDueAt = normalizedScheduleWithDueOnlyOverride.dueAt;
 
         const taskMissions = missions.filter((mission) => mission.taskId === task.id);
         const openTaskMissions = taskMissions.filter((mission) => !isTaskClosedStatus(mission.status));
@@ -1056,7 +1066,16 @@ export function MvpDashboard() {
         }
       }
 
-      if (derivedField === "scheduledFor" && editedField !== "dueAt" && parsedTotalMinutes !== null && parsedDueAt) {
+      const shouldPreserveDueOnlyInput = editedField === "totalMinutes"
+        && nextInputs.scheduledForInput.trim().length === 0
+        && nextInputs.dueAtInput.trim().length > 0;
+      if (
+        derivedField === "scheduledFor"
+        && editedField !== "dueAt"
+        && !shouldPreserveDueOnlyInput
+        && parsedTotalMinutes !== null
+        && parsedDueAt
+      ) {
         if (!isTaskTotalMinutesInRange(parsedTotalMinutes)) {
           immediateFeedback = `총 소요 시간은 ${MIN_TASK_TOTAL_MINUTES}~${MAX_TASK_TOTAL_MINUTES}분 범위로 입력해주세요.`;
         } else {
@@ -2401,13 +2420,13 @@ export function MvpDashboard() {
                   <div className={styles.radarLabelLayer} aria-hidden="true">
                     {STAT_META.map((item, index) => {
                       const angle = (-Math.PI / 2) + (index * Math.PI * 2) / STAT_META.length;
-                      const x = RADAR_LABEL_CENTER + Math.cos(angle) * RADAR_LABEL_RADIUS;
-                      const y = RADAR_LABEL_CENTER + Math.sin(angle) * RADAR_LABEL_RADIUS;
+                      const x = RADAR_LABEL_CENTER_PERCENT + Math.cos(angle) * RADAR_LABEL_RADIUS_PERCENT;
+                      const y = RADAR_LABEL_CENTER_PERCENT + Math.sin(angle) * RADAR_LABEL_RADIUS_PERCENT;
                       return (
                         <div
                           key={item.key}
                           className={styles.radarStatBadge}
-                          style={{ left: `${x}px`, top: `${y}px` }}
+                          style={{ left: `${x}%`, top: `${y}%` }}
                         >
                           <span>{item.label}</span>
                           <strong>{stats[item.key]}</strong>

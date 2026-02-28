@@ -2186,38 +2186,42 @@
 
 .statusCard {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  align-items: stretch;
-  gap: 12px;
+  grid-template-columns: minmax(0, 1fr) minmax(132px, 44%);
+  align-items: start;
+  column-gap: 10px;
+  row-gap: 10px;
 }
 
 .levelBlock {
+  grid-column: 1;
+  min-width: 0;
   gap: 8px;
 }
 
 .radarBlock {
+  grid-column: 2;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  justify-items: center;
+  justify-items: end;
   align-items: center;
-  min-height: 210px;
+  min-width: 0;
   width: 100%;
 }
 
 .radarWrap {
   position: relative;
-  width: min(100%, 220px);
+  width: min(100%, 154px);
   aspect-ratio: 1 / 1;
   margin-left: auto;
-  margin-right: auto;
+  margin-right: 0;
 }
 
 .radarWrap .radarSvg {
   position: absolute;
-  top: 20px;
-  left: 20px;
-  width: calc(100% - 40px);
-  height: calc(100% - 40px);
+  top: 16px;
+  left: 16px;
+  width: calc(100% - 32px);
+  height: calc(100% - 32px);
 }
 
 .radarLabelLayer {
@@ -2232,19 +2236,19 @@
   display: grid;
   justify-items: center;
   gap: 1px;
-  min-width: 58px;
-  padding: 3px 5px;
-  border-radius: 8px;
+  min-width: 62px;
+  padding: 4px 6px;
+  border-radius: 9px;
   background: rgba(255, 255, 255, 0.82);
   border: 1px solid rgba(194, 210, 232, 0.92);
   color: #2b466d;
-  font-size: 9px;
+  font-size: 10px;
   line-height: 1.05;
   text-align: center;
 }
 
 .radarStatBadge strong {
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.05;
 }
 
@@ -2254,32 +2258,29 @@
 
 @media (min-width: 680px) {
   .statusCard {
-    grid-template-columns: minmax(220px, 0.95fr) minmax(0, 1.35fr);
-    column-gap: 18px;
+    grid-template-columns: minmax(220px, 0.95fr) minmax(170px, 1.05fr);
+    column-gap: 16px;
   }
 
   .statusCardTitle {
     margin-bottom: 4px;
   }
 
-  .radarBlock {
-    justify-items: end;
-  }
-
   .radarWrap {
-    width: min(100%, 240px);
-    margin-right: 4px;
+    width: min(100%, 182px);
+    margin-right: 0;
   }
 }
 
 @media (max-width: 560px) {
   .radarWrap {
-    width: min(100%, 208px);
+    width: min(100%, 142px);
   }
 
   .radarStatBadge {
-    min-width: 54px;
-    font-size: 8px;
+    min-width: 52px;
+    font-size: 9px;
+    padding: 3px 5px;
   }
 
   .radarStatBadge strong {
