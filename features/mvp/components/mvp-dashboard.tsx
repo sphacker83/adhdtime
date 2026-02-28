@@ -1903,7 +1903,7 @@ export function MvpDashboard() {
           <div className={styles.progressGroup}>
             <p className={styles.progressTitle}>
               오늘의 달성도
-              <span>DAILY PROGRESS</span>
+              <span>DAILY PROGRESS!</span>
             </p>
             <div className={styles.progressRing} style={dailyProgressRingStyle} aria-label={`오늘의 달성도 ${dailyProgressPercent}%`}>
               <div className={styles.progressRingInner}>

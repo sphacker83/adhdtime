@@ -1912,7 +1912,7 @@
 
 .shell {
   --layout-max-width: 560px;
-  --header-height: 118px;
+  --header-height: 104px;
   --tab-height: 78px;
   min-height: 100dvh;
   padding: 0 0 calc(var(--tab-height) + env(safe-area-inset-bottom) + 14px);
@@ -1930,27 +1930,29 @@
   width: min(var(--layout-max-width), 100%);
   margin: 0 auto;
   min-height: calc(var(--header-height) + env(safe-area-inset-top));
-  padding: calc(8px + env(safe-area-inset-top)) 12px 8px;
-  border-radius: 0 0 16px 16px;
+  padding: calc(6px + env(safe-area-inset-top)) 12px 6px;
+  border-radius: 0 0 12px 12px;
   border: 1px solid #d4dfef;
   border-top: 0;
   background: #f1f5fb;
-  box-shadow: 0 3px 10px rgba(27, 47, 82, 0.08);
+  box-shadow: 0 2px 8px rgba(27, 47, 82, 0.08);
   display: grid;
   grid-template-rows: auto auto;
-  gap: 6px;
+  gap: 4px;
   z-index: 20;
 }
 
 .topBarMain {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 6px;
+  align-items: start;
+  gap: 4px;
 }
 
 .titleGroup {
   min-width: 0;
+  display: grid;
+  gap: 1px;
 }
 
 .brandTitle {
@@ -1958,7 +1960,7 @@
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  font-size: clamp(1.65rem, 7vw, 2rem);
+  font-size: clamp(1.58rem, 6.4vw, 1.9rem);
   line-height: 1;
   font-weight: 800;
   letter-spacing: -0.02em;
@@ -1972,8 +1974,8 @@
 }
 
 .levelSummary {
-  margin: 1px 0 0;
-  font-size: 0.92rem;
+  margin: 0;
+  font-size: 0.9rem;
   line-height: 1.15;
   font-weight: 700;
   color: #1f2d43;
@@ -1985,44 +1987,45 @@
 
 .progressGroup {
   display: inline-flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: flex-end;
-  gap: 4px;
+  gap: 3px;
+  padding-top: 1px;
 }
 
 .progressTitle {
   margin: 0;
   display: grid;
-  justify-items: start;
-  text-align: left;
-  font-size: 10px;
+  justify-items: end;
+  text-align: right;
+  font-size: 9px;
   line-height: 1.1;
   font-weight: 800;
   color: #314a72;
 }
 
 .progressTitle span {
-  font-size: 8px;
+  font-size: 7px;
   color: #7284a1;
 }
 
 .progressRing {
-  width: 48px;
-  height: 48px;
+  width: 44px;
+  height: 44px;
   border-radius: 999px;
-  padding: 3px;
+  padding: 2px;
   flex: none;
 }
 
 .progressRingInner strong {
-  font-size: 11px;
+  font-size: 10px;
 }
 
 .headerDateTime {
   margin: 0;
-  padding-top: 3px;
+  padding-top: 2px;
   border-top: 1px solid #dbe5f3;
-  font-size: 10px;
+  font-size: 9px;
   line-height: 1.2;
   font-weight: 700;
   color: #617390;
@@ -2031,11 +2034,11 @@
 .app {
   position: relative;
   width: min(var(--layout-max-width), 100%);
-  margin: 10px auto 0;
+  margin: 8px auto 0;
   padding: 0 12px;
   display: grid;
   align-content: start;
-  gap: 10px;
+  gap: 9px;
   z-index: 2;
 }
 
@@ -2372,7 +2375,7 @@
 
 @media (min-width: 768px) {
   .shell {
-    --header-height: 122px;
+    --header-height: 108px;
     --tab-height: 80px;
   }
 
