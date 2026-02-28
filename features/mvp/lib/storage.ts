@@ -8,6 +8,7 @@ import {
   type EventName,
   type EventSource,
   type PersistedState,
+  type RankTier,
   type StatsState,
   type Task,
   TASK_SUMMARY_MAX_LENGTH,
@@ -17,11 +18,13 @@ import {
 } from "@/features/mvp/types/domain";
 import { createInitialStats } from "@/features/mvp/lib/reward";
 
-const STORAGE_KEY = "adhdtime:mvp-state:v1";
+const STORAGE_KEY = "adhdtime:mvp-state:v3";
 const TASK_STATUS_VALUES: Task["status"][] = ["todo", "in_progress", "done", "archived"];
 const MISSION_STATUS_VALUES: MissionStatus[] = ["todo", "running", "paused", "done", "abandoned", "archived"];
 const TIMER_SESSION_STATE_VALUES: TimerSessionState[] = ["running", "paused", "ended"];
 const ACTIVE_TAB_VALUES: PersistedState["activeTab"][] = ["home", "tasks", "stats", "settings"];
+const STAT_KEYS = ["initiation", "focus", "breakdown", "recovery", "consistency"] as const;
+const RANK_TIER_PATTERN = /^(?:F|(?:[EDCBA]|S+)(?:-|0|\+))$/;
 const EVENT_NAME_VALUES: EventName[] = [
   "task_created",
   "mission_generated",
@@ -36,6 +39,8 @@ const EVENT_NAME_VALUES: EventName[] = [
   "task_time_updated",
   "xp_gained",
   "level_up",
+  "rank_promoted",
+  "character_rank_changed",
   "haptic_fired",
   "safety_blocked"
 ];
@@ -53,6 +58,10 @@ function isString(value: unknown): value is string {
 
 function isNumber(value: unknown): value is number {
   return typeof value === "number" && Number.isFinite(value);
+}
+
+function isInteger(value: unknown): value is number {
+  return isNumber(value) && Number.isInteger(value);
 }
 
 function isBoolean(value: unknown): value is boolean {
@@ -77,6 +86,10 @@ function isEventName(value: unknown): value is EventName {
 
 function isEventSource(value: unknown): value is EventSource {
   return isString(value) && EVENT_SOURCE_VALUES.includes(value as EventSource);
+}
+
+function isRankTier(value: unknown): value is RankTier {
+  return isString(value) && RANK_TIER_PATTERN.test(value);
 }
 
 function isIsoDateTime(value: unknown): value is string {
@@ -262,28 +275,65 @@ function isAppEvent(value: unknown): value is AppEvent {
   );
 }
 
+function isStatRankProgress(value: unknown): boolean {
+  if (!isRecord(value)) {
+    return false;
+  }
+
+  return (
+    isRankTier(value.rank)
+    && isInteger(value.totalScore)
+    && value.totalScore >= 0
+    && isInteger(value.displayScore)
+    && value.displayScore >= 0
+    && value.displayScore <= 99
+    && isInteger(value.carry)
+    && value.carry >= 0
+  );
+}
+
+function isStatRankState(value: unknown): boolean {
+  if (!isRecord(value)) {
+    return false;
+  }
+
+  return STAT_KEYS.every((statKey) => isStatRankProgress(value[statKey]));
+}
+
+function isCharacterRankState(value: unknown): boolean {
+  if (!isRecord(value)) {
+    return false;
+  }
+
+  return (
+    isRankTier(value.rank)
+    && isInteger(value.bandIndex)
+    && value.bandIndex >= 0
+    && isInteger(value.minScoreInBand)
+    && value.minScoreInBand >= 0
+    && value.minScoreInBand <= 99
+  );
+}
+
 function isStatsState(value: unknown): value is StatsState {
   if (!isRecord(value)) {
     return false;
   }
 
   return (
-    isNumber(value.initiation)
-    && isNumber(value.focus)
-    && isNumber(value.breakdown)
-    && isNumber(value.recovery)
-    && isNumber(value.consistency)
-    && isNumber(value.xp)
-    && isNumber(value.level)
+    isInteger(value.axp)
+    && value.axp >= 0
+    && isInteger(value.accountLevel)
+    && value.accountLevel >= 1
     && isString(value.todayDateKey)
-    && isNumber(value.todayXpGain)
-    && isNumber(value.todayCompleted)
-    && isRecord(value.todayStatGain)
-    && isNumber(value.todayStatGain.initiation)
-    && isNumber(value.todayStatGain.focus)
-    && isNumber(value.todayStatGain.breakdown)
-    && isNumber(value.todayStatGain.recovery)
-    && isNumber(value.todayStatGain.consistency)
+    && isInteger(value.todayAxpGain)
+    && value.todayAxpGain >= 0
+    && isInteger(value.todaySgpGain)
+    && value.todaySgpGain >= 0
+    && isInteger(value.todayCompleted)
+    && value.todayCompleted >= 0
+    && isStatRankState(value.statRanks)
+    && isCharacterRankState(value.characterRank)
   );
 }
 

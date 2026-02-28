@@ -10,6 +10,22 @@ import type { AppEvent, StatsState } from "@/features/mvp/types/domain";
 
 type MvpDashboardStyles = Record<string, string>;
 
+function resolveCharacterTotalScore(stats: StatsState): number {
+  const statScores = Object.values(stats.statRanks).map((rankState) => {
+    if (!Number.isFinite(rankState.totalScore)) {
+      return 0;
+    }
+
+    return Math.max(0, Math.floor(rankState.totalScore));
+  });
+
+  if (statScores.length === 0) {
+    return 0;
+  }
+
+  return Math.min(...statScores);
+}
+
 export interface StatsViewProps {
   styles: MvpDashboardStyles;
   stats: StatsState;
@@ -25,11 +41,14 @@ export function StatsView({
   kpis,
   events
 }: StatsViewProps) {
+  const todaySgpGainScore = Math.max(0, Math.round(stats.todaySgpGain));
+  const characterTotalScore = resolveCharacterTotalScore(stats);
+
   return (
     <section className={styles.listCard}>
       <header className={styles.listHeader}>
         <h3>오늘 리포트</h3>
-        <p>5초 안에 확인하는 요약</p>
+        <p>5초 안에 확인하는 AXP/SGP 요약</p>
       </header>
 
       <div className={styles.reportGrid}>
@@ -42,12 +61,21 @@ export function StatsView({
           <strong>{completionRate}%</strong>
         </article>
         <article>
-          <p>획득 XP</p>
-          <strong>+{stats.todayXpGain}</strong>
+          <p>획득 AXP</p>
+          <strong>+{stats.todayAxpGain}</strong>
         </article>
         <article>
-          <p>다시 시작 점수</p>
-          <strong>+{stats.todayStatGain.recovery}</strong>
+          <p>획득 SGP</p>
+          <strong>+{todaySgpGainScore}</strong>
+        </article>
+        <article>
+          <p>계정 레벨</p>
+          <strong>LV.{stats.accountLevel}</strong>
+        </article>
+        <article>
+          <p>캐릭터 랭크</p>
+          <strong>{stats.characterRank.rank}</strong>
+          <span>{characterTotalScore}</span>
         </article>
       </div>
 

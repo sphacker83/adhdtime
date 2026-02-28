@@ -13,12 +13,9 @@ import {
 import { appendEvent, createEvent } from "@/features/mvp/lib/events";
 import { computeMvpKpis } from "@/features/mvp/lib/kpi";
 import {
+  applyCharacterRankPromotion,
   applyMissionCompletionReward,
-  applyRecoveryReward,
-  createNoRewardOutcome,
-  DAILY_REWARD_TASK_LIMIT,
-  evaluateQuestRewardGate,
-  type RewardGateReason
+  applyRecoveryReward
 } from "@/features/mvp/lib/reward";
 import {
   canShowNotification,
@@ -90,8 +87,8 @@ import {
   MIN_MISSION_EST_MINUTES,
   MIN_TASK_TOTAL_MINUTES,
   type AppEvent,
-  type Mission,
   type EventSource,
+  type Mission,
   type Task,
   type TimerSession
 } from "@/features/mvp/types/domain";
@@ -111,6 +108,7 @@ const RISKY_INPUT_PATTERN = /(자해|죽고\s?싶|폭탄|불법|마약|살인|�
 const DEFAULT_TASK_TOTAL_MINUTES = 60;
 const ROLLING_TIP_INTERVAL_MS = 5000;
 const TOAST_AUTO_DISMISS_MS = 3600;
+const RANK_UP_CTA_PULSE_MS = 900;
 const RADAR_LABEL_CENTER_PERCENT = 50;
 const RADAR_LABEL_RADIUS_PERCENT = 42;
 
@@ -131,17 +129,17 @@ const RECOVERY_FEEDBACK = {
   rescheduled: "괜찮아요. 내일로 다시 등록했어요. 바로 시작할 미션를 준비해뒀어요."
 } as const;
 
-function getRewardBlockedFeedback(reason: RewardGateReason): string {
-  if (reason === "daily_limit_reached") {
-    return `오늘 보상 한도(${DAILY_REWARD_TASK_LIMIT}퀘스트)에 도달해서 XP/스탯은 지급되지 않았어요.`;
-  }
+type RankBandKey = "F" | "E" | "D" | "C" | "B" | "A" | "S";
 
-  if (reason === "task_already_rewarded_today") {
-    return "오늘 이 퀘스트는 이미 보상을 받아서 XP/스탯은 지급되지 않았어요.";
-  }
-
-  return "XP/스탯 보상은 지급되지 않았어요.";
-}
+const RANK_BAND_PALETTE: Record<RankBandKey, { base: string; fill: string }> = {
+  F: { base: "#6b7280", fill: "rgba(107, 114, 128, 0.32)" },
+  E: { base: "#5567c9", fill: "rgba(85, 103, 201, 0.32)" },
+  D: { base: "#3f7fdd", fill: "rgba(63, 127, 221, 0.32)" },
+  C: { base: "#2e9c97", fill: "rgba(46, 156, 151, 0.32)" },
+  B: { base: "#2f9f59", fill: "rgba(47, 159, 89, 0.32)" },
+  A: { base: "#b7802f", fill: "rgba(183, 128, 47, 0.32)" },
+  S: { base: "#c24d3a", fill: "rgba(194, 77, 58, 0.32)" }
+};
 
 const DEFAULT_NOTIFICATION_CAPABILITY: NotificationCapability = {
   supported: false,
@@ -168,14 +166,57 @@ const SYNC_STATUS_LABEL: Record<ExternalSyncJobStatus, string> = {
 
 type QuestSuggestion = Pick<
   ReturnType<typeof rankLocalPresetCandidates>[number],
-  "id" | "title" | "rerankConfidence" | "routeConfidence"
+  "id" | "title" | "rerankConfidence" | "routeConfidence" | "estimatedTimeMin"
 >;
+type RankedPresetCandidate = ReturnType<typeof rankLocalPresetCandidates>[number];
+
+const QUEST_SUGGESTION_LIMIT = 5;
+const QUEST_SIMILARITY_FOCUS_COUNT = 3;
+const QUEST_ROUTE_FOCUS_COUNT = 2;
+const QUEST_CANDIDATE_POOL_SIZE = 20;
 
 type SubmitTaskResult = {
   ok: boolean;
   reason: string;
   message: string;
 };
+
+type RewardOutcomeLike =
+  | ReturnType<typeof applyMissionCompletionReward>
+  | ReturnType<typeof applyRecoveryReward>;
+
+type RankPromotionEntry = {
+  statKey: string;
+  promotionCount: number;
+  fromRank?: string;
+  toRank?: string;
+};
+
+type RewardOutcomeCompat = RewardOutcomeLike;
+type MissionCompletionRewardParams = Parameters<typeof applyMissionCompletionReward>[0] & {
+  questCompleted?: boolean;
+  questMissionCount?: number;
+};
+
+function resolveQuestCompletionBonusApplied(reward: RewardOutcomeCompat, questCompleted: boolean): boolean {
+  const withBonus = reward as RewardOutcomeCompat & {
+    questCompletionBonusApplied?: unknown;
+    questCompletedBonusApplied?: unknown;
+    questCompletionBonusGranted?: unknown;
+  };
+
+  if (typeof withBonus.questCompletionBonusApplied === "boolean") {
+    return withBonus.questCompletionBonusApplied;
+  }
+  if (typeof withBonus.questCompletedBonusApplied === "boolean") {
+    return withBonus.questCompletedBonusApplied;
+  }
+  if (typeof withBonus.questCompletionBonusGranted === "boolean") {
+    return withBonus.questCompletionBonusGranted;
+  }
+
+  return questCompleted;
+}
 
 function deriveNotificationState(capability: NotificationCapability): NotificationPermissionState {
   if (!capability.supported || !capability.secureContext) {
@@ -242,6 +283,247 @@ function clampTaskTotalMinutes(totalMinutes: number): number {
   return Math.min(MAX_TASK_TOTAL_MINUTES, Math.max(MIN_TASK_TOTAL_MINUTES, Math.floor(totalMinutes)));
 }
 
+function roundTo(value: number, digits: number): number {
+  const factor = 10 ** digits;
+  return Math.round(value * factor) / factor;
+}
+
+function clampDisplayScore(value: number): number {
+  if (!Number.isFinite(value)) {
+    return 0;
+  }
+
+  return Math.max(0, Math.min(99, Math.round(value)));
+}
+
+function resolveDisplayScore(value: unknown): number {
+  if (!value || typeof value !== "object") {
+    return 0;
+  }
+
+  const withDisplayScore = value as { minScoreInBand?: unknown; displayScore?: unknown; progress?: unknown };
+  if (typeof withDisplayScore.minScoreInBand === "number" && Number.isFinite(withDisplayScore.minScoreInBand)) {
+    return clampDisplayScore(withDisplayScore.minScoreInBand);
+  }
+
+  if (typeof withDisplayScore.displayScore === "number" && Number.isFinite(withDisplayScore.displayScore)) {
+    return clampDisplayScore(withDisplayScore.displayScore);
+  }
+
+  if (typeof withDisplayScore.progress === "number" && Number.isFinite(withDisplayScore.progress)) {
+    return clampDisplayScore(withDisplayScore.progress);
+  }
+
+  return 0;
+}
+
+function resolveTotalScore(value: unknown): number {
+  if (!value || typeof value !== "object") {
+    return 0;
+  }
+
+  const withTotalScore = value as { totalScore?: unknown };
+  if (typeof withTotalScore.totalScore === "number" && Number.isFinite(withTotalScore.totalScore)) {
+    return Math.max(0, Math.floor(withTotalScore.totalScore));
+  }
+
+  return 0;
+}
+
+function resolveCharacterTotalScoreFromStatRanks(statRanks: RewardOutcomeLike["nextStats"]["statRanks"]): number {
+  const statScores = Object.values(statRanks).map((rankState) => resolveTotalScore(rankState));
+  if (statScores.length === 0) {
+    return 0;
+  }
+
+  return Math.min(...statScores);
+}
+
+function resolveRankBand(rank: string): RankBandKey {
+  const safe = rank.trim().toUpperCase();
+  if (safe.startsWith("S")) {
+    return "S";
+  }
+  if (safe.startsWith("A")) {
+    return "A";
+  }
+  if (safe.startsWith("B")) {
+    return "B";
+  }
+  if (safe.startsWith("C")) {
+    return "C";
+  }
+  if (safe.startsWith("D")) {
+    return "D";
+  }
+  if (safe.startsWith("E")) {
+    return "E";
+  }
+  return "F";
+}
+
+function resolveCharacterBandIndex(value: unknown): number {
+  if (!value || typeof value !== "object") {
+    return 0;
+  }
+
+  const withBandIndex = value as { bandIndex?: unknown };
+  if (typeof withBandIndex.bandIndex === "number" && Number.isFinite(withBandIndex.bandIndex)) {
+    return Math.max(0, Math.floor(withBandIndex.bandIndex));
+  }
+
+  return 0;
+}
+
+function resolveRankPalette(rank: string): { base: string; fill: string } {
+  return RANK_BAND_PALETTE[resolveRankBand(rank)];
+}
+
+function resolveRewardSgpGain(reward: RewardOutcomeCompat): number {
+  if (typeof reward.sgpGain === "number" && Number.isFinite(reward.sgpGain)) {
+    return roundTo(Math.max(0, reward.sgpGain), 2);
+  }
+
+  if (!reward.sgpGainByStat) {
+    return 0;
+  }
+
+  const total = Object.values(reward.sgpGainByStat).reduce((sum, amount) => {
+    return sum + (Number.isFinite(amount) ? amount : 0);
+  }, 0);
+  return roundTo(Math.max(0, total), 2);
+}
+
+function extractRankPromotions(reward: RewardOutcomeCompat): RankPromotionEntry[] {
+  if (Array.isArray(reward.rankPromotions) && reward.rankPromotions.length > 0) {
+    const parsed = reward.rankPromotions.map((promotion): RankPromotionEntry => ({
+      statKey: promotion.statKey,
+      promotionCount: Number.isFinite(promotion.promotedCount)
+        ? Math.max(1, Math.floor(promotion.promotedCount))
+        : 1,
+      fromRank: promotion.fromRank,
+      toRank: promotion.toRank
+    }));
+
+    if (parsed.length > 0) {
+      return parsed;
+    }
+  }
+
+  if (Array.isArray(reward.promotedStats) && reward.promotedStats.length > 0) {
+    return reward.promotedStats.map((statKey) => ({
+      statKey,
+      promotionCount: 1
+    }));
+  }
+
+  return [];
+}
+
+function compareSimilarityFocusedCandidates(a: RankedPresetCandidate, b: RankedPresetCandidate): number {
+  if (b.rerankConfidence !== a.rerankConfidence) {
+    return b.rerankConfidence - a.rerankConfidence;
+  }
+
+  const aCommonHighScore = Math.min(a.rerankConfidence, a.routeConfidence);
+  const bCommonHighScore = Math.min(b.rerankConfidence, b.routeConfidence);
+  if (bCommonHighScore !== aCommonHighScore) {
+    return bCommonHighScore - aCommonHighScore;
+  }
+
+  if (b.routeConfidence !== a.routeConfidence) {
+    return b.routeConfidence - a.routeConfidence;
+  }
+
+  return 0;
+}
+
+function compareRouteFocusedCandidates(a: RankedPresetCandidate, b: RankedPresetCandidate): number {
+  if (b.routeConfidence !== a.routeConfidence) {
+    return b.routeConfidence - a.routeConfidence;
+  }
+
+  const aCommonHighScore = Math.min(a.rerankConfidence, a.routeConfidence);
+  const bCommonHighScore = Math.min(b.rerankConfidence, b.routeConfidence);
+  if (bCommonHighScore !== aCommonHighScore) {
+    return bCommonHighScore - aCommonHighScore;
+  }
+
+  if (b.rerankConfidence !== a.rerankConfidence) {
+    return b.rerankConfidence - a.rerankConfidence;
+  }
+
+  return 0;
+}
+
+function mapCandidateToSuggestion(candidate: RankedPresetCandidate): QuestSuggestion {
+  return {
+    id: candidate.id,
+    title: candidate.title,
+    rerankConfidence: candidate.rerankConfidence,
+    routeConfidence: candidate.routeConfidence,
+    estimatedTimeMin: candidate.estimatedTimeMin
+  };
+}
+
+function appendUniqueCandidates(
+  target: RankedPresetCandidate[],
+  source: RankedPresetCandidate[],
+  usedIds: Set<string>,
+  limit: number
+): void {
+  for (const candidate of source) {
+    if (target.length >= QUEST_SUGGESTION_LIMIT || limit <= 0) {
+      break;
+    }
+
+    if (usedIds.has(candidate.id)) {
+      continue;
+    }
+
+    target.push(candidate);
+    usedIds.add(candidate.id);
+
+    if (target.length >= QUEST_SUGGESTION_LIMIT) {
+      break;
+    }
+
+    limit -= 1;
+  }
+}
+
+function composeQuestSuggestions(rankedCandidates: RankedPresetCandidate[]): QuestSuggestion[] {
+  if (rankedCandidates.length === 0) {
+    return [];
+  }
+
+  const selectedCandidates: RankedPresetCandidate[] = [];
+  const usedIds = new Set<string>();
+
+  appendUniqueCandidates(
+    selectedCandidates,
+    [...rankedCandidates].sort(compareSimilarityFocusedCandidates),
+    usedIds,
+    QUEST_SIMILARITY_FOCUS_COUNT
+  );
+
+  appendUniqueCandidates(
+    selectedCandidates,
+    [...rankedCandidates].sort(compareRouteFocusedCandidates),
+    usedIds,
+    QUEST_ROUTE_FOCUS_COUNT
+  );
+
+  const remainingSlots = QUEST_SUGGESTION_LIMIT - selectedCandidates.length;
+  if (remainingSlots > 0) {
+    appendUniqueCandidates(selectedCandidates, rankedCandidates, usedIds, remainingSlots);
+  }
+
+  return selectedCandidates
+    .slice(0, QUEST_SUGGESTION_LIMIT)
+    .map(mapCandidateToSuggestion);
+}
+
 export function MvpDashboard() {
   const sessionIdRef = useRef(crypto.randomUUID());
   const {
@@ -301,6 +583,7 @@ export function MvpDashboard() {
   const [syncLastJobId, setSyncLastJobId] = useState<string | null>(null);
   const [syncConflict, setSyncConflict] = useState<ExternalSyncConflict | null>(null);
   const [syncMessage, setSyncMessage] = useState("동기화 대기 중");
+  const [isRankUpCtaHighlighted, setIsRankUpCtaHighlighted] = useState(false);
 
   const tickAccumulatorRef = useRef(createTimerElapsedAccumulator());
   const sttRecognitionRef = useRef<SpeechRecognitionLike | null>(null);
@@ -349,8 +632,19 @@ export function MvpDashboard() {
     [coreState]
   );
 
-  const xpProgressPercent = getXpProgressPercent(stats);
+  const axpProgressPercent = getXpProgressPercent(stats);
   const dailyProgressPercent = Math.max(0, Math.min(100, completionRate));
+  const todaySgpGainScore = Math.max(0, Math.round(stats.todaySgpGain));
+  const characterTotalScore = resolveCharacterTotalScoreFromStatRanks(stats.statRanks);
+  const characterRankPalette = resolveRankPalette(stats.characterRank.rank);
+  const characterRankPromotionPreview = useMemo(
+    () => applyCharacterRankPromotion({ stats }),
+    [stats]
+  );
+  const canPromoteCharacterRank = characterRankPromotionPreview.promoted;
+  const pendingCharacterPromotionCount = canPromoteCharacterRank
+    ? characterRankPromotionPreview.pendingPromotionCount + 1
+    : 0;
   const dailyProgressRingStyle = {
     background: `conic-gradient(#4a88d4 0 ${dailyProgressPercent}%, #dbe5f2 ${dailyProgressPercent}% 100%)`
   };
@@ -358,8 +652,8 @@ export function MvpDashboard() {
   const rollingTip = ROLLING_TIPS[rollingTipIndex % ROLLING_TIPS.length];
 
   const radar = useMemo(
-    () => buildRadarShape(stats),
-    [stats]
+    () => buildRadarShape(stats.statRanks),
+    [stats.statRanks]
   );
   const notificationState = deriveNotificationState(notificationCapability);
   const notificationFallbackText = getNotificationFallbackText(notificationState);
@@ -372,12 +666,8 @@ export function MvpDashboard() {
       return [];
     }
 
-    return rankLocalPresetCandidates(normalizedInput, 5).map((candidate) => ({
-      id: candidate.id,
-      title: candidate.title,
-      rerankConfidence: candidate.rerankConfidence,
-      routeConfidence: candidate.routeConfidence
-    }));
+    const rankedCandidates = rankLocalPresetCandidates(normalizedInput, QUEST_CANDIDATE_POOL_SIZE);
+    return composeQuestSuggestions(rankedCandidates);
   }, [taskInput]);
 
   const handleTaskInputChange = (value: string) => {
@@ -503,6 +793,20 @@ export function MvpDashboard() {
 
     return () => window.clearTimeout(dismissTimer);
   }, [toastMessage]);
+
+  useEffect(() => {
+    if (!canPromoteCharacterRank) {
+      setIsRankUpCtaHighlighted(false);
+      return;
+    }
+
+    setIsRankUpCtaHighlighted(true);
+    const pulseTimer = window.setInterval(() => {
+      setIsRankUpCtaHighlighted((prev) => !prev);
+    }, RANK_UP_CTA_PULSE_MS);
+
+    return () => window.clearInterval(pulseTimer);
+  }, [canPromoteCharacterRank]);
 
   useEffect(() => {
     if (!hydrated) {
@@ -832,6 +1136,95 @@ export function MvpDashboard() {
         })
       )
     );
+  };
+
+  const logRewardOutcomeEvents = (params: {
+    reward: RewardOutcomeLike;
+    rewardGranted: boolean;
+    taskId: string;
+    missionId?: string;
+    reason?: "mission_completion" | "remission" | "reschedule";
+    recoveryClickCount?: number;
+    previousCharacterRank: RewardOutcomeLike["nextStats"]["characterRank"];
+  }) => {
+    if (!params.rewardGranted) {
+      return;
+    }
+
+    const reward: RewardOutcomeCompat = params.reward;
+    const sgpGain = resolveRewardSgpGain(reward);
+    const commonMeta: NonNullable<AppEvent["meta"]> = {
+      axpGain: reward.axpGain,
+      sgpGain,
+      accountLevel: reward.nextStats.accountLevel,
+      ...(params.reason ? { reason: params.reason } : {}),
+      ...(typeof params.recoveryClickCount === "number"
+        ? { recoveryClickCount: params.recoveryClickCount }
+        : {})
+    };
+
+    logEvent({
+      eventName: "xp_gained",
+      source: "local",
+      taskId: params.taskId,
+      missionId: params.missionId,
+      meta: commonMeta
+    });
+
+    if (reward.accountLevelUps > 0) {
+      logEvent({
+        eventName: "level_up",
+        source: "local",
+        taskId: params.taskId,
+        missionId: params.missionId,
+        meta: {
+          ...commonMeta,
+          accountLevelUps: reward.accountLevelUps
+        }
+      });
+    }
+
+    const rankPromotions = extractRankPromotions(reward);
+    rankPromotions.forEach((promotion) => {
+      logEvent({
+        eventName: "rank_promoted",
+        source: "local",
+        taskId: params.taskId,
+        missionId: params.missionId,
+        meta: {
+          ...commonMeta,
+          statKey: promotion.statKey,
+          promotionCount: promotion.promotionCount,
+          ...(promotion.fromRank ? { previousRank: promotion.fromRank } : {}),
+          ...(promotion.toRank ? { nextRank: promotion.toRank } : {})
+        }
+      });
+    });
+
+    const previousCharacterRank = reward.previousCharacterRank ?? params.previousCharacterRank;
+    const characterRankChanged = reward.characterRankChanged
+      || previousCharacterRank.rank !== reward.nextStats.characterRank.rank;
+
+    if (characterRankChanged) {
+      const previousBandIndex = resolveCharacterBandIndex(previousCharacterRank);
+      const nextBandIndex = resolveCharacterBandIndex(reward.nextStats.characterRank);
+
+      logEvent({
+        eventName: "character_rank_changed",
+        source: "local",
+        taskId: params.taskId,
+        missionId: params.missionId,
+        meta: {
+          ...commonMeta,
+          previousRank: previousCharacterRank.rank,
+          nextRank: reward.nextStats.characterRank.rank,
+          previousBandIndex,
+          nextBandIndex,
+          previousScoreInBand: resolveDisplayScore(previousCharacterRank),
+          nextScoreInBand: resolveDisplayScore(reward.nextStats.characterRank)
+        }
+      });
+    }
   };
 
   const pushLoopNotification = (params: {
@@ -1570,6 +1963,16 @@ export function MvpDashboard() {
     const totalSeconds = target.estMinutes * 60;
     const remaining = remainingSecondsByMission[missionId] ?? totalSeconds;
     const actualSeconds = Math.max(1, totalSeconds - remaining);
+    const questMissions = missions.filter((item) => item.taskId === target.taskId);
+    const activeQuestMissions = questMissions.filter((mission) => mission.status !== "archived");
+    const questMissionCount = Math.max(1, activeQuestMissions.length);
+    const questCompleted = questMissions.every((mission) =>
+      mission.id === missionId || isTaskClosedStatus(mission.status)
+    );
+    const hasAbandonedMission = activeQuestMissions.some((mission) => mission.status === "abandoned");
+    const cleanQuestCompletion = questCompleted
+      && !hasAbandonedMission
+      && activeQuestMissions.every((mission) => mission.id === missionId || mission.status === "done");
 
     const candidateMissions = orderMissions(
       missions.filter((item) => item.taskId === target.taskId && item.id !== target.id)
@@ -1600,21 +2003,17 @@ export function MvpDashboard() {
     setCurrentMissionId(nextMission?.id ?? null);
     tickAccumulatorRef.current = createTimerElapsedAccumulator();
 
-    const rewardGate = evaluateQuestRewardGate({
-      events,
-      taskId: target.taskId,
-      now: new Date(nowIso)
-    });
-    const reward = rewardGate.granted
-      ? applyMissionCompletionReward({
-          stats,
-          estMinutes: target.estMinutes,
-          actualSeconds
-        })
-      : createNoRewardOutcome({
-          stats,
-          incrementTodayCompleted: true
-        });
+    const previousCharacterRank = stats.characterRank;
+    const missionCompletionRewardParams: MissionCompletionRewardParams = {
+      stats,
+      estMinutes: target.estMinutes,
+      actualSeconds,
+      questCompleted,
+      questMissionCount,
+      cleanQuestCompletion
+    };
+    const reward = applyMissionCompletionReward(missionCompletionRewardParams);
+    const questCompletionBonusApplied = resolveQuestCompletionBonusApplied(reward, questCompleted);
 
     setStats(reward.nextStats);
 
@@ -1626,35 +2025,25 @@ export function MvpDashboard() {
       meta: {
         actualSeconds,
         estMinutes: target.estMinutes,
-        rewardGranted: rewardGate.granted,
-        rewardReason: rewardGate.reason
+        rewardGranted: true,
+        questCompleted,
+        cleanQuestCompletion,
+        questMissionCount,
+        questCompletionBonusApplied,
+        axpGain: reward.axpGain,
+        sgpGain: resolveRewardSgpGain(reward),
+        accountLevel: reward.nextStats.accountLevel
       }
     });
 
-    if (rewardGate.granted) {
-      logEvent({
-        eventName: "xp_gained",
-        source: "local",
-        taskId: target.taskId,
-        missionId,
-        meta: {
-          xpGain: reward.xpGain
-        }
-      });
-    }
-
-    if (rewardGate.granted && reward.levelUps > 0) {
-      logEvent({
-        eventName: "level_up",
-        source: "local",
-        taskId: target.taskId,
-        missionId,
-        meta: {
-          levelUps: reward.levelUps,
-          currentLevel: reward.nextStats.level
-        }
-      });
-    }
+    logRewardOutcomeEvents({
+      reward,
+      rewardGranted: true,
+      taskId: target.taskId,
+      missionId,
+      reason: "mission_completion",
+      previousCharacterRank
+    });
 
     const taskTitle = tasks.find((task) => task.id === target.taskId)?.title ?? "과업";
     pushLoopNotification({
@@ -1663,12 +2052,17 @@ export function MvpDashboard() {
       missionAction: target.action
     });
 
-    if (rewardGate.granted) {
-      setFeedback(`좋아요. +${reward.xpGain} XP 획득! ${nextMission ? "다음 미션로 바로 이어가요." : "오늘 루프를 완료했어요."}`);
-      return;
-    }
-
-    setFeedback(`미션은 완료했어요. ${getRewardBlockedFeedback(rewardGate.reason)} 완료 카운트는 반영됐어요.`);
+    const sgpGain = Math.max(0, Math.round(resolveRewardSgpGain(reward)));
+    const questBonusFeedback = questCompletionBonusApplied
+      ? "퀘스트 완료 보너스가 반영됐어요."
+      : questCompleted
+        ? "퀘스트는 완료했지만 완료 보너스는 적용되지 않았어요."
+        : "퀘스트 완료 보너스는 아직 없어요.";
+    setFeedback(
+      `좋아요. +${reward.axpGain} AXP · +${sgpGain} SGP 획득! ${questBonusFeedback} ${
+        nextMission ? "다음 미션로 바로 이어가요." : "오늘 루프를 완료했어요."
+      }`
+    );
   };
 
   const handleAdjustRunningMissionMinutes = (deltaMinutes: -5 | -1 | 1 | 5) => {
@@ -2040,14 +2434,8 @@ export function MvpDashboard() {
     upsertTimerSession(target.id, "ended", nowIso);
     tickAccumulatorRef.current = createTimerElapsedAccumulator();
 
-    const rewardGate = evaluateQuestRewardGate({
-      events,
-      taskId: target.taskId,
-      now: new Date(nowIso)
-    });
-    const recovery = rewardGate.granted
-      ? applyRecoveryReward(stats)
-      : createNoRewardOutcome({ stats });
+    const previousCharacterRank = stats.characterRank;
+    const recovery = applyRecoveryReward(stats);
     setStats(recovery.nextStats);
 
     setCurrentMissionId(newMissions[0].id);
@@ -2061,44 +2449,25 @@ export function MvpDashboard() {
       meta: {
         parentMissionId: target.id,
         newMissionCount: newMissions.length,
-        recoveryClickCount
+        recoveryClickCount,
+        axpGain: recovery.axpGain,
+        sgpGain: resolveRewardSgpGain(recovery),
+        accountLevel: recovery.nextStats.accountLevel,
+        rewardGranted: true
       }
     });
 
-    if (rewardGate.granted) {
-      logEvent({
-        eventName: "xp_gained",
-        source: "local",
-        taskId: target.taskId,
-        missionId: target.id,
-        meta: {
-          xpGain: recovery.xpGain,
-          reason: "remission",
-          recoveryClickCount
-        }
-      });
+    logRewardOutcomeEvents({
+      reward: recovery,
+      rewardGranted: true,
+      taskId: target.taskId,
+      missionId: target.id,
+      reason: "remission",
+      recoveryClickCount,
+      previousCharacterRank
+    });
 
-      if (recovery.levelUps > 0) {
-        logEvent({
-          eventName: "level_up",
-          source: "local",
-          taskId: target.taskId,
-          missionId: target.id,
-          meta: {
-            levelUps: recovery.levelUps,
-            currentLevel: recovery.nextStats.level,
-            reason: "remission",
-            recoveryClickCount
-          }
-        });
-      }
-    }
-
-    setFeedback(
-      rewardGate.granted
-        ? RECOVERY_FEEDBACK.remissioned
-        : `${RECOVERY_FEEDBACK.remissioned} ${getRewardBlockedFeedback(rewardGate.reason)}`
-    );
+    setFeedback(RECOVERY_FEEDBACK.remissioned);
   };
 
   const handleReschedule = (targetTaskId = activeTaskId ?? homeTask?.id ?? null) => {
@@ -2174,14 +2543,8 @@ export function MvpDashboard() {
     setCurrentMissionId(movedMissions[0]?.id ?? null);
     setActiveTaskId(targetTaskId);
 
-    const rewardGate = evaluateQuestRewardGate({
-      events,
-      taskId: targetTaskId,
-      now: new Date(nowIso)
-    });
-    const recovery = rewardGate.granted
-      ? applyRecoveryReward(stats)
-      : createNoRewardOutcome({ stats });
+    const previousCharacterRank = stats.characterRank;
+    const recovery = applyRecoveryReward(stats);
     setStats(recovery.nextStats);
 
     logEvent({
@@ -2191,7 +2554,11 @@ export function MvpDashboard() {
       meta: {
         rescheduledFor,
         movedMissionCount: movedMissions.length,
-        recoveryClickCount
+        recoveryClickCount,
+        axpGain: recovery.axpGain,
+        sgpGain: resolveRewardSgpGain(recovery),
+        accountLevel: recovery.nextStats.accountLevel,
+        rewardGranted: true
       }
     });
 
@@ -2202,42 +2569,24 @@ export function MvpDashboard() {
       meta: {
         rescheduledFor,
         movedMissionCount: movedMissions.length,
-        recoveryClickCount
+        recoveryClickCount,
+        axpGain: recovery.axpGain,
+        sgpGain: resolveRewardSgpGain(recovery),
+        accountLevel: recovery.nextStats.accountLevel,
+        rewardGranted: true
       }
     });
 
-    if (rewardGate.granted) {
-      logEvent({
-        eventName: "xp_gained",
-        source: "local",
-        taskId: targetTaskId,
-        meta: {
-          xpGain: recovery.xpGain,
-          reason: "reschedule",
-          recoveryClickCount
-        }
-      });
+    logRewardOutcomeEvents({
+      reward: recovery,
+      rewardGranted: true,
+      taskId: targetTaskId,
+      reason: "reschedule",
+      recoveryClickCount,
+      previousCharacterRank
+    });
 
-      if (recovery.levelUps > 0) {
-        logEvent({
-          eventName: "level_up",
-          source: "local",
-          taskId: targetTaskId,
-          meta: {
-            levelUps: recovery.levelUps,
-            currentLevel: recovery.nextStats.level,
-            reason: "reschedule",
-            recoveryClickCount
-          }
-        });
-      }
-    }
-
-    setFeedback(
-      rewardGate.granted
-        ? RECOVERY_FEEDBACK.rescheduled
-        : `${RECOVERY_FEEDBACK.rescheduled} ${getRewardBlockedFeedback(rewardGate.reason)}`
-    );
+    setFeedback(RECOVERY_FEEDBACK.rescheduled);
 
     const taskTitle = ownerTask.title;
     pushLoopNotification({
@@ -2274,6 +2623,37 @@ export function MvpDashboard() {
     taskMetaEditingFieldRef.current = null;
     taskMetaLastDistinctEditedFieldRef.current = null;
     setFeedback("초기화 완료. 새 루프를 시작해보세요.");
+  };
+
+  const handlePromoteCharacterRank = () => {
+    const promotion = applyCharacterRankPromotion({ stats });
+    if (!promotion.promoted) {
+      setFeedback("아직 승급 가능한 캐릭터 랭크가 없습니다. 스탯 누적을 조금 더 진행해보세요.");
+      return;
+    }
+
+    setStats(promotion.nextStats);
+    logEvent({
+      eventName: "character_rank_changed",
+      source: "user",
+      meta: {
+        reason: "manual_rank_up",
+        previousRank: promotion.previousCharacterRank.rank,
+        nextRank: promotion.nextCharacterRank.rank,
+        previousBandIndex: promotion.previousCharacterRank.bandIndex,
+        nextBandIndex: promotion.nextCharacterRank.bandIndex,
+        previousScoreInBand: resolveDisplayScore(promotion.previousCharacterRank),
+        nextScoreInBand: resolveDisplayScore(promotion.nextCharacterRank),
+        pendingPromotionCount: promotion.pendingPromotionCount
+      }
+    });
+
+    const pendingText = promotion.pendingPromotionCount > 0
+      ? ` (추가 대기 ${promotion.pendingPromotionCount}단계)`
+      : "";
+    setFeedback(
+      `랭크 업! 캐릭터 랭크가 ${promotion.previousCharacterRank.rank} → ${promotion.nextCharacterRank.rank}로 승급했어요.${pendingText}`
+    );
   };
 
   const homeMission = useMemo(
@@ -2328,7 +2708,9 @@ export function MvpDashboard() {
         <div className={styles.topBarMain}>
           <div className={styles.titleGroup}>
             <h1 className={styles.brandTitle}>ADHDTime</h1>
-            <p className={styles.levelSummary}>레벨 {stats.level} (LV.{stats.level}) 모험가</p>
+            <p className={styles.levelSummary}>
+              계정 LV.{stats.accountLevel} · 캐릭터 랭크 <span style={{ color: characterRankPalette.base }}>{stats.characterRank.rank}</span>
+            </p>
           </div>
           <div className={styles.progressGroup}>
             <p className={styles.progressTitle}>
@@ -2363,9 +2745,15 @@ export function MvpDashboard() {
           onTaskInputChange={handleTaskInputChange}
           questSuggestions={questSuggestions}
           selectedQuestSuggestionId={selectedQuestSuggestionId}
-          onSelectQuestSuggestion={(suggestionId, title) => {
+          onSelectQuestSuggestion={(suggestionId, title, estimatedTimeMin?: number) => {
             setTaskInput(title);
             setSelectedQuestSuggestionId(suggestionId);
+            const matchedEstimatedTimeMin = typeof estimatedTimeMin === "number" && Number.isFinite(estimatedTimeMin)
+              ? estimatedTimeMin
+              : questSuggestions.find((suggestion) => suggestion.id === suggestionId)?.estimatedTimeMin;
+            if (typeof matchedEstimatedTimeMin === "number" && Number.isFinite(matchedEstimatedTimeMin)) {
+              handleSetTaskTotalMinutesFromScheduled(matchedEstimatedTimeMin);
+            }
           }}
           isSttListening={isSttListening}
           onStartStt={handleStartStt}
@@ -2463,12 +2851,17 @@ export function MvpDashboard() {
               <h2 className={styles.statusCardTitle}>캐릭터 상태</h2>
               <div className={styles.levelBlock}>
                 <div className={styles.characterAvatar} aria-hidden="true">🧙</div>
-                <p className={styles.levelLabel}>레벨 {stats.level}</p>
-                <p className={styles.levelXp}>XP {stats.xp}</p>
+                <p className={styles.levelLabel}>계정 레벨 LV.{stats.accountLevel}</p>
+                <p className={styles.levelXp}>AXP {stats.axp}</p>
+                <p className={styles.levelLabel} style={{ color: characterRankPalette.base }}>
+                  캐릭터 랭크 {stats.characterRank.rank} · {characterTotalScore}
+                </p>
                 <div className={styles.xpTrack} aria-hidden="true">
-                  <span style={{ width: `${xpProgressPercent}%` }} />
+                  <span style={{ width: `${axpProgressPercent}%` }} />
                 </div>
-                <p className={styles.todaySummary}>오늘 완료 {stats.todayCompleted}개 · +{stats.todayXpGain} XP</p>
+                <p className={styles.todaySummary}>
+                  오늘 완료 {stats.todayCompleted}개 · +{stats.todayAxpGain} AXP · +{todaySgpGainScore} SGP
+                </p>
               </div>
 
               <div className={styles.radarBlock}>
@@ -2483,33 +2876,70 @@ export function MvpDashboard() {
                       const y = 60 + Math.sin(angle) * 48;
                       return <line key={STAT_META[index].key} x1={60} y1={60} x2={x} y2={y} className={styles.radarAxis} />;
                     })}
-                    <polygon points={radar.data} className={styles.radarData} />
+                    <polygon
+                      points={radar.data}
+                      className={styles.radarData}
+                      style={{ fill: characterRankPalette.fill, stroke: characterRankPalette.base }}
+                    />
                   </svg>
                   <div className={styles.radarLabelLayer} aria-hidden="true">
                     {STAT_META.map((item, index) => {
                       const angle = (-Math.PI / 2) + (index * Math.PI * 2) / STAT_META.length;
                       const x = RADAR_LABEL_CENTER_PERCENT + Math.cos(angle) * RADAR_LABEL_RADIUS_PERCENT;
                       const y = RADAR_LABEL_CENTER_PERCENT + Math.sin(angle) * RADAR_LABEL_RADIUS_PERCENT;
+                      const rankState = stats.statRanks[item.key];
+                      const statPalette = resolveRankPalette(rankState.rank);
                       return (
                         <div
                           key={item.key}
                           className={styles.radarStatBadge}
-                          style={{ left: `${x}%`, top: `${y}%` }}
+                          style={{ left: `${x}%`, top: `${y}%`, color: statPalette.base }}
                         >
                           <span>{item.label}</span>
-                          <strong>{stats[item.key]}</strong>
+                          <strong>{rankState.rank}</strong>
+                          <small>{resolveTotalScore(rankState)}</small>
                         </div>
                       );
                     })}
                   </div>
                 </div>
+                {canPromoteCharacterRank ? (
+                  <div style={{ display: "grid", justifyItems: "end", gap: 4, marginTop: 8, width: "100%" }}>
+                    <button
+                      type="button"
+                      className={styles.primaryButton}
+                      onClick={handlePromoteCharacterRank}
+                      style={{
+                        height: 36,
+                        paddingInline: 12,
+                        transform: isRankUpCtaHighlighted ? "translateY(-1px) scale(1.03)" : "translateY(0) scale(1)",
+                        boxShadow: isRankUpCtaHighlighted
+                          ? "0 8px 20px rgba(242, 114, 30, 0.4)"
+                          : "0 4px 12px rgba(242, 114, 30, 0.22)",
+                        transition: "transform 220ms ease, box-shadow 220ms ease"
+                      }}
+                    >
+                      [랭크UP!]
+                    </button>
+                    <p className={styles.helperText} style={{ margin: 0, textAlign: "right" }}>
+                      다음 랭크 {characterRankPromotionPreview.nextCharacterRank.rank}
+                      {pendingCharacterPromotionCount > 1 ? ` · 추가 대기 ${pendingCharacterPromotionCount - 1}단계` : ""}
+                    </p>
+                  </div>
+                ) : null}
                 <ul className={styles.statList} aria-hidden="true">
-                  {STAT_META.map((item) => (
-                    <li key={item.key}>
-                      <span>{item.label}</span>
-                      <strong>{stats[item.key]}</strong>
-                    </li>
-                  ))}
+                  {STAT_META.map((item) => {
+                    const rankState = stats.statRanks[item.key];
+                    const statPalette = resolveRankPalette(rankState.rank);
+                    return (
+                      <li key={item.key}>
+                        <span>{item.label}</span>
+                        <strong style={{ color: statPalette.base }}>
+                          {rankState.rank} · {resolveTotalScore(rankState)}
+                        </strong>
+                      </li>
+                    );
+                  })}
                 </ul>
               </div>
             </div>

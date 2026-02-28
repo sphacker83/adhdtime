@@ -3,6 +3,8 @@ export type MissionStatus = "todo" | "running" | "paused" | "done" | "abandoned"
 export type TimerSessionState = "running" | "paused" | "ended";
 export type EventSource = "local" | "ai" | "system" | "user";
 export type MissionIconKey = string;
+export type StatKey = "initiation" | "focus" | "breakdown" | "recovery" | "consistency";
+export type RankTier = string;
 
 export type EventName =
   | "task_created"
@@ -18,6 +20,8 @@ export type EventName =
   | "task_time_updated"
   | "xp_gained"
   | "level_up"
+  | "rank_promoted"
+  | "character_rank_changed"
   | "haptic_fired"
   | "safety_blocked";
 
@@ -67,21 +71,30 @@ export interface TimerSession {
   pauseCount: number;
 }
 
-export interface FiveStats {
-  initiation: number;
-  focus: number;
-  breakdown: number;
-  recovery: number;
-  consistency: number;
+export interface StatRankProgress {
+  rank: RankTier;
+  totalScore: number;
+  displayScore: number;
+  carry: number;
 }
 
-export interface StatsState extends FiveStats {
-  xp: number;
-  level: number;
+export type StatRankState = Record<StatKey, StatRankProgress>;
+
+export interface CharacterRankState {
+  rank: RankTier;
+  bandIndex: number;
+  minScoreInBand: number;
+}
+
+export interface StatsState {
+  axp: number;
+  accountLevel: number;
   todayDateKey: string;
-  todayXpGain: number;
+  todayAxpGain: number;
+  todaySgpGain: number;
   todayCompleted: number;
-  todayStatGain: FiveStats;
+  statRanks: StatRankState;
+  characterRank: CharacterRankState;
 }
 
 export interface UserSettings {

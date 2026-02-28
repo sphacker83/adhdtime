@@ -91,11 +91,15 @@ export function taskStatusLabel(status: Task["status"]): string {
 }
 
 export function getXpProgressPercent(stats: StatsState): number {
-  const maxXp = 100 + (stats.level - 1) * 45;
-  if (maxXp <= 0) {
+  const safeAccountLevel = Math.max(1, Math.floor(stats.accountLevel));
+  const levelOffset = safeAccountLevel - 1;
+  const requiredAxp = 80 + 22 * levelOffset + 4 * (levelOffset ** 2);
+  if (requiredAxp <= 0) {
     return 0;
   }
-  return Math.min(100, Math.round((stats.xp / maxXp) * 100));
+
+  const safeAxp = Math.max(0, Math.floor(stats.axp));
+  return Math.min(100, Math.round((safeAxp / requiredAxp) * 100));
 }
 
 export function formatPercentValue(value: number | null): string {

@@ -20,6 +20,7 @@ export interface QuestSuggestion {
   title: string;
   rerankConfidence: number;
   routeConfidence: number;
+  estimatedTimeMin: number;
 }
 
 export interface SubmitTaskResult {
@@ -38,7 +39,7 @@ export interface TaskInputSectionProps {
   onTaskInputChange: (value: string) => void;
   questSuggestions: QuestSuggestion[];
   selectedQuestSuggestionId: string | null;
-  onSelectQuestSuggestion: (suggestionId: string, title: string) => void;
+  onSelectQuestSuggestion: (suggestionId: string, title: string, estimatedTimeMin?: number) => void;
   isSttListening: boolean;
   onStartStt: () => void;
   onStopStt: () => void;
@@ -131,10 +132,10 @@ export function TaskInputSection(props: TaskInputSectionProps) {
   const scheduledForPickerRef = useRef<HTMLInputElement | null>(null);
   const dueAtPickerRef = useRef<HTMLInputElement | null>(null);
   const isEditMode = composerMode === "edit";
-  const composerTitle = isEditMode ? "퀘스트 수정" : "AI 퀘스트 생성";
+  const composerTitle = isEditMode ? "퀘스트 수정" : "퀘스트 생성";
   const composerActionLabel = isEditMode
     ? (isGenerating ? "수정 중..." : "퀘스트 수정")
-    : (isGenerating ? "생성 중..." : "AI 퀘스트 생성");
+    : (isGenerating ? "생성 중..." : "퀘스트 생성");
   const scheduledForButtonValue = formatDateButtonValue(taskScheduledForInput);
   const dueAtButtonValue = formatDateButtonValue(taskDueAtInput);
   const durationButtonValue = formatMinutesButtonValue(taskTotalMinutesInput);
@@ -247,42 +248,22 @@ export function TaskInputSection(props: TaskInputSectionProps) {
             <header className={styles.questModalHeader}>
               <div className={styles.questModalHeaderMain}>
                 <h3>{composerTitle}</h3>
+              </div>
+              <div className={styles.questModalHeaderActions}>
                 <span className={`${styles.capabilityBadge} ${styles[`capability_${sttSupportState}`]}`}>
                   STT {sttSupportState}
                 </span>
-              </div>
-              <button
-                type="button"
-                className={styles.subtleButton}
-                onClick={handleCloseComposer}
-                aria-label="퀘스트 모달 닫기"
-              >
-                ✕
-              </button>
-            </header>
-
-            <label className={styles.metaField} htmlFor="task-modal-name">
-              <span>퀘스트 이름</span>
-              <div className={styles.inputWithStt}>
-                <input
-                  id="task-modal-name"
-                  value={taskInput}
-                  onChange={(event) => onTaskInputChange(event.target.value)}
-                  placeholder="청소하기"
-                  className={`${styles.input} ${styles.inputWithSttPadding}`}
-                />
                 <button
                   type="button"
-                  className={isSttListening ? `${styles.sttIconButton} ${styles.sttIconButtonActive}` : styles.sttIconButton}
-                  onClick={isSttListening ? onStopStt : onStartStt}
-                  disabled={!sttCapability.canStartRecognition && !isSttListening}
-                  aria-label={isSttListening ? "음성 입력 중지" : "음성 입력 시작"}
-                  title={isSttListening ? "음성 입력 중지" : "음성 입력 시작"}
+                  className={styles.subtleButton}
+                  onClick={handleCloseComposer}
+                  aria-label="퀘스트 모달 닫기"
                 >
-                  <span aria-hidden="true">{isSttListening ? "■" : "🎙"}</span>
+                  ✕
                 </button>
               </div>
-            </label>
+            </header>
+
             {shouldShowQuestSuggestions ? (
               questSuggestions.length > 0 ? (
                 <div className={styles.questRecommendationList} role="list" aria-label="추천 퀘스트">
@@ -296,7 +277,13 @@ export function TaskInputSection(props: TaskInputSectionProps) {
                           : styles.questRecommendationItem
                       }
                       aria-pressed={recommendation.id === selectedQuestSuggestionId}
-                      onClick={() => onSelectQuestSuggestion(recommendation.id, recommendation.title)}
+                      onClick={() =>
+                        onSelectQuestSuggestion(
+                          recommendation.id,
+                          recommendation.title,
+                          recommendation.estimatedTimeMin
+                        )
+                      }
                     >
                       <span className={styles.questRecommendationTitle}>{recommendation.title}</span>
                       <span className={styles.questRecommendationMeta}>
@@ -335,7 +322,6 @@ export function TaskInputSection(props: TaskInputSectionProps) {
                   <span className={styles.questTimeLabelRow}>
                     <span className={styles.questTimeIcon} aria-hidden="true">🕒</span>
                     <span className={styles.questTimeTitle}>시작 예정</span>
-                    <span className={styles.questTimeSubLabel}>(StartAt)</span>
                   </span>
                   <strong className={styles.questTimeValue}>
                     <span className={styles.questTimeValuePrimary}>{scheduledForButtonValue.dateLabel}</span>
@@ -367,7 +353,6 @@ export function TaskInputSection(props: TaskInputSectionProps) {
                   <span className={styles.questTimeLabelRow}>
                     <span className={styles.questTimeIcon} aria-hidden="true">📅</span>
                     <span className={styles.questTimeTitle}>마감 기한</span>
-                    <span className={styles.questTimeSubLabel}>(DueAt)</span>
                   </span>
                   <strong className={styles.questTimeValue}>
                     <span className={styles.questTimeValuePrimary}>{dueAtButtonValue.dateLabel}</span>
@@ -393,7 +378,6 @@ export function TaskInputSection(props: TaskInputSectionProps) {
                   <span className={styles.questTimeLabelRow}>
                     <span className={styles.questTimeIcon} aria-hidden="true">⏳</span>
                     <span className={styles.questTimeTitle}>소요 시간</span>
-                    <span className={styles.questTimeSubLabel}>(EstimateMin)</span>
                   </span>
                   <strong className={`${styles.questTimeValue} ${styles.questTimeValueSingle}`}>
                     <span className={styles.questTimeValuePrimary}>{durationButtonValue}</span>
@@ -409,13 +393,36 @@ export function TaskInputSection(props: TaskInputSectionProps) {
               <button type="button" className={styles.taskChip} onClick={() => onAdjustTaskTotalMinutesFromScheduled(5)}>+5분</button>
             </div>
 
-            {taskMetaFeedback ? <p className={styles.errorText}>{taskMetaFeedback}</p> : null}
-            {modalFeedbackMessage ? <p className={styles.questComposerFeedback}>{modalFeedbackMessage}</p> : null}
+            <div className={styles.questTitleField}>
+              <div className={`${styles.questTitleInputWrap} ${styles.inputWithStt}`}>
+                <input
+                  id="task-modal-title"
+                  value={taskInput}
+                  onChange={(event) => onTaskInputChange(event.target.value)}
+                  placeholder="예: 설거지 15분 하기"
+                  aria-label="퀘스트 이름"
+                  className={`${styles.input} ${styles.questComposerInput} ${styles.inputWithSttPadding}`}
+                />
+                <button
+                  type="button"
+                  className={isSttListening ? `${styles.sttIconButton} ${styles.sttIconButtonActive}` : styles.sttIconButton}
+                  onClick={isSttListening ? onStopStt : onStartStt}
+                  disabled={!sttCapability.canStartRecognition && !isSttListening}
+                  aria-label={isSttListening ? "음성 입력 중지" : "음성 입력 시작"}
+                  title={isSttListening ? "음성 입력 중지" : "음성 입력 시작"}
+                >
+                  <span aria-hidden="true">{isSttListening ? "■" : "🎙"}</span>
+                </button>
+              </div>
+            </div>
 
-            <div className={styles.questModalFooter}>
+            {taskMetaFeedback ? <p className={styles.errorText}>{taskMetaFeedback}</p> : null}
+
+            <div className={`${styles.questModalFooter} ${styles.questComposerFooter}`}>
+              {modalFeedbackMessage ? <p className={styles.questComposerFeedback}>{modalFeedbackMessage}</p> : null}
               <button
                 type="button"
-                className={styles.primaryButton}
+                className={`${styles.primaryButton} ${styles.questComposerSubmitButton}`}
                 disabled={isGenerating}
                 onClick={() => {
                   void handleSubmitClick();

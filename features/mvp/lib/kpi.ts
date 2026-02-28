@@ -16,6 +16,8 @@ const REQUIRED_EVENT_NAMES: EventName[] = [
   "remission_requested",
   "xp_gained",
   "level_up",
+  "rank_promoted",
+  "character_rank_changed",
   "haptic_fired",
   "safety_blocked"
 ];

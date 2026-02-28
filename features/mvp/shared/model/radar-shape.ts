@@ -1,6 +1,6 @@
-import type { FiveStats } from "@/features/mvp/types/domain";
+import type { StatKey, StatRankState } from "@/features/mvp/types/domain";
 
-export const STAT_META: Array<{ key: keyof FiveStats; label: string }> = [
+export const STAT_META: Array<{ key: StatKey; label: string }> = [
   { key: "initiation", label: "시작력" },
   { key: "focus", label: "몰입력" },
   { key: "breakdown", label: "분해력" },
@@ -12,7 +12,32 @@ export function pointsToString(points: Array<[number, number]>): string {
   return points.map(([x, y]) => `${x},${y}`).join(" ");
 }
 
-export function buildRadarShape(stats: FiveStats): { data: string; grid: string[] } {
+function clampDisplayScore(value: number): number {
+  if (!Number.isFinite(value)) {
+    return 0;
+  }
+
+  return Math.max(0, Math.min(99, Math.round(value)));
+}
+
+function resolveDisplayScore(value: unknown): number {
+  if (!value || typeof value !== "object") {
+    return 0;
+  }
+
+  const withDisplayScore = value as { displayScore?: unknown; progress?: unknown };
+  if (typeof withDisplayScore.displayScore === "number" && Number.isFinite(withDisplayScore.displayScore)) {
+    return clampDisplayScore(withDisplayScore.displayScore);
+  }
+
+  if (typeof withDisplayScore.progress === "number" && Number.isFinite(withDisplayScore.progress)) {
+    return clampDisplayScore(withDisplayScore.progress);
+  }
+
+  return 0;
+}
+
+export function buildRadarShape(statRanks: StatRankState): { data: string; grid: string[] } {
   const center = 60;
   const radius = 48;
 
@@ -35,7 +60,8 @@ export function buildRadarShape(stats: FiveStats): { data: string; grid: string[
   const data = pointsToString(
     axes.map(([x, y], index) => {
       const key = STAT_META[index].key;
-      const ratio = Math.max(0, Math.min(1, stats[key] / 100));
+      const displayScore = resolveDisplayScore(statRanks[key]);
+      const ratio = displayScore / 99;
       return [
         center + (x - center) * ratio,
         center + (y - center) * ratio

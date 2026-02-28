@@ -2,13 +2,13 @@ import { describe, expect, it } from "vitest";
 import {
   STAT_META,
   buildRadarShape,
-  missionStatusLabel,
   formatClock,
   formatEventMeta,
   formatOptionalDateTime,
   formatPercentValue,
   formatTimeToStart,
   getXpProgressPercent,
+  missionStatusLabel,
   normalizeLoadedEvents,
   taskStatusLabel
 } from "@/features/mvp/shared";
@@ -37,32 +37,45 @@ describe("display and events model", () => {
   });
 
   it("computes xp progress and radar shape", () => {
-    expect(
-      getXpProgressPercent({
-        xp: 50,
-        level: 1,
-        todayDateKey: "2026-02-27",
-        todayXpGain: 0,
-        todayCompleted: 0,
-        todayStatGain: { initiation: 0, focus: 0, breakdown: 0, recovery: 0, consistency: 0 },
-        initiation: 10,
-        focus: 20,
-        breakdown: 30,
-        recovery: 40,
-        consistency: 50
-      })
-    ).toBe(50);
+    const statsFixture = {
+      axp: 50,
+      accountLevel: 1,
+      todayDateKey: "2026-02-27",
+      todayAxpGain: 0,
+      todaySgpGain: 0,
+      todayCompleted: 0,
+      statRanks: {
+        initiation: { rank: "F", displayScore: 10, progress: 80, mastery: 0 },
+        focus: { rank: "F", displayScore: 20, progress: 80, mastery: 0 },
+        breakdown: { rank: "F", displayScore: 30, progress: 80, mastery: 0 },
+        recovery: { rank: "F", displayScore: 40, progress: 80, mastery: 0 },
+        consistency: { rank: "F", displayScore: 50, progress: 80, mastery: 0 }
+      },
+      characterRank: {
+        rank: "F",
+        progress: 30,
+        displayScore: 30,
+        score: 0.3
+      }
+    } as unknown as Parameters<typeof getXpProgressPercent>[0];
+
+    expect(getXpProgressPercent(statsFixture)).toBe(63);
 
     const shape = buildRadarShape({
-      initiation: 10,
-      focus: 20,
-      breakdown: 30,
-      recovery: 40,
-      consistency: 50
-    });
+      initiation: { rank: "F", displayScore: 1, progress: 99, mastery: 0 },
+      focus: { rank: "E", displayScore: 20, progress: 10, mastery: 0 },
+      breakdown: { rank: "D", displayScore: 30, progress: 10, mastery: 0 },
+      recovery: { rank: "C", displayScore: 40, progress: 10, mastery: 0 },
+      consistency: { rank: "B", displayScore: 50, progress: 10, mastery: 0 }
+    } as unknown as Parameters<typeof buildRadarShape>[0]);
     expect(STAT_META).toHaveLength(5);
     expect(shape.grid).toHaveLength(4);
     expect(shape.data.length).toBeGreaterThan(0);
+
+    const firstPoint = shape.data.split(" ")[0];
+    const firstY = Number(firstPoint?.split(",")[1]);
+    expect(firstY).toBeGreaterThan(59);
+    expect(firstY).toBeLessThan(59.8);
   });
 
   it("normalizes loaded events and event meta text", () => {

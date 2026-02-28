@@ -1,17 +1,47 @@
-import type { AppEvent, FiveStats, StatsState } from "@/features/mvp/types/domain";
+import type {
+  AppEvent,
+  CharacterRankState,
+  RankTier,
+  StatKey,
+  StatRankState,
+  StatsState
+} from "@/features/mvp/types/domain";
+import {
+  applyQuestScoreGain,
+  computeCharacterRank,
+  createInitialStatRanks,
+  rankByBandIndex,
+  STAT_KEYS,
+  syncDisplayScores
+} from "@/features/mvp/lib/rank";
 
-const STAT_MIN = 0;
-const STAT_MAX = 100;
 export const DAILY_REWARD_RESET_HOUR = 4;
 export const DAILY_REWARD_TASK_LIMIT = 5;
 
-const EMPTY_STAT_GAIN: FiveStats = {
+const EMPTY_SGP_GAIN_BY_STAT: Record<StatKey, number> = {
   initiation: 0,
   focus: 0,
   breakdown: 0,
   recovery: 0,
   consistency: 0
 };
+
+const STAT_SCORE_WEIGHTS: Record<StatKey, { weightNum: number; weightDen: number }> = {
+  initiation: { weightNum: 110, weightDen: 100 },
+  focus: { weightNum: 125, weightDen: 100 },
+  breakdown: { weightNum: 105, weightDen: 100 },
+  recovery: { weightNum: 100, weightDen: 100 },
+  consistency: { weightNum: 110, weightDen: 100 }
+};
+
+const MISSION_SGP_SCALE_DEN = 8;
+const MISSION_SGP_UNITS = 1;
+const QUEST_COMPLETION_BONUS_UNITS_PER_MISSION = 1;
+const CLEAN_QUEST_RECOVERY_BONUS_DIVISOR = 2;
+
+const RECOVERY_REWARD_SGP_SCALE_DEN = 8;
+const RECOVERY_REWARD_BASE_UNITS = 1;
+const RECOVERY_REWARD_RECOVERY_UNITS = 4;
 
 function toLocalDateKey(date: Date): string {
   const year = date.getFullYear();
@@ -20,8 +50,243 @@ function toLocalDateKey(date: Date): string {
   return `${year}-${month}-${day}`;
 }
 
-function clampStat(value: number): number {
-  return Math.max(STAT_MIN, Math.min(STAT_MAX, Math.round(value)));
+function toNonNegativeInteger(value: number): number {
+  if (!Number.isFinite(value)) {
+    return 0;
+  }
+
+  return Math.max(0, Math.floor(value));
+}
+
+function createEmptySgpGainByStat(): Record<StatKey, number> {
+  return {
+    ...EMPTY_SGP_GAIN_BY_STAT
+  };
+}
+
+function normalizeQuestGainByStat(questGainByStat: Record<StatKey, number>): Record<StatKey, number> {
+  return {
+    initiation: toNonNegativeInteger(questGainByStat.initiation),
+    focus: toNonNegativeInteger(questGainByStat.focus),
+    breakdown: toNonNegativeInteger(questGainByStat.breakdown),
+    recovery: toNonNegativeInteger(questGainByStat.recovery),
+    consistency: toNonNegativeInteger(questGainByStat.consistency)
+  };
+}
+
+function sumSgpGainByStat(sgpGainByStat: Record<StatKey, number>): number {
+  return STAT_KEYS.reduce((sum, statKey) => sum + sgpGainByStat[statKey], 0);
+}
+
+function resolveCharacterRankSnapshot(
+  statRanks: StatRankState,
+  confirmedBandIndex: number
+): { nextStatRanks: StatRankState; characterRank: CharacterRankState } {
+  const safeBandIndex = toNonNegativeInteger(confirmedBandIndex);
+  const nextStatRanks = syncDisplayScores(statRanks, safeBandIndex);
+  const minScoreInBand = Math.min(
+    ...STAT_KEYS.map((statKey) => toNonNegativeInteger(nextStatRanks[statKey].displayScore))
+  );
+
+  return {
+    nextStatRanks,
+    characterRank: {
+      rank: rankByBandIndex(safeBandIndex),
+      bandIndex: safeBandIndex,
+      minScoreInBand
+    }
+  };
+}
+
+function requiredAxpForAccountLevel(level: number): number {
+  const safeLevel = Math.max(1, Math.floor(level));
+  const baseLevel = safeLevel - 1;
+
+  return 80 + (22 * baseLevel) + (4 * baseLevel * baseLevel);
+}
+
+function resolveAccountProgress(stats: StatsState, axpGain: number): {
+  axp: number;
+  accountLevel: number;
+  accountLevelUps: number;
+} {
+  let nextAxp = toNonNegativeInteger(stats.axp) + toNonNegativeInteger(axpGain);
+  let nextAccountLevel = Math.max(1, toNonNegativeInteger(stats.accountLevel));
+  let accountLevelUps = 0;
+
+  while (nextAxp >= requiredAxpForAccountLevel(nextAccountLevel)) {
+    nextAxp -= requiredAxpForAccountLevel(nextAccountLevel);
+    nextAccountLevel += 1;
+    accountLevelUps += 1;
+  }
+
+  return {
+    axp: nextAxp,
+    accountLevel: nextAccountLevel,
+    accountLevelUps
+  };
+}
+
+function computeAxpScalePercent(characterBandIndex: number): number {
+  const safeBandIndex = toNonNegativeInteger(characterBandIndex);
+  const penaltySteps = Math.max(0, safeBandIndex - 3);
+  return Math.max(40, 100 - (3 * penaltySteps));
+}
+
+function computeMissionAxpGain(estMinutes: number, actualSeconds: number, characterBandIndex: number): number {
+  const safeEstMinutes = Math.max(1, toNonNegativeInteger(estMinutes));
+  const safeActualSeconds = Math.max(1, toNonNegativeInteger(actualSeconds));
+  const targetSeconds = Math.max(60, safeEstMinutes * 60);
+  const paceBonus = safeActualSeconds <= targetSeconds ? 5 : 2;
+  const base = 24 + safeEstMinutes + paceBonus;
+  const scalePercent = computeAxpScalePercent(characterBandIndex);
+
+  return Math.floor((base * scalePercent) / 100);
+}
+
+function computeRecoveryAxpGain(characterBandIndex: number): number {
+  const base = 18;
+  const scalePercent = computeAxpScalePercent(characterBandIndex);
+  return Math.floor((base * scalePercent) / 100);
+}
+
+function resolveMissionSgpGainByStat(params: {
+  questCompleted?: boolean;
+  questMissionCount?: number;
+  cleanQuestCompletion?: boolean;
+}): { questGainScaleDen: number; questGainByStat: Record<StatKey, number> } {
+  const questCompleted = params.questCompleted ?? false;
+  const questMissionCount = Math.max(1, toNonNegativeInteger(params.questMissionCount ?? 1));
+  const cleanQuestCompletion = params.cleanQuestCompletion ?? false;
+
+  const questCompletionBonusUnits = questCompleted
+    ? questMissionCount * QUEST_COMPLETION_BONUS_UNITS_PER_MISSION
+    : 0;
+  const cleanQuestRecoveryBonusUnits = questCompleted && cleanQuestCompletion
+    ? Math.max(1, Math.ceil(questMissionCount / CLEAN_QUEST_RECOVERY_BONUS_DIVISOR))
+    : 0;
+  const baseUnits = MISSION_SGP_UNITS + questCompletionBonusUnits;
+
+  return {
+    questGainScaleDen: MISSION_SGP_SCALE_DEN,
+    questGainByStat: {
+      initiation: baseUnits,
+      focus: baseUnits,
+      breakdown: baseUnits,
+      recovery: baseUnits + cleanQuestRecoveryBonusUnits,
+      consistency: baseUnits
+    }
+  };
+}
+
+function resolveStatRankProgress(
+  statRanks: StatRankState,
+  questGainByStat: Record<StatKey, number>,
+  questGainScaleDen: number
+): {
+  nextStatRanks: StatRankState;
+  sgpGainByStat: Record<StatKey, number>;
+  rankPromotions: RankPromotion[];
+} {
+  const nextStatRanks: StatRankState = {
+    initiation: { ...statRanks.initiation },
+    focus: { ...statRanks.focus },
+    breakdown: { ...statRanks.breakdown },
+    recovery: { ...statRanks.recovery },
+    consistency: { ...statRanks.consistency }
+  };
+  const sgpGainByStat = createEmptySgpGainByStat();
+  const rankPromotions: RankPromotion[] = [];
+  const safeQuestGainScaleDen = Math.max(1, toNonNegativeInteger(questGainScaleDen));
+
+  STAT_KEYS.forEach((statKey) => {
+    const current = statRanks[statKey];
+    const questGainCount = toNonNegativeInteger(questGainByStat[statKey]);
+    const { weightNum, weightDen } = STAT_SCORE_WEIGHTS[statKey];
+
+    if (questGainCount <= 0) {
+      sgpGainByStat[statKey] = 0;
+      return;
+    }
+
+    const result = applyQuestScoreGain(
+      current,
+      weightNum * questGainCount,
+      weightDen * safeQuestGainScaleDen
+    );
+
+    nextStatRanks[statKey] = result.next;
+    sgpGainByStat[statKey] = result.gainedScore;
+
+    if (result.promotedCount > 0) {
+      rankPromotions.push({
+        statKey,
+        fromRank: current.rank,
+        toRank: result.next.rank,
+        promotedCount: result.promotedCount
+      });
+    }
+  });
+
+  return {
+    nextStatRanks,
+    sgpGainByStat,
+    rankPromotions
+  };
+}
+
+function buildRewardOutcome(params: {
+  stats: StatsState;
+  axpGain: number;
+  questGainByStat: Record<StatKey, number>;
+  questGainScaleDen?: number;
+  todayCompletedIncrement?: number;
+  today?: string;
+}): RewardOutcome {
+  const safeStats = rollDailyStats(params.stats, params.today);
+  const safeAxpGain = toNonNegativeInteger(params.axpGain);
+  const safeQuestGainByStat = normalizeQuestGainByStat(params.questGainByStat);
+  const safeQuestGainScaleDen = Math.max(1, toNonNegativeInteger(params.questGainScaleDen ?? 1));
+  const todayCompletedIncrement = toNonNegativeInteger(params.todayCompletedIncrement ?? 0);
+
+  const { axp, accountLevel, accountLevelUps } = resolveAccountProgress(safeStats, safeAxpGain);
+  const {
+    characterRank: previousCharacterRank
+  } = resolveCharacterRankSnapshot(safeStats.statRanks, safeStats.characterRank.bandIndex);
+  const {
+    nextStatRanks: rawNextStatRanks,
+    sgpGainByStat,
+    rankPromotions
+  } = resolveStatRankProgress(safeStats.statRanks, safeQuestGainByStat, safeQuestGainScaleDen);
+  const {
+    nextStatRanks,
+    characterRank: nextCharacterRank
+  } = resolveCharacterRankSnapshot(rawNextStatRanks, previousCharacterRank.bandIndex);
+  const promotedStats = rankPromotions.map((promotion) => promotion.statKey);
+  const sgpGain = sumSgpGainByStat(sgpGainByStat);
+
+  return {
+    nextStats: {
+      ...safeStats,
+      axp,
+      accountLevel,
+      todayAxpGain: safeStats.todayAxpGain + safeAxpGain,
+      todaySgpGain: safeStats.todaySgpGain + sgpGain,
+      todayCompleted: safeStats.todayCompleted + todayCompletedIncrement,
+      statRanks: nextStatRanks,
+      characterRank: nextCharacterRank
+    },
+    axpGain: safeAxpGain,
+    accountLevelUps,
+    sgpGainByStat,
+    rankPromotions,
+    characterRankChanged: false,
+    previousCharacterRank,
+    sgpGain,
+    promotedStats,
+    xpGain: safeAxpGain,
+    levelUps: accountLevelUps
+  };
 }
 
 export function getDateKey(date = new Date()): string {
@@ -99,24 +364,18 @@ export function evaluateQuestRewardGate(params: {
 }
 
 export function createInitialStats(today = getDateKey()): StatsState {
+  const statRanks = createInitialStatRanks();
+  const characterRank = computeCharacterRank(statRanks);
+
   return {
-    initiation: 12,
-    focus: 12,
-    breakdown: 12,
-    recovery: 12,
-    consistency: 12,
-    xp: 0,
-    level: 1,
+    axp: 0,
+    accountLevel: 1,
     todayDateKey: today,
-    todayXpGain: 0,
+    todayAxpGain: 0,
+    todaySgpGain: 0,
     todayCompleted: 0,
-    todayStatGain: {
-      initiation: 0,
-      focus: 0,
-      breakdown: 0,
-      recovery: 0,
-      consistency: 0
-    }
+    statRanks: syncDisplayScores(statRanks, characterRank.bandIndex),
+    characterRank
   };
 }
 
@@ -128,37 +387,42 @@ export function rollDailyStats(stats: StatsState, today = getDateKey()): StatsSt
   return {
     ...stats,
     todayDateKey: today,
-    todayXpGain: 0,
-    todayCompleted: 0,
-    todayStatGain: {
-      initiation: 0,
-      focus: 0,
-      breakdown: 0,
-      recovery: 0,
-      consistency: 0
-    }
+    todayAxpGain: 0,
+    todaySgpGain: 0,
+    todayCompleted: 0
   };
 }
 
-function requiredXpForLevel(level: number): number {
-  return 100 + (level - 1) * 45;
-}
-
-function addFiveStats(current: FiveStats, delta: FiveStats): FiveStats {
-  return {
-    initiation: clampStat(current.initiation + delta.initiation),
-    focus: clampStat(current.focus + delta.focus),
-    breakdown: clampStat(current.breakdown + delta.breakdown),
-    recovery: clampStat(current.recovery + delta.recovery),
-    consistency: clampStat(current.consistency + delta.consistency)
-  };
+export interface RankPromotion {
+  statKey: StatKey;
+  fromRank: RankTier;
+  toRank: RankTier;
+  promotedCount: number;
 }
 
 export interface RewardOutcome {
+  // Core reward contract
   nextStats: StatsState;
+  axpGain: number;
+  accountLevelUps: number;
+  sgpGainByStat: Record<StatKey, number>;
+  rankPromotions: RankPromotion[];
+  characterRankChanged: boolean;
+  previousCharacterRank: CharacterRankState;
+
+  // Compatibility aliases used by existing UI
+  sgpGain: number;
+  promotedStats: StatKey[];
   xpGain: number;
   levelUps: number;
-  statGain: FiveStats;
+}
+
+export interface CharacterRankPromotionOutcome {
+  nextStats: StatsState;
+  promoted: boolean;
+  previousCharacterRank: CharacterRankState;
+  nextCharacterRank: CharacterRankState;
+  pendingPromotionCount: number;
 }
 
 export function createNoRewardOutcome(params: {
@@ -168,16 +432,54 @@ export function createNoRewardOutcome(params: {
 }): RewardOutcome {
   const safeStats = rollDailyStats(params.stats, params.today);
   const todayCompletedIncrement = params.incrementTodayCompleted ? 1 : 0;
+
   return {
-    xpGain: 0,
-    levelUps: 0,
-    statGain: {
-      ...EMPTY_STAT_GAIN
-    },
     nextStats: {
       ...safeStats,
       todayCompleted: safeStats.todayCompleted + todayCompletedIncrement
-    }
+    },
+    axpGain: 0,
+    accountLevelUps: 0,
+    sgpGainByStat: createEmptySgpGainByStat(),
+    rankPromotions: [],
+    characterRankChanged: false,
+    previousCharacterRank: {
+      ...safeStats.characterRank
+    },
+    sgpGain: 0,
+    promotedStats: [],
+    xpGain: 0,
+    levelUps: 0
+  };
+}
+
+export function applyCharacterRankPromotion(params: {
+  stats: StatsState;
+  today?: string;
+}): CharacterRankPromotionOutcome {
+  const safeStats = rollDailyStats(params.stats, params.today);
+  const {
+    nextStatRanks: currentStatRanks,
+    characterRank: previousCharacterRank
+  } = resolveCharacterRankSnapshot(safeStats.statRanks, safeStats.characterRank.bandIndex);
+  const maxPossibleBandIndex = computeCharacterRank(currentStatRanks).bandIndex;
+  const promoted = maxPossibleBandIndex > previousCharacterRank.bandIndex;
+  const promotedBandIndex = promoted ? previousCharacterRank.bandIndex + 1 : previousCharacterRank.bandIndex;
+  const {
+    nextStatRanks,
+    characterRank: nextCharacterRank
+  } = resolveCharacterRankSnapshot(currentStatRanks, promotedBandIndex);
+
+  return {
+    nextStats: {
+      ...safeStats,
+      statRanks: nextStatRanks,
+      characterRank: nextCharacterRank
+    },
+    promoted,
+    previousCharacterRank,
+    nextCharacterRank,
+    pendingPromotionCount: Math.max(0, maxPossibleBandIndex - promotedBandIndex)
   };
 }
 
@@ -185,96 +487,49 @@ export function applyMissionCompletionReward(params: {
   stats: StatsState;
   estMinutes: number;
   actualSeconds: number;
+  questCompleted?: boolean;
+  questMissionCount?: number;
+  cleanQuestCompletion?: boolean;
+  today?: string;
 }): RewardOutcome {
-  const safeStats = rollDailyStats(params.stats);
-  const targetSeconds = Math.max(60, Math.floor(params.estMinutes * 60));
-  const actualSeconds = Math.max(1, Math.floor(params.actualSeconds));
-  const paceBonus = actualSeconds <= targetSeconds ? 5 : 2;
-  const baseXp = 10 + Math.max(2, params.estMinutes * 2);
-  const xpGain = baseXp + paceBonus;
+  const currentCharacterBandIndex = toNonNegativeInteger(params.stats.characterRank.bandIndex);
+  const axpGain = computeMissionAxpGain(
+    params.estMinutes,
+    params.actualSeconds,
+    currentCharacterBandIndex
+  );
+  const missionSgpGain = resolveMissionSgpGainByStat({
+    questCompleted: params.questCompleted,
+    questMissionCount: params.questMissionCount,
+    cleanQuestCompletion: params.cleanQuestCompletion
+  });
 
-  const statGain: FiveStats = {
-    initiation: 1,
-    focus: actualSeconds <= targetSeconds * 1.2 ? 2 : 1,
-    breakdown: params.estMinutes <= 10 ? 1 : 0,
-    recovery: 0,
-    consistency: 1
-  };
-
-  let nextXp = safeStats.xp + xpGain;
-  let nextLevel = safeStats.level;
-  let levelUps = 0;
-
-  while (nextXp >= requiredXpForLevel(nextLevel)) {
-    nextXp -= requiredXpForLevel(nextLevel);
-    nextLevel += 1;
-    levelUps += 1;
-  }
-
-  const gainedStats = addFiveStats(safeStats, statGain);
-
-  return {
-    xpGain,
-    levelUps,
-    statGain,
-    nextStats: {
-      ...safeStats,
-      ...gainedStats,
-      xp: nextXp,
-      level: nextLevel,
-      todayXpGain: safeStats.todayXpGain + xpGain,
-      todayCompleted: safeStats.todayCompleted + 1,
-      todayStatGain: {
-        initiation: safeStats.todayStatGain.initiation + statGain.initiation,
-        focus: safeStats.todayStatGain.focus + statGain.focus,
-        breakdown: safeStats.todayStatGain.breakdown + statGain.breakdown,
-        recovery: safeStats.todayStatGain.recovery + statGain.recovery,
-        consistency: safeStats.todayStatGain.consistency + statGain.consistency
-      }
-    }
-  };
+  return buildRewardOutcome({
+    stats: params.stats,
+    axpGain,
+    questGainByStat: missionSgpGain.questGainByStat,
+    questGainScaleDen: missionSgpGain.questGainScaleDen,
+    todayCompletedIncrement: 1,
+    today: params.today
+  });
 }
 
-export function applyRecoveryReward(stats: StatsState): RewardOutcome {
-  const safeStats = rollDailyStats(stats);
-  const xpGain = 8;
-  const statGain: FiveStats = {
-    initiation: 0,
-    focus: 0,
-    breakdown: 0,
-    recovery: 2,
-    consistency: 1
-  };
+export function applyRecoveryReward(stats: StatsState, today = getDateKey()): RewardOutcome {
+  const currentCharacterBandIndex = toNonNegativeInteger(stats.characterRank.bandIndex);
+  const axpGain = computeRecoveryAxpGain(currentCharacterBandIndex);
 
-  let nextXp = safeStats.xp + xpGain;
-  let nextLevel = safeStats.level;
-  let levelUps = 0;
-
-  while (nextXp >= requiredXpForLevel(nextLevel)) {
-    nextXp -= requiredXpForLevel(nextLevel);
-    nextLevel += 1;
-    levelUps += 1;
-  }
-
-  const gainedStats = addFiveStats(safeStats, statGain);
-
-  return {
-    xpGain,
-    levelUps,
-    statGain,
-    nextStats: {
-      ...safeStats,
-      ...gainedStats,
-      xp: nextXp,
-      level: nextLevel,
-      todayXpGain: safeStats.todayXpGain + xpGain,
-      todayStatGain: {
-        initiation: safeStats.todayStatGain.initiation,
-        focus: safeStats.todayStatGain.focus,
-        breakdown: safeStats.todayStatGain.breakdown,
-        recovery: safeStats.todayStatGain.recovery + statGain.recovery,
-        consistency: safeStats.todayStatGain.consistency + statGain.consistency
-      }
-    }
-  };
+  return buildRewardOutcome({
+    stats,
+    axpGain,
+    questGainByStat: {
+      initiation: RECOVERY_REWARD_BASE_UNITS,
+      focus: RECOVERY_REWARD_BASE_UNITS,
+      breakdown: RECOVERY_REWARD_BASE_UNITS,
+      recovery: RECOVERY_REWARD_RECOVERY_UNITS,
+      consistency: RECOVERY_REWARD_BASE_UNITS
+    },
+    questGainScaleDen: RECOVERY_REWARD_SGP_SCALE_DEN,
+    today,
+    todayCompletedIncrement: 0
+  });
 }

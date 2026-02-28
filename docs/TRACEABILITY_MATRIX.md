@@ -32,7 +32,7 @@ Last Updated: 2026-02-28
 | FR-04 | 퀘스트 리스트/현재 미션 강조 | 완료 | `features/mvp/components/mvp-dashboard.tsx` | 현재 미션 강조 + 시작 CTA 제공 |
 | FR-05 | 타이머 + 실행 중 빠른 시간 조정 | 완료 | `features/mvp/components/mvp-dashboard.tsx`, `features/mvp/lib/timer-accuracy.ts` | 실행 중 빠른 `-1/+1` 조정, `+1` 상한 15분 강제 |
 | FR-06 | 5분 미세 햅틱 + ON/OFF | 완료 | `features/mvp/components/mvp-dashboard.tsx` | 설정 토글 반영, 미지원 환경 폴백 포함 |
-| FR-07 | XP/레벨/5스탯 반영 | 완료 | `features/mvp/lib/reward.ts`, `features/mvp/components/mvp-dashboard.tsx` | 완료/복귀 보상 및 레벨업 처리 |
+| FR-07 | AXP/계정 레벨/정수 스탯 점수 기반 세분화 랭크 반영 | 완료 | `features/mvp/lib/reward.ts`, `features/mvp/lib/rank.ts`, `features/mvp/components/mvp-dashboard.tsx` | 완료/복귀 보상 시 정수-only 점수(`totalScore/displayScore/carry`) 누적, `F + (-/0/+)` 및 `A+ 이후 S/SS` 확장 랭크, 5스탯 `min(totalScore)` 캐릭터 랭크를 반영 |
 | FR-08 | 일간 리포트 | 완료 | `features/mvp/components/mvp-dashboard.tsx`, `features/mvp/lib/kpi.ts` | 리포트 카드 + KPI 스냅샷 표시 |
 | FR-09 | 과업 단위 재일정/재청킹 | 완료 | `features/mvp/components/mvp-dashboard.tsx`, `features/mvp/task-list/components/home-view.tsx`, `features/mvp/recovery/components/recovery-actions.tsx` | 재일정 엔트리를 `taskId` 기준으로 고정하고 미완료 미션 동반 이동 처리 |
 | FR-10 | 알림(P1) | 부분 | `features/mvp/components/mvp-dashboard.tsx`, `features/mvp/integrations/notification/notification-adapter.ts` | 권한/트리거 연결은 있으나 별도 알림 설정 토글/정책 정교화 미완 |
@@ -48,7 +48,7 @@ Last Updated: 2026-02-28
 | UC-03 | 미션 편집/삭제 + 시간 정책 | 완료 | `features/mvp/components/mvp-dashboard.tsx` | 실행 잠금(`running/paused`) 정책 가드 + 삭제 비활성화 |
 | UC-04 | 타이머 + 실행 중 빠른 +/- | 완료 | `features/mvp/components/mvp-dashboard.tsx`, `features/mvp/lib/timer-accuracy.ts` | 빠른 `-1/+1` 조정 및 상한/예산 제약 동작 |
 | UC-05 | 5분 미세 햅틱 | 완료 | `features/mvp/components/mvp-dashboard.tsx` | ON/OFF 및 이벤트 기록 동작 |
-| UC-06 | 보상/스탯 반영 | 완료 | `features/mvp/lib/reward.ts`, `features/mvp/components/mvp-dashboard.tsx` | 즉시 보상 반영 |
+| UC-06 | AXP/정수 점수 기반 랭크 보상 반영 | 완료 | `features/mvp/lib/reward.ts`, `features/mvp/lib/rank.ts`, `features/mvp/components/mvp-dashboard.tsx` | 완료/복귀 시 정수 점수 누적과 세분화 랭크 승급, 캐릭터 랭크(`min(totalScore)`)를 즉시 갱신 |
 | UC-07 | 과업 재일정 또는 재청킹 | 완료 | `features/mvp/components/mvp-dashboard.tsx`, `features/mvp/task-list/components/home-view.tsx`, `features/mvp/recovery/components/recovery-actions.tsx` | Task 단위 재일정 + 재청킹 2CTA 유지, 미완료 미션 동반 이동 반영 |
 | UC-08 | 일간 리포트 확인 | 완료 | `features/mvp/components/mvp-dashboard.tsx`, `features/mvp/lib/kpi.ts` | 리포트 및 KPI 표시 |
 | UC-09 | 알림(P1) | 부분 | `features/mvp/components/mvp-dashboard.tsx`, `features/mvp/integrations/notification/notification-adapter.ts` | 시작/완료/재등록 알림 트리거 있음, 정책 완결성은 보강 필요 |
@@ -63,10 +63,10 @@ Last Updated: 2026-02-28
 | 3. 3탭/3분 이내 첫 시작 | 완료 | `features/mvp/components/mvp-dashboard.tsx`, `scripts/verify-release-gate.mjs` | `mission_started` 메타(startClickCount/withinThreeMinutes) + Gate 자동 판정 근거 추가 |
 | 4. 타이머 안정 + 빠른 `+/-` 조정 | 완료 | `features/mvp/components/mvp-dashboard.tsx`, `features/mvp/lib/timer-accuracy.ts` | 빠른 조정 동작 + `+1` 상한 15분 강제 |
 | 5. 햅틱 ON/OFF 정상 | 완료 | `features/mvp/components/mvp-dashboard.tsx` | 설정 반영 및 폴백 확인 가능 |
-| 6. 보상 즉시 반영 | 완료 | `features/mvp/lib/reward.ts`, `features/mvp/components/mvp-dashboard.tsx` | 완료/복귀 보상 즉시 반영 |
+| 6. 보상 즉시 반영 | 완료 | `features/mvp/lib/reward.ts`, `features/mvp/lib/rank.ts`, `features/mvp/components/mvp-dashboard.tsx` | 완료/복귀 즉시 정수-only 스코어를 누적하고 `displayScore(0~99)`/레이더 원점 리셋, 스탯 승급/캐릭터 랭크 갱신을 반영 |
 | 7. 재일정/재청킹 2탭 복귀 | 완료 | `features/mvp/recovery/components/recovery-actions.tsx`, `features/mvp/components/mvp-dashboard.tsx`, `scripts/verify-release-gate.mjs` | 복귀 2CTA + recoveryClickCount 계측/검증 근거 자동화 |
 | 8. 재일정 Task 단위 준수 | 완료 | `features/mvp/components/mvp-dashboard.tsx`, `features/mvp/task-list/components/home-view.tsx`, `features/mvp/recovery/components/recovery-actions.tsx`, `scripts/verify-release-gate.mjs` | 재일정 엔트리/상태 전이를 `taskId` 중심으로 고정 |
-| 9. 필수 이벤트 누락 없음 | 완료 | `features/mvp/lib/events.ts`, `features/mvp/lib/kpi.ts`, `scripts/verify-release-gate.mjs` | PRD 필수 이벤트 목록(`task_time_updated/task_rescheduled/mission_time_adjusted` 포함) 동기화 + 자동 커버리지 검증 |
+| 9. 필수 이벤트 누락 없음 | 완료 | `features/mvp/lib/events.ts`, `features/mvp/lib/kpi.ts`, `scripts/verify-release-gate.mjs` | PRD 필수 이벤트 목록 동기화 + v3 랭크 이벤트(`rank_promoted`, `character_rank_changed`) 커버리지 자동 검증 |
 | 10. rawInput 장기 저장 없음 | 완료 | `features/mvp/lib/storage.ts` | summary 저장 정책 적용 |
 | 11. 시간 필드 정합성 규칙 | 완료 | `features/mvp/lib/storage.ts`, `features/mvp/components/mvp-dashboard.tsx`, `features/mvp/types/domain.ts` | ISO UTC 정규화 + `completedAt(done only)` 반영 |
 

@@ -18,6 +18,8 @@ const GATE9_REQUIRED_EVENTS = [
   "remission_requested",
   "xp_gained",
   "level_up",
+  "rank_promoted",
+  "character_rank_changed",
   "haptic_fired",
   "safety_blocked"
 ];
@@ -273,6 +275,28 @@ function verifyKpiComputability(computeMvpKpis) {
     }),
     createEvent({ eventName: "xp_gained", timestampMs: baseMs + 8_000, sessionId: "s1", taskId: "t1" }),
     createEvent({ eventName: "level_up", timestampMs: baseMs + 9_000, sessionId: "s1", taskId: "t1" }),
+    createEvent({
+      eventName: "rank_promoted",
+      timestampMs: baseMs + 9_500,
+      sessionId: "s1",
+      taskId: "t1",
+      meta: {
+        statKey: "focus",
+        fromRank: "F",
+        toRank: "E",
+        promotedCount: 1
+      }
+    }),
+    createEvent({
+      eventName: "character_rank_changed",
+      timestampMs: baseMs + 9_750,
+      sessionId: "s1",
+      taskId: "t1",
+      meta: {
+        previousRank: "F",
+        nextRank: "E"
+      }
+    }),
     createEvent({ eventName: "haptic_fired", timestampMs: baseMs + 10_000, sessionId: "s1", taskId: "t1" }),
     createEvent({ eventName: "safety_blocked", timestampMs: baseMs + 11_000, sessionId: "s1", taskId: "t1" }),
     createEvent({ eventName: "task_created", timestampMs: baseMs + DAY_MS + 30_000, sessionId: "s1", taskId: "t2" }),
