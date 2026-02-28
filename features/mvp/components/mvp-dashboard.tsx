@@ -67,6 +67,7 @@ import {
   parseDateTimeLocalInput,
   parseLooseMinuteInput,
   parseTaskTotalMinutesInput,
+  reorderTaskChunksKeepingLocked,
   withReorderedTaskChunks,
   buildTaskSummary,
   type TaskMetaField,
@@ -1724,18 +1725,11 @@ export function MvpDashboard() {
     }
 
     const orderedTaskChunks = orderChunks(chunks.filter((chunk) => chunk.taskId === taskId));
-    const fromIndex = orderedTaskChunks.findIndex((chunk) => chunk.id === draggedChunkId);
-    const toIndex = orderedTaskChunks.findIndex((chunk) => chunk.id === targetChunkId);
-    if (fromIndex < 0 || toIndex < 0) {
+    const reorderedTaskChunks = reorderTaskChunksKeepingLocked(orderedTaskChunks, draggedChunkId, targetChunkId);
+    if (!reorderedTaskChunks) {
+      setFeedback("실행 중이거나 완료된 미션은 순서를 변경할 수 없습니다.");
       return;
     }
-
-    const reorderedTaskChunks = [...orderedTaskChunks];
-    const [movedChunk] = reorderedTaskChunks.splice(fromIndex, 1);
-    if (!movedChunk) {
-      return;
-    }
-    reorderedTaskChunks.splice(toIndex, 0, movedChunk);
 
     const nextOrderById = new Map(reorderedTaskChunks.map((chunk, index) => [chunk.id, index + 1]));
     setChunks((prev) =>
@@ -1748,6 +1742,17 @@ export function MvpDashboard() {
           : chunk
       )
     );
+
+    if (activeTaskId === taskId) {
+      const nextPrimaryChunk = reorderedTaskChunks.find((chunk) => isActionableChunkStatus(chunk.status)) ?? null;
+      if (!nextPrimaryChunk) {
+        if (currentChunkId !== null) {
+          setCurrentChunkId(null);
+        }
+      } else if (currentChunkId !== nextPrimaryChunk.id) {
+        setCurrentChunkId(nextPrimaryChunk.id);
+      }
+    }
 
     setFeedback("청크 순서를 변경했습니다.");
   };

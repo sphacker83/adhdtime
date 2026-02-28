@@ -1,9 +1,11 @@
 import { useState, type DragEvent, type MouseEvent } from "react";
 import { RecoveryActions } from "@/features/mvp/recovery";
 import {
+  chunkStatusLabel,
   formatClock,
   formatOptionalDateTime,
   isActionableChunkStatus,
+  isReorderableChunkStatus,
   orderChunks
 } from "@/features/mvp/shared";
 import { ChunkPrimaryActions, ChunkQuickAdjustActions } from "@/features/mvp/timer-runtime";
@@ -223,15 +225,23 @@ export function HomeView({
     setDragOverChunkId(null);
   };
 
-  const handleChunkDragStart = (event: DragEvent<HTMLLIElement>, chunkId: string) => {
+  const handleChunkDragStart = (event: DragEvent<HTMLLIElement>, chunkId: string, canReorder: boolean) => {
+    if (!canReorder) {
+      event.preventDefault();
+      return;
+    }
     event.dataTransfer.effectAllowed = "move";
     event.dataTransfer.setData("text/plain", chunkId);
     setDraggingChunkId(chunkId);
     setDragOverChunkId(null);
   };
 
-  const handleChunkDragOver = (event: DragEvent<HTMLLIElement>, targetChunkId: string) => {
-    if (!draggingChunkId || draggingChunkId === targetChunkId) {
+  const handleChunkDragOver = (
+    event: DragEvent<HTMLLIElement>,
+    targetChunkId: string,
+    targetCanAcceptDrop: boolean
+  ) => {
+    if (!draggingChunkId || draggingChunkId === targetChunkId || !targetCanAcceptDrop) {
       return;
     }
     event.preventDefault();
@@ -241,7 +251,16 @@ export function HomeView({
     }
   };
 
-  const handleChunkDrop = (event: DragEvent<HTMLLIElement>, taskId: string, targetChunkId: string) => {
+  const handleChunkDrop = (
+    event: DragEvent<HTMLLIElement>,
+    taskId: string,
+    targetChunkId: string,
+    targetCanAcceptDrop: boolean
+  ) => {
+    if (!targetCanAcceptDrop) {
+      clearDragState();
+      return;
+    }
     event.preventDefault();
     const draggedChunkId = draggingChunkId || event.dataTransfer.getData("text/plain");
     if (!draggedChunkId || draggedChunkId === targetChunkId) {
@@ -391,9 +410,10 @@ export function HomeView({
         <ul className={getClassName("taskPreviewList")}>
           {waitingTasks.length === 0 ? <li className={getClassName("emptyRow")}>대기 중인 과업이 없습니다.</li> : null}
           {waitingTasks.map((task) => {
-            const actionableTaskChunks = orderChunks(
-              chunks.filter((chunk) => chunk.taskId === task.id && isActionableChunkStatus(chunk.status))
+            const orderedVisibleTaskChunks = orderChunks(
+              chunks.filter((chunk) => chunk.taskId === task.id && chunk.status !== "archived")
             );
+            const actionableTaskChunks = orderedVisibleTaskChunks.filter((chunk) => isActionableChunkStatus(chunk.status));
             const openChunks = actionableTaskChunks.length;
             const isExpanded = expandedHomeTaskId === task.id;
             const estimatedMinutes = actionableTaskChunks.reduce((total, chunk) => total + chunk.estMinutes, 0);
@@ -465,31 +485,35 @@ export function HomeView({
                 </div>
                 {isExpanded ? (
                   <ul id={`home-task-chunks-${task.id}`} className={getClassName("homeTaskChunkList")}>
-                    {actionableTaskChunks.length === 0 ? (
+                    {orderedVisibleTaskChunks.length === 0 ? (
                       <li className={getClassName("homeTaskChunkEmpty")}>청크가 없습니다.</li>
                     ) : null}
-                    {actionableTaskChunks.map((chunk) => {
+                    {orderedVisibleTaskChunks.map((chunk) => {
+                      const isChunkReorderable = isReorderableChunkStatus(chunk.status);
                       const isDragging = draggingChunkId === chunk.id;
-                      const isDragOver = dragOverChunkId === chunk.id && draggingChunkId !== chunk.id;
+                      const isDragOver = dragOverChunkId === chunk.id && draggingChunkId !== chunk.id && isChunkReorderable;
                       return (
                         <li
                           key={chunk.id}
                           className={joinClassNames(
                             getClassName("homeTaskChunkRow"),
-                            getClassName("homeTaskChunkDraggable"),
+                            isChunkReorderable ? getClassName("homeTaskChunkDraggable") : getClassName("homeTaskChunkLocked"),
+                            chunk.status === "done" ? getClassName("homeTaskChunkDone") : undefined,
                             isDragging ? getClassName("homeTaskChunkDragging") : undefined,
                             isDragOver ? getClassName("homeTaskChunkDragOver") : undefined
                           )}
-                          draggable
-                          onDragStart={(event) => handleChunkDragStart(event, chunk.id)}
-                          onDragOver={(event) => handleChunkDragOver(event, chunk.id)}
-                          onDrop={(event) => handleChunkDrop(event, task.id, chunk.id)}
+                          draggable={isChunkReorderable}
+                          onDragStart={(event) => handleChunkDragStart(event, chunk.id, isChunkReorderable)}
+                          onDragOver={(event) => handleChunkDragOver(event, chunk.id, isChunkReorderable)}
+                          onDrop={(event) => handleChunkDrop(event, task.id, chunk.id, isChunkReorderable)}
                           onDragEnd={clearDragState}
                         >
                           <span className={getClassName("homeTaskChunkDragHandle")} aria-hidden="true">⠿</span>
                           <span className={getClassName("homeTaskChunkBody")}>
                             <span className={getClassName("homeTaskChunkAction")}>{chunk.action}</span>
-                            <span className={getClassName("homeTaskChunkInfo")}>{`${chunk.estMinutes}분`}</span>
+                            <span className={getClassName("homeTaskChunkInfo")}>
+                              {`${chunk.estMinutes}분 · ${chunkStatusLabel(chunk.status)}`}
+                            </span>
                           </span>
                           <span className={getClassName("homeTaskChunkButtons")}>
                             <button

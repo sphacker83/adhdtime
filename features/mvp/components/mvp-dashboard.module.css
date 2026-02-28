@@ -2425,6 +2425,11 @@
   cursor: grab;
 }
 
+.homeTaskChunkLocked {
+  cursor: default;
+  opacity: 0.86;
+}
+
 .homeTaskChunkDragging {
   opacity: 0.6;
 }
@@ -2432,6 +2437,16 @@
 .homeTaskChunkDragOver {
   border-color: #7eafe4;
   box-shadow: 0 0 0 2px rgba(126, 175, 228, 0.24);
+}
+
+.homeTaskChunkDone .homeTaskChunkAction {
+  color: #657b9c;
+  text-decoration: line-through;
+}
+
+.homeTaskChunkLocked .homeTaskChunkDragHandle {
+  cursor: not-allowed;
+  opacity: 0.38;
 }
 
 .homeTaskChunkBody {
