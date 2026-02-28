@@ -10,7 +10,7 @@ Last Updated: 2026-02-28
 - [x] Phase 3: 탭/화면 단위 컴포넌트 분해
 - [x] Phase 4: 기능 모듈 분해(task-input/task-list/timer-runtime/recovery)
 - [x] Phase 5: integrations 계층 분리(notification/stt/sync)
-- [ ] Phase 6: 정리/회귀 강화/마감
+- [x] Phase 6: 정리/회귀 강화/마감
 
 ## Phase 0: 문서 세팅 ✅
 
@@ -111,10 +111,15 @@ Last Updated: 2026-02-28
 
 ## Phase 6: 정리 및 마감
 
-- [ ] 미사용 코드/스타일 제거
-- [ ] 문서 및 ADR 업데이트
-- [ ] 최종 회귀(typecheck/lint/test:mvp/build)
-- [ ] 트랙 마감 및 잔여 이슈 정리
+- [x] 미사용 코드/스타일 제거
+  - `features/p1/*` 레거시 파일 제거 (mvp에서 미사용)
+- [x] 문서 및 ADR 업데이트
+  - `docs/frontend-architecture/adr-0005-phase6-cleanup-and-closure.md`
+  - `docs/TRACEABILITY_MATRIX.md` 연동 근거 경로 업데이트
+  - `README.md` 프로젝트 구조 최신화
+- [x] 최종 회귀(typecheck/lint/test:mvp/build/verify:mvp)
+- [x] 트랙 마감 및 잔여 이슈 정리
+  - frontend-architecture 트랙 기준 Phase 0~6 완료
 
 ## Validation Gate
 

@@ -18,6 +18,8 @@ Last Updated: 2026-02-28
   - Phase 3~4 탭 뷰/기능 모듈 분해 의사결정 기록
 - `adr-0004-phase5-integrations-boundary.md`
   - Phase 5 integrations 계층 분리 의사결정 기록
+- `adr-0005-phase6-cleanup-and-closure.md`
+  - Phase 6 정리/회귀/트랙 마감 의사결정 기록
 
 ## 권장 사용 순서
 

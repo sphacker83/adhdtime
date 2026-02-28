@@ -66,7 +66,6 @@ npm run verify:mvp
 ```text
 app/                         # Next.js App Router 엔트리
 features/mvp/               # MVP 루프 UI/도메인 로직/타입
-features/p1/                # P1 foundation helper/type (알림/STT/동기화 mock)
 scripts/                    # 릴리즈 게이트 스크립트
 docs/                       # PRD/USECASE/추적/운영 문서
 dev/active/                 # Dev Docs(세션 복구용 context/tasks/plan)

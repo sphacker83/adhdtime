@@ -37,8 +37,10 @@ Last Updated: 2026-02-28
   - notification/stt/sync adapter를 `features/mvp/integrations/*` 계층으로 분리
   - `mvp` 영역의 `features/p1/*` 직접 import 제거
   - capability/권한/동기화 mock 경계 표준화 유지 + 회귀 게이트 통과
-- Phase 6: 다음 착수 대상
-  - 미사용 코드/스타일 정리 및 하드닝
+- Phase 6: 완료
+  - 미사용 레거시 코드(`features/p1/*`) 제거
+  - 추적/아키텍처 문서 경로 정리 및 마감 ADR 기록
+  - 최종 회귀 게이트(`verify:mvp`) 통과
 
 ## Target State
 
@@ -81,3 +83,4 @@ Last Updated: 2026-02-28
 - `docs/frontend-architecture/adr-0002-phase2-core-state-boundary.md`
 - `docs/frontend-architecture/adr-0003-phase3-phase4-view-feature-modules.md`
 - `docs/frontend-architecture/adr-0004-phase5-integrations-boundary.md`
+- `docs/frontend-architecture/adr-0005-phase6-cleanup-and-closure.md`

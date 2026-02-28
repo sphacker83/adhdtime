@@ -86,18 +86,24 @@ Last Updated: 2026-02-28
   - `npm run verify:mvp`
 - ADR 기록 추가
   - `docs/frontend-architecture/adr-0004-phase5-integrations-boundary.md`
+- Phase 6 정리/마감 완료
+  - `features/p1/*` 레거시 코드 제거
+  - `README.md` 프로젝트 구조 최신화
+  - `docs/TRACEABILITY_MATRIX.md` 연동 경로(`p1 -> mvp/integrations`) 갱신
+- 회귀 게이트(Phase 6 최종) 통과
+  - `npm run verify:mvp`
+- ADR 기록 추가
+  - `docs/frontend-architecture/adr-0005-phase6-cleanup-and-closure.md`
 
 ### 🟡 IN PROGRESS
-- Phase 6 준비
-  - 미사용 로직/스타일 정리 후보 수집 및 테스트 갭 보강 포인트 정리
+- 없음 (frontend-architecture 트랙 마감)
 
 ### ⏳ NOT STARTED
-- Phase 6 본 구현
+- 없음
 
 ### ⚠️ BLOCKERS / DECISIONS NEEDED
 - Blocker 없음
-- 결정 필요:
-  - Phase 6에서 `mvp-dashboard.tsx` 추가 축소를 우선할지, `mvp-dashboard.module.css` 분할을 우선할지
+- 결정 필요 없음(Phase 0~6 종료)
 
 ## Key Decisions
 
@@ -107,6 +113,7 @@ Last Updated: 2026-02-28
 - hydration/persist/reset 경계는 `useMvpStore`에 집중하고 UI는 오케스트레이션만 담당한다.
 - Phase 3/4에서는 탭 렌더링과 기능 UI를 분리하되, 도메인 핸들러 시그니처는 유지해 behavior parity를 우선한다.
 - Phase 5에서는 `mvp` feature 내부 연동 접근을 `features/mvp/integrations/*`로 통일해 cross-feature 결합을 제거한다.
+- Phase 6에서는 `mvp`에서 사용하지 않는 `p1` 레거시 경로를 제거해 코드 경계를 실제 파일 시스템 수준으로 고정한다.
 
 ## Key Files
 
@@ -164,6 +171,8 @@ Last Updated: 2026-02-28
   - Phase 3~4 뷰/기능 모듈 분해 의사결정 기록
 - `docs/frontend-architecture/adr-0004-phase5-integrations-boundary.md`
   - Phase 5 integrations 경계 의사결정 기록
+- `docs/frontend-architecture/adr-0005-phase6-cleanup-and-closure.md`
+  - Phase 6 정리/마감 의사결정 기록
 - `docs/frontend-architecture/refactor-blueprint.md`
   - 목표 구조/규칙 정의
 - `docs/frontend-architecture/refactor-roadmap.md`
@@ -171,6 +180,5 @@ Last Updated: 2026-02-28
 
 ## Quick Resume
 
-1. Phase 6 정리 대상(미사용 상태/함수/CSS rule)을 목록화한다.
-2. `mvp-dashboard.tsx`와 `mvp-dashboard.module.css`를 정리 우선순위에 따라 축소한다.
-3. 정리 후 회귀 게이트(typecheck/lint/test:mvp/build/verify:mvp)를 다시 통과시킨다.
+1. 후속 기능 작업은 `features/mvp/integrations/*` 경계를 유지한 상태로 진행한다.
+2. 신규 요구사항은 별도 `dev/active/*` 트랙을 생성해 문서/코드 동기화 원칙을 유지한다.

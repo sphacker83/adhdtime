@@ -1,6 +1,6 @@
 # TRACEABILITY_MATRIX
 
-Last Updated: 2026-02-27  
+Last Updated: 2026-02-28  
 기준 문서: `docs/PRD.md` v3.1, `docs/USECASE.md` v2.1
 
 ## 상태 정의
@@ -35,7 +35,7 @@ Last Updated: 2026-02-27
 | FR-07 | XP/레벨/5스탯 반영 | 완료 | `features/mvp/lib/reward.ts`, `features/mvp/components/mvp-dashboard.tsx` | 완료/복귀 보상 및 레벨업 처리 |
 | FR-08 | 일간 리포트 | 완료 | `features/mvp/components/mvp-dashboard.tsx`, `features/mvp/lib/kpi.ts` | 리포트 카드 + KPI 스냅샷 표시 |
 | FR-09 | 과업 단위 재일정/재청킹 | 부분 | `features/mvp/components/mvp-dashboard.tsx` | 재청킹/재등록 동작은 있으나 재일정이 Task 단위가 아님(청크 중심) |
-| FR-10 | 알림(P1) | 부분 | `features/mvp/components/mvp-dashboard.tsx`, `features/p1/helpers/notification-capability.ts` | 권한/트리거 연결은 있으나 별도 알림 설정 토글/정책 정교화 미완 |
+| FR-10 | 알림(P1) | 부분 | `features/mvp/components/mvp-dashboard.tsx`, `features/mvp/integrations/notification/notification-adapter.ts` | 권한/트리거 연결은 있으나 별도 알림 설정 토글/정책 정교화 미완 |
 | FR-11 | 실행 전/중 시간 수정 정책 | 완료 | `features/mvp/components/mvp-dashboard.tsx` | `paused` 포함 실행 잠금 + 실행 중 총시간 감소 차단 |
 | FR-12 | date...At 정합성 규칙 | 완료 | `features/mvp/lib/storage.ts`, `features/mvp/components/mvp-dashboard.tsx`, `features/mvp/types/domain.ts` | ISO UTC 정규화 + `completedAt`은 `done`일 때만 저장 |
 
@@ -51,8 +51,8 @@ Last Updated: 2026-02-27
 | UC-06 | 보상/스탯 반영 | 완료 | `features/mvp/lib/reward.ts`, `features/mvp/components/mvp-dashboard.tsx` | 즉시 보상 반영 |
 | UC-07 | 과업 재일정 또는 재청킹 | 부분 | `features/mvp/components/mvp-dashboard.tsx` | 재청킹/재등록 가능하나 Task 단위 일정 이동 정책 미구현 |
 | UC-08 | 일간 리포트 확인 | 완료 | `features/mvp/components/mvp-dashboard.tsx`, `features/mvp/lib/kpi.ts` | 리포트 및 KPI 표시 |
-| UC-09 | 알림(P1) | 부분 | `features/mvp/components/mvp-dashboard.tsx`, `features/p1/helpers/notification-capability.ts` | 시작/완료/재등록 알림 트리거 있음, 정책 완결성은 보강 필요 |
-| UC-10 | 외부 동기화(P1) | 부분 | `features/p1/helpers/sync-mock-adapter.ts`, `features/mvp/components/mvp-dashboard.tsx` | 상태 전이 mock만 구현, 실제 OAuth/API 연동 미구현 |
+| UC-09 | 알림(P1) | 부분 | `features/mvp/components/mvp-dashboard.tsx`, `features/mvp/integrations/notification/notification-adapter.ts` | 시작/완료/재등록 알림 트리거 있음, 정책 완결성은 보강 필요 |
+| UC-10 | 외부 동기화(P1) | 부분 | `features/mvp/integrations/sync/sync-mock-adapter.ts`, `features/mvp/components/mvp-dashboard.tsx` | 상태 전이 mock만 구현, 실제 OAuth/API 연동 미구현 |
 
 ## 3) PRD v3.1 릴리즈 게이트 체크 상태
 
