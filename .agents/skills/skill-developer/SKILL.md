@@ -1,13 +1,13 @@
 ---
 name: skill-developer
-description: Anthropic 모범 사례에 따라 Agent Workflows 스킬을 만들고 관리합니다. 새 스킬 생성, skill-rules.json 수정, 트리거 패턴 이해, 훅 작업, 스킬 활성화 디버깅, 점진적 공개(progressive disclosure) 구현 시 사용하세요. 스킬 구조, YAML 프론트매터, 트리거 유형(키워드, 의도 패턴, 파일 경로, 콘텐츠 패턴), enforcement 레벨(block/suggest/warn), 훅 메커니즘(UserPromptSubmit/PreToolUse), 세션 추적, 500줄 규칙을 다룹니다.
+description: Gemini 모범 사례에 따라 Agent Workflows 스킬을 만들고 관리합니다. 새 스킬 생성, skill-rules.json 수정, 트리거 패턴 이해, 훅 작업, 스킬 활성화 디버깅, 점진적 공개(progressive disclosure) 구현 시 사용하세요. 스킬 구조, YAML 프론트매터, 트리거 유형(키워드, 의도 패턴, 파일 경로, 콘텐츠 패턴), enforcement 레벨(block/suggest/warn), 훅 메커니즘(UserPromptSubmit/PreToolUse), 세션 추적, 500줄 규칙을 다룹니다.
 ---
 
 # 스킬 개발자 가이드
 
 ## 목적
 
-자동 활성화 시스템이 있는 Agent Workflows에서 스킬을 만들고 관리하기 위한 포괄 가이드입니다. 500줄 규칙과 점진적 공개(progressive disclosure) 패턴을 포함한 Anthropic 공식 모범 사례를 따릅니다.
+자동 활성화 시스템이 있는 Agent Workflows에서 스킬을 만들고 관리하기 위한 포괄 가이드입니다. 500줄 규칙과 점진적 공개(progressive disclosure) 패턴을 포함한 Gemini 최적화 모범 사례를 따릅니다.
 
 ## 이 스킬을 사용해야 하는 경우
 
@@ -180,7 +180,7 @@ EOF
 - 파일 경로 패턴 조정
 - 실제 파일에 대해 콘텐츠 패턴을 테스트
 
-### 5단계: Anthropic 모범 사례 준수
+### 5단계: Gemini 모범 사례 준수
 
 ✅ SKILL.md는 500줄 이하로 유지
 ✅ 레퍼런스 파일로 점진적 공개(progressive disclosure) 적용
@@ -376,7 +376,7 @@ skill-rules.json 전체 스키마:
 - **파일 마커**: `// @skip-validation`(영구 스킵)
 - **환경 변수**: `SKIP_SKILL_GUARDRAILS`(긴급 비활성화)
 
-### Anthropic 모범 사례
+### Gemini 모범 사례
 
 ✅ **500줄 규칙**: SKILL.md는 500줄 이하로 유지
 ✅ **점진적 공개**: 자세한 내용은 레퍼런스 파일로 분리
@@ -419,7 +419,7 @@ EOF
 
 ---
 
-**스킬 상태(Skill Status)**: COMPLETE - Anthropic 모범 사례에 맞게 재구성 ✅
+**스킬 상태(Skill Status)**: COMPLETE - Gemini 모범 사례에 맞게 재구성 ✅
 **라인 수(Line Count)**: < 500 (500줄 규칙 준수) ✅
 **점진적 공개(Progressive Disclosure)**: 자세한 내용은 레퍼런스 파일로 분리 ✅
 
