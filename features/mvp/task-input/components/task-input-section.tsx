@@ -24,7 +24,7 @@ export interface TaskInputSectionProps {
   onStartStt: () => void;
   onStopStt: () => void;
   sttCapability: SttCapability;
-  onGenerateTask: () => void;
+  onGenerateTask: () => Promise<boolean>;
   isGenerating: boolean;
   taskTotalMinutesInput: string;
   onSetTaskTotalMinutesFromScheduled: (value: number) => void;
@@ -61,7 +61,7 @@ function formatDateButtonValue(rawValue: string): DateButtonValue {
 function formatMinutesButtonValue(rawValue: string): string {
   const parsed = Number.parseInt(rawValue, 10);
   if (!Number.isFinite(parsed)) {
-    return "--분";
+    return "--";
   }
 
   return `${Math.min(MAX_TASK_TOTAL_MINUTES, Math.max(MIN_TASK_TOTAL_MINUTES, parsed))}분`;
@@ -161,6 +161,17 @@ export function TaskInputSection(props: TaskInputSectionProps) {
     onSetTaskTotalMinutesFromScheduled(parsedMinutes);
   };
 
+  const handleGenerateClick = async (): Promise<void> => {
+    try {
+      const isSuccess = await onGenerateTask();
+      if (isSuccess) {
+        setIsComposerOpen(false);
+      }
+    } catch {
+      // 실패 시 모달은 열린 상태를 유지한다.
+    }
+  };
+
   return (
     <>
       {!isComposerOpen ? (
@@ -172,6 +183,7 @@ export function TaskInputSection(props: TaskInputSectionProps) {
           title="AI 퀘스트 생성"
         >
           <span className={styles.floatingQuestButtonIcon} aria-hidden="true">⚔️</span>
+          <span className={styles.floatingQuestButtonLabel}>퀘스트 생성</span>
         </button>
       ) : null}
 
@@ -331,7 +343,9 @@ export function TaskInputSection(props: TaskInputSectionProps) {
                 type="button"
                 className={styles.primaryButton}
                 disabled={isGenerating}
-                onClick={onGenerateTask}
+                onClick={() => {
+                  void handleGenerateClick();
+                }}
               >
                 {isGenerating ? "생성 중..." : "AI 퀘스트 생성"}
               </button>

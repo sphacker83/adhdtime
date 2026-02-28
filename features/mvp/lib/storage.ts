@@ -104,6 +104,15 @@ function sanitizeTaskTotalMinutes(totalMinutes: unknown, fallbackMinutes: number
   return Math.min(MAX_TASK_TOTAL_MINUTES, Math.max(MIN_TASK_TOTAL_MINUTES, Math.floor(rawValue)));
 }
 
+function sanitizeChunkIconKey(value: unknown): string | undefined {
+  if (!isString(value)) {
+    return undefined;
+  }
+
+  const normalized = value.trim();
+  return normalized.length > 0 ? normalized : undefined;
+}
+
 function buildChunkMinuteFallbackByTaskId(chunks: Chunk[]): Map<string, number> {
   const taskMinutes = new Map<string, number>();
 
@@ -204,6 +213,7 @@ function isChunk(value: unknown): value is Chunk {
     && (value.actualSeconds === undefined || isNumber(value.actualSeconds))
     && (value.parentChunkId === undefined || isString(value.parentChunkId))
     && (value.rescheduledFor === undefined || isString(value.rescheduledFor))
+    && (value.iconKey === undefined || isString(value.iconKey))
   );
 }
 
@@ -290,6 +300,13 @@ export function sanitizeTaskSummary(rawInput: string): string {
   return normalized || FALLBACK_TASK_SUMMARY;
 }
 
+function sanitizeChunkForStorage(chunk: Chunk): Chunk {
+  return {
+    ...chunk,
+    iconKey: sanitizeChunkIconKey(chunk.iconKey)
+  };
+}
+
 function sanitizeTaskForStorage(task: Task, minuteFallbackByTaskId: Map<string, number>): Task {
   const safeSummary = sanitizeTaskSummary(task.summary ?? task.title);
   const scheduledFor = sanitizeIsoDateTime(task.scheduledFor);
@@ -317,10 +334,12 @@ function sanitizeTaskForStorage(task: Task, minuteFallbackByTaskId: Map<string, 
 }
 
 function sanitizeStateForStorage(state: PersistedState): PersistedState {
-  const minuteFallbackByTaskId = buildChunkMinuteFallbackByTaskId(state.chunks);
+  const sanitizedChunks = state.chunks.map((chunk) => sanitizeChunkForStorage(chunk));
+  const minuteFallbackByTaskId = buildChunkMinuteFallbackByTaskId(sanitizedChunks);
 
   return {
     ...state,
+    chunks: sanitizedChunks,
     tasks: state.tasks.map((task) => sanitizeTaskForStorage(task, minuteFallbackByTaskId))
   };
 }
@@ -356,7 +375,9 @@ export function loadPersistedState(): PersistedState | null {
     }
 
     const sanitizedChunks = Array.isArray(parsed.chunks)
-      ? parsed.chunks.filter((chunk): chunk is Chunk => isChunk(chunk))
+      ? parsed.chunks
+        .filter((chunk): chunk is Chunk => isChunk(chunk))
+        .map((chunk) => sanitizeChunkForStorage(chunk))
       : [];
     const minuteFallbackByTaskId = buildChunkMinuteFallbackByTaskId(sanitizedChunks);
     const timelineFallbackByTaskId = buildTaskTimelineFallbackByTaskId(sanitizedChunks);

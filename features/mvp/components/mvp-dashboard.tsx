@@ -5,6 +5,7 @@ import {
   createAiFallbackAdapter,
   enforceChunkBudget,
   generateLocalChunking,
+  mapChunkingResultToChunks,
   generateTemplateChunking,
   isWithinTaskChunkBudget,
   sumChunkEstMinutes,
@@ -218,7 +219,7 @@ export function MvpDashboard() {
   } = useMvpStore({ sessionId: sessionIdRef.current });
 
   const [taskInput, setTaskInput] = useState("");
-  const [taskTotalMinutesInput, setTaskTotalMinutesInput] = useState(String(DEFAULT_TASK_TOTAL_MINUTES));
+  const [taskTotalMinutesInput, setTaskTotalMinutesInput] = useState("");
   const [taskScheduledForInput, setTaskScheduledForInput] = useState("");
   const [taskDueAtInput, setTaskDueAtInput] = useState("");
   const [taskMetaFeedback, setTaskMetaFeedback] = useState<string | null>(null);
@@ -939,22 +940,25 @@ export function MvpDashboard() {
     handleSetTaskTotalMinutesFromScheduled(safeTotalMinutes + deltaMinutes);
   };
 
-  const handleGenerateTask = async () => {
+  const handleGenerateTask = async (): Promise<boolean> => {
     const rawInput = taskInput.trim();
     if (!rawInput) {
       setFeedback("할 일을 입력하면 바로 10분 단위로 쪼개드릴게요.");
-      return;
+      return false;
     }
 
     if (taskMetaFeedback) {
       setFeedback(`입력 단계 오류를 먼저 해결해주세요: ${taskMetaFeedback}`);
-      return;
+      return false;
     }
 
-    const parsedTotalMinutes = parseTaskTotalMinutesInput(taskTotalMinutesInput);
+    const normalizedTotalInput = taskTotalMinutesInput.trim();
+    const parsedTotalMinutes = normalizedTotalInput
+      ? parseTaskTotalMinutesInput(normalizedTotalInput)
+      : DEFAULT_TASK_TOTAL_MINUTES;
     if (parsedTotalMinutes === null) {
       setFeedback(`총 소요 시간은 ${MIN_TASK_TOTAL_MINUTES}~${MAX_TASK_TOTAL_MINUTES}분 사이로 입력해주세요.`);
-      return;
+      return false;
     }
 
     const normalizedSchedule = normalizeTaskScheduleFromLocalInputs({
@@ -965,7 +969,7 @@ export function MvpDashboard() {
     });
     if (!normalizedSchedule) {
       setFeedback("일정 시간 형식이 올바르지 않습니다. 날짜와 시간을 다시 확인해주세요.");
-      return;
+      return false;
     }
     const { scheduledFor, dueAt } = normalizedSchedule;
 
@@ -979,7 +983,7 @@ export function MvpDashboard() {
         }
       });
       setFeedback(RECOVERY_FEEDBACK.safetyBlocked);
-      return;
+      return false;
     }
 
     setIsGenerating(true);
@@ -1033,18 +1037,20 @@ export function MvpDashboard() {
         status: "todo"
       };
 
-      const nextChunks: Chunk[] = adjustedChunkTemplates.map((chunk) => ({
-        id: chunk.chunkId,
-        taskId,
-        order: chunk.order,
-        action: chunk.action,
-        estMinutes: chunk.estMinutes,
-        status: "todo"
-      }));
+      const nextChunks: Chunk[] = mapChunkingResultToChunks(
+        {
+          ...chunking,
+          chunks: adjustedChunkTemplates
+        },
+        {
+          taskId,
+          status: "todo"
+        }
+      );
 
       if (!isWithinTaskChunkBudget(nextChunks, parsedTotalMinutes)) {
         setFeedback("청크 시간 합계가 과업 총 시간 예산을 초과해 생성이 취소되었습니다.");
-        return;
+        return false;
       }
 
       setTasks((prev) => [nextTask, ...prev]);
@@ -1063,6 +1069,7 @@ export function MvpDashboard() {
       setActiveTaskId(taskId);
       setCurrentChunkId(nextChunks[0]?.id ?? null);
       setTaskInput("");
+      setTaskTotalMinutesInput("");
       setTaskScheduledForInput("");
       setTaskDueAtInput("");
       setTaskMetaFeedback(null);
@@ -1102,6 +1109,7 @@ export function MvpDashboard() {
           usedValidationFallback
         }
       });
+      return true;
     } finally {
       setIsGenerating(false);
     }
@@ -1594,6 +1602,7 @@ export function MvpDashboard() {
         action: `${target.action} - 첫 5분 버전`,
         estMinutes: Math.max(2, Math.floor(target.estMinutes / 2)),
         status: "todo",
+        iconKey: target.iconKey,
         parentChunkId: target.id
       },
       {
@@ -1603,6 +1612,7 @@ export function MvpDashboard() {
         action: `${target.action} - 마무리 5분 버전`,
         estMinutes: Math.max(2, target.estMinutes - Math.max(2, Math.floor(target.estMinutes / 2))),
         status: "todo",
+        iconKey: target.iconKey,
         parentChunkId: target.id
       }
     ];
@@ -1885,27 +1895,49 @@ export function MvpDashboard() {
       <div className={styles.noiseLayer} aria-hidden="true" />
 
       <header className={styles.topBar}>
-        <div className={styles.titleGroup}>
-          <h1 className={styles.brandTitle}>ADHDTime</h1>
-          <p className={styles.levelSummary}>레벨 {stats.level} (LV.{stats.level}) 모험가</p>
-          <p className={styles.clock} suppressHydrationWarning>
-            {formatDateTime(clock)}
-          </p>
-        </div>
-        <div className={styles.progressGroup}>
-          <p className={styles.progressTitle}>
-            오늘의 달성도
-            <span>DAILY PROGRESS</span>
-          </p>
-          <div className={styles.progressRing} style={dailyProgressRingStyle} aria-label={`오늘의 달성도 ${dailyProgressPercent}%`}>
-            <div className={styles.progressRingInner}>
-              <strong>{dailyProgressPercent}%</strong>
+        <div className={styles.topBarMain}>
+          <div className={styles.titleGroup}>
+            <h1 className={styles.brandTitle}>ADHDTime</h1>
+            <p className={styles.levelSummary}>레벨 {stats.level} (LV.{stats.level}) 모험가</p>
+          </div>
+          <div className={styles.progressGroup}>
+            <p className={styles.progressTitle}>
+              오늘의 달성도
+              <span>DAILY PROGRESS</span>
+            </p>
+            <div className={styles.progressRing} style={dailyProgressRingStyle} aria-label={`오늘의 달성도 ${dailyProgressPercent}%`}>
+              <div className={styles.progressRingInner}>
+                <strong>{dailyProgressPercent}%</strong>
+              </div>
             </div>
           </div>
         </div>
+        <p className={styles.headerDateTime} suppressHydrationWarning>{formatDateTime(clock)}</p>
       </header>
 
       <main className={styles.app}>
+        <TaskInputSection
+          styles={styles}
+          sttSupportState={sttSupportState}
+          taskInput={taskInput}
+          onTaskInputChange={setTaskInput}
+          isSttListening={isSttListening}
+          onStartStt={handleStartStt}
+          onStopStt={handleStopStt}
+          sttCapability={sttCapability}
+          onGenerateTask={handleGenerateTask}
+          isGenerating={isGenerating}
+          taskTotalMinutesInput={taskTotalMinutesInput}
+          onSetTaskTotalMinutesFromScheduled={handleSetTaskTotalMinutesFromScheduled}
+          onAdjustTaskTotalMinutesFromScheduled={handleAdjustTaskTotalMinutesFromScheduled}
+          taskScheduledForInput={taskScheduledForInput}
+          onTaskScheduledForInputChange={handleTaskScheduledForInputChange}
+          taskDueAtInput={taskDueAtInput}
+          onTaskDueAtInputChange={handleTaskDueAtInputChange}
+          taskMetaFeedback={taskMetaFeedback}
+          sttTranscript={sttTranscript}
+          sttError={sttError}
+        />
 
         {activeTab === "home" || activeTab === "stats" ? (
           <section className={styles.statusSection}>
@@ -1924,19 +1956,38 @@ export function MvpDashboard() {
               </div>
 
               <div className={styles.radarBlock}>
-                <svg viewBox="0 0 120 120" className={styles.radarSvg} role="img" aria-label="5스탯 레이더 차트">
-                  {radar.grid.map((gridLine, index) => (
-                    <polygon key={gridLine} points={gridLine} className={styles.radarGrid} data-level={index} />
-                  ))}
-                  {STAT_META.map((_, index) => {
-                    const angle = (-Math.PI / 2) + (index * Math.PI * 2) / STAT_META.length;
-                    const x = 60 + Math.cos(angle) * 48;
-                    const y = 60 + Math.sin(angle) * 48;
-                    return <line key={STAT_META[index].key} x1={60} y1={60} x2={x} y2={y} className={styles.radarAxis} />;
-                  })}
-                  <polygon points={radar.data} className={styles.radarData} />
-                </svg>
-                <ul className={styles.statList}>
+                <div className={styles.radarWrap}>
+                  <svg viewBox="0 0 120 120" className={styles.radarSvg} role="img" aria-label="5스탯 레이더 차트">
+                    {radar.grid.map((gridLine, index) => (
+                      <polygon key={gridLine} points={gridLine} className={styles.radarGrid} data-level={index} />
+                    ))}
+                    {STAT_META.map((_, index) => {
+                      const angle = (-Math.PI / 2) + (index * Math.PI * 2) / STAT_META.length;
+                      const x = 60 + Math.cos(angle) * 48;
+                      const y = 60 + Math.sin(angle) * 48;
+                      return <line key={STAT_META[index].key} x1={60} y1={60} x2={x} y2={y} className={styles.radarAxis} />;
+                    })}
+                    <polygon points={radar.data} className={styles.radarData} />
+                  </svg>
+                  <div className={styles.radarLabelLayer} aria-hidden="true">
+                    {STAT_META.map((item, index) => {
+                      const angle = (-Math.PI / 2) + (index * Math.PI * 2) / STAT_META.length;
+                      const x = 75 + Math.cos(angle) * 63;
+                      const y = 75 + Math.sin(angle) * 63;
+                      return (
+                        <div
+                          key={item.key}
+                          className={styles.radarStatBadge}
+                          style={{ left: `${x}px`, top: `${y}px` }}
+                        >
+                          <span>{item.label}</span>
+                          <strong>{stats[item.key]}</strong>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+                <ul className={styles.statList} aria-hidden="true">
                   {STAT_META.map((item) => (
                     <li key={item.key}>
                       <span>{item.label}</span>
@@ -1950,57 +2001,36 @@ export function MvpDashboard() {
         ) : null}
 
         {activeTab === "home" ? (
-          <>
-            <TaskInputSection
-              styles={styles}
-              sttSupportState={sttSupportState}
-              taskInput={taskInput}
-              onTaskInputChange={setTaskInput}
-              isSttListening={isSttListening}
-              onStartStt={handleStartStt}
-              onStopStt={handleStopStt}
-              sttCapability={sttCapability}
-              onGenerateTask={() => void handleGenerateTask()}
-              isGenerating={isGenerating}
-              taskTotalMinutesInput={taskTotalMinutesInput}
-              onSetTaskTotalMinutesFromScheduled={handleSetTaskTotalMinutesFromScheduled}
-              onAdjustTaskTotalMinutesFromScheduled={handleAdjustTaskTotalMinutesFromScheduled}
-              taskScheduledForInput={taskScheduledForInput}
-              onTaskScheduledForInputChange={handleTaskScheduledForInputChange}
-              taskDueAtInput={taskDueAtInput}
-              onTaskDueAtInputChange={handleTaskDueAtInputChange}
-              taskMetaFeedback={taskMetaFeedback}
-              sttTranscript={sttTranscript}
-              sttError={sttError}
-            />
-
-            <HomeView
-              styles={styles}
-              homeChunk={homeChunk}
-              homeTask={homeTask}
-              homeRemaining={homeRemaining}
-              homeTaskBudgetUsage={homeTaskBudgetUsage}
-              completionRate={completionRate}
-              homeTaskCards={homeTaskCards}
-              chunks={chunks}
-              expandedHomeTaskId={expandedHomeTaskId}
-              remainingSecondsByChunk={remainingSecondsByChunk}
-              onSetActiveTaskId={setActiveTaskId}
-              onToggleExpandedHomeTaskId={(taskId) => {
-                setExpandedHomeTaskId((prev) => (prev === taskId ? null : taskId));
-              }}
-              onStartChunk={handleStartChunk}
-              onPauseChunk={handlePauseChunk}
-              onCompleteChunk={handleCompleteChunk}
-              onAdjustRunningChunkMinutes={handleAdjustRunningChunkMinutes}
-              canAdjustMinusFive={canAdjustMinusFive}
-              canAdjustMinusOne={canAdjustMinusOne}
-              canAdjustPlusOne={canAdjustPlusOne}
-              canAdjustPlusFive={canAdjustPlusFive}
-              onRechunk={handleRechunk}
-              onReschedule={handleReschedule}
-            />
-          </>
+          <HomeView
+            styles={styles}
+            homeChunk={homeChunk}
+            homeTask={homeTask}
+            homeRemaining={homeRemaining}
+            homeTaskBudgetUsage={homeTaskBudgetUsage}
+            completionRate={completionRate}
+            homeTaskCards={homeTaskCards}
+            chunks={chunks}
+            expandedHomeTaskId={expandedHomeTaskId}
+            remainingSecondsByChunk={remainingSecondsByChunk}
+            isExecutionLocked={isExecutionLocked}
+            onSetActiveTaskId={setActiveTaskId}
+            onToggleExpandedHomeTaskId={(taskId) => {
+              setExpandedHomeTaskId((prev) => (prev === taskId ? null : taskId));
+            }}
+            onStartChunk={handleStartChunk}
+            onPauseChunk={handlePauseChunk}
+            onCompleteChunk={handleCompleteChunk}
+            onAdjustRunningChunkMinutes={handleAdjustRunningChunkMinutes}
+            canAdjustMinusFive={canAdjustMinusFive}
+            canAdjustMinusOne={canAdjustMinusOne}
+            canAdjustPlusOne={canAdjustPlusOne}
+            canAdjustPlusFive={canAdjustPlusFive}
+            onRechunk={handleRechunk}
+            onReschedule={handleReschedule}
+            onEditTaskTotalMinutes={handleEditTaskTotalMinutes}
+            onEditChunk={handleEditChunk}
+            onDeleteChunk={handleDeleteChunk}
+          />
         ) : null}
 
         {activeTab === "tasks" ? (

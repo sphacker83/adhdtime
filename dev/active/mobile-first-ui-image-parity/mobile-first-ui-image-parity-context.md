@@ -5,51 +5,65 @@ Last Updated: 2026-02-28
 ## SESSION PROGRESS
 
 ### ✅ COMPLETED
-- 레퍼런스 이미지 경로 최신화: `/docs/ui/main_ui.png`, `/docs/ui/ui.png`, `/docs/ui/add_ui.png`
-- 레퍼런스 섹션 매핑 갱신: `1/2/4/5 -> main_ui`, `3/7 -> ui`, `6 -> add_ui`
-- Dev Docs 트랙 생성: `dev/active/mobile-first-ui-image-parity/`
-- `plan/context/tasks` 3파일에 전략/진행/체크리스트 분리 구조 유지
-- 신규 요구사항 6개(헤더 정합, 메시지 제거, 청킹 UI 재구성, 고정 헤더/네비, 진행중 다음 미션, 대기중 완료 제외) 문서 반영
-- `MvpDashboard` 레이아웃을 `헤더 고정 + 하단 네비 고정 + 메인 스크롤` 구조로 재구성
-- 타이틀/캐릭터 상태 사이 메시지 렌더 제거
-- 입력 섹션을 우하단 플로팅 아이콘(⚔️) 기반 `AI 퀘스트 생성` 모달 플로우로 재구성
-- 모달에서 퀘스트 이름 입력 우측 STT 버튼 유지, 생성 CTA를 `AI 퀘스트 생성`으로 고정
-- 진행중 퀘스트 카드에 `다음 미션`(최대 3개) 표시 추가
-- 대기중 퀘스트 목록에서 `done` 항목 제외 규칙 적용
-- 일정 정합 강화: 태스크 상태 동기화 effect와 총시간 수정 경로에서 `normalizeTaskScheduleIso`로 시작/마감 자동 정규화
-- 검증 완료: `npm run typecheck`, `npm run lint`, `npm run test:mvp` 통과
+- 기존 라운드 반영사항(고정 헤더/하단 탭, 다음 미션 기본 표시, 대기중 done 제외)이 `main`에 반영되어 있음
+- 이번 라운드 착수 전 탐색 완료:
+  - 플로팅 버튼/모달 닫힘 이슈 원인 확인
+  - 다음 미션 아이콘 도입을 위한 타입/생성/저장 경로 확인
+  - 헤더 정합(`오늘의 달성도` 텍스트+링, 하단 시간줄) 수정 지점 확인
+- 문서 선행 원칙에 따라 `plan/context/tasks` 재작성 완료
+- `Chunk.iconKey` 모델 추가 및 생성/저장 경로 반영(`domain/chunking/storage`)
+- 플로팅 `퀘스트 생성` 버튼을 전 탭 우하단 고정 노출로 변경
+- 퀘스트 생성 성공 시 모달 자동 닫힘 적용
+- 기본 소요시간 표시 `--` 반영
+- 현재 퀘스트 카드 구조 변경:
+  - 타이틀 `퀘스트 : [이름]`
+  - `#분 청크` 제거
+  - 예상소요시간/마감시간/마감까지 남은 시간 표시
+  - 다음 미션 섹션을 CTA 아래로 이동
+- 다음 미션 개선:
+  - 상태 텍스트 제거
+  - 아이콘(`iconKey`) 표시
+  - 삭제 버튼 추가
+- 대기중 퀘스트/미션 수정 버튼 추가(기존 핸들러 재사용)
+- 헤더 보정:
+  - `오늘의 달성도` 텍스트/링 위치 조정
+  - 타이틀바 하단 날짜/요일/시간 표시 추가
+- 검증 통과:
+  - `npm run typecheck`
+  - `npm run lint`
+  - `npm run test:mvp` (37 tests)
 
 ### 🟡 IN PROGRESS
-- 레퍼런스 이미지(`main_ui/add_ui`) 대비 픽셀 단위 미세 간격 보정
-- `390/430/768+` 수동 시각 QA 및 접근성 QA 기록
+- `main_ui.png` 대비 헤더 픽셀 정합 수동 QA
+- 홈/할일/스탯/설정 탭에서 플로팅 버튼 시각 QA
 
 ### ⚠️ BLOCKERS
-- 레퍼런스 이미지의 정확한 폰트/아이콘 원본 에셋 정보 없음
-- 픽셀 단위 동일성 검증을 위한 스크린샷 비교 자동화는 아직 미구성
+- `/docs/ui/main_ui.png` 원본 폰트/디자인 토큰 미제공으로 픽셀 단위 100% 동일성은 수동 미세 보정 필요
 
 ## Key Decisions
-- 이번 트랙은 기능 추가가 아니라 UI 정합과 조작 흐름 개선에 집중한다.
-- 기존 `MvpDashboard` 로직(청킹/타이머/보상/이벤트)은 유지하고, 뷰 구조를 먼저 분리한다.
-- 모바일 기준 뷰포트를 `390px`로 고정해 1차 맞춤 후 태블릿/데스크톱 확장을 진행한다.
-- 스타일 기준은 토큰 근사값(`radius.card`, `space.sectionY`, `touch.min`)을 우선 사용한다.
-- 레퍼런스는 섹션별로 분리 적용한다(`main_ui`: 1/2/4/5, `ui`: 3/7, `add_ui`: 6).
-- 고정 레이아웃 규칙은 `헤더 고정 + 하단 네비 고정 + 메인 내용만 스크롤`로 유지한다.
-- 진행중 퀘스트에는 `다음 미션`을 노출하고, 대기중 퀘스트에서는 완료 항목을 제외한다.
+1. 이번 라운드는 `MvpDashboard` 경로만 수정한다. (`PhaseOneDashboard` 미사용)
+2. 플로팅 생성 버튼은 홈 탭 조건문 밖으로 이동해 전 탭에서 노출한다.
+3. 생성 모달 닫힘은 `onGenerateTask` 성공 boolean 반환으로 제어한다.
+4. 미션 아이콘은 `Chunk.iconKey` optional 필드로 도입해 기존 데이터와 호환한다.
+5. 홈 뷰 편집/삭제 액션은 기존 핸들러를 재사용해 회귀 위험을 줄인다.
+6. 헤더 정합은 CSS 최하단 parity override 블록에서만 수정한다.
 
 ## Files In Scope
-- `docs/ui/ui.png` (UI 레퍼런스)
-- `docs/ui/main_ui.png` (UI 레퍼런스)
-- `docs/ui/add_ui.png` (퀘스트 추가/편집 + 진행중 다음 미션 레퍼런스)
-- `app/page.tsx`
+- `docs/ui/main_ui.png`
+- `docs/ui/add_ui.png`
 - `features/mvp/components/mvp-dashboard.tsx`
 - `features/mvp/components/mvp-dashboard.module.css`
 - `features/mvp/task-input/components/task-input-section.tsx`
 - `features/mvp/task-list/components/home-view.tsx`
+- `features/mvp/types/domain.ts`
+- `features/mvp/lib/chunking.ts`
+- `features/mvp/lib/storage.ts`
+- `features/mvp/shared/model/display-utils.ts`
 - `dev/active/mobile-first-ui-image-parity/mobile-first-ui-image-parity-plan.md`
 - `dev/active/mobile-first-ui-image-parity/mobile-first-ui-image-parity-context.md`
 - `dev/active/mobile-first-ui-image-parity/mobile-first-ui-image-parity-tasks.md`
 
 ## Quick Resume
-1. `390/430/768+`에서 `docs/ui/main_ui.png`, `docs/ui/add_ui.png`와 시각 비교 QA를 수행한다.
-2. 미세 간격/타이포 보정이 필요하면 `mvp-dashboard.module.css` 최하단 parity override 섹션에서만 수정한다.
-3. 수동 QA 결과를 `tasks.md` 체크박스와 본 `context.md`에 반영하고 트랙 close-out 한다.
+1. 수동 UI QA(`docs/ui/main_ui.png`, `docs/ui/add_ui.png` 비교)로 헤더/플로팅/홈카드를 확인한다.
+2. 필요시 `mvp-dashboard.module.css` parity override만 미세 조정한다.
+3. 최종 커밋/푸시를 진행한다.

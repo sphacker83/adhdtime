@@ -1,4 +1,7 @@
 import {
+  type Chunk,
+  type ChunkDraft,
+  type ChunkIconKey,
   MAX_TASK_TOTAL_MINUTES,
   MAX_CHUNK_EST_MINUTES,
   MIN_TASK_TOTAL_MINUTES,
@@ -92,6 +95,16 @@ const ACTION_KOREAN_DECLARATIVE_END_PATTERN = /[가-힣]+(다|요)(\([^)]*\))?$/
 
 const EST_MINUTES_RANGE_LABEL = `${MIN_CHUNK_EST_MINUTES}~${MAX_CHUNK_EST_MINUTES}분`;
 const CHUNK_COUNT_RECOMMENDED_LABEL = `${RECOMMENDED_MIN_CHUNK_COUNT}~${RECOMMENDED_MAX_CHUNK_COUNT}개`;
+const DEFAULT_CHUNK_ICON_KEY: ChunkIconKey = "default";
+const CHUNK_ICON_RULES: Array<{ iconKey: ChunkIconKey; keywords: string[] }> = [
+  { iconKey: "routine", keywords: ["알람", "기상", "취침", "잠", "루틴", "아침", "저녁", "세면", "물", "침대"] },
+  { iconKey: "organize", keywords: ["정리", "청소", "정돈", "분류", "버리", "치우", "옮기", "정렬"] },
+  { iconKey: "record", keywords: ["작성", "적기", "기록", "메모", "입력", "정리노트"] },
+  { iconKey: "review", keywords: ["확인", "검토", "체크", "점검", "요약", "마무리", "완료"] },
+  { iconKey: "schedule", keywords: ["일정", "예약", "계획", "마감", "시간"] },
+  { iconKey: "break", keywords: ["휴식", "스트레칭", "호흡", "산책", "쉬기"] },
+  { iconKey: "execute", keywords: ["시작", "실행", "집중", "작업", "진행", "핵심", "처리"] }
+];
 
 export function clampTaskTotalMinutes(totalMinutes: number, fallback = MIN_TASK_TOTAL_MINUTES): number {
   const baseValue = Number.isFinite(totalMinutes) ? totalMinutes : fallback;
@@ -167,6 +180,36 @@ function tokenizeScoreText(input: string): string[] {
     .split(" ")
     .map((token) => token.trim())
     .filter((token) => token.length > 0);
+}
+
+function isNonEmptyString(value: unknown): value is string {
+  return typeof value === "string" && value.trim().length > 0;
+}
+
+function compactIconScoreText(input: string): string {
+  return normalizeScoreText(input).replace(/\s+/g, "");
+}
+
+function resolveChunkIconKey(action: string, notes?: string, rawIconKey?: unknown): ChunkIconKey {
+  if (isNonEmptyString(rawIconKey)) {
+    return rawIconKey.trim();
+  }
+
+  const actionText = compactIconScoreText(action);
+  const notesText = compactIconScoreText(notes ?? "");
+  const targetText = `${actionText}${notesText}`;
+
+  for (const rule of CHUNK_ICON_RULES) {
+    const hasMatch = rule.keywords.some((keyword) => {
+      const compactKeyword = compactIconScoreText(keyword);
+      return compactKeyword.length > 0 && targetText.includes(compactKeyword);
+    });
+    if (hasMatch) {
+      return rule.iconKey;
+    }
+  }
+
+  return DEFAULT_CHUNK_ICON_KEY;
 }
 
 function hasScoreTerm(normalizedInput: string, compactInput: string, term: string): boolean {
@@ -397,7 +440,8 @@ function mapPresetChunksToTemplates(preset: ChunkPreset): ChunkTemplate[] | null
         action,
         estMinutes: clampMinutes(chunk.min),
         difficulty,
-        notes
+        notes,
+        iconKey: resolveChunkIconKey(action, notes)
       };
     })
     .filter((template): template is ChunkTemplate => template !== null);
@@ -519,7 +563,8 @@ function buildResult(taskId: string, title: string, templates: ChunkTemplate[]):
       action: template.action,
       estMinutes: clampMinutes(template.estMinutes),
       difficulty: clampDifficulty(template.difficulty),
-      notes: template.notes
+      notes: template.notes,
+      iconKey: resolveChunkIconKey(template.action, template.notes, template.iconKey)
     })),
     safety: {
       requiresCaution: false,
@@ -538,7 +583,39 @@ function buildDefaultTemplates(title: string): ChunkTemplate[] {
     { action: `핵심 행동 1개 바로 실행하기`, estMinutes: 10, difficulty: 2, notes: "타이머와 함께 시작" },
     { action: `진행 상태를 2문장으로 기록하기`, estMinutes: 4, difficulty: 1, notes: "다음 행동 연결" },
     { action: `다음 청크를 예약하고 마무리하기`, estMinutes: 3, difficulty: 1, notes: "복귀 마찰 줄이기" }
-  ];
+  ].map((template) => ({
+    ...template,
+    iconKey: resolveChunkIconKey(template.action, template.notes)
+  }));
+}
+
+export function withNormalizedChunkIcons(payload: ChunkingResult): ChunkingResult {
+  return {
+    ...payload,
+    chunks: payload.chunks.map((chunk): ChunkDraft => ({
+      ...chunk,
+      iconKey: resolveChunkIconKey(chunk.action, chunk.notes, chunk.iconKey)
+    }))
+  };
+}
+
+export function mapChunkingResultToChunks(
+  payload: ChunkingResult,
+  options?: { taskId?: string; status?: Chunk["status"] }
+): Chunk[] {
+  const normalized = withNormalizedChunkIcons(payload);
+  const taskId = options?.taskId ?? normalized.taskId;
+  const status = options?.status ?? "todo";
+
+  return normalized.chunks.map((chunk): Chunk => ({
+    id: chunk.chunkId,
+    taskId,
+    order: chunk.order,
+    action: chunk.action,
+    estMinutes: clampMinutes(chunk.estMinutes),
+    status,
+    iconKey: chunk.iconKey
+  }));
 }
 
 export function generateLocalChunking(taskId: string, title: string): ChunkingResult | null {
@@ -565,6 +642,7 @@ export function createAiFallbackAdapter(delayMs = 600): AiChunkingAdapter {
 export function validateChunkingResult(payload: ChunkingResult): ChunkingValidationResult {
   const errors: string[] = [];
   const warnings: string[] = [];
+  payload.chunks = withNormalizedChunkIcons(payload).chunks;
 
   if (!payload.taskId.trim()) {
     errors.push("taskId가 비어 있습니다.");

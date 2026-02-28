@@ -2,6 +2,7 @@ export type TaskStatus = "todo" | "in_progress" | "done" | "archived";
 export type ChunkStatus = "todo" | "running" | "paused" | "done" | "abandoned" | "archived";
 export type TimerSessionState = "running" | "paused" | "ended";
 export type EventSource = "local" | "ai" | "system" | "user";
+export type ChunkIconKey = string;
 
 export type EventName =
   | "task_created"
@@ -48,6 +49,7 @@ export interface Chunk {
   action: string;
   estMinutes: number;
   status: ChunkStatus;
+  iconKey?: ChunkIconKey;
   startedAt?: string;
   completedAt?: string;
   actualSeconds?: number;
@@ -104,20 +106,24 @@ export interface ChunkTemplate {
   estMinutes: number;
   difficulty: number;
   notes: string;
+  iconKey?: ChunkIconKey;
+}
+
+export interface ChunkDraft {
+  chunkId: string;
+  order: number;
+  action: string;
+  estMinutes: number;
+  difficulty: number;
+  notes: string;
+  iconKey?: ChunkIconKey;
 }
 
 export interface ChunkingResult {
   taskId: string;
   title: string;
   context: string;
-  chunks: Array<{
-    chunkId: string;
-    order: number;
-    action: string;
-    estMinutes: number;
-    difficulty: number;
-    notes: string;
-  }>;
+  chunks: ChunkDraft[];
   safety: {
     requiresCaution: boolean;
     notes: string;
