@@ -1805,6 +1805,7 @@
   height: 34px;
   border-radius: 11px;
   font-size: 12px;
+  white-space: nowrap;
 }
 
 .questModalFooter {
@@ -2133,10 +2134,10 @@
 .currentQuestMainGrid {
   margin-top: 4px;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 132px;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 3fr);
   grid-template-rows: auto auto;
-  align-items: start;
-  column-gap: 12px;
+  align-items: center;
+  column-gap: 10px;
   row-gap: 8px;
 }
 
@@ -2153,18 +2154,6 @@
   letter-spacing: -0.02em;
 }
 
-.currentQuestEnergyValue {
-  grid-column: 2;
-  grid-row: 1;
-  justify-self: end;
-  margin: 2px 4px 0 0;
-  font-size: 20px;
-  line-height: 1;
-  font-weight: 900;
-  color: #29629e;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.7);
-}
-
 .timerValue {
   grid-column: 1;
   grid-row: 2;
@@ -2178,17 +2167,20 @@
 
 .currentQuestMonsterWrap {
   grid-column: 2;
-  grid-row: 2;
-  width: 132px;
+  grid-row: 1 / span 2;
+  width: 100%;
+  max-width: 148px;
+  justify-self: end;
   display: grid;
   justify-items: center;
   align-items: center;
-  margin-top: -4px;
+  margin-top: 0;
 }
 
 .currentQuestMonsterRing {
-  width: 122px;
-  height: 122px;
+  width: min(100%, 142px);
+  aspect-ratio: 1 / 1;
+  height: auto;
   border-radius: 999px;
   padding: 8px;
   box-shadow:
@@ -2205,11 +2197,31 @@
   background: #f7fbff;
   display: grid;
   place-items: center;
+  position: relative;
 }
 
 .currentQuestMonster {
   font-size: 66px;
   line-height: 1;
+}
+
+.currentQuestMonsterPercent {
+  position: absolute;
+  left: 50%;
+  bottom: 8px;
+  transform: translateX(-50%);
+  min-width: 44px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(189, 208, 233, 0.9);
+  background: rgba(255, 255, 255, 0.94);
+  font-family: "Space Grotesk", "IBM Plex Sans KR", sans-serif;
+  font-size: 0.82rem;
+  line-height: 1.1;
+  font-weight: 900;
+  color: #1f3a5f;
+  text-align: center;
+  letter-spacing: -0.01em;
 }
 
 .currentQuestInfoGrid {
@@ -2230,12 +2242,23 @@
 }
 
 .currentQuestInfoLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   font-size: 10px;
   color: #627a9f;
   font-weight: 700;
 }
 
+.currentQuestInfoIcon {
+  font-size: 12px;
+  line-height: 1;
+  color: currentColor;
+  flex: none;
+}
+
 .currentQuestInfoValue {
+  display: block;
   font-size: 11px;
   line-height: 1.2;
   color: #243c61;
@@ -2335,17 +2358,76 @@
   padding-right: 6px;
 }
 
-.homeTaskEditButton {
+.homeTaskMenu {
+  position: relative;
+}
+
+.homeTaskMenuTrigger {
+  width: 28px;
   height: 28px;
-  padding: 0 9px;
-  font-size: 11px;
+  border-radius: 8px;
+  border: 1px solid #d5e1f2;
+  background: #f4f8ff;
+  color: #34517a;
+  font-size: 20px;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  list-style: none;
+}
+
+.homeTaskMenuTrigger::-webkit-details-marker {
+  display: none;
+}
+
+.homeTaskMenuPanel {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  z-index: 4;
+  min-width: 74px;
+  padding: 4px;
+  border: 1px solid #d2dff0;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 8px 18px rgba(24, 40, 67, 0.14);
+  display: grid;
+  gap: 4px;
+}
+
+.homeTaskMenuItem,
+.homeTaskMenuItemDanger {
+  width: 100%;
+  justify-content: center;
   white-space: nowrap;
 }
 
 .homeTaskChunkRow {
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: 14px minmax(0, 1fr) auto;
   align-items: center;
   gap: 8px;
+}
+
+.homeTaskChunkDragHandle {
+  font-size: 12px;
+  color: #89a0bf;
+  line-height: 1;
+  cursor: grab;
+  user-select: none;
+}
+
+.homeTaskChunkDraggable {
+  cursor: grab;
+}
+
+.homeTaskChunkDragging {
+  opacity: 0.6;
+}
+
+.homeTaskChunkDragOver {
+  border-color: #7eafe4;
+  box-shadow: 0 0 0 2px rgba(126, 175, 228, 0.24);
 }
 
 .homeTaskChunkBody {
@@ -2377,6 +2459,11 @@
 
 .questModal {
   width: min(560px, calc(100% - 6px));
+}
+
+.chunkEditForm {
+  display: grid;
+  gap: 8px;
 }
 
 .taskMetaGrid {
@@ -2554,6 +2641,6 @@
   }
 
   .questPresetRow {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }

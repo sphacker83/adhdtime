@@ -1,6 +1,6 @@
+import { useState, type DragEvent, type MouseEvent } from "react";
 import { RecoveryActions } from "@/features/mvp/recovery";
 import {
-  chunkStatusLabel,
   formatClock,
   formatOptionalDateTime,
   isActionableChunkStatus,
@@ -111,6 +111,8 @@ export interface HomeViewProps {
   onRechunk: (chunkId: string) => void;
   onReschedule: (chunkId: string) => void;
   onEditTaskTotalMinutes: (task: Task) => void;
+  onDeleteTask: (task: Task) => void;
+  onReorderTaskChunks: (taskId: string, draggedChunkId: string, targetChunkId: string) => void;
   onEditChunk: (chunk: Chunk) => void;
   onDeleteChunk: (chunk: Chunk) => void;
 }
@@ -140,10 +142,14 @@ export function HomeView({
   onRechunk,
   onReschedule,
   onEditTaskTotalMinutes,
+  onDeleteTask,
+  onReorderTaskChunks,
   onEditChunk,
   onDeleteChunk
 }: HomeViewProps) {
   const getClassName = (classKey: string) => styles[classKey] ?? "";
+  const [draggingChunkId, setDraggingChunkId] = useState<string | null>(null);
+  const [dragOverChunkId, setDragOverChunkId] = useState<string | null>(null);
   const waitingTasks = homeTaskCards.filter((task) => task.status !== "done");
   const homeTaskActionableChunks = homeTask
     ? orderChunks(chunks.filter((chunk) => chunk.taskId === homeTask.id && isActionableChunkStatus(chunk.status)))
@@ -178,9 +184,72 @@ export function HomeView({
   const energyRatio = totalEnergySeconds > 0 ? Math.max(0, Math.min(1, remainingEnergySeconds / totalEnergySeconds)) : 0;
   const energyPercent = Math.round(energyRatio * 100);
   const energyAngle = Math.max(0, Math.min(360, energyRatio * 360));
+  const energyHue = Math.max(0, Math.min(120, Math.round(energyRatio * 120)));
+  const ringAccentColor = `hsl(${energyHue} 74% 44%)`;
+  const ringTrackColor = `hsl(${energyHue} 44% 84%)`;
+  const ringGlowColor = `hsla(${energyHue}, 72%, 34%, 0.24)`;
+  const ringInnerBorderColor = `hsl(${energyHue} 34% 72%)`;
+  const dueCardBorderColor = `hsl(${energyHue} 48% 72%)`;
+  const dueCardBackgroundColor = `hsl(${energyHue} 74% 94%)`;
+  const dueCardTextColor = `hsl(${energyHue} 58% 28%)`;
   const currentQuestMonsterIcon = resolveCurrentQuestMonsterIcon(homeTask, homeTaskActionableChunks.length);
   const currentQuestMonsterRingStyle = {
-    background: `conic-gradient(#3ea2ff 0deg ${energyAngle}deg, #d8e6f6 ${energyAngle}deg 360deg)`
+    background: `conic-gradient(${ringAccentColor} 0deg ${energyAngle}deg, ${ringTrackColor} ${energyAngle}deg 360deg)`,
+    boxShadow: `inset 0 0 0 1px ${ringTrackColor}, 0 6px 12px ${ringGlowColor}`
+  };
+  const currentQuestMonsterCoreStyle = {
+    borderColor: ringInnerBorderColor
+  };
+  const dueCardStyle = {
+    borderColor: dueCardBorderColor,
+    background: dueCardBackgroundColor
+  };
+  const dueCardValueStyle = {
+    color: dueCardTextColor
+  };
+
+  const handleTaskMenuAction = (event: MouseEvent<HTMLButtonElement>, action: () => void) => {
+    event.preventDefault();
+    event.stopPropagation();
+    action();
+    const detailsElement = event.currentTarget.closest("details");
+    if (detailsElement) {
+      detailsElement.removeAttribute("open");
+    }
+  };
+
+  const clearDragState = () => {
+    setDraggingChunkId(null);
+    setDragOverChunkId(null);
+  };
+
+  const handleChunkDragStart = (event: DragEvent<HTMLLIElement>, chunkId: string) => {
+    event.dataTransfer.effectAllowed = "move";
+    event.dataTransfer.setData("text/plain", chunkId);
+    setDraggingChunkId(chunkId);
+    setDragOverChunkId(null);
+  };
+
+  const handleChunkDragOver = (event: DragEvent<HTMLLIElement>, targetChunkId: string) => {
+    if (!draggingChunkId || draggingChunkId === targetChunkId) {
+      return;
+    }
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "move";
+    if (dragOverChunkId !== targetChunkId) {
+      setDragOverChunkId(targetChunkId);
+    }
+  };
+
+  const handleChunkDrop = (event: DragEvent<HTMLLIElement>, taskId: string, targetChunkId: string) => {
+    event.preventDefault();
+    const draggedChunkId = draggingChunkId || event.dataTransfer.getData("text/plain");
+    if (!draggedChunkId || draggedChunkId === targetChunkId) {
+      clearDragState();
+      return;
+    }
+    onReorderTaskChunks(taskId, draggedChunkId, targetChunkId);
+    clearDragState();
   };
 
   return (
@@ -196,7 +265,6 @@ export function HomeView({
               <div className={getClassName("currentQuestTitleBlock")}>
                 <h2>{homeChunk.action}</h2>
               </div>
-              <strong className={getClassName("currentQuestEnergyValue")}>{`${energyPercent}%`}</strong>
               <p className={getClassName("timerValue")}>{formatClock(homeRemaining)}</p>
               <div className={getClassName("currentQuestMonsterWrap")}>
                 <div
@@ -204,23 +272,33 @@ export function HomeView({
                   style={currentQuestMonsterRingStyle}
                   aria-label={`퀘스트 에너지 ${energyPercent}%`}
                 >
-                  <div className={getClassName("currentQuestMonsterCore")}>
+                  <div className={getClassName("currentQuestMonsterCore")} style={currentQuestMonsterCoreStyle}>
                     <span className={getClassName("currentQuestMonster")} aria-hidden="true">{currentQuestMonsterIcon}</span>
+                    <span className={getClassName("currentQuestMonsterPercent")}>{`${energyPercent}%`}</span>
                   </div>
                 </div>
               </div>
             </div>
             <div className={getClassName("currentQuestInfoGrid")}>
               <p className={getClassName("currentQuestInfoItem")}>
-                <span className={getClassName("currentQuestInfoLabel")}>예상소요시간</span>
+                <span className={getClassName("currentQuestInfoLabel")}>
+                  <span className={getClassName("currentQuestInfoIcon")} aria-hidden="true">⏱</span>
+                  예상소요시간
+                </span>
                 <strong className={getClassName("currentQuestInfoValue")}>{expectedDurationText}</strong>
               </p>
-              <p className={getClassName("currentQuestInfoItem")}>
-                <span className={getClassName("currentQuestInfoLabel")}>마감시간</span>
-                <strong className={getClassName("currentQuestInfoValue")}>{dueAtText}</strong>
+              <p className={getClassName("currentQuestInfoItem")} style={dueCardStyle}>
+                <span className={getClassName("currentQuestInfoLabel")} style={dueCardValueStyle}>
+                  <span className={getClassName("currentQuestInfoIcon")} aria-hidden="true">📅</span>
+                  마감시간
+                </span>
+                <strong className={getClassName("currentQuestInfoValue")} style={dueCardValueStyle}>{dueAtText}</strong>
               </p>
               <p className={getClassName("currentQuestInfoItem")}>
-                <span className={getClassName("currentQuestInfoLabel")}>마감까지</span>
+                <span className={getClassName("currentQuestInfoLabel")}>
+                  <span className={getClassName("currentQuestInfoIcon")} aria-hidden="true">🔥</span>
+                  마감까지
+                </span>
                 <strong className={getClassName("currentQuestInfoValue")}>{dueRemainingText}</strong>
               </p>
             </div>
@@ -363,13 +441,27 @@ export function HomeView({
                       <span className={getClassName("homeTaskChevron")}>{isExpanded ? "▴" : "▾"}</span>
                     </span>
                   </button>
-                  <button
-                    type="button"
-                    className={joinClassNames(getClassName("smallButton"), getClassName("homeTaskEditButton"))}
-                    onClick={() => onEditTaskTotalMinutes(task)}
-                  >
-                    퀘스트 수정
-                  </button>
+                  <details className={getClassName("homeTaskMenu")}>
+                    <summary className={getClassName("homeTaskMenuTrigger")} aria-label="퀘스트 메뉴">
+                      ⋯
+                    </summary>
+                    <div className={getClassName("homeTaskMenuPanel")}>
+                      <button
+                        type="button"
+                        className={joinClassNames(getClassName("smallButton"), getClassName("homeTaskMenuItem"))}
+                        onClick={(event) => handleTaskMenuAction(event, () => onEditTaskTotalMinutes(task))}
+                      >
+                        수정
+                      </button>
+                      <button
+                        type="button"
+                        className={joinClassNames(getClassName("smallButtonDanger"), getClassName("homeTaskMenuItemDanger"))}
+                        onClick={(event) => handleTaskMenuAction(event, () => onDeleteTask(task))}
+                      >
+                        삭제
+                      </button>
+                    </div>
+                  </details>
                 </div>
                 {isExpanded ? (
                   <ul id={`home-task-chunks-${task.id}`} className={getClassName("homeTaskChunkList")}>
@@ -377,14 +469,27 @@ export function HomeView({
                       <li className={getClassName("homeTaskChunkEmpty")}>청크가 없습니다.</li>
                     ) : null}
                     {actionableTaskChunks.map((chunk) => {
-                      const remaining = remainingSecondsByChunk[chunk.id] ?? chunk.estMinutes * 60;
+                      const isDragging = draggingChunkId === chunk.id;
+                      const isDragOver = dragOverChunkId === chunk.id && draggingChunkId !== chunk.id;
                       return (
-                        <li key={chunk.id} className={getClassName("homeTaskChunkRow")}>
+                        <li
+                          key={chunk.id}
+                          className={joinClassNames(
+                            getClassName("homeTaskChunkRow"),
+                            getClassName("homeTaskChunkDraggable"),
+                            isDragging ? getClassName("homeTaskChunkDragging") : undefined,
+                            isDragOver ? getClassName("homeTaskChunkDragOver") : undefined
+                          )}
+                          draggable
+                          onDragStart={(event) => handleChunkDragStart(event, chunk.id)}
+                          onDragOver={(event) => handleChunkDragOver(event, chunk.id)}
+                          onDrop={(event) => handleChunkDrop(event, task.id, chunk.id)}
+                          onDragEnd={clearDragState}
+                        >
+                          <span className={getClassName("homeTaskChunkDragHandle")} aria-hidden="true">⠿</span>
                           <span className={getClassName("homeTaskChunkBody")}>
                             <span className={getClassName("homeTaskChunkAction")}>{chunk.action}</span>
-                            <span className={getClassName("homeTaskChunkInfo")}>
-                              {chunk.estMinutes}분 · {formatClock(remaining)} · {chunkStatusLabel(chunk.status)}
-                            </span>
+                            <span className={getClassName("homeTaskChunkInfo")}>{`${chunk.estMinutes}분`}</span>
                           </span>
                           <span className={getClassName("homeTaskChunkButtons")}>
                             <button

@@ -18,6 +18,7 @@ type MvpDashboardStyles = Record<string, string>;
 export interface TaskInputSectionProps {
   styles: MvpDashboardStyles;
   isComposerOpen: boolean;
+  composerMode: "create" | "edit";
   onCloseComposer: () => void;
   sttSupportState: "supported" | "unsupported";
   taskInput: string;
@@ -26,7 +27,7 @@ export interface TaskInputSectionProps {
   onStartStt: () => void;
   onStopStt: () => void;
   sttCapability: SttCapability;
-  onGenerateTask: () => Promise<boolean>;
+  onSubmitTask: () => Promise<boolean>;
   isGenerating: boolean;
   taskTotalMinutesInput: string;
   onSetTaskTotalMinutesFromScheduled: (value: number) => void;
@@ -73,6 +74,7 @@ export function TaskInputSection(props: TaskInputSectionProps) {
   const {
     styles,
     isComposerOpen,
+    composerMode,
     onCloseComposer,
     sttSupportState,
     taskInput,
@@ -81,7 +83,7 @@ export function TaskInputSection(props: TaskInputSectionProps) {
     onStartStt,
     onStopStt,
     sttCapability,
-    onGenerateTask,
+    onSubmitTask,
     isGenerating,
     taskTotalMinutesInput,
     onSetTaskTotalMinutesFromScheduled,
@@ -96,6 +98,11 @@ export function TaskInputSection(props: TaskInputSectionProps) {
   } = props;
   const scheduledForPickerRef = useRef<HTMLInputElement | null>(null);
   const dueAtPickerRef = useRef<HTMLInputElement | null>(null);
+  const isEditMode = composerMode === "edit";
+  const composerTitle = isEditMode ? "퀘스트 수정" : "AI 퀘스트 생성";
+  const composerActionLabel = isEditMode
+    ? (isGenerating ? "수정 중..." : "퀘스트 수정")
+    : (isGenerating ? "생성 중..." : "AI 퀘스트 생성");
   const scheduledForButtonValue = formatDateButtonValue(taskScheduledForInput);
   const dueAtButtonValue = formatDateButtonValue(taskDueAtInput);
   const durationButtonValue = formatMinutesButtonValue(taskTotalMinutesInput);
@@ -164,9 +171,9 @@ export function TaskInputSection(props: TaskInputSectionProps) {
     onSetTaskTotalMinutesFromScheduled(parsedMinutes);
   };
 
-  const handleGenerateClick = async (): Promise<void> => {
+  const handleSubmitClick = async (): Promise<void> => {
     try {
-      const isSuccess = await onGenerateTask();
+      const isSuccess = await onSubmitTask();
       if (isSuccess) {
         onCloseComposer();
       }
@@ -187,11 +194,11 @@ export function TaskInputSection(props: TaskInputSectionProps) {
             className={styles.questModal}
             role="dialog"
             aria-modal="true"
-            aria-label="AI 퀘스트 생성"
+            aria-label={composerTitle}
             onClick={(event) => event.stopPropagation()}
           >
             <header className={styles.questModalHeader}>
-              <h3>AI 퀘스트 생성</h3>
+              <h3>{composerTitle}</h3>
               <button
                 type="button"
                 className={styles.subtleButton}
@@ -334,10 +341,10 @@ export function TaskInputSection(props: TaskInputSectionProps) {
                 className={styles.primaryButton}
                 disabled={isGenerating}
                 onClick={() => {
-                  void handleGenerateClick();
+                  void handleSubmitClick();
                 }}
               >
-                {isGenerating ? "생성 중..." : "AI 퀘스트 생성"}
+                {composerActionLabel}
               </button>
             </div>
           </section>

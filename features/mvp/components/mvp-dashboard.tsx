@@ -227,6 +227,14 @@ export function MvpDashboard() {
   const [taskMetaFeedback, setTaskMetaFeedback] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isQuestComposerOpen, setIsQuestComposerOpen] = useState(false);
+  const [questComposerMode, setQuestComposerMode] = useState<"create" | "edit">("create");
+  const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
+  const [chunkEditDraft, setChunkEditDraft] = useState<{
+    chunkId: string;
+    action: string;
+    estMinutesInput: string;
+  } | null>(null);
+  const [chunkEditError, setChunkEditError] = useState<string | null>(null);
   const [, setFeedback] = useState<string>("오늘은 가장 작은 행동부터 시작해요.");
   const [clock, setClock] = useState(new Date());
   const [currentChunkId, setCurrentChunkId] = useState<string | null>(null);
@@ -321,6 +329,68 @@ export function MvpDashboard() {
 
   const mergeSttTranscript = (finalTranscript: string, interimTranscript: string): string =>
     [finalTranscript, interimTranscript].filter(Boolean).join(" ").trim();
+
+  const resetTaskComposerDraft = () => {
+    setTaskInput("");
+    setTaskTotalMinutesInput("");
+    setTaskScheduledForInput("");
+    setTaskDueAtInput("");
+    setTaskMetaFeedback(null);
+    taskMetaEditingFieldRef.current = null;
+    taskMetaLastDistinctEditedFieldRef.current = null;
+  };
+
+  const closeQuestComposer = () => {
+    setIsQuestComposerOpen(false);
+    setQuestComposerMode("create");
+    setEditingTaskId(null);
+    resetTaskComposerDraft();
+  };
+
+  const formatTaskIsoToLocalInput = (isoValue?: string): string => {
+    if (!isoValue) {
+      return "";
+    }
+    const parsedDate = new Date(isoValue);
+    if (Number.isNaN(parsedDate.getTime())) {
+      return "";
+    }
+    return formatDateTimeLocalInput(parsedDate);
+  };
+
+  const openQuestComposerForCreate = () => {
+    setQuestComposerMode("create");
+    setEditingTaskId(null);
+    resetTaskComposerDraft();
+    setIsQuestComposerOpen(true);
+  };
+
+  const openQuestComposerForEdit = (task: Task) => {
+    const fallbackStartAtMs = Date.parse(task.createdAt);
+    const fallbackStartAt = Number.isFinite(fallbackStartAtMs) ? new Date(fallbackStartAtMs) : new Date();
+    const normalizedSchedule = normalizeTaskScheduleIso({
+      scheduledFor: task.scheduledFor,
+      dueAt: task.dueAt,
+      totalMinutes: task.totalMinutes,
+      fallbackStartAt
+    });
+
+    setQuestComposerMode("edit");
+    setEditingTaskId(task.id);
+    setTaskInput(task.title);
+    setTaskTotalMinutesInput(String(task.totalMinutes));
+    setTaskScheduledForInput(formatTaskIsoToLocalInput(normalizedSchedule.scheduledFor));
+    setTaskDueAtInput(formatTaskIsoToLocalInput(normalizedSchedule.dueAt));
+    setTaskMetaFeedback(null);
+    taskMetaEditingFieldRef.current = null;
+    taskMetaLastDistinctEditedFieldRef.current = null;
+    setIsQuestComposerOpen(true);
+  };
+
+  const closeChunkEditModal = () => {
+    setChunkEditDraft(null);
+    setChunkEditError(null);
+  };
 
   useEffect(() => {
     const tick = window.setInterval(() => {
@@ -1071,13 +1141,9 @@ export function MvpDashboard() {
 
       setActiveTaskId(taskId);
       setCurrentChunkId(nextChunks[0]?.id ?? null);
-      setTaskInput("");
-      setTaskTotalMinutesInput("");
-      setTaskScheduledForInput("");
-      setTaskDueAtInput("");
-      setTaskMetaFeedback(null);
-      taskMetaEditingFieldRef.current = null;
-      taskMetaLastDistinctEditedFieldRef.current = null;
+      resetTaskComposerDraft();
+      setQuestComposerMode("create");
+      setEditingTaskId(null);
       setActiveTab("home");
       setFeedback(
         source === "local"
@@ -1116,6 +1182,114 @@ export function MvpDashboard() {
     } finally {
       setIsGenerating(false);
     }
+  };
+
+  const handleUpdateTask = async (): Promise<boolean> => {
+    const targetTask = editingTaskId ? tasks.find((task) => task.id === editingTaskId) : null;
+    if (!targetTask) {
+      setFeedback("수정할 퀘스트를 찾을 수 없습니다.");
+      return false;
+    }
+
+    const rawInput = taskInput.trim();
+    if (!rawInput) {
+      setFeedback("퀘스트 이름을 입력해주세요.");
+      return false;
+    }
+
+    if (taskMetaFeedback) {
+      setFeedback(`입력 단계 오류를 먼저 해결해주세요: ${taskMetaFeedback}`);
+      return false;
+    }
+
+    const normalizedTotalInput = taskTotalMinutesInput.trim();
+    const parsedTotalMinutes = normalizedTotalInput
+      ? parseTaskTotalMinutesInput(normalizedTotalInput)
+      : targetTask.totalMinutes;
+    if (parsedTotalMinutes === null) {
+      setFeedback(`총 소요 시간은 ${MIN_TASK_TOTAL_MINUTES}~${MAX_TASK_TOTAL_MINUTES}분 사이로 입력해주세요.`);
+      return false;
+    }
+
+    const fallbackStartAtMs = Date.parse(targetTask.createdAt);
+    const fallbackStartAt = Number.isFinite(fallbackStartAtMs) ? new Date(fallbackStartAtMs) : new Date();
+    const normalizedSchedule = normalizeTaskScheduleFromLocalInputs({
+      scheduledForInput: taskScheduledForInput,
+      dueAtInput: taskDueAtInput,
+      totalMinutes: parsedTotalMinutes,
+      fallbackStartAt
+    });
+    if (!normalizedSchedule) {
+      setFeedback("일정 시간 형식이 올바르지 않습니다. 날짜와 시간을 다시 확인해주세요.");
+      return false;
+    }
+
+    const taskHasExecutionLockedChunk = executionLockedTaskId === targetTask.id;
+    if (taskHasExecutionLockedChunk && parsedTotalMinutes < targetTask.totalMinutes) {
+      setFeedback("실행 중에는 과업 총 시간을 줄일 수 없습니다. 증가만 가능합니다.");
+      return false;
+    }
+
+    const currentBudgetChunks = getTaskBudgetedChunks(chunks, targetTask.id);
+    if (!isWithinTaskChunkBudget(currentBudgetChunks, parsedTotalMinutes)) {
+      setFeedback("현재 청크 시간 합계보다 작게 과업 총 시간을 줄일 수 없습니다.");
+      return false;
+    }
+
+    const safeTitle = buildTaskSummary(rawInput) || targetTask.title;
+    const titleChanged = safeTitle !== targetTask.title || safeTitle !== (targetTask.summary ?? targetTask.title);
+    const totalChanged = parsedTotalMinutes !== targetTask.totalMinutes;
+    const scheduleChanged = normalizedSchedule.scheduledFor !== targetTask.scheduledFor
+      || normalizedSchedule.dueAt !== targetTask.dueAt;
+
+    if (!titleChanged && !totalChanged && !scheduleChanged) {
+      setFeedback("변경된 내용이 없습니다.");
+      return false;
+    }
+
+    setTasks((prev) =>
+      prev.map((task) =>
+        task.id === targetTask.id
+          ? {
+              ...task,
+              title: safeTitle,
+              summary: safeTitle,
+              totalMinutes: parsedTotalMinutes,
+              scheduledFor: normalizedSchedule.scheduledFor,
+              dueAt: normalizedSchedule.dueAt
+            }
+          : task
+      )
+    );
+    setActiveTaskId(targetTask.id);
+    setActiveTab("home");
+    resetTaskComposerDraft();
+    setQuestComposerMode("create");
+    setEditingTaskId(null);
+    setFeedback("퀘스트를 수정했습니다.");
+
+    logEvent({
+      eventName: "task_time_updated",
+      source: "user",
+      taskId: targetTask.id,
+      meta: {
+        previousTotalMinutes: targetTask.totalMinutes,
+        nextTotalMinutes: parsedTotalMinutes,
+        updatedDuringRun: taskHasExecutionLockedChunk,
+        titleChanged,
+        scheduleChanged
+      }
+    });
+
+    return true;
+  };
+
+  const handleSubmitTask = (): Promise<boolean> => {
+    if (questComposerMode === "edit") {
+      return handleUpdateTask();
+    }
+
+    return handleGenerateTask();
   };
 
   const handleStartChunk = (chunkId: string) => {
@@ -1409,72 +1583,47 @@ export function MvpDashboard() {
   };
 
   const handleEditTaskTotalMinutes = (task: Task) => {
-    const nextTotalRaw = window.prompt(
-      `과업 총 시간(분)을 입력하세요. ${MIN_TASK_TOTAL_MINUTES}~${MAX_TASK_TOTAL_MINUTES}`,
-      String(task.totalMinutes)
-    );
-    if (!nextTotalRaw) {
+    openQuestComposerForEdit(task);
+  };
+
+  const handleDeleteTask = (task: Task) => {
+    if (executionLockedTaskId === task.id) {
+      setFeedback("실행 중인 퀘스트는 삭제할 수 없습니다. 먼저 일시정지 또는 완료하세요.");
       return;
     }
 
-    const parsedTotal = parseTaskTotalMinutesInput(nextTotalRaw);
-    if (parsedTotal === null) {
-      setFeedback(`총 소요 시간은 ${MIN_TASK_TOTAL_MINUTES}~${MAX_TASK_TOTAL_MINUTES}분 사이여야 합니다.`);
+    const confirmed = window.confirm(`"${task.title}" 퀘스트를 삭제할까요?`);
+    if (!confirmed) {
       return;
     }
 
-    const taskHasExecutionLockedChunk = executionLockedTaskId === task.id;
-    if (taskHasExecutionLockedChunk && parsedTotal < task.totalMinutes) {
-      setFeedback("실행 중에는 과업 총 시간을 줄일 수 없습니다. 증가만 가능합니다.");
-      return;
-    }
+    const targetChunkIds = chunks.filter((chunk) => chunk.taskId === task.id).map((chunk) => chunk.id);
+    const chunkIdSet = new Set(targetChunkIds);
 
-    const currentBudgetChunks = getTaskBudgetedChunks(chunks, task.id);
-    if (!isWithinTaskChunkBudget(currentBudgetChunks, parsedTotal)) {
-      setFeedback("현재 청크 시간 합계보다 작게 과업 총 시간을 줄일 수 없습니다.");
-      return;
-    }
-
-    if (parsedTotal === task.totalMinutes) {
-      return;
-    }
-
-    setTasks((prev) =>
-      prev.map((item) =>
-        item.id === task.id
-          ? (() => {
-              const fallbackStartAtMs = Date.parse(item.createdAt);
-              const fallbackStartAt = Number.isFinite(fallbackStartAtMs) ? new Date(fallbackStartAtMs) : new Date();
-              const normalizedSchedule = normalizeTaskScheduleIso({
-                scheduledFor: item.scheduledFor,
-                dueAt: item.dueAt,
-                totalMinutes: parsedTotal,
-                fallbackStartAt
-              });
-
-              return {
-                ...item,
-                totalMinutes: parsedTotal,
-                scheduledFor: normalizedSchedule.scheduledFor,
-                dueAt: normalizedSchedule.dueAt
-              };
-            })()
-          : item
-      )
-    );
-
-    logEvent({
-      eventName: "task_time_updated",
-      source: "user",
-      taskId: task.id,
-      meta: {
-        previousTotalMinutes: task.totalMinutes,
-        nextTotalMinutes: parsedTotal,
-        updatedDuringRun: taskHasExecutionLockedChunk
-      }
+    setTasks((prev) => prev.filter((item) => item.id !== task.id));
+    setChunks((prev) => prev.filter((chunk) => chunk.taskId !== task.id));
+    setTimerSessions((prev) => prev.filter((session) => !chunkIdSet.has(session.chunkId)));
+    setRemainingSecondsByChunk((prev) => {
+      const next = { ...prev };
+      targetChunkIds.forEach((chunkId) => {
+        delete next[chunkId];
+      });
+      return next;
     });
 
-    setFeedback(`과업 총 시간을 ${parsedTotal}분으로 업데이트하고 시작/마감 일정을 동기화했습니다.`);
+    if (activeTaskId === task.id) {
+      setActiveTaskId(null);
+    }
+    if (expandedHomeTaskId === task.id) {
+      setExpandedHomeTaskId(null);
+    }
+    if (currentChunkId && chunkIdSet.has(currentChunkId)) {
+      setCurrentChunkId(null);
+    }
+    delete gateMetricsRef.current.startClickCountByTaskId[task.id];
+    delete gateMetricsRef.current.firstStartLoggedByTaskId[task.id];
+    delete gateMetricsRef.current.recoveryClickCountByTaskId[task.id];
+    setFeedback(`퀘스트 "${task.title}"를 삭제했습니다.`);
   };
 
   const handleEditChunk = (chunk: Chunk) => {
@@ -1483,46 +1632,62 @@ export function MvpDashboard() {
       return;
     }
 
-    const nextAction = window.prompt("행동 청크를 수정하세요", chunk.action);
+    setChunkEditDraft({
+      chunkId: chunk.id,
+      action: chunk.action,
+      estMinutesInput: String(chunk.estMinutes)
+    });
+    setChunkEditError(null);
+  };
+
+  const handleSubmitChunkEdit = () => {
+    if (!chunkEditDraft) {
+      return;
+    }
+
+    const targetChunk = chunks.find((chunk) => chunk.id === chunkEditDraft.chunkId);
+    if (!targetChunk) {
+      setChunkEditError("수정할 미션을 찾을 수 없습니다.");
+      return;
+    }
+
+    const nextAction = chunkEditDraft.action.trim();
     if (!nextAction) {
+      setChunkEditError("미션 제목을 입력해주세요.");
       return;
     }
 
-    const nextMinutesRaw = window.prompt("예상 시간(2~15분)", String(chunk.estMinutes));
-    if (!nextMinutesRaw) {
-      return;
-    }
-
-    const parsedMinutes = Number(nextMinutesRaw);
+    const parsedMinutes = Number(chunkEditDraft.estMinutesInput);
     if (!Number.isFinite(parsedMinutes)) {
-      setFeedback("시간은 숫자로 입력해주세요.");
+      setChunkEditError("소요 시간은 숫자로 입력해주세요.");
       return;
     }
 
     const nextMinutes = clampMinuteInput(parsedMinutes);
-    const ownerTask = tasks.find((task) => task.id === chunk.taskId);
+    const ownerTask = tasks.find((task) => task.id === targetChunk.taskId);
     if (!ownerTask) {
+      setChunkEditError("미션 소유 퀘스트를 찾을 수 없습니다.");
       return;
     }
 
     const projectedBudgetChunks = [
-      ...getTaskBudgetedChunks(chunks, chunk.taskId, chunk.id),
+      ...getTaskBudgetedChunks(chunks, targetChunk.taskId, targetChunk.id),
       {
-        ...chunk,
+        ...targetChunk,
         estMinutes: nextMinutes
       }
     ];
     if (!isWithinTaskChunkBudget(projectedBudgetChunks, ownerTask.totalMinutes)) {
-      setFeedback("과업 총 시간 예산을 초과하여 청크 시간을 수정할 수 없습니다.");
+      setChunkEditError("과업 총 시간 예산을 초과하여 청크 시간을 수정할 수 없습니다.");
       return;
     }
 
     setChunks((prev) =>
       prev.map((item) =>
-        item.id === chunk.id
+        item.id === targetChunk.id
           ? {
               ...item,
-              action: nextAction.trim() || item.action,
+              action: nextAction,
               estMinutes: nextMinutes
             }
           : item
@@ -1530,20 +1695,61 @@ export function MvpDashboard() {
     );
 
     setRemainingSecondsByChunk((prev) => {
-      if (chunk.status === "done") {
+      if (targetChunk.status === "done") {
         return prev;
       }
 
-      const oldTotal = chunk.estMinutes * 60;
+      const oldTotal = targetChunk.estMinutes * 60;
       const newTotal = nextMinutes * 60;
-      const current = prev[chunk.id] ?? oldTotal;
+      const current = prev[targetChunk.id] ?? oldTotal;
       const ratio = oldTotal > 0 ? current / oldTotal : 1;
 
       return {
         ...prev,
-        [chunk.id]: Math.max(0, Math.round(newTotal * ratio))
+        [targetChunk.id]: Math.max(0, Math.round(newTotal * ratio))
       };
     });
+
+    setFeedback("미션 정보를 수정했습니다.");
+    closeChunkEditModal();
+  };
+
+  const handleReorderTaskChunks = (taskId: string, draggedChunkId: string, targetChunkId: string) => {
+    if (draggedChunkId === targetChunkId) {
+      return;
+    }
+    if (executionLockedTaskId === taskId) {
+      setFeedback("실행 중인 퀘스트는 청크 순서를 변경할 수 없습니다.");
+      return;
+    }
+
+    const orderedTaskChunks = orderChunks(chunks.filter((chunk) => chunk.taskId === taskId));
+    const fromIndex = orderedTaskChunks.findIndex((chunk) => chunk.id === draggedChunkId);
+    const toIndex = orderedTaskChunks.findIndex((chunk) => chunk.id === targetChunkId);
+    if (fromIndex < 0 || toIndex < 0) {
+      return;
+    }
+
+    const reorderedTaskChunks = [...orderedTaskChunks];
+    const [movedChunk] = reorderedTaskChunks.splice(fromIndex, 1);
+    if (!movedChunk) {
+      return;
+    }
+    reorderedTaskChunks.splice(toIndex, 0, movedChunk);
+
+    const nextOrderById = new Map(reorderedTaskChunks.map((chunk, index) => [chunk.id, index + 1]));
+    setChunks((prev) =>
+      prev.map((chunk) =>
+        chunk.taskId === taskId && nextOrderById.has(chunk.id)
+          ? {
+              ...chunk,
+              order: nextOrderById.get(chunk.id) ?? chunk.order
+            }
+          : chunk
+      )
+    );
+
+    setFeedback("청크 순서를 변경했습니다.");
   };
 
   const handleDeleteChunk = (chunk: Chunk) => {
@@ -1922,7 +2128,8 @@ export function MvpDashboard() {
         <TaskInputSection
           styles={styles}
           isComposerOpen={isQuestComposerOpen}
-          onCloseComposer={() => setIsQuestComposerOpen(false)}
+          composerMode={questComposerMode}
+          onCloseComposer={closeQuestComposer}
           sttSupportState={sttSupportState}
           taskInput={taskInput}
           onTaskInputChange={setTaskInput}
@@ -1930,7 +2137,7 @@ export function MvpDashboard() {
           onStartStt={handleStartStt}
           onStopStt={handleStopStt}
           sttCapability={sttCapability}
-          onGenerateTask={handleGenerateTask}
+          onSubmitTask={handleSubmitTask}
           isGenerating={isGenerating}
           taskTotalMinutesInput={taskTotalMinutesInput}
           onSetTaskTotalMinutesFromScheduled={handleSetTaskTotalMinutesFromScheduled}
@@ -1943,6 +2150,77 @@ export function MvpDashboard() {
           sttTranscript={sttTranscript}
           sttError={sttError}
         />
+
+        {chunkEditDraft ? (
+          <div
+            className={styles.questModalBackdrop}
+            onClick={closeChunkEditModal}
+            role="presentation"
+          >
+            <section
+              className={styles.questModal}
+              role="dialog"
+              aria-modal="true"
+              aria-label="미션 수정"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <header className={styles.questModalHeader}>
+                <h3>미션 수정</h3>
+                <button
+                  type="button"
+                  className={styles.subtleButton}
+                  onClick={closeChunkEditModal}
+                  aria-label="미션 수정 모달 닫기"
+                >
+                  ✕
+                </button>
+              </header>
+
+              <div className={styles.chunkEditForm}>
+                <label className={styles.metaField} htmlFor="chunk-edit-action">
+                  <span>미션 제목</span>
+                  <input
+                    id="chunk-edit-action"
+                    value={chunkEditDraft.action}
+                    onChange={(event) =>
+                      setChunkEditDraft((prev) => (prev ? { ...prev, action: event.target.value } : prev))
+                    }
+                    className={styles.input}
+                    placeholder="미션 제목"
+                  />
+                </label>
+
+                <label className={styles.metaField} htmlFor="chunk-edit-minutes">
+                  <span>소요 시간(분)</span>
+                  <input
+                    id="chunk-edit-minutes"
+                    type="number"
+                    min={MIN_CHUNK_EST_MINUTES}
+                    max={MAX_CHUNK_EST_MINUTES}
+                    value={chunkEditDraft.estMinutesInput}
+                    onChange={(event) =>
+                      setChunkEditDraft((prev) => (prev ? { ...prev, estMinutesInput: event.target.value } : prev))
+                    }
+                    className={styles.input}
+                    inputMode="numeric"
+                  />
+                </label>
+              </div>
+
+              {chunkEditError ? <p className={styles.errorText}>{chunkEditError}</p> : null}
+
+              <div className={styles.questModalFooter}>
+                <button
+                  type="button"
+                  className={styles.primaryButton}
+                  onClick={handleSubmitChunkEdit}
+                >
+                  미션 저장
+                </button>
+              </div>
+            </section>
+          </div>
+        ) : null}
 
         {activeTab === "home" || activeTab === "stats" ? (
           <section className={styles.statusSection}>
@@ -2031,6 +2309,8 @@ export function MvpDashboard() {
             onRechunk={handleRechunk}
             onReschedule={handleReschedule}
             onEditTaskTotalMinutes={handleEditTaskTotalMinutes}
+            onDeleteTask={handleDeleteTask}
+            onReorderTaskChunks={handleReorderTaskChunks}
             onEditChunk={handleEditChunk}
             onDeleteChunk={handleDeleteChunk}
           />
@@ -2111,7 +2391,7 @@ export function MvpDashboard() {
         <button
           type="button"
           className={styles.tabCreateButton}
-          onClick={() => setIsQuestComposerOpen(true)}
+          onClick={openQuestComposerForCreate}
           aria-label="AI 퀘스트 생성 모달 열기"
           title="AI 퀘스트 생성"
         >

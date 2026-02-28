@@ -121,6 +121,23 @@ Last Updated: 2026-02-28
   - `npm run typecheck`
   - `npm run lint`
   - `npm run test:mvp` (37 tests)
+- Round 10 편집 플로우 통합 완료:
+  - 대기중 퀘스트 단일 `퀘스트 수정` 버튼 제거, 메뉴 아이콘(`수정/삭제`)으로 전환
+  - 퀘스트 추가 모달 `create/edit` 모드 분리:
+    - 생성 모드: `AI 퀘스트 생성`
+    - 편집 모드: `퀘스트 수정`
+  - 청크 수정에서 `prompt` 제거, 팝업 폼(미션 제목/소요시간)으로 전환
+  - 대기 목록 펼침 시 청크 DnD 순서 변경 지원
+  - 펼침 청크 표기를 `미션 제목 + 소요시간(분)`만 남기도록 단순화
+  - Playwright 캡처 추가:
+    - `output/playwright/round14-waiting-menu.png`
+    - `output/playwright/round14-quest-edit-modal.png`
+    - `output/playwright/round14-chunk-edit-modal.png`
+    - `output/playwright/round14-after-dnd.png`
+  - 검증 통과:
+    - `npm run typecheck`
+    - `npm run lint`
+    - `npm run test:mvp`
 
 ### 🟡 IN PROGRESS
 - `/docs/ui/main_ui.png` 대비 헤더 픽셀 미세 보정(폰트 렌더링 차이) 수동 QA
