@@ -1,6 +1,6 @@
 # ADHDTime PRD (MVP 정합본)
 
-문서 버전: v3.1  
+문서 버전: v3.2  
 작성일: 2026-02-28  
 연계 문서: `docs/USECASE.md`, `docs/DEVELOPMENT_PLAN.md`, `docs/ui.png`  
 대상: **Next.js 기반 모바일 우선 웹앱** MVP
@@ -68,6 +68,11 @@ ADHDTime은 사용자가 과업을 직접 등록하고 총소요시간(`totalMin
 - 구독 기반 기능 게이트
 - 클라우드 동기화(선택)
 
+### 3.2.1 현재 구현 동기화 노트 (2026-02-28)
+
+- STT/알림/동기화는 MVP 게이트 대상은 아니지만, UI 및 로컬 mock 경로는 이미 구현되어 있다.
+- 릴리즈 게이트 평가는 코어 루프(P0) 기준으로 하며, 실험 기능은 기본 비핵심 경로로 취급한다.
+
 ### 3.3 제외 범위 (이번 턴)
 
 - 소셜/레이드/랭킹
@@ -92,7 +97,7 @@ ADHDTime은 사용자가 과업을 직접 등록하고 총소요시간(`totalMin
 
 - 설명: 텍스트로 과업을 직접 등록하고 `totalMinutes`를 설정한다.
 - AC
-  - `title`, `totalMinutes` 입력만으로 Task 생성 가능
+  - `title` 입력으로 Task 생성 가능하며, `totalMinutes` 미입력 시 기본값 60분을 적용
   - `totalMinutes` 허용 범위는 10~480
   - `scheduledFor`, `dueAt`는 선택 입력
   - 입력 실패 시 재시도 동선 1탭 이내
@@ -215,11 +220,13 @@ type Chunk = {
   action: string;
   estMinutes: number; // 2~15
   status: "todo" | "running" | "paused" | "done" | "abandoned" | "archived";
+  iconKey?: string;
   createdAt: string;
   startedAt?: string;
   completedAt?: string;
   actualSeconds?: number;
   parentChunkId?: string; // 재청킹으로 생성된 경우 원본 chunk
+  rescheduledFor?: string; // Task 재일정 시 청크 이동 메타(보조 필드)
 };
 
 type TimerSession = {
@@ -293,23 +300,25 @@ type StatsSnapshot = {
 
 ## 8. 이벤트 택소노미 (MVP 필수)
 
-필수 이벤트:
+필수 이벤트(현재 구현 기준):
 
 - `task_created`
 - `task_time_updated`
 - `task_rescheduled`
+- `reschedule_requested`
 - `chunk_generated`
-- `chunk_edited`
 - `chunk_time_adjusted`
 - `chunk_started`
 - `chunk_paused`
 - `chunk_completed`
-- `chunk_abandoned`
 - `rechunk_requested`
 - `xp_gained`
 - `level_up`
 - `haptic_fired`
 - `safety_blocked`
+
+참고:
+- `chunk_edited`, `chunk_abandoned`는 문서 요구사항에 포함되나, 현재 계측은 우선순위가 낮은 후속 항목으로 남아 있다.
 
 공통 필드:
 
@@ -362,8 +371,8 @@ type StatsSnapshot = {
 1. 플랫폼: Next.js 기반 모바일 우선 웹앱
 2. 저장: 로컬 우선(IndexedDB/LocalStorage) + 추후 서버 확장
 3. AI 전략: 로컬 패턴 우선, AI 폴백
-4. 기본 알림 전략: MVP는 앱 활성 중 햅틱 중심, 시스템 알림은 P1
-5. 음성 입력: MVP는 UI 슬롯만, 실제 STT는 P1
+4. 기본 알림 전략: MVP 코어 게이트는 햅틱 중심이며, 알림 UI/권한 경로는 실험 기능으로 포함
+5. 음성 입력: MVP 코어 게이트와 분리된 실험 기능으로 STT 경로를 포함
 6. 문구 원칙: 실패 대신 조정/복귀 중심 언어 사용
-7. 재일정 정책: 청크 단위 재일정은 미지원, Task 단위 재일정만 지원
+7. 재일정 정책: Task 단위 재일정을 기본으로 하되 청크 이동 메타(`rescheduledFor`)를 보조 저장
 8. 시간 필드 원칙: 실행 시각은 `*At`, 계획 시각은 `scheduledFor`로 통일

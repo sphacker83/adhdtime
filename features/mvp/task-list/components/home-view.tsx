@@ -152,7 +152,7 @@ export function HomeView({
 
     return followingChunks.slice(0, 3);
   })();
-  const currentQuestTitle = homeTask?.title ?? homeChunk?.action ?? "미정";
+  const currentQuestTitle = homeChunk ? (homeTask?.title ?? homeChunk.action) : "없음";
   const expectedDurationText = homeTask ? `${homeTaskBudgetUsage}/${homeTask.totalMinutes}분` : "--";
   const dueAtText = homeTask?.dueAt ? formatOptionalDateTime(homeTask.dueAt) : "--";
   const dueRemainingText = formatRemainingToDeadline(homeTask?.dueAt);
@@ -267,7 +267,7 @@ export function HomeView({
         )}
       </section>
 
-      <section className={getClassName("waitingSection")}>
+      <section className={joinClassNames(getClassName("listCard"), getClassName("waitingSection"))}>
         <header className={getClassName("waitingHeader")}>
           <h3>대기 중인 퀘스트</h3>
           <p>{waitingTasks.length}개 · 완료율 {completionRate}%</p>

@@ -1418,7 +1418,7 @@
 .waitingSection {
   display: grid;
   gap: 6px;
-  padding: 0 1px;
+  padding: 12px;
 }
 
 .waitingHeader {
@@ -1426,7 +1426,7 @@
   align-items: flex-end;
   justify-content: space-between;
   gap: 8px;
-  padding: 0 1px;
+  padding: 0;
 }
 
 .waitingHeader h3 {
@@ -1912,10 +1912,9 @@
 
 .shell {
   --layout-max-width: 100%;
-  --header-height: 92px;
-  --tab-height: 78px;
+  --tab-height: 52px;
   min-height: 100dvh;
-  padding: 0 0 calc(var(--tab-height) + env(safe-area-inset-bottom) + 2px);
+  padding: 0 0 calc(var(--tab-height) + 6px);
   overflow-x: hidden;
   background: linear-gradient(180deg, #f4f7fc 0%, #e7eef8 100%);
 }
@@ -1929,8 +1928,8 @@
   top: 0;
   width: 100%;
   margin: 0;
-  min-height: calc(var(--header-height) + env(safe-area-inset-top));
-  padding: calc(4px + env(safe-area-inset-top)) 12px 4px;
+  min-height: 0;
+  padding: 8px 12px 3px;
   border-radius: 0;
   border: 1px solid #d4dfef;
   border-top: 0;
@@ -1939,30 +1938,35 @@
   background: #f1f5fb;
   box-shadow: 0 1px 6px rgba(27, 47, 82, 0.08);
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   grid-template-rows: auto auto;
-  gap: 2px;
+  justify-content: normal;
+  justify-items: stretch;
+  align-items: stretch;
+  gap: 3px;
   z-index: 20;
 }
 
 .topBarMain {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 3px;
+  align-items: end;
+  gap: 8px;
+  width: 100%;
 }
 
 .titleGroup {
   min-width: 0;
   display: grid;
-  gap: 0;
+  gap: 2px;
 }
 
 .topBar .brandTitle {
   margin: 0;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font-size: clamp(1.54rem, 6vw, 1.82rem);
+  gap: 7px;
+  font-size: clamp(1.66rem, 6.6vw, 2rem);
   line-height: 1;
   font-weight: 800;
   letter-spacing: -0.02em;
@@ -1977,7 +1981,7 @@
 
 .levelSummary {
   margin: 0;
-  font-size: 0.86rem;
+  font-size: 0.95rem;
   line-height: 1.15;
   font-weight: 700;
   color: #1f2d43;
@@ -1989,9 +1993,9 @@
 
 .progressGroup {
   display: inline-flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: flex-end;
-  gap: 2px;
+  gap: 5px;
 }
 
 .progressTitle {
@@ -1999,35 +2003,36 @@
   display: grid;
   justify-items: end;
   text-align: right;
-  font-size: 8px;
+  font-size: 10px;
   line-height: 1.1;
   font-weight: 800;
   color: #314a72;
 }
 
 .progressTitle span {
-  font-size: 6px;
+  font-size: 8px;
   color: #7284a1;
 }
 
 .progressRing {
-  width: 40px;
-  height: 40px;
+  width: 46px;
+  height: 46px;
   border-radius: 999px;
-  padding: 2px;
+  padding: 3px;
   flex: none;
 }
 
 .progressRingInner strong {
-  font-size: 9px;
+  font-size: 11px;
 }
 
 .headerDateTime {
   margin: 0;
-  padding-top: 2px;
+  width: 100%;
+  padding-top: 3px;
   border-top: 1px solid #dbe5f3;
-  font-size: 8px;
-  line-height: 1.2;
+  font-size: 14px;
+  line-height: 1.25;
   font-weight: 700;
   color: #617390;
 }
@@ -2035,7 +2040,7 @@
 .app {
   position: relative;
   width: 100%;
-  margin: 6px 0 0;
+  margin: 4px 0 0;
   padding: 0 12px;
   display: grid;
   align-content: start;
@@ -2051,6 +2056,14 @@
   margin: 0;
   font-size: 1.45rem;
   line-height: 1.15;
+}
+
+.statusCardTitle {
+  grid-column: 1 / -1;
+  margin: 0 0 4px;
+  font-size: 1.45rem;
+  line-height: 1.12;
+  color: #1f2a3d;
 }
 
 .statusCard,
@@ -2283,32 +2296,37 @@
 
 .floatingQuestButton {
   position: fixed;
-  right: clamp(12px, 3vw, 24px);
-  bottom: calc(var(--tab-height) + env(safe-area-inset-bottom) + 10px);
-  height: 52px;
-  padding: 0 16px 0 13px;
+  left: clamp(12px, 3vw, 24px);
+  right: auto;
+  bottom: calc(var(--tab-height) + 10px);
+  width: 94px;
+  height: 94px;
+  padding: 10px 8px;
   border: 1px solid #2f74be;
-  border-radius: 999px;
+  border-radius: 20px;
   background: linear-gradient(180deg, #4fb4ff 0%, #2d84d9 100%);
   box-shadow: 0 12px 22px rgba(33, 99, 172, 0.28);
   color: #fff;
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
+  display: grid;
+  grid-template-rows: auto auto;
+  justify-items: center;
+  align-content: center;
+  gap: 4px;
   cursor: pointer;
   z-index: 35;
   font-weight: 800;
-  font-size: 13px;
+  font-size: 11px;
 }
 
 .floatingQuestButtonIcon {
-  font-size: 21px;
+  font-size: 34px;
   line-height: 1;
 }
 
 .floatingQuestButtonLabel {
-  line-height: 1;
-  white-space: nowrap;
+  line-height: 1.1;
+  text-align: center;
+  white-space: normal;
 }
 
 .floatingQuestButton:focus-visible {
@@ -2318,7 +2336,7 @@
 
 .questModalBackdrop {
   z-index: 55;
-  padding: 0 12px calc(var(--tab-height) + env(safe-area-inset-bottom) + 8px);
+  padding: 0 12px calc(var(--tab-height) + 8px);
 }
 
 .questModal {
@@ -2340,21 +2358,34 @@
   bottom: 0;
   transform: none;
   width: 100%;
-  min-height: calc(var(--tab-height) + env(safe-area-inset-bottom));
-  padding: 6px 10px calc(2px + env(safe-area-inset-bottom));
+  height: var(--tab-height);
+  min-height: var(--tab-height);
+  padding: 0 10px;
   border-radius: 0;
   border: 0;
   border-top: 1px solid #cdd9eb;
   background: #fff;
   box-shadow: 0 -6px 18px rgba(22, 39, 66, 0.14);
+  display: flex;
+  justify-content: space-between;
   gap: 8px;
   z-index: 70;
+  align-items: stretch;
 }
 
 .tabButton,
 .tabButtonActive {
-  height: 52px;
+  flex: 1 1 0;
+  min-width: 0;
+  height: var(--tab-height);
   border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 2px;
+  padding: 0;
+  line-height: 1;
 }
 
 .tabButton {
@@ -2381,8 +2412,7 @@
 
 @media (min-width: 768px) {
   .shell {
-    --header-height: 96px;
-    --tab-height: 80px;
+    --tab-height: 52px;
   }
 
   .app {
@@ -2394,6 +2424,19 @@
 }
 
 @media (max-width: 420px) {
+  .topBar {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .topBar .brandTitle {
+    font-size: clamp(1.5rem, 6.4vw, 1.82rem);
+  }
+
+  .headerDateTime {
+    font-size: 13px;
+  }
+
   .currentQuestInfoGrid {
     grid-template-columns: 1fr;
   }

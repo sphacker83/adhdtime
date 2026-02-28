@@ -1941,10 +1941,8 @@ export function MvpDashboard() {
 
         {activeTab === "home" || activeTab === "stats" ? (
           <section className={styles.statusSection}>
-            <header className={styles.sectionHeader}>
-              <h2>캐릭터 상태</h2>
-            </header>
             <div className={styles.statusCard}>
+              <h2 className={styles.statusCardTitle}>캐릭터 상태</h2>
               <div className={styles.levelBlock}>
                 <div className={styles.characterAvatar} aria-hidden="true">🧙</div>
                 <p className={styles.levelLabel}>레벨 {stats.level}</p>

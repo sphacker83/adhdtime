@@ -37,17 +37,39 @@ Last Updated: 2026-02-28
   - 하단 탭바 하단 여백 누적 해소(`shell padding`, `tabBar padding` 재조정)
   - 모달 오픈 시 탭바 가림 방지(z-index 재정렬)
   - 현재 퀘스트의 `현재 미션`, `1개 +`, `대기` 칩 제거
+- Round 3 UI 보정 적용:
+  - 헤더 내부 정렬 재조정(타이틀/달성도/시간줄)
+  - 시간줄 폰트 확대 및 헤더 하단 공백 축소
+  - 탭바 높이(52px 버튼 기준) 정합화 + 버튼 수직 정렬 보정
+  - `퀘스트 : 없음` fallback 고정
+  - `캐릭터 상태` 타이틀 카드 내부 이동
+  - `대기 중인 퀘스트` 섹션 카드 내부 구조 통일
+  - 퀘스트 생성 FAB 좌하단 이동 + 세로 레이아웃(큰 아이콘) 적용
 - Playwright 실측 검증 완료:
   - `output/playwright/before-fix-home.png`
   - `output/playwright/after-fix-home.png`
   - `output/playwright/after-fix-modal-open.png`
+  - `output/playwright/after-plan-home.png`
+  - `output/playwright/after-plan-modal.png`
+  - `output/playwright/after-plan-home-v2.png`
+  - `output/playwright/post-fix-home-current.png`
+  - `output/playwright/post-fix-home-current-v2.png`
+- 최종 레이아웃 충돌 해소:
+  - 헤더 `display:grid`에 남아 있던 `justify-content: space-between` 잔존값 제거
+  - 헤더 시간줄 width를 100%로 고정해 좌우 full-width 정렬 확보
+  - 하단 탭바를 `display:flex`, `height: 52px`로 고정해 버튼/컨테이너 높이 불일치 해소
+- 상위 문서 동기화 완료:
+  - `docs/PRD.md` v3.2 반영
+  - `docs/DEVELOPMENT_PLAN.md` v2.2 반영
+- 문서 체계 정리:
+  - 비어 있던 사이드 플랜 트랙 `dev/active/task-json-preset-scoring-side-plan`을 `dev/archive/`로 이동
 - 검증 통과:
   - `npm run typecheck`
   - `npm run lint`
   - `npm run test:mvp` (37 tests)
 
 ### 🟡 IN PROGRESS
-- 홈/할일/스탯/설정 탭에서 플로팅 버튼 시각 QA(최종 확인)
+- `/docs/ui/main_ui.png` 대비 헤더 픽셀 미세 보정(폰트 렌더링 차이) 수동 QA
 
 ### ⚠️ BLOCKERS
 - `/docs/ui/main_ui.png` 원본 폰트/디자인 토큰 미제공으로 픽셀 단위 100% 동일성은 수동 미세 보정 필요

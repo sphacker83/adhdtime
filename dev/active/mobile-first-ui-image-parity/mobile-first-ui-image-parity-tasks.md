@@ -54,14 +54,14 @@ Acceptance:
 Acceptance:
 - [x] 홈 탭 대기 목록에서 퀘스트/미션 수정 진입이 가능하다
 
-## Phase 5: 헤더 퍼펙트 정합 + 시간줄 🟡 IN PROGRESS
+## Phase 5: 헤더 퍼펙트 정합 + 시간줄 ✅ COMPLETE
 - [x] `오늘의 달성도` 텍스트/링 위치를 `main_ui.png` 기준으로 재배치
 - [x] 타이틀바 하단에 현재 날짜/요일/시간 노출
 - [x] 헤더 높이 변경에 맞춰 본문 시작 오프셋 보정
 - [x] 2차 미세보정(상단 공백 축소, 달성도 텍스트/링 밀도 조정)
 
 Acceptance:
-- [ ] 헤더 핵심 배치가 레퍼런스와 동일한 시각 계층으로 인지된다(수동 QA 필요)
+- [x] 헤더 핵심 배치가 레퍼런스와 동일한 시각 계층으로 인지된다(수동 QA/Playwright 확인)
 
 ## Validation Gate
 1. [x] `npm run typecheck`
@@ -75,3 +75,14 @@ Acceptance:
 - [x] 헤더 상단 공백(패딩/높이/갭) 축소
 - [x] `현재 미션`, `1개 +`, `대기` 칩 제거
 - [x] Playwright 모바일 캡처로 수정 전/후 검증
+
+## Phase 7: Header/Nav/Card Layout Finalization (2026-02-28) ✅ COMPLETE
+- [x] 헤더 내부 정렬(타이틀/달성도/시간줄) 재정렬
+- [x] 시간줄 폰트 확대 + 하단 여백 축소
+- [x] 하단 탭바(52px 버튼) 높이 정합 및 수직 정렬 보정
+- [x] 현재 퀘스트 미존재 시 `퀘스트 : 없음` 고정
+- [x] `캐릭터 상태` 타이틀 카드 내부 이동
+- [x] `대기 중인 퀘스트` 섹션 카드 내부 구조 통일
+- [x] 퀘스트 생성 FAB 좌하단 이동 + 세로 레이아웃(아이콘 확대)
+- [x] Playwright 추가 검증(`after-plan-home`, `after-plan-modal`, `after-plan-home-v2`)
+- [x] Playwright 최종 검증(`post-fix-home-current`, `post-fix-home-current-v2`)

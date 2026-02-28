@@ -1,9 +1,9 @@
 # ADHDTime 개발 플랜 (MVP 실행안)
 
-문서 버전: v2.1  
-작성일: 2026-02-27  
-Last Updated: 2026-02-27  
-기준 문서: `docs/PRD.md` v3.1, `docs/USECASE.md` v2.1
+문서 버전: v2.2  
+작성일: 2026-02-28  
+Last Updated: 2026-02-28  
+기준 문서: `docs/PRD.md` v3.2, `docs/USECASE.md` v2.1
 
 ---
 
@@ -25,11 +25,11 @@ Last Updated: 2026-02-27
 
 - 플랫폼: Next.js(App Router) 기반 모바일 우선 웹앱
 - 저장: 로컬 우선(IndexedDB/LocalStorage)
-- 과업 생성: `title` + `totalMinutes` 필수
+- 과업 생성: `title` 필수, `totalMinutes` 미입력 시 기본 60분
 - 청킹: 로컬 패턴 우선 + AI 폴백, `sum(chunks.estMinutes) <= totalMinutes` 강제
-- 재일정: 청크 단위 미지원, Task 단위만 지원
+- 재일정: Task 단위 기준 + 청크 이동 메타(`rescheduledFor`) 보조 저장
 - 시간 필드: `createdAt/scheduledFor/startedAt/dueAt/completedAt` 정합 규칙 고정
-- 알림(STT 포함): P1
+- 알림/STT/동기화: 코어 게이트 외 실험 경로로 UI/로컬 mock 포함
 - 범위 원칙: P0 외 요구사항은 백로그로 이관
 
 ---
@@ -37,8 +37,14 @@ Last Updated: 2026-02-27
 ## 3. 우선순위 정책
 
 - P0 must: FR-01 ~ FR-09, FR-11 ~ FR-12
-- P1 later: FR-10(알림), STT, 외부 동기화/구독
+- P1 later: 코어 게이트 밖 고도화(실알림 품질/고급 STT/외부 동기화/구독)
 - 원칙: 릴리즈 게이트와 직접 연결된 항목을 먼저 구현
+
+## 3.2 문서-구현 동기화 포인트 (2026-02-28)
+
+- 이벤트 계약은 현재 구현 이벤트명을 기준으로 정렬한다.
+- `chunk_edited`, `chunk_abandoned` 계측은 후속 우선순위로 분리한다.
+- UI parity 라운드에서 반응형/헤더/탭바/FAB 레이아웃 보정은 P0 품질 항목으로 취급한다.
 
 ## 3.1 FR 진행 상태 동기화 (Round 2 확정)
 
@@ -250,7 +256,7 @@ Last Updated: 2026-02-27
 
 ---
 
-## 10. P1 백로그 (명시적 제외)
+## 10. P1 백로그 (코어 게이트 제외)
 
 - FR-10 알림
 - 음성 입력(STT)
