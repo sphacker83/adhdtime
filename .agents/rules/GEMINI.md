@@ -1,13 +1,13 @@
-# GEMINI.md
+# AGENT_WORKFLOWS.md
 
-이 파일은 이 저장소에서 Gemini 에이전트가 `.gemini` 자산(스킬/훅/에이전트/명령어/Dev Docs)을 최대한 활용하도록 하는 운영 규칙입니다.
+이 파일은 이 저장소에서 Gemini 에이전트가 `.agents/workflows` 자산(스킬/훅/에이전트/명령어/Dev Docs)을 최대한 활용하도록 하는 운영 규칙입니다.
 
 ## 1) 기본 원칙
 
 - 모든 응답은 기본적으로 한국어로 작성한다.
 - 프로젝트 구조를 추측하지 않는다. 필요 정보가 없으면 먼저 확인한다.
 - 단순 수정은 빠르게 처리하고, 복잡한 작업은 문서화부터 시작한다.
-- `.gemini`는 "있으면 참고"가 아니라 "기본 워크플로우"로 사용한다.
+- `.agents/workflows`는 "있으면 참고"가 아니라 "기본 워크플로우"로 사용한다.
 
 ## 2) 작업 시작 체크리스트
 
@@ -19,7 +19,7 @@
 4. 복잡 작업이면 `dev/active/...` 3파일(plan/context/tasks)부터 만들거나 갱신한다.
 5. 구현 후에는 `context/tasks`를 최신 상태로 업데이트한다.
 
-## 3) 스킬 사용 규칙 (`.gemini/skills`)
+## 3) 스킬 사용 규칙 (`.agents/workflows/skills`)
 
 ### 3-1. 스킬 선택 우선순위
 
@@ -59,7 +59,7 @@
 - 별도 디렉터리와 3파일을 동일 규칙으로 유지한다.
 - 우선순위는 `P0/P1/P2`로 명시한다.
 
-## 5) 훅 사용 규칙 (`.gemini/hooks`, `.gemini/settings.json`)
+## 5) 훅 사용 규칙 (`.agents/workflows/hooks`, `.agents/workflows/settings.json`)
 
 현재 기본 훅 구성:
 
@@ -69,12 +69,12 @@
 
 원칙:
 
-- 훅/설정 작업 시 `GEMINI_INTEGRATION_GUIDE.md` 절차를 따른다.
+- 훅/설정 작업 시 `AGENT_WORKFLOWS_INTEGRATION_GUIDE.md` 절차를 따른다.
 - `settings.json`을 통째로 덮어쓰지 않고 필요한 훅 섹션만 병합한다.
 - 훅 복사 후 실행 권한을 확인한다(`chmod +x`).
-- TypeScript 훅은 의존성 설치 여부를 확인한다(`.gemini/hooks/package.json`, `npm install`).
+- TypeScript 훅은 의존성 설치 여부를 확인한다(`.agents/workflows/hooks/package.json`, `npm install`).
 
-## 6) 에이전트 사용 규칙 (`.gemini/agents`)
+## 6) 에이전트 사용 규칙 (`.agents/workflows/agents`)
 
 - 복잡하고 다단계인 작업은 전용 에이전트 사용을 우선 검토한다.
 - 일반적으로 바로 사용 가능한 에이전트:
@@ -94,7 +94,7 @@
 ### 6-2. 에이전트 스펙 주입 원칙(필수)
 
 - 에이전트 호출 시 이름만 전달하지 않는다.
-- 실행 전에 반드시 해당 에이전트 파일(`.gemini/agents/<agent-name>.md`)을 읽고, 핵심 규칙/절차/출력 형식을 호출 메시지에 반영한다.
+- 실행 전에 반드시 해당 에이전트 파일(`.agents/workflows/agents/<agent-name>.md`)을 읽고, 핵심 규칙/절차/출력 형식을 호출 메시지에 반영한다.
 - 최소 포함 요소:
   - 책임 범위(파일/기능)
   - 강제 규칙(아키텍처/테스트/DI/문서화 등)
@@ -121,7 +121,7 @@
   - 세션 마감/인수인계: `/dev-docs-update` 또는 동등 절차로 최신 상태 동기화
   - 게이트 미통과(단순/단일 파일/짧은 수정): Dev Docs 생략 가능
 
-## 7) 슬래시 명령어 활용 (`.gemini/commands`)
+## 7) 슬래시 명령어 활용 (`.agents/workflows/commands`)
 
 - 계획 수립 시작: `/dev-docs`
 - 컨텍스트 압축/세션 마감 전 정리: `/dev-docs-update`
@@ -129,23 +129,23 @@
 
 명령어 사용 시 경로 가정(`dev/active`, API 경로)을 현재 저장소 구조와 맞춘다.
 
-## 8) 통합/수정 작업 공통 체크리스트 (`GEMINI_INTEGRATION_GUIDE.md`)
+## 8) 통합/수정 작업 공통 체크리스트 (`AGENT_WORKFLOWS_INTEGRATION_GUIDE.md`)
 
 스킬/훅/에이전트/명령어를 손댈 때 아래를 기본으로 확인한다.
 
 1. 구조 확인 질문(단일 앱/모노레포, 코드 위치, 스택)
 2. 필요한 항목만 선별 적용(초기에는 과도한 일괄 적용 금지)
 3. JSON 유효성 검증
-   - `cat .gemini/skills/skill-rules.json | jq .`
-   - `cat .gemini/settings.json | jq .`
+   - `cat .agents/workflows/skills/skill-rules.json | jq .`
+   - `cat .agents/workflows/settings.json | jq .`
 4. 훅 실행 권한 검증
-   - `ls -la .gemini/hooks/*.sh`
+   - `ls -la .agents/workflows/hooks/*.sh`
 5. 훅 의존성 검증(필요 시)
-   - `ls .gemini/hooks/node_modules/`
+   - `ls .agents/workflows/hooks/node_modules/`
 
 ## 9) 금지/주의
 
-- `.gemini/settings.json` 전체를 예시 파일로 덮어쓰지 않는다.
+- `.agents/workflows/settings.json` 전체를 예시 파일로 덮어쓰지 않는다.
 - 스킬을 한 번에 전부 추가하지 않는다.
 - `tsc-check` 계열 Stop 훅은 검증 없이 추가하지 않는다.
 - 스택 불일치(예: React 스킬을 Vue 프로젝트에 그대로 적용) 상태로 강행하지 않는다.
