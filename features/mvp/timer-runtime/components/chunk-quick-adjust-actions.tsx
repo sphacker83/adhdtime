@@ -28,7 +28,7 @@ export function ChunkQuickAdjustActions({
         disabled={!canAdjustMinusFive}
         aria-label="청크 시간 5분 감소"
       >
-        -5
+        -5분
       </button>
       <button
         type="button"
@@ -37,7 +37,7 @@ export function ChunkQuickAdjustActions({
         disabled={!canAdjustMinusOne}
         aria-label="청크 시간 1분 감소"
       >
-        -1
+        -1분
       </button>
       <button
         type="button"
@@ -46,7 +46,7 @@ export function ChunkQuickAdjustActions({
         disabled={!canAdjustPlusOne}
         aria-label="청크 시간 1분 증가"
       >
-        +1
+        +1분
       </button>
       <button
         type="button"
@@ -55,7 +55,7 @@ export function ChunkQuickAdjustActions({
         disabled={!canAdjustPlusFive}
         aria-label="청크 시간 5분 증가"
       >
-        +5
+        +5분
       </button>
     </div>
   );
