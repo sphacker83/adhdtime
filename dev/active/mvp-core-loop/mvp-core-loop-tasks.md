@@ -93,6 +93,14 @@ Last Updated: 2026-02-28
 - [x] 추가 조정: `radarStatBadge` 배경 투명화
 - [x] 추가 조정: `xpTrack` 폭 상한 2차 축소(`168px` -> `148px`)
 
+## Session Update (2026-02-28, Growth/Rank/Co-op Planning)
+- [x] 평가: XP와 스탯 랭크의 역할 분리 원칙 확정
+- [x] PRD 반영: Post-MVP 성장/랭크/캐릭터랭크/단체 이벤트(Room) 기획 추가
+- [x] 개발 플랜 반영: P2 에픽(Epic G/H) 백로그 추가
+- [x] 구현 범위 제외 명시: MVP 게이트는 현행 유지
+- [x] 성장 점수 모델 단일 기획 문서 신설(`docs/GROWTH_SCORE_MODEL_V1.md`)
+- [x] 보완 반영: 일일 보상 상한(Daily Cap, 5퀘스트) 규칙을 모델/PRD/개발플랜에 동기화
+
 ## Session Close (2026-02-28)
 
 - [x] `npm run verify:mvp` 통합 점검 PASS 확인

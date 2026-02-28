@@ -37,6 +37,7 @@ Last Updated: 2026-02-28
 - 미션 기반 일정 동기화 시 due-only 과업의 시작시간 재주입 버그 수정(`mvp-dashboard.tsx`)
 - 편집 모달 오픈 시 due-only 스케줄 보존(시작시간 자동 역산 표시 차단)
 - 총 소요시간 편집 중 due-only 입력의 시작시간 자동 파생 차단
+- PRD/개발플랜에 Post-MVP 성장 2축(XP vs 스탯 랭크) 및 단체 이벤트(Room 기반) 기획 반영
 - `npm run typecheck`, `npm run lint`, `npm run test:mvp`, `npm run build` 통과
 
 ### 🟡 IN PROGRESS
@@ -93,6 +94,20 @@ Last Updated: 2026-02-28
   - `radarStatBadge`의 `border` 제거.
   - `radarStatBadge` 배경을 `transparent`로 전환해 도형 가림 제거.
 - 상태: 추가 조정 반영 및 `npm run lint` 통과.
+
+## Session Notes (2026-02-28, Growth/Rank/Co-op Planning)
+- 요청: 경험치/스탯 관계 재정의(스탯=레벨 수렴 방지), 스탯 랭크 및 캐릭터 랭크 규칙 평가/보완, 향후 단체 이벤트(주말 대청소 방) 확장 계획 문서 반영.
+- 추가 요청: 일일 보상 상한(최대 5퀘스트까지 XP/스탯 지급) 정책 추가.
+- 반영 문서:
+  - `docs/PRD.md` v3.3: Post-MVP 섹션에 성장 2축, 스탯 랭크(100 도달 시 랭크업), 캐릭터 랭크 평균 산식, Co-op Room Event 및 계측 이벤트 추가.
+  - `docs/DEVELOPMENT_PLAN.md` v2.3: P2 백로그(Epic G/H)로 성장/협동 확장 작업 분해.
+- 산출물:
+  - `docs/GROWTH_SCORE_MODEL_V1.md` 신설(공식 점수모델 초안, 산식/분배/페이싱/악용방지/Room 연계 규칙 포함).
+- 보완 반영:
+  - `GROWTH_SCORE_MODEL_V1`: Daily Cap(일일 최대 5퀘스트 보상), 04:00 리셋, 6번째 이후 기록 전용 완료 규칙 추가.
+  - `PRD`: Post-MVP 보상 분리 정책에 Daily Cap 명시.
+  - `DEVELOPMENT_PLAN`: Epic G에 `G-05 일일 보상 상한` 구현 항목 추가.
+- 상태: 구현 변경 없이 기획/문서 반영 완료.
 
 ## Session Close (2026-02-28)
 
