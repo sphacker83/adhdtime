@@ -7,41 +7,44 @@ Last Updated: 2026-02-28
 ### ✅ COMPLETED
 - P1 착수용 Dev Docs 3종 생성
 - P1 우선순위 제안 수립 (`알림 FR-10 -> STT -> 외부 동기화`)
-- `features/p1` 신규 스캐폴딩 생성
-  - 알림 capability/permission 헬퍼
-  - STT capability 헬퍼(실제 인식 로직은 미연결)
-  - 동기화 도메인 타입 초안
+- Phase 1 완료: 알림 상태 배지/권한 요청/fallback/UI 연결
+- Phase 2 완료: STT 지원성 배지/시작-중지/transcript 미리보기 연결
+- Phase 3 완료: 동기화 mock adapter + 상태 전이 + conflict 표시 경로 연결
+- 통합 테스트 추가:
+  - `features/mvp/integrations/notification/notification-adapter.test.ts`
+  - `features/mvp/integrations/stt/stt-adapter.test.ts`
+  - `features/mvp/integrations/sync/sync-mock-adapter.test.ts`
 
 ### 🟡 IN PROGRESS
-- 없음 (다음 턴에서 Phase 1 구현 시작 가능)
+- 없음 (트랙 마감)
 
 ### ⚠️ BLOCKERS
-- 외부 동기화의 실제 provider OAuth 정책 미정
-- STT 브라우저별 이벤트 차이 대응 정책 미정
+- 없음 (현재 트랙 범위 기준)
 
 ## Key Decisions
-- 기존 MVP 동작 리스크를 줄이기 위해 신규 경로(`features/p1`, `dev/active/post-mvp-p1`) 중심으로 추가한다.
+- 연동 경계는 `features/mvp/integrations/*`로 통합 유지한다.
 - capability 체크는 SSR 안전하게 동작하도록 브라우저 존재 여부를 먼저 검증한다.
-- 동기화는 구현보다 타입 계약을 먼저 확정해 다음 턴에서 adapter/UI를 빠르게 붙일 수 있게 한다.
+- 동기화는 실 provider 연결 전까지 mock adapter + 명시적 상태 전이로 회귀 안정성을 확보한다.
 
 ## Files In Scope
 - `dev/active/post-mvp-p1/post-mvp-p1-plan.md`
 - `dev/active/post-mvp-p1/post-mvp-p1-context.md`
 - `dev/active/post-mvp-p1/post-mvp-p1-tasks.md`
-- `features/p1/helpers/notification-capability.ts`
-- `features/p1/helpers/stt-capability.ts`
-- `features/p1/helpers/index.ts`
-- `features/p1/types/sync-domain.ts`
-- `features/p1/types/index.ts`
-- `features/p1/index.ts`
+- `features/mvp/integrations/notification/notification-adapter.ts`
+- `features/mvp/integrations/stt/stt-adapter.ts`
+- `features/mvp/integrations/sync/sync-domain.ts`
+- `features/mvp/integrations/sync/sync-mock-adapter.ts`
+- `features/mvp/components/mvp-dashboard.tsx`
+- `features/mvp/task-input/components/task-input-section.tsx`
+- `features/mvp/settings/components/settings-view.tsx`
 
 ## Quick Resume
-1. FR-10 알림 UI 엔트리(권한 상태/요청 버튼)부터 연결한다.
-2. STT 버튼/상태를 과업 입력 UI에 연결하고 transcript 표시까지 구현한다.
-3. 동기화 mock adapter를 추가해 `ExternalSyncJobStatus` 상태 전이 검증을 붙인다.
+1. 실 provider(OAuth) 어댑터를 추가할 때 `sync-mock-adapter` 계약을 기준으로 교체한다.
+2. STT/알림의 브라우저 호환성 매트릭스를 Playwright 시나리오로 확장한다.
+3. P1 다음 단계 문서를 `post-mvp-p2` 트랙으로 분리해 관리한다.
 
 ## Session Close (2026-02-28)
 
 - 전체 점검: `npm run verify:mvp` PASS (`typecheck/lint/test:mvp/build/verify:gate`).
-- 오늘 반영: 대기 중 퀘스트 접힘 상태 메뉴 패널 잘림 UI 수정(`features/mvp/components/mvp-dashboard.module.css`), 루트 운영 가이드 `AGENTS.md` 추가.
-- 인수인계: 다음 세션 시작 시 각 트랙의 `Quick Resume` 섹션을 기준으로 이어서 진행.
+- 오늘 반영: P1 연동 어댑터 단위 테스트 3종 추가 및 `post-mvp-p1` 트랙 문서 완료 상태 동기화.
+- 인수인계: 트랙은 마감 상태이며, 후속은 `Quick Resume`의 P2 후보 작업으로 시작한다.

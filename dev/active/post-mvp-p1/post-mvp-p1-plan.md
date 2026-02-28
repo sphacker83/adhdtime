@@ -7,8 +7,8 @@ MVP 코어 루프 안정화 이후 P1은 사용자 재참여율과 입력 접근
 
 ## Current State
 - MVP는 local-first 단일 페이지 흐름(입력/청킹/타이머/보상)까지 동작한다.
-- 알림 권한/지원성 체크, STT 지원성 체크, 외부 동기화 도메인 계약은 아직 없다.
-- 캘린더 연동은 기존 대시보드의 UI 목업 중심이며, P1 전용 도메인 타입/헬퍼가 분리되어 있지 않다.
+- 알림/ STT/동기화의 1차 기반 구현은 `features/mvp/integrations/*` 경계로 반영 완료됐다.
+- 캘린더 연동은 mock adapter 기반 상태 전이까지 완료됐고, 실 provider 연동(OAuth)은 후속 범위다.
 
 ## Priority Proposal (P1)
 1. 알림 FR-10
@@ -25,7 +25,7 @@ MVP 코어 루프 안정화 이후 P1은 사용자 재참여율과 입력 접근
 
 ## Iteration 1 Implementation Order + Acceptance
 
-### Phase 1: Notification Foundation (FR-10)
+### Phase 1: Notification Foundation (FR-10) ✅ COMPLETE
 작업:
 - capability/permission 헬퍼 연결
 - 권한 요청 버튼과 상태 배지 UI
@@ -36,7 +36,7 @@ Acceptance Criteria:
 - 권한 요청 결과가 상태에 즉시 반영된다.
 - 권한 허용 시 지정 이벤트에서 브라우저 알림이 1회 이상 정상 표시된다.
 
-### Phase 2: STT Foundation
+### Phase 2: STT Foundation ✅ COMPLETE
 작업:
 - STT capability 헬퍼를 입력 UI에 연결
 - STT 시작/중지 버튼과 상태 표시(지원/미지원/권한 필요)
@@ -47,7 +47,7 @@ Acceptance Criteria:
 - 비지원 환경에서 입력 폼 fallback이 깨지지 않는다.
 - transcript 이벤트를 받아 UI에 표시할 수 있는 상태까지 동작한다.
 
-### Phase 3: External Sync Foundation
+### Phase 3: External Sync Foundation ✅ COMPLETE
 작업:
 - 동기화 도메인 타입으로 connection/job/conflict 상태를 일관 관리
 - provider별 mock adapter 인터페이스 정의
@@ -72,6 +72,11 @@ Acceptance Criteria:
 - 권한 거부/미지원 시 fallback 문구와 수동 입력 경로를 기본 제공
 - capability 헬퍼로 런타임 분기를 표준화
 - 동기화는 mock adapter + 명시적 상태머신부터 시작
+
+## Validation Result (2026-02-28)
+- `npm run verify:mvp` PASS
+- 세부 결과: `typecheck/lint/test:mvp/build/verify:gate` 모두 통과
+- 테스트 범위: 11 files / 50 tests (notification/stt/sync adapter unit test 포함)
 
 ## Estimate (초기)
 - Phase 1: S-M

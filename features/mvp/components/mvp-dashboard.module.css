@@ -1907,7 +1907,7 @@
 /* Final parity lock: fixed header/footer, floating FAB, and next mission preview */
 
 .shell {
-  --layout-max-width: 100%;
+  --layout-max-width: 960px;
   --tab-height: 56px;
   min-height: 100dvh;
   padding: 0 0 calc(var(--tab-height) + 20px);
@@ -1922,15 +1922,13 @@
 .topBar {
   position: sticky;
   top: 0;
-  width: 100%;
-  margin: 0;
+  width: min(var(--layout-max-width), calc(100% - 24px));
+  margin: 0 auto;
   min-height: 0;
   padding: 8px 12px 3px;
   border-radius: 0;
   border: 1px solid #d4dfef;
   border-top: 0;
-  border-left: 0;
-  border-right: 0;
   background: #f1f5fb;
   box-shadow: 0 1px 6px rgba(27, 47, 82, 0.08);
   display: grid;
@@ -2035,9 +2033,9 @@
 
 .app {
   position: relative;
-  width: 100%;
-  margin: 4px 0 0;
-  padding: 0 12px;
+  width: min(var(--layout-max-width), calc(100% - 24px));
+  margin: 4px auto 0;
+  padding: 0;
   display: grid;
   align-content: start;
   gap: 8px;
@@ -2482,11 +2480,11 @@
 
 .tabBar {
   position: fixed;
-  left: 0;
-  right: 0;
+  left: 50%;
+  right: auto;
   bottom: 0;
-  transform: none;
-  width: 100%;
+  transform: translateX(-50%);
+  width: min(var(--layout-max-width), calc(100% - 24px));
   height: var(--tab-height);
   min-height: var(--tab-height);
   padding: 3px 8px 2px;
