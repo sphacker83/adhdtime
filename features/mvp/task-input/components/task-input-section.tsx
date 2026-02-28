@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, type RefObject } from "react";
+import { useRef, useState, type RefObject } from "react";
 import {
   MAX_TASK_TOTAL_MINUTES,
   MIN_TASK_TOTAL_MINUTES
@@ -15,6 +15,19 @@ import {
 
 type MvpDashboardStyles = Record<string, string>;
 
+export interface QuestSuggestion {
+  id: string;
+  title: string;
+  rerankConfidence: number;
+  routeConfidence: number;
+}
+
+export interface SubmitTaskResult {
+  ok: boolean;
+  reason: string;
+  message: string;
+}
+
 export interface TaskInputSectionProps {
   styles: MvpDashboardStyles;
   isComposerOpen: boolean;
@@ -23,11 +36,15 @@ export interface TaskInputSectionProps {
   sttSupportState: "supported" | "unsupported";
   taskInput: string;
   onTaskInputChange: (value: string) => void;
+  questSuggestions: QuestSuggestion[];
+  selectedQuestSuggestionId: string | null;
+  onSelectQuestSuggestion: (suggestionId: string, title: string) => void;
   isSttListening: boolean;
   onStartStt: () => void;
   onStopStt: () => void;
   sttCapability: SttCapability;
-  onSubmitTask: () => Promise<boolean>;
+  onSubmitTask: () => Promise<SubmitTaskResult>;
+  feedbackMessage: string;
   isGenerating: boolean;
   taskTotalMinutesInput: string;
   onSetTaskTotalMinutesFromScheduled: (value: number) => void;
@@ -70,6 +87,16 @@ function formatMinutesButtonValue(rawValue: string): string {
   return `${Math.min(MAX_TASK_TOTAL_MINUTES, Math.max(MIN_TASK_TOTAL_MINUTES, parsed))}분`;
 }
 
+function formatConfidencePercent(value: number): string {
+  const safeValue = Number.isFinite(value) ? Math.max(0, value) : 0;
+  if (safeValue === 1) {
+    return "100%";
+  }
+
+  const percent = Math.min(99.9, safeValue * 100);
+  return `${percent.toFixed(1)}%`;
+}
+
 export function TaskInputSection(props: TaskInputSectionProps) {
   const {
     styles,
@@ -79,11 +106,15 @@ export function TaskInputSection(props: TaskInputSectionProps) {
     sttSupportState,
     taskInput,
     onTaskInputChange,
+    questSuggestions,
+    selectedQuestSuggestionId,
+    onSelectQuestSuggestion,
     isSttListening,
     onStartStt,
     onStopStt,
     sttCapability,
     onSubmitTask,
+    feedbackMessage,
     isGenerating,
     taskTotalMinutesInput,
     onSetTaskTotalMinutesFromScheduled,
@@ -96,6 +127,7 @@ export function TaskInputSection(props: TaskInputSectionProps) {
     sttTranscript,
     sttError
   } = props;
+  const [submitFeedbackOverride, setSubmitFeedbackOverride] = useState<string | null>(null);
   const scheduledForPickerRef = useRef<HTMLInputElement | null>(null);
   const dueAtPickerRef = useRef<HTMLInputElement | null>(null);
   const isEditMode = composerMode === "edit";
@@ -106,6 +138,13 @@ export function TaskInputSection(props: TaskInputSectionProps) {
   const scheduledForButtonValue = formatDateButtonValue(taskScheduledForInput);
   const dueAtButtonValue = formatDateButtonValue(taskDueAtInput);
   const durationButtonValue = formatMinutesButtonValue(taskTotalMinutesInput);
+  const shouldShowQuestSuggestions = taskInput.trim().length >= 2;
+  const modalFeedbackMessage = submitFeedbackOverride ?? feedbackMessage;
+
+  const handleCloseComposer = (): void => {
+    setSubmitFeedbackOverride(null);
+    onCloseComposer();
+  };
 
   const getSafeTotalMinutes = (): number => {
     const parsed = Number.parseInt(taskTotalMinutesInput, 10);
@@ -172,13 +211,21 @@ export function TaskInputSection(props: TaskInputSectionProps) {
   };
 
   const handleSubmitClick = async (): Promise<void> => {
+    setSubmitFeedbackOverride(null);
     try {
-      const isSuccess = await onSubmitTask();
-      if (isSuccess) {
-        onCloseComposer();
+      const result = await onSubmitTask();
+      if (result.ok) {
+        handleCloseComposer();
+        return;
       }
-    } catch {
-      // 실패 시 모달은 열린 상태를 유지한다.
+
+      const failedMessage = result.message?.trim()
+        ? result.message
+        : "요청 처리에 실패했습니다. 입력 내용을 확인하고 다시 시도해주세요.";
+      setSubmitFeedbackOverride(failedMessage);
+    } catch (error) {
+      console.error("퀘스트 제출 처리 중 오류:", error);
+      setSubmitFeedbackOverride("요청 처리 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.");
     }
   };
 
@@ -187,7 +234,7 @@ export function TaskInputSection(props: TaskInputSectionProps) {
       {isComposerOpen ? (
         <div
           className={styles.questModalBackdrop}
-          onClick={onCloseComposer}
+          onClick={handleCloseComposer}
           role="presentation"
         >
           <section
@@ -202,7 +249,7 @@ export function TaskInputSection(props: TaskInputSectionProps) {
               <button
                 type="button"
                 className={styles.subtleButton}
-                onClick={onCloseComposer}
+                onClick={handleCloseComposer}
                 aria-label="퀘스트 모달 닫기"
               >
                 ✕
@@ -237,6 +284,36 @@ export function TaskInputSection(props: TaskInputSectionProps) {
                 </button>
               </div>
             </label>
+            {shouldShowQuestSuggestions ? (
+              questSuggestions.length > 0 ? (
+                <div className={styles.questRecommendationList} role="list" aria-label="추천 퀘스트">
+                  {questSuggestions.map((recommendation) => (
+                    <button
+                      key={recommendation.id}
+                      type="button"
+                      className={
+                        recommendation.id === selectedQuestSuggestionId
+                          ? `${styles.questRecommendationItem} ${styles.questRecommendationItemActive}`
+                          : styles.questRecommendationItem
+                      }
+                      aria-pressed={recommendation.id === selectedQuestSuggestionId}
+                      onClick={() => onSelectQuestSuggestion(recommendation.id, recommendation.title)}
+                    >
+                      <span className={styles.questRecommendationTitle}>{recommendation.title}</span>
+                      <span className={styles.questRecommendationMeta}>
+                        유사도 {formatConfidencePercent(recommendation.rerankConfidence)}
+                        {" · "}
+                        연관도 {formatConfidencePercent(recommendation.routeConfidence)}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <p className={styles.questRecommendationEmpty}>
+                  추천 퀘스트가 없어요. 2자 이상으로 조금 더 구체적으로 입력해보세요.
+                </p>
+              )
+            ) : null}
             {sttTranscript ? <p className={styles.transcriptPreview}>미리보기: {sttTranscript}</p> : null}
             {sttError ? <p className={styles.errorText}>{sttError}</p> : null}
             {!sttCapability.canStartRecognition ? (
@@ -334,6 +411,7 @@ export function TaskInputSection(props: TaskInputSectionProps) {
             </div>
 
             {taskMetaFeedback ? <p className={styles.errorText}>{taskMetaFeedback}</p> : null}
+            {modalFeedbackMessage ? <p className={styles.questComposerFeedback}>{modalFeedbackMessage}</p> : null}
 
             <div className={styles.questModalFooter}>
               <button

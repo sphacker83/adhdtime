@@ -165,6 +165,7 @@ interface ScoredPresetCandidate {
   difficulty: number;
   estimatedTimeMin: number;
   taskId: string;
+  isExactTitleMatch: boolean;
 }
 
 export interface LocalPresetRankCandidate {
@@ -183,6 +184,11 @@ export interface LocalPresetRankCandidate {
   priority: number;
   difficulty: number;
   estimatedTimeMin: number;
+}
+
+export interface GenerateLocalMissioningOptions {
+  forcePresetId?: string;
+  preferTopRank?: boolean;
 }
 
 interface SparseVector {
@@ -244,6 +250,7 @@ const PRESET_ROUTE_SCORE_WEIGHT = 40;
 const PRESET_RERANK_CONFIDENCE_WEIGHT = 64;
 const PRESET_INTENT_HINT_SIGNAL_BONUS = 0.09;
 const PRESET_MIN_SIGNAL_SCORE = 0.07;
+const PRESET_EXACT_TITLE_MATCH_BONUS = 10_000;
 const DEFAULT_MISSION_NOTE = "완료 조건 체크";
 const TIME_VALUE_PATTERN = /^([01]\d|2[0-3]):[0-5]\d$/;
 
@@ -362,9 +369,9 @@ const SCORE_STOPWORDS = new Set<string>([
 const ACTION_START_VERB_PATTERN =
   /^(시작|준비|정리|분류|작성|확인|검토|실행|제출|저장|기록|예약|마무리|요약|복습|정돈|선택|고르|읽|적|풀|버리|담|옮기|닦|체크|보내|완료|쪼개|정하|계획)/;
 const ACTION_END_VERB_PATTERN =
-  /(하기|해보기|작성|정리|확인|검토|실행|준비|제출|저장|기록|예약|마무리|요약|복습|정돈|정하기|적기|읽기|풀기|버리기|담기|옮기기|닦기|고르기|체크하기|보내기|완료|종료)$/;
+  /(하기|해보기|작성|정리|확인|검토|실행|준비|제출|저장|기록|예약|마무리|요약|복습|정돈|정하기|적기|읽기|풀기|버리기|담기|옮기기|닦기|고르기|체크하기|보내기|꺼내기|모으기|비우기|완료|종료)$/;
 const ACTION_CONTAINS_VERB_PATTERN =
-  /(하기|해보기|작성|정리|확인|검토|실행|준비|제출|저장|기록|예약|마무리|요약|복습|정돈|정하|적기|읽기|풀기|버리기|담기|옮기기|닦기|고르기|체크|보내|시작|종료)/;
+  /(하기|해보기|작성|정리|확인|검토|실행|준비|제출|저장|기록|예약|마무리|요약|복습|정돈|정하|적기|읽기|풀기|버리기|담기|옮기기|닦기|고르기|체크|보내|꺼내|모으|비우|시작|종료)/;
 const ACTION_KOREAN_DECLARATIVE_END_PATTERN = /[가-힣]+(다|요)(\([^)]*\))?$/;
 
 const EST_MINUTES_RANGE_LABEL = `${MIN_MISSION_EST_MINUTES}~${MAX_MISSION_EST_MINUTES}분`;
@@ -883,6 +890,43 @@ function normalizeTitle(title: string): string {
 
 function normalizeScoreText(input: string): string {
   return input.toLowerCase().trim().replace(/\s+/g, " ");
+}
+
+interface PresetTitleExactMatchIndex {
+  byNormalized: Map<string, readonly string[]>;
+  byCompact: Map<string, readonly string[]>;
+}
+
+function buildPresetTitleExactMatchIndex(presets: readonly MissionPreset[]): PresetTitleExactMatchIndex {
+  const mutableByNormalized = new Map<string, string[]>();
+  const mutableByCompact = new Map<string, string[]>();
+
+  presets.forEach((preset) => {
+    const normalizedTitle = normalizeScoreText(preset.title);
+    if (!normalizedTitle) {
+      return;
+    }
+
+    const compactTitle = normalizedTitle.replace(/\s+/g, "");
+    const normalizedBucket = mutableByNormalized.get(normalizedTitle) ?? [];
+    normalizedBucket.push(preset.id);
+    mutableByNormalized.set(normalizedTitle, normalizedBucket);
+
+    if (compactTitle) {
+      const compactBucket = mutableByCompact.get(compactTitle) ?? [];
+      compactBucket.push(preset.id);
+      mutableByCompact.set(compactTitle, compactBucket);
+    }
+  });
+
+  return {
+    byNormalized: new Map(
+      Array.from(mutableByNormalized.entries()).map(([key, presetIds]) => [key, Object.freeze([...presetIds])])
+    ),
+    byCompact: new Map(
+      Array.from(mutableByCompact.entries()).map(([key, presetIds]) => [key, Object.freeze([...presetIds])])
+    )
+  };
 }
 
 function tokenizeScoreText(input: string): string[] {
@@ -1418,6 +1462,25 @@ const PRESET_SEARCH_INDEX: readonly PresetSearchIndex[] = JSON_PRESETS.map((pres
     exampleVectors: preset.examples.map((example) => buildSparseVector(example))
   };
 });
+const PRESET_TITLE_EXACT_MATCH_INDEX = buildPresetTitleExactMatchIndex(JSON_PRESETS);
+
+function findExactTitlePresetIds(title: string): Set<string> {
+  const matchedPresetIds = new Set<string>();
+  const normalizedTitle = normalizeScoreText(title);
+  if (!normalizedTitle) {
+    return matchedPresetIds;
+  }
+
+  PRESET_TITLE_EXACT_MATCH_INDEX.byNormalized.get(normalizedTitle)?.forEach((presetId) => matchedPresetIds.add(presetId));
+
+  const compactTitle = normalizedTitle.replace(/\s+/g, "");
+  if (!compactTitle) {
+    return matchedPresetIds;
+  }
+
+  PRESET_TITLE_EXACT_MATCH_INDEX.byCompact.get(compactTitle)?.forEach((presetId) => matchedPresetIds.add(presetId));
+  return matchedPresetIds;
+}
 
 function scoreAdhdExecution(preset: MissionPreset): number {
   const difficulty = clampDifficulty(preset.difficulty);
@@ -1655,6 +1718,7 @@ function isMeaningfulRoutingInput(routingContext: QueryRoutingContext): boolean 
 function scorePresetCandidates(title: string): { candidates: ScoredPresetCandidate[]; routingContext: QueryRoutingContext } {
   const normalizedInput = normalizeRoutingInput(title);
   const routingContext = classifyRouting(normalizedInput);
+  const exactTitlePresetIds = findExactTitlePresetIds(title);
 
   if (!normalizedInput.normalizedText) {
     return {
@@ -1668,7 +1732,7 @@ function scorePresetCandidates(title: string): { candidates: ScoredPresetCandida
   const queryTokens = new Set(tokenizeScoreText(augmentedQuery));
   const hasWeeklySignal = /(주간|이번 주|주말|weekend|weekly)/.test(normalizedInput.normalizedText);
 
-  if (queryVector.norm === 0 && queryTokens.size === 0) {
+  if (queryVector.norm === 0 && queryTokens.size === 0 && exactTitlePresetIds.size === 0) {
     return {
       candidates: [],
       routingContext
@@ -1677,6 +1741,7 @@ function scorePresetCandidates(title: string): { candidates: ScoredPresetCandida
 
   const candidates = PRESET_SEARCH_INDEX.reduce<ScoredPresetCandidate[]>((accumulator, indexEntry) => {
     const { preset, vector, tokens, titleVector, intentVector, exampleVectors } = indexEntry;
+    const isExactTitleMatch = exactTitlePresetIds.has(preset.id);
     const similarity = computeCosineSimilarity(queryVector, vector);
     const titleSimilarity = computeCosineSimilarity(queryVector, titleVector);
     const intentSimilarity = computeCosineSimilarity(queryVector, intentVector);
@@ -1695,7 +1760,7 @@ function scorePresetCandidates(title: string): { candidates: ScoredPresetCandida
       + intentHintSignal
       + routeAlignment.normalized * 0.3;
 
-    if (signalScore < PRESET_MIN_SIGNAL_SCORE) {
+    if (!isExactTitleMatch && signalScore < PRESET_MIN_SIGNAL_SCORE) {
       return accumulator;
     }
 
@@ -1732,6 +1797,7 @@ function scorePresetCandidates(title: string): { candidates: ScoredPresetCandida
         + routeAlignment.score * PRESET_ROUTE_SCORE_WEIGHT * 0.01
         + rerankConfidence * PRESET_RERANK_CONFIDENCE_WEIGHT
         + adhdScore
+        + (isExactTitleMatch ? PRESET_EXACT_TITLE_MATCH_BONUS : 0)
       ).toFixed(4)
     );
 
@@ -1745,7 +1811,8 @@ function scorePresetCandidates(title: string): { candidates: ScoredPresetCandida
       priority,
       difficulty,
       estimatedTimeMin,
-      taskId: preset.id
+      taskId: preset.id,
+      isExactTitleMatch
     });
 
     return accumulator;
@@ -1778,7 +1845,8 @@ function selectFallbackCandidateByPresetLinks(seed: ScoredPresetCandidate, ranke
         priority: preset.priority,
         difficulty: preset.difficulty,
         estimatedTimeMin: preset.estimatedTimeMin,
-        taskId: preset.id
+        taskId: preset.id,
+        isExactTitleMatch: false
       };
     }
   }
@@ -1872,28 +1940,51 @@ function selectJsonPresetTemplates(title: string): MissionTemplate[] | null {
   return mapPresetMissionsToTemplates(selectedCandidate.preset);
 }
 
+function selectPresetTemplatesById(presetId: string): MissionTemplate[] | null {
+  const preset = PRESET_BY_ID.get(presetId);
+  if (!preset) {
+    return null;
+  }
+
+  return mapPresetMissionsToTemplates(preset);
+}
+
+function selectTopRankPresetTemplates(title: string): MissionTemplate[] | null {
+  const topCandidate = rankLocalPresetCandidates(title, 1)[0];
+  if (!topCandidate) {
+    return null;
+  }
+
+  return selectPresetTemplatesById(topCandidate.id);
+}
+
 export function rankLocalPresetCandidates(title: string, limit = 5): LocalPresetRankCandidate[] {
   const safeLimit = Number.isFinite(limit) ? Math.max(1, Math.floor(limit)) : 5;
   return scorePresetCandidates(title).candidates
     .sort(compareScoredPresetCandidates)
     .slice(0, safeLimit)
-    .map((candidate) => ({
-      id: candidate.preset.id,
-      intent: candidate.preset.intent,
-      title: candidate.preset.title,
-      persona: candidate.preset.persona,
-      type: candidate.preset.type,
-      domain: candidate.preset.domain,
-      state: candidate.routeCandidate?.state ?? "in_progress",
-      timeContext: candidate.preset.timeContext,
-      totalScore: candidate.totalScore,
-      similarity: candidate.similarity,
-      rerankConfidence: candidate.rerankConfidence,
-      routeConfidence: candidate.routeConfidence,
-      priority: candidate.priority,
-      difficulty: candidate.difficulty,
-      estimatedTimeMin: candidate.estimatedTimeMin
-    }));
+    .map((candidate) => {
+      const exposureRerankConfidence = candidate.isExactTitleMatch ? 1 : candidate.rerankConfidence;
+      const exposureRouteConfidence = candidate.isExactTitleMatch ? 1 : candidate.routeConfidence;
+
+      return {
+        id: candidate.preset.id,
+        intent: candidate.preset.intent,
+        title: candidate.preset.title,
+        persona: candidate.preset.persona,
+        type: candidate.preset.type,
+        domain: candidate.preset.domain,
+        state: candidate.routeCandidate?.state ?? "in_progress",
+        timeContext: candidate.preset.timeContext,
+        totalScore: candidate.totalScore,
+        similarity: candidate.similarity,
+        rerankConfidence: exposureRerankConfidence,
+        routeConfidence: exposureRouteConfidence,
+        priority: candidate.priority,
+        difficulty: candidate.difficulty,
+        estimatedTimeMin: candidate.estimatedTimeMin
+      };
+    });
 }
 
 function normalizeActionText(action: string): string {
@@ -1996,7 +2087,24 @@ export function mapMissioningResultToMissions(
   }));
 }
 
-export function generateLocalMissioning(taskId: string, title: string): MissioningResult | null {
+export function generateLocalMissioning(
+  taskId: string,
+  title: string,
+  options?: GenerateLocalMissioningOptions
+): MissioningResult | null {
+  const forcedPresetId = options?.forcePresetId?.trim();
+  if (forcedPresetId) {
+    const forcedTemplates = selectPresetTemplatesById(forcedPresetId);
+    return forcedTemplates ? buildResult(taskId, title, forcedTemplates) : null;
+  }
+
+  if (options?.preferTopRank) {
+    const topRankTemplates = selectTopRankPresetTemplates(title);
+    if (topRankTemplates) {
+      return buildResult(taskId, title, topRankTemplates);
+    }
+  }
+
   const jsonTemplates = selectJsonPresetTemplates(title);
   if (jsonTemplates) {
     return buildResult(taskId, title, jsonTemplates);

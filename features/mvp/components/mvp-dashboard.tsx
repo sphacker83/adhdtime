@@ -4,8 +4,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   enforceMissionBudget,
   generateLocalMissioning,
-  mapMissioningResultToMissions,
   isWithinTaskMissionBudget,
+  mapMissioningResultToMissions,
+  rankLocalPresetCandidates,
   sumMissionEstMinutes,
   validateMissioningResult
 } from "@/features/mvp/lib/missioning";
@@ -133,6 +134,17 @@ const SYNC_STATUS_LABEL: Record<ExternalSyncJobStatus, string> = {
   CONFLICT: "conflict"
 };
 
+type QuestSuggestion = Pick<
+  ReturnType<typeof rankLocalPresetCandidates>[number],
+  "id" | "title" | "rerankConfidence" | "routeConfidence"
+>;
+
+type SubmitTaskResult = {
+  ok: boolean;
+  reason: string;
+  message: string;
+};
+
 function deriveNotificationState(capability: NotificationCapability): NotificationPermissionState {
   if (!capability.supported || !capability.secureContext) {
     return "unsupported";
@@ -194,6 +206,31 @@ function clampMinuteInput(minutes: number): number {
   return Math.min(15, Math.max(2, Math.floor(minutes)));
 }
 
+function clampTaskTotalMinutes(totalMinutes: number): number {
+  return Math.min(MAX_TASK_TOTAL_MINUTES, Math.max(MIN_TASK_TOTAL_MINUTES, Math.floor(totalMinutes)));
+}
+
+function applyDueOnlyScheduleInputOverride(
+  normalizedSchedule: ReturnType<typeof normalizeTaskScheduleFromLocalInputs>,
+  scheduledForInput: string,
+  dueAtInput: string
+) {
+  if (!normalizedSchedule) {
+    return normalizedSchedule;
+  }
+
+  const hasScheduledForInput = scheduledForInput.trim().length > 0;
+  const hasDueAtInput = dueAtInput.trim().length > 0;
+  if (!hasScheduledForInput && hasDueAtInput) {
+    return {
+      ...normalizedSchedule,
+      scheduledFor: undefined
+    };
+  }
+
+  return normalizedSchedule;
+}
+
 export function MvpDashboard() {
   const sessionIdRef = useRef(crypto.randomUUID());
   const {
@@ -220,6 +257,7 @@ export function MvpDashboard() {
   } = useMvpStore({ sessionId: sessionIdRef.current });
 
   const [taskInput, setTaskInput] = useState("");
+  const [selectedQuestSuggestionId, setSelectedQuestSuggestionId] = useState<string | null>(null);
   const [taskTotalMinutesInput, setTaskTotalMinutesInput] = useState("");
   const [taskScheduledForInput, setTaskScheduledForInput] = useState("");
   const [taskDueAtInput, setTaskDueAtInput] = useState("");
@@ -234,7 +272,7 @@ export function MvpDashboard() {
     estMinutesInput: string;
   } | null>(null);
   const [missionEditError, setMissionEditError] = useState<string | null>(null);
-  const [, setFeedback] = useState<string>("오늘은 가장 작은 행동부터 시작해요.");
+  const [feedback, setFeedback] = useState<string>("오늘은 가장 작은 행동부터 시작해요.");
   const [clock, setClock] = useState(new Date());
   const [currentMissionId, setCurrentMissionId] = useState<string | null>(null);
   const [expandedHomeTaskId, setExpandedHomeTaskId] = useState<string | null>(null);
@@ -314,6 +352,24 @@ export function MvpDashboard() {
   const sttSupportState = getSttSupportState(sttCapability);
   const syncStatusLabel = SYNC_STATUS_LABEL[syncStatus];
   const isSyncBusy = syncStatus === "QUEUED" || syncStatus === "RUNNING";
+  const questSuggestions = useMemo<QuestSuggestion[]>(() => {
+    const normalizedInput = taskInput.trim();
+    if (normalizedInput.length < 2) {
+      return [];
+    }
+
+    return rankLocalPresetCandidates(normalizedInput, 5).map((candidate) => ({
+      id: candidate.id,
+      title: candidate.title,
+      rerankConfidence: candidate.rerankConfidence,
+      routeConfidence: candidate.routeConfidence
+    }));
+  }, [taskInput]);
+
+  const handleTaskInputChange = (value: string) => {
+    setTaskInput(value);
+    setSelectedQuestSuggestionId(null);
+  };
 
   const clearSttTranscriptRefs = () => {
     sttFinalTranscriptRef.current = "";
@@ -330,6 +386,7 @@ export function MvpDashboard() {
 
   const resetTaskComposerDraft = () => {
     setTaskInput("");
+    setSelectedQuestSuggestionId(null);
     setTaskTotalMinutesInput("");
     setTaskScheduledForInput("");
     setTaskDueAtInput("");
@@ -376,6 +433,7 @@ export function MvpDashboard() {
     setQuestComposerMode("edit");
     setEditingTaskId(task.id);
     setTaskInput(task.title);
+    setSelectedQuestSuggestionId(null);
     setTaskTotalMinutesInput(String(task.totalMinutes));
     setTaskScheduledForInput(formatTaskIsoToLocalInput(normalizedSchedule.scheduledFor));
     setTaskDueAtInput(formatTaskIsoToLocalInput(normalizedSchedule.dueAt));
@@ -805,7 +863,7 @@ export function MvpDashboard() {
 
       const mergedTranscript = mergeSttTranscript(finalTranscript, interimTranscript);
       if (mergedTranscript) {
-        setTaskInput(mergedTranscript);
+        handleTaskInputChange(mergedTranscript);
       }
     };
     recognition.onerror = (event) => {
@@ -951,7 +1009,7 @@ export function MvpDashboard() {
         }
       }
 
-      if (derivedField === "scheduledFor" && parsedTotalMinutes !== null && parsedDueAt) {
+      if (derivedField === "scheduledFor" && editedField !== "dueAt" && parsedTotalMinutes !== null && parsedDueAt) {
         if (!isTaskTotalMinutesInRange(parsedTotalMinutes)) {
           immediateFeedback = `총 소요 시간은 ${MIN_TASK_TOTAL_MINUTES}~${MAX_TASK_TOTAL_MINUTES}분 범위로 입력해주세요.`;
         } else {
@@ -988,7 +1046,7 @@ export function MvpDashboard() {
   };
 
   const handleTaskDueAtInputChange = (nextValue: string) => {
-    handleTaskMetaInputChange("dueAt", nextValue, { forcedAnchorField: "totalMinutes" });
+    handleTaskMetaInputChange("dueAt", nextValue, { forcedAnchorField: "scheduledFor" });
   };
 
   const handleSetTaskTotalMinutesFromScheduled = (nextMinutes: number) => {
@@ -1011,38 +1069,29 @@ export function MvpDashboard() {
     handleSetTaskTotalMinutesFromScheduled(safeTotalMinutes + deltaMinutes);
   };
 
-  const handleGenerateTask = async (): Promise<boolean> => {
+  const handleGenerateTask = async (): Promise<SubmitTaskResult> => {
     const rawInput = taskInput.trim();
     if (!rawInput) {
-      setFeedback("할 일을 입력하면 바로 10분 단위로 쪼개드릴게요.");
-      return false;
+      const message = "할 일을 입력하면 바로 10분 단위로 쪼개드릴게요.";
+      setFeedback(message);
+      return { ok: false, reason: "empty_input", message };
     }
 
     if (taskMetaFeedback) {
-      setFeedback(`입력 단계 오류를 먼저 해결해주세요: ${taskMetaFeedback}`);
-      return false;
+      const message = `입력 단계 오류를 먼저 해결해주세요: ${taskMetaFeedback}`;
+      setFeedback(message);
+      return { ok: false, reason: "invalid_meta", message };
     }
 
     const normalizedTotalInput = taskTotalMinutesInput.trim();
     const parsedTotalMinutes = normalizedTotalInput
       ? parseTaskTotalMinutesInput(normalizedTotalInput)
-      : DEFAULT_TASK_TOTAL_MINUTES;
-    if (parsedTotalMinutes === null) {
-      setFeedback(`총 소요 시간은 ${MIN_TASK_TOTAL_MINUTES}~${MAX_TASK_TOTAL_MINUTES}분 사이로 입력해주세요.`);
-      return false;
+      : null;
+    if (normalizedTotalInput && parsedTotalMinutes === null) {
+      const message = `총 소요 시간은 ${MIN_TASK_TOTAL_MINUTES}~${MAX_TASK_TOTAL_MINUTES}분 사이로 입력해주세요.`;
+      setFeedback(message);
+      return { ok: false, reason: "invalid_total_minutes", message };
     }
-
-    const normalizedSchedule = normalizeTaskScheduleFromLocalInputs({
-      scheduledForInput: taskScheduledForInput,
-      dueAtInput: taskDueAtInput,
-      totalMinutes: parsedTotalMinutes,
-      fallbackStartAt: new Date()
-    });
-    if (!normalizedSchedule) {
-      setFeedback("일정 시간 형식이 올바르지 않습니다. 날짜와 시간을 다시 확인해주세요.");
-      return false;
-    }
-    const { scheduledFor, dueAt } = normalizedSchedule;
 
     if (RISKY_INPUT_PATTERN.test(rawInput)) {
       logEvent({
@@ -1053,8 +1102,9 @@ export function MvpDashboard() {
           inputLength: rawInput.length
         }
       });
-      setFeedback(RECOVERY_FEEDBACK.safetyBlocked);
-      return false;
+      const message = RECOVERY_FEEDBACK.safetyBlocked;
+      setFeedback(message);
+      return { ok: false, reason: "safety_blocked", message };
     }
 
     setIsGenerating(true);
@@ -1064,23 +1114,47 @@ export function MvpDashboard() {
       const summary = buildTaskSummary(rawInput);
       const missioningStartedAt = Date.now();
       const source: EventSource = "local";
-      const missioning = generateLocalMissioning(taskId, rawInput);
+      const missioning = generateLocalMissioning(taskId, rawInput, {
+        forcePresetId: selectedQuestSuggestionId ?? undefined,
+        preferTopRank: selectedQuestSuggestionId === null
+      });
       if (!missioning) {
-        setFeedback("입력과 유사한 퀘스트/미션 추천을 찾지 못했습니다. 문장을 조금 더 구체적으로 입력해주세요.");
-        return false;
+        const message = "입력과 유사한 퀘스트/미션 추천을 찾지 못했습니다. 문장을 조금 더 구체적으로 입력해주세요.";
+        setFeedback(message);
+        return { ok: false, reason: "no_candidates", message };
       }
 
       const validation = validateMissioningResult(missioning);
       if (!validation.ok) {
-        setFeedback("추천된 미션 검증에 실패했습니다. 입력 문장을 바꿔 다시 시도해주세요.");
-        return false;
+        const message = "추천된 미션 검증에 실패했습니다. 입력 문장을 바꿔 다시 시도해주세요.";
+        setFeedback(message);
+        return { ok: false, reason: "mission_validation_failed", message };
       }
 
       const missioningLatencyMs = Date.now() - missioningStartedAt;
+      const effectiveTotalMinutes = clampTaskTotalMinutes(
+        parsedTotalMinutes ?? sumMissionEstMinutes(missioning.missions)
+      );
+      const normalizedSchedule = applyDueOnlyScheduleInputOverride(
+        normalizeTaskScheduleFromLocalInputs({
+          scheduledForInput: taskScheduledForInput,
+          dueAtInput: taskDueAtInput,
+          totalMinutes: effectiveTotalMinutes,
+          fallbackStartAt: new Date()
+        }),
+        taskScheduledForInput,
+        taskDueAtInput
+      );
+      if (!normalizedSchedule) {
+        const message = "일정 시간 형식이 올바르지 않습니다. 날짜와 시간을 다시 확인해주세요.";
+        setFeedback(message);
+        return { ok: false, reason: "invalid_schedule", message };
+      }
+      const { scheduledFor, dueAt } = normalizedSchedule;
       const createdAt = new Date().toISOString();
 
       const safeTitle = summary || "새 과업";
-      const adjustedMissionTemplates = enforceMissionBudget(missioning.missions, parsedTotalMinutes).map((mission, index) => ({
+      const adjustedMissionTemplates = enforceMissionBudget(missioning.missions, effectiveTotalMinutes).map((mission, index) => ({
         ...mission,
         order: index + 1
       }));
@@ -1089,7 +1163,7 @@ export function MvpDashboard() {
         id: taskId,
         title: safeTitle,
         summary: safeTitle,
-        totalMinutes: parsedTotalMinutes,
+        totalMinutes: effectiveTotalMinutes,
         createdAt,
         scheduledFor,
         dueAt,
@@ -1107,9 +1181,10 @@ export function MvpDashboard() {
         }
       );
 
-      if (!isWithinTaskMissionBudget(nextMissions, parsedTotalMinutes)) {
-        setFeedback("미션 시간 합계가 과업 총 시간 예산을 초과해 생성이 취소되었습니다.");
-        return false;
+      if (!isWithinTaskMissionBudget(nextMissions, effectiveTotalMinutes)) {
+        const message = "미션 시간 합계가 과업 총 시간 예산을 초과해 생성이 취소되었습니다.";
+        setFeedback(message);
+        return { ok: false, reason: "mission_budget_exceeded", message };
       }
 
       setTasks((prev) => [nextTask, ...prev]);
@@ -1131,7 +1206,8 @@ export function MvpDashboard() {
       setQuestComposerMode("create");
       setEditingTaskId(null);
       setActiveTab("home");
-      setFeedback("문장 유사도 기반 추천으로 바로 시작할 수 있게 준비했어요.");
+      const message = "문장 유사도 기반 추천으로 바로 시작할 수 있게 준비했어요.";
+      setFeedback(message);
 
       logEvent({
         eventName: "task_created",
@@ -1140,7 +1216,7 @@ export function MvpDashboard() {
         meta: {
           summaryLength: safeTitle.length,
           missionCount: nextMissions.length,
-          totalMinutes: parsedTotalMinutes,
+          totalMinutes: effectiveTotalMinutes,
           scheduledFor: scheduledFor ?? null,
           dueAt: dueAt ?? null
         }
@@ -1159,113 +1235,138 @@ export function MvpDashboard() {
           withinTenSeconds: missioningLatencyMs <= 10_000
         }
       });
-      return true;
+      return { ok: true, reason: "created", message };
+    } catch (error) {
+      const message = "퀘스트 생성 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.";
+      console.error("퀘스트 생성 실패:", error);
+      setFeedback(message);
+      return { ok: false, reason: "unexpected_error", message };
     } finally {
       setIsGenerating(false);
     }
   };
 
-  const handleUpdateTask = async (): Promise<boolean> => {
-    const targetTask = editingTaskId ? tasks.find((task) => task.id === editingTaskId) : null;
-    if (!targetTask) {
-      setFeedback("수정할 퀘스트를 찾을 수 없습니다.");
-      return false;
-    }
-
-    const rawInput = taskInput.trim();
-    if (!rawInput) {
-      setFeedback("퀘스트 이름을 입력해주세요.");
-      return false;
-    }
-
-    if (taskMetaFeedback) {
-      setFeedback(`입력 단계 오류를 먼저 해결해주세요: ${taskMetaFeedback}`);
-      return false;
-    }
-
-    const normalizedTotalInput = taskTotalMinutesInput.trim();
-    const parsedTotalMinutes = normalizedTotalInput
-      ? parseTaskTotalMinutesInput(normalizedTotalInput)
-      : targetTask.totalMinutes;
-    if (parsedTotalMinutes === null) {
-      setFeedback(`총 소요 시간은 ${MIN_TASK_TOTAL_MINUTES}~${MAX_TASK_TOTAL_MINUTES}분 사이로 입력해주세요.`);
-      return false;
-    }
-
-    const fallbackStartAtMs = Date.parse(targetTask.createdAt);
-    const fallbackStartAt = Number.isFinite(fallbackStartAtMs) ? new Date(fallbackStartAtMs) : new Date();
-    const normalizedSchedule = normalizeTaskScheduleFromLocalInputs({
-      scheduledForInput: taskScheduledForInput,
-      dueAtInput: taskDueAtInput,
-      totalMinutes: parsedTotalMinutes,
-      fallbackStartAt
-    });
-    if (!normalizedSchedule) {
-      setFeedback("일정 시간 형식이 올바르지 않습니다. 날짜와 시간을 다시 확인해주세요.");
-      return false;
-    }
-
-    const taskHasExecutionLockedMission = executionLockedTaskId === targetTask.id;
-    if (taskHasExecutionLockedMission && parsedTotalMinutes < targetTask.totalMinutes) {
-      setFeedback("실행 중에는 과업 총 시간을 줄일 수 없습니다. 증가만 가능합니다.");
-      return false;
-    }
-
-    const currentBudgetMissions = getTaskBudgetedMissions(missions, targetTask.id);
-    if (!isWithinTaskMissionBudget(currentBudgetMissions, parsedTotalMinutes)) {
-      setFeedback("현재 미션 시간 합계보다 작게 과업 총 시간을 줄일 수 없습니다.");
-      return false;
-    }
-
-    const safeTitle = buildTaskSummary(rawInput) || targetTask.title;
-    const titleChanged = safeTitle !== targetTask.title || safeTitle !== (targetTask.summary ?? targetTask.title);
-    const totalChanged = parsedTotalMinutes !== targetTask.totalMinutes;
-    const scheduleChanged = normalizedSchedule.scheduledFor !== targetTask.scheduledFor
-      || normalizedSchedule.dueAt !== targetTask.dueAt;
-
-    if (!titleChanged && !totalChanged && !scheduleChanged) {
-      setFeedback("변경된 내용이 없습니다.");
-      return false;
-    }
-
-    setTasks((prev) =>
-      prev.map((task) =>
-        task.id === targetTask.id
-          ? {
-              ...task,
-              title: safeTitle,
-              summary: safeTitle,
-              totalMinutes: parsedTotalMinutes,
-              scheduledFor: normalizedSchedule.scheduledFor,
-              dueAt: normalizedSchedule.dueAt
-            }
-          : task
-      )
-    );
-    setActiveTaskId(targetTask.id);
-    setActiveTab("home");
-    resetTaskComposerDraft();
-    setQuestComposerMode("create");
-    setEditingTaskId(null);
-    setFeedback("퀘스트를 수정했습니다.");
-
-    logEvent({
-      eventName: "task_time_updated",
-      source: "user",
-      taskId: targetTask.id,
-      meta: {
-        previousTotalMinutes: targetTask.totalMinutes,
-        nextTotalMinutes: parsedTotalMinutes,
-        updatedDuringRun: taskHasExecutionLockedMission,
-        titleChanged,
-        scheduleChanged
+  const handleUpdateTask = async (): Promise<SubmitTaskResult> => {
+    try {
+      const targetTask = editingTaskId ? tasks.find((task) => task.id === editingTaskId) : null;
+      if (!targetTask) {
+        const message = "수정할 퀘스트를 찾을 수 없습니다.";
+        setFeedback(message);
+        return { ok: false, reason: "task_not_found", message };
       }
-    });
 
-    return true;
+      const rawInput = taskInput.trim();
+      if (!rawInput) {
+        const message = "퀘스트 이름을 입력해주세요.";
+        setFeedback(message);
+        return { ok: false, reason: "empty_input", message };
+      }
+
+      if (taskMetaFeedback) {
+        const message = `입력 단계 오류를 먼저 해결해주세요: ${taskMetaFeedback}`;
+        setFeedback(message);
+        return { ok: false, reason: "invalid_meta", message };
+      }
+
+      const normalizedTotalInput = taskTotalMinutesInput.trim();
+      const parsedTotalMinutes = normalizedTotalInput
+        ? parseTaskTotalMinutesInput(normalizedTotalInput)
+        : targetTask.totalMinutes;
+      if (parsedTotalMinutes === null) {
+        const message = `총 소요 시간은 ${MIN_TASK_TOTAL_MINUTES}~${MAX_TASK_TOTAL_MINUTES}분 사이로 입력해주세요.`;
+        setFeedback(message);
+        return { ok: false, reason: "invalid_total_minutes", message };
+      }
+
+      const fallbackStartAtMs = Date.parse(targetTask.createdAt);
+      const fallbackStartAt = Number.isFinite(fallbackStartAtMs) ? new Date(fallbackStartAtMs) : new Date();
+      const normalizedSchedule = applyDueOnlyScheduleInputOverride(
+        normalizeTaskScheduleFromLocalInputs({
+          scheduledForInput: taskScheduledForInput,
+          dueAtInput: taskDueAtInput,
+          totalMinutes: parsedTotalMinutes,
+          fallbackStartAt
+        }),
+        taskScheduledForInput,
+        taskDueAtInput
+      );
+      if (!normalizedSchedule) {
+        const message = "일정 시간 형식이 올바르지 않습니다. 날짜와 시간을 다시 확인해주세요.";
+        setFeedback(message);
+        return { ok: false, reason: "invalid_schedule", message };
+      }
+
+      const taskHasExecutionLockedMission = executionLockedTaskId === targetTask.id;
+      if (taskHasExecutionLockedMission && parsedTotalMinutes < targetTask.totalMinutes) {
+        const message = "실행 중에는 과업 총 시간을 줄일 수 없습니다. 증가만 가능합니다.";
+        setFeedback(message);
+        return { ok: false, reason: "execution_locked", message };
+      }
+
+      const currentBudgetMissions = getTaskBudgetedMissions(missions, targetTask.id);
+      if (!isWithinTaskMissionBudget(currentBudgetMissions, parsedTotalMinutes)) {
+        const message = "현재 미션 시간 합계보다 작게 과업 총 시간을 줄일 수 없습니다.";
+        setFeedback(message);
+        return { ok: false, reason: "mission_budget_exceeded", message };
+      }
+
+      const safeTitle = buildTaskSummary(rawInput) || targetTask.title;
+      const titleChanged = safeTitle !== targetTask.title || safeTitle !== (targetTask.summary ?? targetTask.title);
+      const totalChanged = parsedTotalMinutes !== targetTask.totalMinutes;
+      const scheduleChanged = normalizedSchedule.scheduledFor !== targetTask.scheduledFor
+        || normalizedSchedule.dueAt !== targetTask.dueAt;
+
+      if (!titleChanged && !totalChanged && !scheduleChanged) {
+        const message = "변경된 내용이 없습니다.";
+        setFeedback(message);
+        return { ok: false, reason: "no_changes", message };
+      }
+
+      setTasks((prev) =>
+        prev.map((task) =>
+          task.id === targetTask.id
+            ? {
+                ...task,
+                title: safeTitle,
+                summary: safeTitle,
+                totalMinutes: parsedTotalMinutes,
+                scheduledFor: normalizedSchedule.scheduledFor,
+                dueAt: normalizedSchedule.dueAt
+              }
+            : task
+        )
+      );
+      setActiveTaskId(targetTask.id);
+      setActiveTab("home");
+      resetTaskComposerDraft();
+      setQuestComposerMode("create");
+      setEditingTaskId(null);
+      const message = "퀘스트를 수정했습니다.";
+      setFeedback(message);
+
+      logEvent({
+        eventName: "task_time_updated",
+        source: "user",
+        taskId: targetTask.id,
+        meta: {
+          previousTotalMinutes: targetTask.totalMinutes,
+          nextTotalMinutes: parsedTotalMinutes,
+          updatedDuringRun: taskHasExecutionLockedMission,
+          titleChanged,
+          scheduleChanged
+        }
+      });
+
+      return { ok: true, reason: "updated", message };
+    } catch (error) {
+      const message = "퀘스트 수정 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.";
+      console.error("퀘스트 수정 실패:", error);
+      setFeedback(message);
+      return { ok: false, reason: "unexpected_error", message };
+    }
   };
 
-  const handleSubmitTask = (): Promise<boolean> => {
+  const handleSubmitTask = (): Promise<SubmitTaskResult> => {
     if (questComposerMode === "edit") {
       return handleUpdateTask();
     }
@@ -2035,6 +2136,7 @@ export function MvpDashboard() {
     setNotificationCapability(getNotificationCapability());
     setSttCapability(getSttCapability());
     setTaskMetaFeedback(null);
+    setSelectedQuestSuggestionId(null);
     taskMetaEditingFieldRef.current = null;
     taskMetaLastDistinctEditedFieldRef.current = null;
     setFeedback("초기화 완료. 새 루프를 시작해보세요.");
@@ -2107,6 +2209,7 @@ export function MvpDashboard() {
           </div>
         </div>
         <p className={styles.headerDateTime} suppressHydrationWarning>{formatDateTime(clock)}</p>
+        <p className={styles.feedback}>{feedback}</p>
       </header>
 
       <main className={styles.app}>
@@ -2117,12 +2220,19 @@ export function MvpDashboard() {
           onCloseComposer={closeQuestComposer}
           sttSupportState={sttSupportState}
           taskInput={taskInput}
-          onTaskInputChange={setTaskInput}
+          onTaskInputChange={handleTaskInputChange}
+          questSuggestions={questSuggestions}
+          selectedQuestSuggestionId={selectedQuestSuggestionId}
+          onSelectQuestSuggestion={(suggestionId, title) => {
+            setTaskInput(title);
+            setSelectedQuestSuggestionId(suggestionId);
+          }}
           isSttListening={isSttListening}
           onStartStt={handleStartStt}
           onStopStt={handleStopStt}
           sttCapability={sttCapability}
           onSubmitTask={handleSubmitTask}
+          feedbackMessage={feedback}
           isGenerating={isGenerating}
           taskTotalMinutesInput={taskTotalMinutesInput}
           onSetTaskTotalMinutesFromScheduled={handleSetTaskTotalMinutesFromScheduled}

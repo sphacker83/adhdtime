@@ -48,9 +48,66 @@ describe("generateLocalMissioning", () => {
     expect(result.missions[0]?.iconKey).toBeTruthy();
   });
 
+  it("forcePresetId가 있으면 입력과 무관하게 해당 preset을 강제 실행한다", () => {
+    const forcePresetId = "STU-DAY-HYGIENE-001";
+
+    const first = generateLocalMissioning("task-force-1", "청소해야돼", { forcePresetId });
+    const second = generateLocalMissioning("task-force-2", "회의록 정리", { forcePresetId });
+    expect(first).not.toBeNull();
+    expect(second).not.toBeNull();
+
+    if (!first || !second) {
+      return;
+    }
+
+    expect(first.missions.map((mission) => mission.action)).toEqual(
+      second.missions.map((mission) => mission.action)
+    );
+    expect(first.missions[0]?.action).toContain("위생");
+  });
+
+  it("preferTopRank=true면 top1 랭크 preset을 우선 사용한다", () => {
+    const query = "청소해야돼";
+    const topRankId = rankLocalPresetCandidates(query, 1)[0]?.id;
+    expect(topRankId).toBeTruthy();
+    if (!topRankId) {
+      return;
+    }
+
+    const preferred = generateLocalMissioning("task-prefer-top", query, { preferTopRank: true });
+    const forcedTop = generateLocalMissioning("task-force-top", query, { forcePresetId: topRankId });
+    expect(preferred).not.toBeNull();
+    expect(forcedTop).not.toBeNull();
+    if (!preferred || !forcedTop) {
+      return;
+    }
+
+    expect(preferred.missions.map((mission) => mission.action)).toEqual(
+      forcedTop.missions.map((mission) => mission.action)
+    );
+  });
+
   it("JSON/LOCAL 모두 매칭 실패하면 null을 반환한다", () => {
     const result = generateLocalMissioning("task-none", "zxqv pqow");
     expect(result).toBeNull();
+  });
+
+  it("exact title 입력이면 해당 preset id가 deterministic하게 top1이다", () => {
+    const query = "출근 직후 오늘의 탑3 설정";
+    const ranked = rankLocalPresetCandidates(query, 3);
+
+    expect(ranked[0]).toBeDefined();
+    expect(ranked[0]?.id).toBe("WRK-DAY-WORK-002");
+  });
+
+  it("exact title top1은 rerank/route confidence를 1로 노출한다", () => {
+    const query = "출근 직후 오늘의 탑3 설정";
+    const top = rankLocalPresetCandidates(query, 1)[0];
+
+    expect(top).toBeDefined();
+    expect(top?.id).toBe("WRK-DAY-WORK-002");
+    expect(top?.rerankConfidence).toBe(1);
+    expect(top?.routeConfidence).toBe(1);
   });
 
   it("일상 입력은 의도에 맞는 상위 intent로 랭크된다", () => {
@@ -109,6 +166,50 @@ describe("generateLocalMissioning", () => {
     const result = generateTemplateMissioning("task-template", "집중해서 보고서 마무리");
     const missingIconCount = result.missions.filter((mission) => !mission.iconKey).length;
     expect(missingIconCount).toBe(0);
+  });
+
+  it("꺼내기/모으기/비우기 문장을 포함한 미션은 검증을 통과한다", () => {
+    const validation = validateMissioningResult({
+      taskId: "task-action-verbs",
+      title: "청소 루프",
+      context: "청소 루프",
+      missions: [
+        {
+          missionId: "m-1",
+          order: 1,
+          action: "서랍에서 청소도구 꺼내기",
+          estMinutes: 3,
+          difficulty: 1,
+          notes: "준비 단계",
+          iconKey: "organize"
+        },
+        {
+          missionId: "m-2",
+          order: 2,
+          action: "책상 위 문서 모으기",
+          estMinutes: 4,
+          difficulty: 1,
+          notes: "집중 구역 정리",
+          iconKey: "organize"
+        },
+        {
+          missionId: "m-3",
+          order: 3,
+          action: "휴지통 비우기",
+          estMinutes: 3,
+          difficulty: 1,
+          notes: "마무리 단계",
+          iconKey: "organize"
+        }
+      ],
+      safety: {
+        requiresCaution: false,
+        notes: ""
+      }
+    });
+
+    expect(validation.ok).toBe(true);
+    expect(validation.errors).toHaveLength(0);
   });
 
   it("MissioningResult -> Mission 매핑에서 iconKey를 보존한다", () => {
