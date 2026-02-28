@@ -1914,7 +1914,7 @@
   --layout-max-width: 100%;
   --tab-height: 56px;
   min-height: 100dvh;
-  padding: 0 0 calc(var(--tab-height) + 34px);
+  padding: 0 0 calc(var(--tab-height) + 20px);
   overflow-x: hidden;
   background: linear-gradient(180deg, #f4f7fc 0%, #e7eef8 100%);
 }
@@ -2296,7 +2296,7 @@
 
 .questModalBackdrop {
   z-index: 55;
-  padding: 0 12px calc(var(--tab-height) + 24px);
+  padding: 0 12px calc(var(--tab-height) + 20px);
 }
 
 .questModal {
@@ -2320,7 +2320,7 @@
   width: 100%;
   height: var(--tab-height);
   min-height: var(--tab-height);
-  padding: 0 10px;
+  padding: 3px 8px 2px;
   border-radius: 0;
   border: 0;
   border-top: 1px solid #cdd9eb;
@@ -2329,7 +2329,7 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: stretch;
-  gap: 8px;
+  gap: 6px;
   z-index: 70;
   overflow: visible;
 }
@@ -2338,9 +2338,9 @@
   content: "";
   position: absolute;
   left: 50%;
-  top: -18px;
-  width: 116px;
-  height: 38px;
+  top: -14px;
+  width: 104px;
+  height: 32px;
   transform: translateX(-50%);
   border: 1px solid #cdd9eb;
   border-bottom: 0;
@@ -2355,15 +2355,15 @@
   min-width: 0;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
+  gap: 6px;
   align-items: stretch;
   z-index: 1;
 }
 
 .tabCreateButton {
-  width: 82px;
-  height: 82px;
-  margin-top: -36px;
+  width: 76px;
+  height: 76px;
+  margin-top: -28px;
   border-radius: 999px;
   border: 2px solid #2f74be;
   background: linear-gradient(180deg, #4fb4ff 0%, #2d84d9 100%);
@@ -2380,12 +2380,12 @@
 }
 
 .tabCreateIcon {
-  font-size: 28px;
+  font-size: 24px;
   line-height: 1;
 }
 
 .tabCreateLabel {
-  font-size: 10px;
+  font-size: 9px;
   line-height: 1.1;
   font-weight: 800;
   text-align: center;
@@ -2400,7 +2400,7 @@
 .tabButtonActive {
   width: 100%;
   min-width: 0;
-  height: var(--tab-height);
+  height: calc(var(--tab-height) - 5px);
   border-radius: 10px;
   display: flex;
   flex-direction: column;
@@ -2409,6 +2409,7 @@
   gap: 2px;
   padding: 0;
   line-height: 1;
+  align-self: center;
 }
 
 .tabButton {
@@ -2422,15 +2423,15 @@
 }
 
 .tabIcon {
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .tabLabelKr {
-  font-size: 10px;
+  font-size: 9px;
 }
 
 .tabLabelEn {
-  font-size: 9px;
+  font-size: 8px;
 }
 
 @media (min-width: 768px) {

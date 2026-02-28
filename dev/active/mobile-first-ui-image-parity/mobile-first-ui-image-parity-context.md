@@ -71,6 +71,14 @@ Last Updated: 2026-02-28
   - Playwright 캡처 추가:
     - `output/playwright/nav-center-cta-home.png`
     - `output/playwright/nav-center-cta-modal.png`
+- Round 5 하단 바 미세조정 완료:
+  - 하단 바 내부 여백/간격 축소(`padding`, `gap`, 버튼 높이)
+  - 중앙 CTA 크기와 돌출 높이 축소(주변 탭과 밸런스 조정)
+  - 본문 하단 예약 여백 축소(`shell padding-bottom`)
+  - 모달 하단 safe 공간 재보정
+  - Playwright 캡처 추가:
+    - `output/playwright/nav-center-cta-tuned-home.png`
+    - `output/playwright/nav-center-cta-tuned-modal.png`
 - 문서 체계 정리:
   - 비어 있던 사이드 플랜 트랙 `dev/active/task-json-preset-scoring-side-plan`을 `dev/archive/`로 이동
 - 검증 통과:
@@ -108,6 +116,6 @@ Last Updated: 2026-02-28
 - `dev/active/mobile-first-ui-image-parity/mobile-first-ui-image-parity-tasks.md`
 
 ## Quick Resume
-1. 수동 UI QA(`docs/ui/main_ui.png`, `docs/ui/add_ui.png` 비교)로 헤더/중앙 CTA/홈카드를 확인한다.
+1. 수동 UI QA(`docs/ui/main_ui.png`, `docs/ui/add_ui.png` 비교)로 헤더/중앙 CTA/하단 바 공백을 확인한다.
 2. 필요시 `mvp-dashboard.module.css` parity override만 미세 조정한다.
 3. 최종 커밋/푸시를 진행한다.

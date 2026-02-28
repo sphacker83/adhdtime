@@ -93,3 +93,12 @@ Acceptance:
 - [x] 네비 상단 돌출형(`---^---`) 시각 구조 구현
 - [x] 모달 상태를 부모로 이동해 중앙 CTA와 연결
 - [x] Playwright 캡처 + `typecheck/lint/test:mvp` 재검증
+
+## Phase 9: 하단 바 공백 미세조정 (2026-02-28) ✅ COMPLETE
+- [x] 하단 바 패딩/갭 축소
+- [x] 좌우 탭 버튼 높이/아이콘/라벨 밀도 조정
+- [x] 중앙 CTA 크기/돌출 높이 축소
+- [x] 본문 하단 예약 공간 축소
+- [x] 모달 하단 안전 여백 동기화
+- [x] Playwright 캡처(`nav-center-cta-tuned-home`, `nav-center-cta-tuned-modal`)
+- [x] `typecheck/lint/test:mvp` 재검증
