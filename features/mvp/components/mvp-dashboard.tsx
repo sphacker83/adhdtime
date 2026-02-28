@@ -52,6 +52,7 @@ import {
   STAT_META,
   TASK_META_PAIR_PRIORITY,
   addMinutesToDate,
+  applyDueOnlyScheduleOverride,
   buildNextRescheduleDate,
   buildRadarShape,
   getTaskMetaConstraintFeedback,
@@ -239,27 +240,6 @@ function clampMinuteInput(minutes: number): number {
 
 function clampTaskTotalMinutes(totalMinutes: number): number {
   return Math.min(MAX_TASK_TOTAL_MINUTES, Math.max(MIN_TASK_TOTAL_MINUTES, Math.floor(totalMinutes)));
-}
-
-function applyDueOnlyScheduleInputOverride(
-  normalizedSchedule: ReturnType<typeof normalizeTaskScheduleFromLocalInputs>,
-  scheduledForInput: string,
-  dueAtInput: string
-) {
-  if (!normalizedSchedule) {
-    return normalizedSchedule;
-  }
-
-  const hasScheduledForInput = scheduledForInput.trim().length > 0;
-  const hasDueAtInput = dueAtInput.trim().length > 0;
-  if (!hasScheduledForInput && hasDueAtInput) {
-    return {
-      ...normalizedSchedule,
-      scheduledFor: undefined
-    };
-  }
-
-  return normalizedSchedule;
 }
 
 export function MvpDashboard() {
@@ -463,10 +443,10 @@ export function MvpDashboard() {
       totalMinutes: task.totalMinutes,
       fallbackStartAt
     });
-    const normalizedScheduleWithDueOnlyOverride = applyDueOnlyScheduleInputOverride(
+    const normalizedScheduleWithDueOnlyOverride = applyDueOnlyScheduleOverride(
       normalizedSchedule,
-      task.scheduledFor ?? "",
-      task.dueAt ?? ""
+      task.scheduledFor,
+      task.dueAt
     ) ?? normalizedSchedule;
 
     setQuestComposerMode("edit");
@@ -718,10 +698,10 @@ export function MvpDashboard() {
           totalMinutes: task.totalMinutes,
           fallbackStartAt
         });
-        const normalizedScheduleWithDueOnlyOverride = applyDueOnlyScheduleInputOverride(
+        const normalizedScheduleWithDueOnlyOverride = applyDueOnlyScheduleOverride(
           normalizedSchedule,
-          task.scheduledFor ?? "",
-          task.dueAt ?? ""
+          task.scheduledFor,
+          task.dueAt
         ) ?? normalizedSchedule;
         const nextScheduledFor = normalizedScheduleWithDueOnlyOverride.scheduledFor;
         const nextDueAt = normalizedScheduleWithDueOnlyOverride.dueAt;
@@ -1217,7 +1197,7 @@ export function MvpDashboard() {
       const effectiveTotalMinutes = clampTaskTotalMinutes(
         parsedTotalMinutes ?? sumMissionEstMinutes(missioning.missions)
       );
-      const normalizedSchedule = applyDueOnlyScheduleInputOverride(
+      const normalizedSchedule = applyDueOnlyScheduleOverride(
         normalizeTaskScheduleFromLocalInputs({
           scheduledForInput: taskScheduledForInput,
           dueAtInput: taskDueAtInput,
@@ -1362,7 +1342,7 @@ export function MvpDashboard() {
 
       const fallbackStartAtMs = Date.parse(targetTask.createdAt);
       const fallbackStartAt = Number.isFinite(fallbackStartAtMs) ? new Date(fallbackStartAtMs) : new Date();
-      const normalizedSchedule = applyDueOnlyScheduleInputOverride(
+      const normalizedSchedule = applyDueOnlyScheduleOverride(
         normalizeTaskScheduleFromLocalInputs({
           scheduledForInput: taskScheduledForInput,
           dueAtInput: taskDueAtInput,
@@ -2121,29 +2101,30 @@ export function MvpDashboard() {
     );
   };
 
-  const handleReschedule = (targetMissionId = currentMissionId) => {
-    if (!targetMissionId) {
+  const handleReschedule = (targetTaskId = activeTaskId ?? homeTask?.id ?? null) => {
+    if (!targetTaskId) {
       return;
     }
 
-    const target = missions.find((mission) => mission.id === targetMissionId);
-    if (!target || !isActionableMissionStatus(target.status)) {
-      return;
-    }
-    const ownerTask = tasks.find((task) => task.id === target.taskId);
+    const ownerTask = tasks.find((task) => task.id === targetTaskId);
     if (!ownerTask) {
       return;
     }
 
+    const movedMissions = orderMissions(
+      missions.filter((mission) => mission.taskId === targetTaskId && isActionableMissionStatus(mission.status))
+    );
+    if (movedMissions.length === 0) {
+      return;
+    }
+    const primaryMission = movedMissions[0];
+
     const metricState = gateMetricsRef.current;
-    const recoveryClickCount = (metricState.recoveryClickCountByTaskId[target.taskId] ?? 0) + 1;
-    metricState.recoveryClickCountByTaskId[target.taskId] = recoveryClickCount;
+    const recoveryClickCount = (metricState.recoveryClickCountByTaskId[targetTaskId] ?? 0) + 1;
+    metricState.recoveryClickCountByTaskId[targetTaskId] = recoveryClickCount;
 
     const nowIso = new Date().toISOString();
     const rescheduledFor = buildNextRescheduleDate();
-    const movedMissions = orderMissions(
-      missions.filter((mission) => mission.taskId === target.taskId && isActionableMissionStatus(mission.status))
-    );
     const activeSessionMissionIds = movedMissions
       .filter((mission) => mission.status === "running" || mission.status === "paused")
       .map((mission) => mission.id);
@@ -2165,7 +2146,7 @@ export function MvpDashboard() {
 
     setMissions((prev) =>
       prev.map((mission) => {
-        if (mission.taskId !== target.taskId || !isActionableMissionStatus(mission.status)) {
+        if (mission.taskId !== targetTaskId || !isActionableMissionStatus(mission.status)) {
           return mission;
         }
 
@@ -2191,11 +2172,11 @@ export function MvpDashboard() {
     });
     tickAccumulatorRef.current = createTimerElapsedAccumulator();
     setCurrentMissionId(movedMissions[0]?.id ?? null);
-    setActiveTaskId(target.taskId);
+    setActiveTaskId(targetTaskId);
 
     const rewardGate = evaluateQuestRewardGate({
       events,
-      taskId: target.taskId,
+      taskId: targetTaskId,
       now: new Date(nowIso)
     });
     const recovery = rewardGate.granted
@@ -2206,8 +2187,7 @@ export function MvpDashboard() {
     logEvent({
       eventName: "task_rescheduled",
       source: "local",
-      taskId: target.taskId,
-      missionId: target.id,
+      taskId: targetTaskId,
       meta: {
         rescheduledFor,
         movedMissionCount: movedMissions.length,
@@ -2218,8 +2198,7 @@ export function MvpDashboard() {
     logEvent({
       eventName: "reschedule_requested",
       source: "local",
-      taskId: target.taskId,
-      missionId: target.id,
+      taskId: targetTaskId,
       meta: {
         rescheduledFor,
         movedMissionCount: movedMissions.length,
@@ -2231,8 +2210,7 @@ export function MvpDashboard() {
       logEvent({
         eventName: "xp_gained",
         source: "local",
-        taskId: target.taskId,
-        missionId: target.id,
+        taskId: targetTaskId,
         meta: {
           xpGain: recovery.xpGain,
           reason: "reschedule",
@@ -2244,8 +2222,7 @@ export function MvpDashboard() {
         logEvent({
           eventName: "level_up",
           source: "local",
-          taskId: target.taskId,
-          missionId: target.id,
+          taskId: targetTaskId,
           meta: {
             levelUps: recovery.levelUps,
             currentLevel: recovery.nextStats.level,
@@ -2262,11 +2239,11 @@ export function MvpDashboard() {
         : `${RECOVERY_FEEDBACK.rescheduled} ${getRewardBlockedFeedback(rewardGate.reason)}`
     );
 
-    const taskTitle = tasks.find((task) => task.id === target.taskId)?.title ?? "과업";
+    const taskTitle = ownerTask.title;
     pushLoopNotification({
       eventName: "task_rescheduled",
       taskTitle,
-      missionAction: target.action
+      missionAction: primaryMission?.action ?? "다음 미션"
     });
   };
 

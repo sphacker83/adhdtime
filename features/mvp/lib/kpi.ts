@@ -4,13 +4,16 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 
 const REQUIRED_EVENT_NAMES: EventName[] = [
   "task_created",
+  "task_time_updated",
+  "task_rescheduled",
+  "reschedule_requested",
   "mission_generated",
+  "mission_time_adjusted",
   "mission_started",
   "mission_paused",
   "mission_completed",
   "mission_abandoned",
   "remission_requested",
-  "reschedule_requested",
   "xp_gained",
   "level_up",
   "haptic_fired",

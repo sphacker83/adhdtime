@@ -119,7 +119,7 @@ export interface HomeViewProps {
   canAdjustPlusOne: boolean;
   canAdjustPlusFive: boolean;
   onRemission: (missionId: string) => void;
-  onReschedule: (missionId: string) => void;
+  onReschedule: (taskId: string) => void;
   onEditTaskTotalMinutes: (task: Task) => void;
   onDeleteTask: (task: Task) => void;
   onReorderTaskMissions: (taskId: string, draggedMissionId: string, targetMissionId: string) => void;

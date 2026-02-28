@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  applyDueOnlyScheduleOverride,
   addMinutesToDate,
   buildNextRescheduleDate,
   buildTaskSummary,
@@ -151,6 +152,43 @@ describe("task-meta constraints and schedule model", () => {
       totalMinutes: 30
     });
     expect(alreadyAligned.changed).toBe(false);
+  });
+
+  it("keeps due-only schedule without reinjecting scheduledFor", () => {
+    const dueAtIso = parseDateTimeLocalInput("2026-03-01T11:15")?.toISOString();
+    expect(dueAtIso).toBeDefined();
+
+    const fromLocalDueOnly = normalizeTaskScheduleFromLocalInputs({
+      scheduledForInput: "",
+      dueAtInput: "2026-03-01T11:15",
+      totalMinutes: 30
+    });
+    const overriddenLocalDueOnly = applyDueOnlyScheduleOverride(
+      fromLocalDueOnly,
+      "",
+      "2026-03-01T11:15"
+    );
+    expect(overriddenLocalDueOnly?.scheduledFor).toBeUndefined();
+    expect(overriddenLocalDueOnly?.dueAt).toBe(dueAtIso);
+
+    const fromPersistedDueOnly = normalizeTaskScheduleIso({
+      dueAt: "2026-03-01T11:15:00.000Z",
+      totalMinutes: 30
+    });
+    const overriddenPersistedDueOnly = applyDueOnlyScheduleOverride(
+      fromPersistedDueOnly,
+      undefined,
+      "2026-03-01T11:15:00.000Z"
+    );
+    expect(overriddenPersistedDueOnly?.scheduledFor).toBeUndefined();
+    expect(overriddenPersistedDueOnly?.dueAt).toBe("2026-03-01T11:15:00.000Z");
+
+    const scheduledInputPreserved = applyDueOnlyScheduleOverride(
+      fromLocalDueOnly,
+      "2026-03-01T10:45",
+      "2026-03-01T11:15"
+    );
+    expect(scheduledInputPreserved?.scheduledFor).toBeDefined();
   });
 
   it("computes minute deltas and next reschedule date", () => {

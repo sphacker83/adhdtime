@@ -176,6 +176,27 @@ export function normalizeTaskScheduleFromLocalInputs({
   });
 }
 
+export function applyDueOnlyScheduleOverride(
+  normalizedSchedule: NormalizedTaskSchedule | null,
+  scheduledForValue?: string,
+  dueAtValue?: string
+): NormalizedTaskSchedule | null {
+  if (!normalizedSchedule) {
+    return normalizedSchedule;
+  }
+
+  const hasScheduledFor = Boolean(scheduledForValue?.trim());
+  const hasDueAt = Boolean(dueAtValue?.trim());
+  if (!hasScheduledFor && hasDueAt) {
+    return {
+      ...normalizedSchedule,
+      scheduledFor: undefined
+    };
+  }
+
+  return normalizedSchedule;
+}
+
 export function buildNextRescheduleDate(now = new Date()): string {
   const next = new Date(now);
   next.setDate(next.getDate() + 1);

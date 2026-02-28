@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test:mvp": "vitest run features/mvp/lib/timer-accuracy.test.ts features/mvp/lib/kpi.test.ts features/mvp/lib/missioning.test.ts features/mvp/shared/model/task-meta-and-schedule.test.ts features/mvp/shared/model/mission-runtime.test.ts features/mvp/shared/model/display-and-events.test.ts features/mvp/shell/model/core-state.test.ts features/mvp/shell/model/core-state.selectors.test.ts features/mvp/integrations/notification/notification-adapter.test.ts features/mvp/integrations/stt/stt-adapter.test.ts features/mvp/integrations/sync/sync-mock-adapter.test.ts",
+    "test:mvp": "vitest run features/mvp/lib/timer-accuracy.test.ts features/mvp/lib/kpi.test.ts features/mvp/lib/missioning.test.ts features/mvp/lib/reward.test.ts features/mvp/shared/model/task-meta-and-schedule.test.ts features/mvp/shared/model/mission-runtime.test.ts features/mvp/shared/model/display-and-events.test.ts features/mvp/shell/model/core-state.test.ts features/mvp/shell/model/core-state.selectors.test.ts features/mvp/integrations/notification/notification-adapter.test.ts features/mvp/integrations/stt/stt-adapter.test.ts features/mvp/integrations/sync/sync-mock-adapter.test.ts",
     "verify:gate": "node scripts/verify-release-gate.mjs",
     "verify:mvp": "npm run typecheck && npm run lint && npm run test:mvp && npm run build && npm run verify:gate"
   },

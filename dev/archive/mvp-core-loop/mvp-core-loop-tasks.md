@@ -3,7 +3,7 @@
 Last Updated: 2026-02-28
 
 ## Active Backlog
-- [x] 실제 구현 이슈 백로그 확인: `dev/active/mvp-core-loop/mvp-core-loop-implementation-issues.md`
+- [x] 실제 구현 이슈 백로그 확인: `dev/archive/mvp-core-loop/mvp-core-loop-implementation-issues.md`
 
 ## Phase 1: Domain + Engine
 - [x] Task/Mission/TimerSession/Stats/Event 타입 정의
@@ -76,9 +76,10 @@ Last Updated: 2026-02-28
 - [x] 총 소요시간 편집 시 due-only 입력에서 시작시간 자동 역산 차단
 - [x] 원인/수정 포인트 문서화
   - 원인: `normalizeTaskScheduleIso`가 `dueAt`만 있는 과업에서 `scheduledFor`를 역산 생성
-  - 조치: 동기화 `useEffect`에도 `applyDueOnlyScheduleInputOverride` 동일 정책 적용
+  - 조치: 동기화 `useEffect`에도 `applyDueOnlyScheduleOverride` 동일 정책 적용
 - [x] 검증 게이트 재실행(`npm run typecheck`, `npm run test:mvp`, `npm run lint`)
-- [ ] 다음 확인: due-only 시나리오(생성/수정/미션 변경)에서 `scheduledFor` 자동 재주입 여부 수동 점검
+- [x] 다음 확인: due-only 시나리오(생성/수정/미션 변경)에서 `scheduledFor` 자동 재주입 여부 점검
+  - 근거: `features/mvp/shared/model/task-meta-and-schedule.test.ts`에 due-only 회귀 케이스 추가 + `npm run test:mvp` PASS
 
 ## Session Update (2026-02-28, Mobile Status Card Rebalance)
 - [x] 요구사항 정리: 모바일 상태 카드 2열 고정(좌측 상태 정보 / 우측 레이더), 카드 세로 확장 방지

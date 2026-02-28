@@ -27,7 +27,7 @@ Review Method: `documentation-architect` 구조화 + `plan-reviewer` 갭 검증 
 - [x] MVP-010 이벤트 로그 조회 편의 개선
   - 근거: `features/mvp/components/mvp-dashboard.tsx` 최근 이벤트에 `source` 및 `meta` 요약 표시
 - [x] MVP-011 타입/린트/빌드 파이프라인 체크 문서화
-  - 근거: `dev/active/mvp-core-loop/mvp-core-loop-tasks.md`에 실행 순서/통과 기준/최근 실행 결과 추가
+  - 근거: `dev/archive/mvp-core-loop/mvp-core-loop-tasks.md`에 실행 순서/통과 기준/최근 실행 결과 추가
 
 ---
 
@@ -176,7 +176,7 @@ Review Method: `documentation-architect` 구조화 + `plan-reviewer` 갭 검증 
 - Priority: P0-Medium
 - Why: 이슈 완료 검증 기준을 동일하게 적용하기 위한 문서 필요
 - Scope:
-  - `dev/active/mvp-core-loop/mvp-core-loop-tasks.md`
+  - `dev/archive/mvp-core-loop/mvp-core-loop-tasks.md`
   - 필요 시 `README.md`
 - AC:
   - 각 이슈 종료 조건에 `typecheck/lint/build` 명시

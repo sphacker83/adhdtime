@@ -19,7 +19,21 @@ npm run verify:mvp
 
 ## 2) 최근 실행 결과
 
-### 실행 #2 (최신)
+### 실행 #3 (최신)
+
+- 실행 일시: 2026-02-28 23:17 KST
+- 실행 명령: `npm run verify:mvp`
+- 최종 결과: `PASS` (exit code 0)
+
+| 단계 | 결과 | 핵심 로그 |
+| --- | --- | --- |
+| typecheck | PASS | `tsc --noEmit` 오류 없음 |
+| lint | PASS | `eslint .` 오류 없음 |
+| test:mvp | PASS | `12 files, 65 tests passed` (`reward.test.ts` 포함) |
+| build | PASS | Next.js 16.1.6 빌드 성공 |
+| verify:gate | PASS | Gate-3/7/8/9 자동 판정 근거 + 이벤트 커버리지/KPI null 안전 처리 모두 PASS |
+
+### 실행 #2
 
 - 실행 일시: 2026-02-28 18:04 KST
 - 실행 명령: `npm run verify:mvp`
@@ -49,10 +63,10 @@ npm run verify:mvp
 
 ### verify:gate 확인 항목
 
-- 필수 이벤트 정의가 기대 목록과 일치
-- 샘플 이벤트가 필수 이벤트 커버리지 충족
-- 핵심 KPI 계산 가능
-- 빈 이벤트 입력 시 KPI null 안전 처리
+- Gate-3: 첫 시작 탭 수/3분 내 시작 메타 계측 근거 확인
+- Gate-7: 복귀 2CTA + recovery 탭 계측 이벤트 근거 확인
+- Gate-8: Task 단위 재일정 엔트리/전이(taskId 기준) 근거 확인
+- Gate-9: 필수 이벤트 정의/샘플 커버리지/KPI 계산/null 안전 처리 확인
 
 ## 3) 실패 시 대응 절차
 

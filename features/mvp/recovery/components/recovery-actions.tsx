@@ -5,9 +5,9 @@ type CssModuleClassMap = Readonly<Record<string, string>>;
 
 export interface RecoveryActionsProps {
   styles: CssModuleClassMap;
-  mission: Pick<Mission, "id" | "status">;
+  mission: Pick<Mission, "id" | "status" | "taskId">;
   onRemission: (missionId: string) => void;
-  onReschedule: (missionId: string) => void;
+  onReschedule: (taskId: string) => void;
 }
 
 export function RecoveryActions({
@@ -32,7 +32,7 @@ export function RecoveryActions({
       <button
         type="button"
         className={getClassName("subtleButton")}
-        onClick={() => onReschedule(mission.id)}
+        onClick={() => onReschedule(mission.taskId)}
         disabled={!isActionable}
       >
         내일로 다시 등록

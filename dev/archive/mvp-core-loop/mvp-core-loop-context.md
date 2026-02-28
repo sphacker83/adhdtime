@@ -69,11 +69,11 @@ Last Updated: 2026-02-28
 
 ## Session Notes (2026-02-28, Dashboard UX Polish + Due-Only Fix)
 - 원인: `missions` 변경 시 동작하는 task schedule 동기화 `useEffect`가 `normalizeTaskScheduleIso` 결과를 그대로 반영하면서, `dueAt`만 있던 과업에 `scheduledFor`를 역산 주입함.
-- 수정: `normalizeTaskScheduleIso` 직후 `applyDueOnlyScheduleInputOverride`와 동일 정책을 `task.scheduledFor/task.dueAt` 기준으로 공통 적용해, 시작시간 미입력 + 마감시간만 입력된 경우 `scheduledFor`를 `undefined`로 유지.
+- 수정: `normalizeTaskScheduleIso` 직후 `applyDueOnlyScheduleOverride`와 동일 정책을 `task.scheduledFor/task.dueAt` 기준으로 공통 적용해, 시작시간 미입력 + 마감시간만 입력된 경우 `scheduledFor`를 `undefined`로 유지.
 - 보강: 퀘스트 편집 모달 초기 입력 구성에서도 same override를 적용해 due-only 과업을 열었을 때 시작시간이 UI에 재주입되지 않도록 수정.
 - 보강: 총 소요시간 입력으로 파생 계산 시 due-only 입력(`scheduledFor` 공란 + `dueAt` 존재) 조건에서는 `scheduledFor` 역산을 건너뛰도록 가드 추가.
 - 상태: 코드 반영 및 검증 게이트 재실행 완료(`npm run typecheck`, `npm run test:mvp`, `npm run lint` 모두 통과).
-- 다음 확인: due-only 생성/수정/미션 상태 전이 후에도 시작시간이 자동 복원되지 않는지 수동 시나리오 점검.
+- 확인 완료: due-only 생성/수정/미션 상태 전이 경로에서 시작시간 자동 재주입이 발생하지 않음을 회귀 테스트(`task-meta-and-schedule.test.ts`)와 `npm run test:mvp` PASS로 검증.
 
 ## Session Notes (2026-02-28, Mobile Status Card Rebalance)
 - 요구사항: 카드 전체 크기 확장은 피하고, 모바일에서도 좌측 상태 정보 + 우측 레이더가 한 줄 2열로 안정적으로 보이도록 조정.
