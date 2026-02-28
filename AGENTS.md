@@ -81,6 +81,7 @@
   - `code-architecture-reviewer`
   - `code-refactor-master`
   - `documentation-architect`
+  - `flutter-developer` (Flutter 코드 작업일 때)
   - `frontend-architecture-designer`
   - `frontend-error-fixer`
   - `refactor-planner`
@@ -103,6 +104,12 @@
 - 파일 수정, 테스트 실행, 장시간 대기 작업은 원칙적으로 서브 에이전트에 위임한다.
 - 서브 에이전트에 작업을 줄 때는 반드시 책임 범위(파일/기능 단위)를 명시한다.
 - 예외는 사용자의 명시적 요청이 있는 경우에만 허용한다(예: \"메인이 직접 즉시 수정\").
+- 개발 에이전트는 Dev Docs `조건부 강제` 규칙을 따른다.
+  - 게이트 기준: 대략 2시간+, 다단계, 멀티세션 가능 작업
+  - 게이트 통과 시: 구현 전에 `dev/active/[task]/`의 `plan/context/tasks` 3파일을 먼저 만들거나 갱신
+  - 구현 중: 각 서브 에이전트는 **자기 책임 범위 변경분만** `context/tasks`에 즉시 반영
+  - 세션 마감/인수인계: `/dev-docs-update` 또는 동등 절차로 최신 상태 동기화
+  - 게이트 미통과(단순/단일 파일/짧은 수정): Dev Docs 생략 가능
 
 ## 7) 슬래시 명령어 활용 (`.codex/commands`)
 
@@ -136,6 +143,7 @@
 ## 10) 빠른 실행 가이드
 
 - 프론트 UI 버그 수정: `frontend-dev-guidelines` 확인 -> 구현 -> 필요 시 `frontend-error-fixer` 에이전트
+- Flutter 기능 구현/리팩터링: `flutter-dev-guidelines` 확인 -> 필요 시 `flutter-developer` 에이전트
 - API/인증 라우트 검증: `route-tester` 확인 -> 인증 전제 확인 -> 테스트
 - 스킬 트리거 이상: `skill-developer` 확인 -> `skill-rules.json`/훅 설정 점검
 - 장기 작업 시작: `/dev-docs`로 3파일 생성 후 구현 시작

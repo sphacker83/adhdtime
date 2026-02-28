@@ -30,6 +30,8 @@
 
 ## 제공되는 스킬
 
+현재 기준 **10개 스킬**이 포함되어 있습니다.
+
 ### skill-developer (메타 스킬)
 **목적:** Roo Codex 스킬 생성 및 관리
 
@@ -118,13 +120,80 @@
 }
 ```
 
-**참고:** 이 스킬은 MUI v6→v7 비호환을 방지하기 위해 **가드레일**(enforcement: "block")로 설정되어 있습니다.
+**참고:** 이 저장소에서는 과차단을 피하기 위해 enforcement를 **"suggest"**로 설정했습니다.
 
 **[스킬 보기 →](frontend-dev-guidelines/)**
 
 ---
 
+### flutter-dev-guidelines (기본 진입 + 라우터)
+**목적:** Flutter 신규 개발 기본 가이드이자 아키텍처/테스트/디버깅/검증 게이트 분류 인덱스
+
+**사용 시점:**
+- Flutter/플러터가 단독으로 언급되거나 신규 개발을 시작할 때
+- 어떤 Flutter 하위 스킬을 병행할지 먼저 분류할 때
+- 전체 작업 플로우(구현 -> 테스트 -> 게이트 검증)를 잡을 때
+
+**하위 스킬 라우팅:**
+- 설계/레이어/모델/DI/패키지 선정 -> `flutter-architecture-guidelines`
+- unit/widget/integration 테스트 설계 -> `flutter-testing-guidelines`
+- Inspector/DevTools/플랫폼/성능 디버깅 -> `flutter-debugging-guidelines`
+- G1~G5(+G4b) 판정/증빙 -> `flutter-validation-gates`
+
+**[스킬 보기 →](flutter-dev-guidelines/)**
+
+---
+
+### flutter-architecture-guidelines
+**목적:** MVVM + Clean Architecture, 모델 경계(Entity/DTO/Model/Mapper/VO), DI(단일 Composition Root), Flutter Favorite 정책 강제
+
+**사용 시점:**
+- 신규 feature 구조를 설계/구현할 때
+- Entity/DTO/Mapper 분리나 DI 바인딩을 정리할 때
+- 패키지 도입 전 아키텍처 영향도를 검토할 때
+
+**[스킬 보기 →](flutter-architecture-guidelines/)**
+
+---
+
+### flutter-testing-guidelines
+**목적:** unit/widget/integration 테스트 전략과 ViewModel 테스트 책임(상태 전이 assertion) 표준화
+
+**사용 시점:**
+- 테스트 코드를 신규 작성/수정할 때
+- ViewModel 변경에 대응하는 단위 테스트를 보강할 때
+- CI 테스트 명령 및 패턴을 정리할 때
+
+**[스킬 보기 →](flutter-testing-guidelines/)**
+
+---
+
+### flutter-debugging-guidelines
+**목적:** Flutter Inspector/DevTools 기반 디버깅, lifecycle/플랫폼 이슈 분석, 성능 병목 추적 흐름 제공
+
+**사용 시점:**
+- 재현은 되지만 원인이 불명확한 버그를 추적할 때
+- Android/iOS 권한/설정/플러그인 이슈를 조사할 때
+- 프레임 드랍/메모리 증가 같은 성능 문제를 분석할 때
+
+**[스킬 보기 →](flutter-debugging-guidelines/)**
+
+---
+
+### flutter-validation-gates
+**목적:** G1~G5(+G4b) 게이트, 증빙 규칙, PASS/FAIL 판정 명령 표준화
+
+**사용 시점:**
+- PR/릴리스 전 완료 판정을 실행할 때
+- `dev/evidence/flutter/<task-name>/` 증빙을 생성/검토할 때
+- CI 게이트 자동화 기준을 맞출 때
+
+**[스킬 보기 →](flutter-validation-gates/)**
+
+---
+
 ### route-tester
+
 **목적:** JWT 쿠키 인증으로 보호된 API 라우트 테스트
 
 **파일:** 메인 파일 1개(389줄)

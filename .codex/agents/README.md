@@ -26,6 +26,18 @@
 
 ---
 
+## Dev Docs 조건부 강제 규칙
+
+- 개발 에이전트는 복잡도 게이트를 먼저 판단합니다.
+- 게이트 기준: 대략 2시간+, 다단계, 멀티세션 가능 작업
+- 게이트 통과 시:
+  - 구현 전에 `dev/active/[task]/`의 `plan/context/tasks` 3파일을 만들거나 갱신
+  - 구현 중에는 자기 책임 범위 변경분만 `context/tasks`에 즉시 반영
+  - 세션 종료/인수인계 시 `/dev-docs-update` 또는 동등 절차로 동기화
+- 게이트 미통과(단순 버그/단일 파일/짧은 수정) 시 Dev Docs를 생략할 수 있습니다.
+
+---
+
 ## 사용 가능한 에이전트 (12)
 
 ### code-architecture-reviewer
@@ -68,13 +80,19 @@
 ---
 
 ### flutter-developer
-**목적:** Flutter 애플리케이션 개발, 네이티브 연동 및 상태 관리 문제 해결
+**목적:** 최신 stable Flutter/Dart 기반의 Flutter 개발, MVVM + Clean Architecture 적용, 모델 설계/DI 완성도 확보, 네이티브 연동 및 상태 관리 문제 해결
 
 **사용 시점:**
 - 새로운 Flutter UI 화면과 컴포넌트를 구현할 때
+- MVVM + Clean Architecture(`presentation/viewmodel/domain/data/core`)를 설계/적용할 때
+- `repository`/`usecase`/`viewmodel` 경계를 정리할 때
+- Entity/DTO/Model/Mapper/Value Object 경계를 설계할 때
+- Composition Root 기반 DI(Constructor Injection, 인터페이스 바인딩, 테스트 교체 주입)를 구성할 때
 - Provider, Riverpod, BLoC 등 상태 관리 로직을 구현하거나 디버깅할 때
 - iOS/Android 네이티브 연동(MethodChannel) 관련 에러를 해결할 때
 - Flutter 앱의 렌더링 성능을 최적화할 때
+- 패키지 선정 시 Flutter Favorite 배지(pub.dev)와 유지보수 상태를 검증할 때
+- 레이어/모델/DI/테스트 완료 게이트를 점검할 때
 
 **통합:** ✅ 그대로 복사
 
