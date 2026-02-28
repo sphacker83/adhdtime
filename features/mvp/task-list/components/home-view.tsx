@@ -15,6 +15,23 @@ function joinClassNames(...classNames: Array<string | undefined>): string {
   return classNames.filter(Boolean).join(" ");
 }
 
+function formatTaskClock(value: string | null | undefined): string {
+  if (!value) {
+    return "--:--";
+  }
+
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) {
+    return "--:--";
+  }
+
+  return parsed.toLocaleTimeString("ko-KR", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false
+  });
+}
+
 function resolveTaskIcon(task: Task, openChunks: number): string {
   if (task.status === "done") {
     return "😺";
@@ -152,8 +169,8 @@ export function HomeView({
         )}
       </section>
 
-      <section className={getClassName("listCard")}>
-        <header className={getClassName("listHeader")}>
+      <section className={getClassName("waitingSection")}>
+        <header className={getClassName("waitingHeader")}>
           <h3>대기 중인 퀘스트</h3>
           <p>{waitingTasks.length}개 · 완료율 {completionRate}%</p>
         </header>
@@ -166,6 +183,7 @@ export function HomeView({
             );
             const openChunks = actionableTaskChunks.length;
             const isExpanded = expandedHomeTaskId === task.id;
+            const estimatedMinutes = actionableTaskChunks.reduce((total, chunk) => total + chunk.estMinutes, 0);
 
             return (
               <li key={task.id} className={getClassName("homeTaskItem")}>
@@ -179,17 +197,34 @@ export function HomeView({
                   aria-expanded={isExpanded}
                   aria-controls={`home-task-chunks-${task.id}`}
                 >
-                  <span className={getClassName("homeTaskIcon")} aria-hidden="true">
+                  <span className={getClassName("homeTaskMonster")} aria-hidden="true">
                     {resolveTaskIcon(task, openChunks)}
                   </span>
                   <span className={getClassName("homeTaskMain")}>
-                    <span className={getClassName("homeTaskTitle")}>{task.title}</span>
-                    <span className={getClassName("homeTaskMeta")}>
-                      시작 {formatOptionalDateTime(task.scheduledFor)} · 마감 {formatOptionalDateTime(task.dueAt)} · {openChunks}개 남음
+                    <span className={getClassName("homeTaskTitleRow")}>
+                      <span className={getClassName("homeTaskTitle")}>{task.title}</span>
+                      <strong className={getClassName("homeTaskRemaining")}>{openChunks}개 남음</strong>
+                    </span>
+                    <span className={getClassName("homeTaskMetaRow")}>
+                      <span className={getClassName("homeTaskMetaItem")}>
+                        <span className={getClassName("homeTaskMetaIcon")} aria-hidden="true">🕒</span>
+                        <span className={getClassName("homeTaskMetaValue")}>{formatTaskClock(task.scheduledFor)} 시작</span>
+                        <span className={getClassName("homeTaskMetaLabel")}>(Start)</span>
+                      </span>
+                      <span className={getClassName("homeTaskMetaItem")}>
+                        <span className={getClassName("homeTaskMetaIcon")} aria-hidden="true">📅</span>
+                        <span className={getClassName("homeTaskMetaValue")}>{formatTaskClock(task.dueAt)} 마감</span>
+                        <span className={getClassName("homeTaskMetaLabel")}>(Due)</span>
+                      </span>
+                      <span className={getClassName("homeTaskMetaItem")}>
+                        <span className={getClassName("homeTaskMetaIcon")} aria-hidden="true">⏳</span>
+                        <span className={getClassName("homeTaskMetaValue")}>{estimatedMinutes}분 소요</span>
+                        <span className={getClassName("homeTaskMetaLabel")}>(Est. Min.)</span>
+                      </span>
                     </span>
                   </span>
-                  <span className={getClassName("homeTaskChevron")} aria-hidden="true">
-                    {isExpanded ? "▾" : "▸"}
+                  <span className={getClassName("homeTaskAccordionIndicator")} aria-hidden="true">
+                    <span className={getClassName("homeTaskChevron")}>{isExpanded ? "▴" : "▾"}</span>
                   </span>
                 </button>
                 {isExpanded ? (

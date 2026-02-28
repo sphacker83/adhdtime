@@ -1932,48 +1932,50 @@ export function MvpDashboard() {
         </header>
         <p className={styles.feedback}>{feedback}</p>
 
+        {activeTab === "home" || activeTab === "stats" ? (
+          <section className={styles.statusSection}>
+            <header className={styles.sectionHeader}>
+              <h2>캐릭터 상태</h2>
+            </header>
+            <div className={styles.statusCard}>
+              <div className={styles.levelBlock}>
+                <div className={styles.characterAvatar} aria-hidden="true">🧙</div>
+                <p className={styles.levelLabel}>레벨 {stats.level}</p>
+                <p className={styles.levelXp}>XP {stats.xp}</p>
+                <div className={styles.xpTrack} aria-hidden="true">
+                  <span style={{ width: `${xpProgressPercent}%` }} />
+                </div>
+                <p className={styles.todaySummary}>오늘 완료 {stats.todayCompleted}개 · +{stats.todayXpGain} XP</p>
+              </div>
+
+              <div className={styles.radarBlock}>
+                <svg viewBox="0 0 120 120" className={styles.radarSvg} role="img" aria-label="5스탯 레이더 차트">
+                  {radar.grid.map((gridLine, index) => (
+                    <polygon key={gridLine} points={gridLine} className={styles.radarGrid} data-level={index} />
+                  ))}
+                  {STAT_META.map((_, index) => {
+                    const angle = (-Math.PI / 2) + (index * Math.PI * 2) / STAT_META.length;
+                    const x = 60 + Math.cos(angle) * 48;
+                    const y = 60 + Math.sin(angle) * 48;
+                    return <line key={STAT_META[index].key} x1={60} y1={60} x2={x} y2={y} className={styles.radarAxis} />;
+                  })}
+                  <polygon points={radar.data} className={styles.radarData} />
+                </svg>
+                <ul className={styles.statList}>
+                  {STAT_META.map((item) => (
+                    <li key={item.key}>
+                      <span>{item.label}</span>
+                      <strong>{stats[item.key]}</strong>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </section>
+        ) : null}
+
         {activeTab === "home" ? (
           <>
-            <section className={styles.statusSection}>
-              <header className={styles.sectionHeader}>
-                <h2>캐릭터 상태</h2>
-              </header>
-              <div className={styles.statusCard}>
-                <div className={styles.levelBlock}>
-                  <div className={styles.characterAvatar} aria-hidden="true">🧙</div>
-                  <p className={styles.levelLabel}>레벨 {stats.level}</p>
-                  <p className={styles.levelXp}>XP {stats.xp}</p>
-                  <div className={styles.xpTrack} aria-hidden="true">
-                    <span style={{ width: `${xpProgressPercent}%` }} />
-                  </div>
-                  <p className={styles.todaySummary}>오늘 완료 {stats.todayCompleted}개 · +{stats.todayXpGain} XP</p>
-                </div>
-
-                <div className={styles.radarBlock}>
-                  <svg viewBox="0 0 120 120" className={styles.radarSvg} role="img" aria-label="5스탯 레이더 차트">
-                    {radar.grid.map((gridLine, index) => (
-                      <polygon key={gridLine} points={gridLine} className={styles.radarGrid} data-level={index} />
-                    ))}
-                    {STAT_META.map((_, index) => {
-                      const angle = (-Math.PI / 2) + (index * Math.PI * 2) / STAT_META.length;
-                      const x = 60 + Math.cos(angle) * 48;
-                      const y = 60 + Math.sin(angle) * 48;
-                      return <line key={STAT_META[index].key} x1={60} y1={60} x2={x} y2={y} className={styles.radarAxis} />;
-                    })}
-                    <polygon points={radar.data} className={styles.radarData} />
-                  </svg>
-                  <ul className={styles.statList}>
-                    {STAT_META.map((item) => (
-                      <li key={item.key}>
-                        <span>{item.label}</span>
-                        <strong>{stats[item.key]}</strong>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            </section>
-
             <TaskInputSection
               styles={styles}
               sttSupportState={sttSupportState}

@@ -1409,13 +1409,43 @@
 }
 
 .taskPreviewList {
-  gap: 7px;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.waitingSection {
+  display: grid;
+  gap: 6px;
+  padding: 0 1px;
+}
+
+.waitingHeader {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0 1px;
+}
+
+.waitingHeader h3 {
+  margin: 0;
+  font-size: 1.45rem;
+  line-height: 1.1;
+  color: #223552;
+}
+
+.waitingHeader p {
+  margin: 0;
+  font-size: 11px;
+  color: #5d7295;
 }
 
 .homeTaskItem {
-  border-radius: 12px;
-  border-color: #d5e2f2;
-  background: #f7faff;
+  border-radius: 11px;
+  border-color: #d6e2f3;
+  background: #ffffff;
 }
 
 .homeTaskToggle {
@@ -1423,21 +1453,21 @@
   border-radius: 0;
   background: transparent;
   display: grid;
-  grid-template-columns: 36px minmax(0, 1fr) auto;
-  gap: 8px;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 5px;
   align-items: center;
-  padding: 10px;
+  padding: 5px 20px 5px 6px;
+  position: relative;
 }
 
-.homeTaskIcon {
+.homeTaskMonster {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 32px;
   height: 32px;
-  border-radius: 10px;
-  display: grid;
-  place-items: center;
-  background: #fff;
-  border: 1px solid #d7e2f0;
-  font-size: 18px;
+  font-size: 28px;
+  line-height: 1;
 }
 
 .homeTaskMain {
@@ -1446,26 +1476,104 @@
   min-width: 0;
 }
 
+.homeTaskTitleRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px;
+  min-width: 0;
+}
+
 .homeTaskTitle {
   font-size: 14px;
   font-weight: 700;
   color: #1f3255;
-}
-
-.homeTaskMeta {
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 11px;
-  color: #60708f;
+}
+
+.homeTaskRemaining {
+  flex: none;
+  font-size: 10px;
+  color: #5c6f8f;
+  font-weight: 700;
+}
+
+.homeTaskMetaRow {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 3px;
+  min-width: 0;
+}
+
+.homeTaskMetaItem {
+  display: grid;
+  grid-template-columns: 10px minmax(0, 1fr);
+  grid-template-areas:
+    "icon value"
+    "icon label";
+  align-items: start;
+  justify-items: start;
+  gap: 1px;
+  padding: 0;
+  min-width: 0;
+  text-align: left;
+}
+
+.homeTaskMetaIcon {
+  grid-area: icon;
+  font-size: 8px;
+  line-height: 1;
+  color: #7d8ea9;
+  margin-top: 1px;
+}
+
+.homeTaskMetaValue {
+  grid-area: value;
+  font-size: 10px;
+  color: #3b5277;
+  font-weight: 700;
+  line-height: 1.05;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  word-break: keep-all;
+  text-align: left;
+}
+
+.homeTaskMetaLabel {
+  grid-area: label;
+  font-size: 7.5px;
+  color: #7f8faa;
+  line-height: 1.02;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  word-break: keep-all;
+  text-align: left;
+}
+
+.homeTaskAccordionIndicator {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 16px;
+  height: 16px;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
 }
 
 .homeTaskChevron {
-  font-size: 12px;
+  font-size: 10px;
+  color: #8695ad;
+  line-height: 1;
 }
 
 .homeTaskChunkList {
-  padding: 0 10px 10px;
+  padding: 0 6px 6px;
 }
 
 .homeTaskChunkRow {
