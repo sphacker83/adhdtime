@@ -2198,6 +2198,10 @@
   gap: 8px;
 }
 
+.xpTrack {
+  width: min(100%, 148px);
+}
+
 .radarBlock {
   grid-column: 2;
   display: grid;
@@ -2239,8 +2243,8 @@
   min-width: 62px;
   padding: 4px 6px;
   border-radius: 9px;
-  background: rgba(255, 255, 255, 0.82);
-  border: 1px solid rgba(194, 210, 232, 0.92);
+  background: transparent;
+  border: none;
   color: #2b466d;
   font-size: 10px;
   line-height: 1.05;

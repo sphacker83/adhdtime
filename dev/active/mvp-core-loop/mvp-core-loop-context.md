@@ -82,6 +82,18 @@ Last Updated: 2026-02-28
   - 레이더 라벨 좌표를 px 고정값에서 `%` 기반 반응형 좌표로 전환.
 - 상태: 코드 반영 및 검증 완료(`npm run typecheck`, `npm run lint`, `npm run test:mvp` 통과).
 
+## Session Notes (2026-02-28, Status Card Micro Tuning)
+- 요구사항: XP 막대를 조금 더 짧게 조정하고, 방사형 수치 배지를 모서리 방향으로 약간 더 바깥으로 이동, 배지 테두리 제거.
+- 추가 요구사항: 배지 배경을 투명 처리하여 방사형 스탯 도형 가림 해소.
+- 추가 요구사항: XP 막대를 한 단계 더 짧게 축소.
+- 적용:
+  - `RADAR_LABEL_RADIUS_PERCENT`를 상향해 배지 위치를 외곽 방향으로 이동.
+  - `xpTrack` 폭 상한을 설정해 XP 막대가 이전보다 짧게 보이도록 조정.
+  - `xpTrack` 폭 상한을 `148px`로 추가 축소.
+  - `radarStatBadge`의 `border` 제거.
+  - `radarStatBadge` 배경을 `transparent`로 전환해 도형 가림 제거.
+- 상태: 추가 조정 반영 및 `npm run lint` 통과.
+
 ## Session Close (2026-02-28)
 
 - 전체 점검: `npm run verify:mvp` PASS (`typecheck/lint/test:mvp/build/verify:gate`).

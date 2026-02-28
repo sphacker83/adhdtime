@@ -86,6 +86,13 @@ Last Updated: 2026-02-28
 - [x] 레이더 라벨 좌표를 카드 폭에 종속되지 않게 반응형 비율 좌표로 전환
 - [x] 회귀 검증(`npm run typecheck`, `npm run lint`, `npm run test:mvp`)
 
+## Session Update (2026-02-28, Status Card Micro Tuning)
+- [x] 요구사항 정리(XP 바 길이 축소, 방사형 배지 외곽 이동, 배지 테두리 제거)
+- [x] CSS/상수 조정 반영(`xpTrack`, `radarStatBadge`, `RADAR_LABEL_RADIUS_PERCENT`)
+- [x] 회귀 검증(`npm run typecheck`, `npm run lint`, `npm run test:mvp`)
+- [x] 추가 조정: `radarStatBadge` 배경 투명화
+- [x] 추가 조정: `xpTrack` 폭 상한 2차 축소(`168px` -> `148px`)
+
 ## Session Close (2026-02-28)
 
 - [x] `npm run verify:mvp` 통합 점검 PASS 확인
