@@ -63,7 +63,7 @@ Last Updated: 2026-02-28
 - `app/page.tsx`
 
 ## Quick Resume
-1. P1 착수 문서 확인: `dev/active/post-mvp-p1/*`
+1. P1 착수 문서 확인: `dev/archive/post-mvp-p1/*`
 2. FR-10(알림) UI 연결부터 구현 시작
 3. 변경 후 `npm run typecheck && npm run lint && npm run test:mvp && npm run build` 재검증
 

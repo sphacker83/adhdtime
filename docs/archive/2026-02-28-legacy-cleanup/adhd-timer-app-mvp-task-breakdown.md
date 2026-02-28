@@ -1,6 +1,6 @@
 # ADHD 타이머 앱 MVP 작업/함수단위 Task (체크리스트)
 
-- 기준 문서: `docs/adhd-timer-app-mvp-prd.md`
+- 기준 문서: `adhd-timer-app-mvp-prd.md`
 - 작성일: 2026-02-26
 - 목적: PRD를 개발 실행 가능한 작업 단위(Jira/Linear 티켓)와 함수 단위(구현 체크리스트)로 분해
 - 현재 진행 상태: `Phase 2 구현 완료 + 홈 UI/상태머신 고도화 반영`

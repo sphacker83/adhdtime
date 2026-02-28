@@ -67,12 +67,14 @@ npm run verify:mvp
 app/                         # Next.js App Router 엔트리
 features/mvp/               # MVP 루프 UI/도메인 로직/타입
 scripts/                    # 릴리즈 게이트 스크립트
-docs/                       # PRD/USECASE/추적/운영 문서
-dev/active/                 # Dev Docs(세션 복구용 context/tasks/plan)
+docs/                       # 기준 문서 + 아카이브 인덱스 (docs/README.md)
+dev/active/                 # 진행 중 Dev Docs 트랙
+dev/archive/                # 완료/중단 Dev Docs 트랙 보관
 ```
 
 ## 참고 문서
 
+- `docs/README.md`
 - `docs/PRD.md`
 - `docs/USECASE.md`
 - `docs/TRACEABILITY_MATRIX.md`

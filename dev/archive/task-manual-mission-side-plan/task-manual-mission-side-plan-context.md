@@ -43,9 +43,9 @@ Last Updated: 2026-02-28
 
 ## Files In Scope
 - 문서:
-  - `dev/active/task-manual-mission-side-plan/task-manual-mission-side-plan-plan.md`
-  - `dev/active/task-manual-mission-side-plan/task-manual-mission-side-plan-context.md`
-  - `dev/active/task-manual-mission-side-plan/task-manual-mission-side-plan-tasks.md`
+  - `dev/archive/task-manual-mission-side-plan/task-manual-mission-side-plan-plan.md`
+  - `dev/archive/task-manual-mission-side-plan/task-manual-mission-side-plan-context.md`
+  - `dev/archive/task-manual-mission-side-plan/task-manual-mission-side-plan-tasks.md`
 - 구현 반영 파일:
   - `features/mvp/components/mvp-dashboard.tsx`
   - `features/mvp/components/mvp-dashboard.module.css`

@@ -6,7 +6,7 @@
 - Related:
   - `docs/frontend-architecture/refactor-blueprint.md`
   - `docs/frontend-architecture/refactor-roadmap.md`
-  - `dev/active/frontend-architecture-refactor/frontend-architecture-refactor-plan.md`
+  - `dev/archive/frontend-architecture-refactor/frontend-architecture-refactor-plan.md`
 
 ## Context
 

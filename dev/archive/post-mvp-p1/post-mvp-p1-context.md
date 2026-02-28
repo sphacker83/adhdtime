@@ -27,9 +27,9 @@ Last Updated: 2026-02-28
 - 동기화는 실 provider 연결 전까지 mock adapter + 명시적 상태 전이로 회귀 안정성을 확보한다.
 
 ## Files In Scope
-- `dev/active/post-mvp-p1/post-mvp-p1-plan.md`
-- `dev/active/post-mvp-p1/post-mvp-p1-context.md`
-- `dev/active/post-mvp-p1/post-mvp-p1-tasks.md`
+- `dev/archive/post-mvp-p1/post-mvp-p1-plan.md`
+- `dev/archive/post-mvp-p1/post-mvp-p1-context.md`
+- `dev/archive/post-mvp-p1/post-mvp-p1-tasks.md`
 - `features/mvp/integrations/notification/notification-adapter.ts`
 - `features/mvp/integrations/stt/stt-adapter.ts`
 - `features/mvp/integrations/sync/sync-domain.ts`

@@ -2,7 +2,7 @@ node_modules
 .next
 out
 coverage
-output/playwright
+output/playwright*
 .DS_Store
 .codex/tsc-cache
 .env*

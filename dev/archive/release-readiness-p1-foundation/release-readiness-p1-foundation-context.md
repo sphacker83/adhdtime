@@ -33,8 +33,8 @@ Last Updated: 2026-02-28
 - 문서 상태 표기는 본 세션부터 `in-progress/pending` 임시 슬롯을 종료하고 확정 상태로 유지한다.
 
 ## Files In Scope
-- `dev/active/release-readiness-p1-foundation/release-readiness-p1-foundation-context.md`
-- `dev/active/release-readiness-p1-foundation/release-readiness-p1-foundation-tasks.md`
+- `dev/archive/release-readiness-p1-foundation/release-readiness-p1-foundation-context.md`
+- `dev/archive/release-readiness-p1-foundation/release-readiness-p1-foundation-tasks.md`
 - `docs/DEVELOPMENT_PLAN.md`
 - `docs/TRACEABILITY_MATRIX.md`
 

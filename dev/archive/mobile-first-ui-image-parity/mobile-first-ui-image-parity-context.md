@@ -116,7 +116,7 @@ Last Updated: 2026-02-28
     - `output/playwright/round9-home-with-quest.png`
     - `output/playwright/round9-waiting-icons.png`
 - 문서 체계 정리:
-  - 비어 있던 사이드 플랜 트랙 `dev/active/task-json-preset-scoring-side-plan`을 `dev/archive/`로 이동
+- 비어 있던 사이드 플랜 트랙 `dev/archive/task-json-preset-scoring-side-plan` 유지
 - 검증 통과:
   - `npm run typecheck`
   - `npm run lint`
@@ -155,7 +155,7 @@ Last Updated: 2026-02-28
 
 ## Files In Scope
 - `docs/ui/main_ui.png`
-- `docs/ui/add_ui.png`
+- `docs/archive/2026-02-28-legacy-cleanup/assets/add_ui.png`
 - `features/mvp/components/mvp-dashboard.tsx`
 - `features/mvp/components/mvp-dashboard.module.css`
 - `features/mvp/task-input/components/task-input-section.tsx`
@@ -164,12 +164,12 @@ Last Updated: 2026-02-28
 - `features/mvp/lib/missioning.ts`
 - `features/mvp/lib/storage.ts`
 - `features/mvp/shared/model/display-utils.ts`
-- `dev/active/mobile-first-ui-image-parity/mobile-first-ui-image-parity-plan.md`
-- `dev/active/mobile-first-ui-image-parity/mobile-first-ui-image-parity-context.md`
-- `dev/active/mobile-first-ui-image-parity/mobile-first-ui-image-parity-tasks.md`
+- `dev/archive/mobile-first-ui-image-parity/mobile-first-ui-image-parity-plan.md`
+- `dev/archive/mobile-first-ui-image-parity/mobile-first-ui-image-parity-context.md`
+- `dev/archive/mobile-first-ui-image-parity/mobile-first-ui-image-parity-tasks.md`
 
 ## Quick Resume
-1. 수동 UI QA(`docs/ui/main_ui.png`, `docs/ui/add_ui.png` 비교)로 헤더/중앙 CTA/하단 바 공백을 확인한다.
+1. 수동 UI QA(`docs/ui/main_ui.png`, `docs/archive/2026-02-28-legacy-cleanup/assets/add_ui.png` 비교)로 헤더/중앙 CTA/하단 바 공백을 확인한다.
 2. 필요시 `mvp-dashboard.module.css` parity override만 미세 조정한다.
 3. 최종 커밋/푸시를 진행한다.
 

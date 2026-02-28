@@ -15,7 +15,7 @@ Last Updated: 2026-02-27
 - 작업
   - 현재 구조/파일 크기/핵심 플로우 문서화
   - 최소 회귀 시나리오 체크리스트 작성
-  - `dev/active/frontend-architecture-refactor` 트랙 생성
+  - `dev/archive/frontend-architecture-refactor` 트랙 생성
 - 산출물
   - `refactor-blueprint.md`, `refactor-roadmap.md`, `plan/context/tasks`
 - 완료 기준

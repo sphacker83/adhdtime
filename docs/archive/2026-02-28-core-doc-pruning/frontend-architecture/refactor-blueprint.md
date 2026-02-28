@@ -129,4 +129,4 @@ types/                             # 앱 전역 타입
 - 구조 정의: 본 문서(`refactor-blueprint.md`)
 - 실행 순서: `refactor-roadmap.md`
 - 의사결정 로그: `adr-template.md` 기반 ADR 문서
-- 세션 인수인계: `dev/active/frontend-architecture-refactor/*`
+- 세션 인수인계: `dev/archive/frontend-architecture-refactor/*`
