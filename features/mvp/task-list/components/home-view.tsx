@@ -88,6 +88,14 @@ function formatRemainingToDeadline(isoValue?: string, now = new Date()): string 
   return remainHours > 0 ? `${days}일 ${remainHours}시간` : `${days}일`;
 }
 
+function formatScheduledStartTime(isoValue?: string): string {
+  if (!isoValue) {
+    return "--:--";
+  }
+
+  return formatOptionalDateTime(isoValue);
+}
+
 export interface HomeViewProps {
   styles: CssModuleClassMap;
   homeMission: Mission | null;
@@ -442,7 +450,7 @@ export function HomeView({
                       <span className={getClassName("homeTaskMetaRow")}>
                         <span className={getClassName("homeTaskMetaItem")}>
                           <span className={getClassName("homeTaskMetaIcon")} aria-hidden="true">🕒</span>
-                          <span className={getClassName("homeTaskMetaValue")}>{formatOptionalDateTime(task.scheduledFor)} 시작</span>
+                          <span className={getClassName("homeTaskMetaValue")}>{formatScheduledStartTime(task.scheduledFor)} 시작</span>
                           <span className={getClassName("homeTaskMetaLabel")}>(Start)</span>
                         </span>
                         <span className={getClassName("homeTaskMetaItem")}>

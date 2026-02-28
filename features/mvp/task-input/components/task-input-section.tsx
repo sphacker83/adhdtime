@@ -245,7 +245,12 @@ export function TaskInputSection(props: TaskInputSectionProps) {
             onClick={(event) => event.stopPropagation()}
           >
             <header className={styles.questModalHeader}>
-              <h3>{composerTitle}</h3>
+              <div className={styles.questModalHeaderMain}>
+                <h3>{composerTitle}</h3>
+                <span className={`${styles.capabilityBadge} ${styles[`capability_${sttSupportState}`]}`}>
+                  STT {sttSupportState}
+                </span>
+              </div>
               <button
                 type="button"
                 className={styles.subtleButton}
@@ -255,12 +260,6 @@ export function TaskInputSection(props: TaskInputSectionProps) {
                 ✕
               </button>
             </header>
-
-            <div className={styles.inputHeaderActions}>
-              <span className={`${styles.capabilityBadge} ${styles[`capability_${sttSupportState}`]}`}>
-                STT {sttSupportState}
-              </span>
-            </div>
 
             <label className={styles.metaField} htmlFor="task-modal-name">
               <span>퀘스트 이름</span>

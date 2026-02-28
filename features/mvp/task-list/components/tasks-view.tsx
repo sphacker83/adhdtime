@@ -14,6 +14,14 @@ function joinClassNames(...classNames: Array<string | undefined>): string {
   return classNames.filter(Boolean).join(" ");
 }
 
+function formatScheduledStartTime(isoValue?: string): string {
+  if (!isoValue) {
+    return "--:--";
+  }
+
+  return formatOptionalDateTime(isoValue);
+}
+
 export interface TasksViewProps {
   styles: CssModuleClassMap;
   tasks: Task[];
@@ -67,7 +75,7 @@ export function TasksView({
         <div className={getClassName("taskBudgetRow")}>
           <p className={getClassName("helperText")}>
             총 {activeTask.totalMinutes}분 · 미션 합계 {activeTaskBudgetUsage}분 · 상태 {taskStatusLabel(activeTask.status)}
-            {" "}· 시작 예정 {formatOptionalDateTime(activeTask.scheduledFor)} · 마감 {formatOptionalDateTime(activeTask.dueAt)}
+            {" "}· 시작 예정 {formatScheduledStartTime(activeTask.scheduledFor)} · 마감 {formatOptionalDateTime(activeTask.dueAt)}
           </p>
           <button
             type="button"

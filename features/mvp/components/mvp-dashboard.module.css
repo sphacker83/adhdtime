@@ -1642,6 +1642,14 @@
   gap: 10px;
 }
 
+.questModalHeaderMain {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
 .questModalHeader h3 {
   margin: 0;
   font-size: clamp(1.6rem, 5.4vw, 2rem);
@@ -1649,6 +1657,12 @@
   font-weight: 800;
   letter-spacing: -0.02em;
   color: #111827;
+}
+
+.questModalHeaderMain .capabilityBadge {
+  min-height: 28px;
+  padding: 0 10px;
+  font-size: 11px;
 }
 
 .questModalHeader .subtleButton {
@@ -2099,6 +2113,38 @@
   color: #617390;
 }
 
+.rollingTip {
+  margin: 0;
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid #d5e1f2;
+  background: linear-gradient(110deg, #ffffff 0%, #edf4ff 100%);
+  color: #355276;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.35;
+  padding: 7px 10px;
+}
+
+.toastPopup {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--tab-height) + env(safe-area-inset-bottom) + 14px);
+  transform: translateX(-50%);
+  width: min(560px, calc(100% - 24px));
+  border-radius: 12px;
+  border: 1px solid #c85f4b;
+  background: rgba(152, 42, 24, 0.95);
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.35;
+  padding: 10px 12px;
+  box-shadow: 0 8px 18px rgba(92, 27, 17, 0.28);
+  z-index: 35;
+  backdrop-filter: blur(3px);
+}
+
 .app {
   position: relative;
   width: min(var(--layout-max-width), calc(100% - 24px));
@@ -2122,8 +2168,8 @@
 
 .statusCardTitle {
   grid-column: 1 / -1;
-  margin: 0 0 4px;
-  font-size: 1.45rem;
+  margin: 0 0 8px;
+  font-size: clamp(1.55rem, 4.2vw, 1.95rem);
   line-height: 1.12;
   color: #1f2a3d;
 }
@@ -2138,24 +2184,40 @@
   box-shadow: 0 6px 16px rgba(27, 48, 83, 0.08);
 }
 
+.statusCard {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: stretch;
+  gap: 12px;
+}
+
+.levelBlock {
+  gap: 8px;
+}
+
 .radarBlock {
-  display: flex;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: center;
   align-items: center;
+  min-height: 210px;
+  width: 100%;
 }
 
 .radarWrap {
   position: relative;
-  width: 150px;
-  height: 150px;
+  width: min(100%, 220px);
+  aspect-ratio: 1 / 1;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .radarWrap .radarSvg {
   position: absolute;
-  top: 15px;
-  left: 15px;
-  width: 120px;
-  height: 120px;
+  top: 20px;
+  left: 20px;
+  width: calc(100% - 40px);
+  height: calc(100% - 40px);
 }
 
 .radarLabelLayer {
@@ -2169,25 +2231,60 @@
   transform: translate(-50%, -50%);
   display: grid;
   justify-items: center;
-  gap: 0;
-  min-width: 50px;
-  padding: 2px 4px;
+  gap: 1px;
+  min-width: 58px;
+  padding: 3px 5px;
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.82);
   border: 1px solid rgba(194, 210, 232, 0.92);
   color: #2b466d;
-  font-size: 8px;
+  font-size: 9px;
   line-height: 1.05;
   text-align: center;
 }
 
 .radarStatBadge strong {
-  font-size: 10px;
+  font-size: 12px;
   line-height: 1.05;
 }
 
 .statList {
   display: none;
+}
+
+@media (min-width: 680px) {
+  .statusCard {
+    grid-template-columns: minmax(220px, 0.95fr) minmax(0, 1.35fr);
+    column-gap: 18px;
+  }
+
+  .statusCardTitle {
+    margin-bottom: 4px;
+  }
+
+  .radarBlock {
+    justify-items: end;
+  }
+
+  .radarWrap {
+    width: min(100%, 240px);
+    margin-right: 4px;
+  }
+}
+
+@media (max-width: 560px) {
+  .radarWrap {
+    width: min(100%, 208px);
+  }
+
+  .radarStatBadge {
+    min-width: 54px;
+    font-size: 8px;
+  }
+
+  .radarStatBadge strong {
+    font-size: 11px;
+  }
 }
 
 .missionMetaRow {

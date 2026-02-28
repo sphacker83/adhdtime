@@ -104,6 +104,21 @@ const RIGHT_TAB_ITEMS = TAB_ITEMS.slice(2);
 const RISKY_INPUT_PATTERN = /(자해|죽고\s?싶|폭탄|불법|마약|살인|테러)/i;
 
 const DEFAULT_TASK_TOTAL_MINUTES = 60;
+const ROLLING_TIP_INTERVAL_MS = 5000;
+const TOAST_AUTO_DISMISS_MS = 3600;
+const RADAR_LABEL_CENTER = 110;
+const RADAR_LABEL_RADIUS = 94;
+
+const ROLLING_TIPS = [
+  "작게 시작하면 꾸준함이 쉬워져요.",
+  "미션은 5~15분 단위로 더 잘 굴러갑니다.",
+  "완벽보다 완료가 오늘의 우선순위예요.",
+  "먼저 1단계만 실행해도 흐름이 생겨요.",
+  "집중이 깨지면 회복 미션으로 다시 붙잡아요.",
+  "마감이 보이면 지금 할 1개만 고르세요."
+] as const;
+const FEEDBACK_TOAST_ERROR_PATTERN =
+  /(오류|에러|실패|취소|초과|불가|차단|찾을\s*수\s*없|수\s*없(?:습니다)?|검증|문제|이상이어야|잠그)/i;
 
 const RECOVERY_FEEDBACK = {
   safetyBlocked: "괜찮아요. 안전을 위해 이 입력은 청킹하지 않았어요. 안전한 할 일로 다시 입력해 주세요.",
@@ -273,6 +288,8 @@ export function MvpDashboard() {
   } | null>(null);
   const [missionEditError, setMissionEditError] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<string>("오늘은 가장 작은 행동부터 시작해요.");
+  const [rollingTipIndex, setRollingTipIndex] = useState(0);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [clock, setClock] = useState(new Date());
   const [currentMissionId, setCurrentMissionId] = useState<string | null>(null);
   const [expandedHomeTaskId, setExpandedHomeTaskId] = useState<string | null>(null);
@@ -342,6 +359,7 @@ export function MvpDashboard() {
     background: `conic-gradient(#4a88d4 0 ${dailyProgressPercent}%, #dbe5f2 ${dailyProgressPercent}% 100%)`
   };
   const kpis = useMemo(() => computeMvpKpis(events), [events]);
+  const rollingTip = ROLLING_TIPS[rollingTipIndex % ROLLING_TIPS.length];
 
   const radar = useMemo(
     () => buildRadarShape(stats),
@@ -455,6 +473,35 @@ export function MvpDashboard() {
 
     return () => window.clearInterval(tick);
   }, []);
+
+  useEffect(() => {
+    const tipInterval = window.setInterval(() => {
+      setRollingTipIndex((prevIndex) => (prevIndex + 1) % ROLLING_TIPS.length);
+    }, ROLLING_TIP_INTERVAL_MS);
+
+    return () => window.clearInterval(tipInterval);
+  }, []);
+
+  useEffect(() => {
+    const trimmedFeedback = feedback.trim();
+    if (!trimmedFeedback || !FEEDBACK_TOAST_ERROR_PATTERN.test(trimmedFeedback)) {
+      return;
+    }
+
+    setToastMessage(trimmedFeedback);
+  }, [feedback]);
+
+  useEffect(() => {
+    if (!toastMessage) {
+      return;
+    }
+
+    const dismissTimer = window.setTimeout(() => {
+      setToastMessage(null);
+    }, TOAST_AUTO_DISMISS_MS);
+
+    return () => window.clearTimeout(dismissTimer);
+  }, [toastMessage]);
 
   useEffect(() => {
     if (!hydrated) {
@@ -2209,8 +2256,14 @@ export function MvpDashboard() {
           </div>
         </div>
         <p className={styles.headerDateTime} suppressHydrationWarning>{formatDateTime(clock)}</p>
-        <p className={styles.feedback}>{feedback}</p>
+        <p className={styles.rollingTip} aria-live="polite">{rollingTip}</p>
       </header>
+
+      {toastMessage ? (
+        <div className={styles.toastPopup} role="alert" aria-live="assertive">
+          {toastMessage}
+        </div>
+      ) : null}
 
       <main className={styles.app}>
         <TaskInputSection
@@ -2348,8 +2401,8 @@ export function MvpDashboard() {
                   <div className={styles.radarLabelLayer} aria-hidden="true">
                     {STAT_META.map((item, index) => {
                       const angle = (-Math.PI / 2) + (index * Math.PI * 2) / STAT_META.length;
-                      const x = 75 + Math.cos(angle) * 63;
-                      const y = 75 + Math.sin(angle) * 63;
+                      const x = RADAR_LABEL_CENTER + Math.cos(angle) * RADAR_LABEL_RADIUS;
+                      const y = RADAR_LABEL_CENTER + Math.sin(angle) * RADAR_LABEL_RADIUS;
                       return (
                         <div
                           key={item.key}
