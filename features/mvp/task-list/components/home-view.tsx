@@ -187,15 +187,17 @@ export function HomeView({
     <>
       <section className={getClassName("currentChunkCard")}>
         <header className={getClassName("currentQuestHeader")}>
-          <p className={getClassName("sectionLabel")}>{`퀘스트 : ${currentQuestTitle}`}</p>
+          <p className={getClassName("sectionLabel")}>{`퀘스트: ${currentQuestTitle}`}</p>
         </header>
 
         {homeChunk ? (
           <>
-            <div className={getClassName("currentQuestTop")}>
+            <div className={getClassName("currentQuestMainGrid")}>
               <div className={getClassName("currentQuestTitleBlock")}>
                 <h2>{homeChunk.action}</h2>
               </div>
+              <strong className={getClassName("currentQuestEnergyValue")}>{`${energyPercent}%`}</strong>
+              <p className={getClassName("timerValue")}>{formatClock(homeRemaining)}</p>
               <div className={getClassName("currentQuestMonsterWrap")}>
                 <div
                   className={getClassName("currentQuestMonsterRing")}
@@ -206,10 +208,8 @@ export function HomeView({
                     <span className={getClassName("currentQuestMonster")} aria-hidden="true">{currentQuestMonsterIcon}</span>
                   </div>
                 </div>
-                <span className={getClassName("currentQuestMonsterEnergy")}>{`${energyPercent}%`}</span>
               </div>
             </div>
-            <p className={getClassName("timerValue")}>{formatClock(homeRemaining)}</p>
             <div className={getClassName("currentQuestInfoGrid")}>
               <p className={getClassName("currentQuestInfoItem")}>
                 <span className={getClassName("currentQuestInfoLabel")}>예상소요시간</span>

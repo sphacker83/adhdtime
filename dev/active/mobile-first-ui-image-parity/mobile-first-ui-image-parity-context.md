@@ -89,6 +89,14 @@ Last Updated: 2026-02-28
     - `output/playwright/round6-home.png`
     - `output/playwright/round6-modal.png`
     - `output/playwright/round6-with-quest.png`
+- Round 7 퀘스트 카드 배치 미세조정 완료:
+  - `퀘스트: 타이틀` 표기 정리
+  - `미션 제목 / 우측 에너지%` 배치
+  - `타이머 / 우측 링서클` 배치
+  - 하단 네비 한글 라벨 가독성(크기) 추가 보정
+  - Playwright 캡처 추가:
+    - `output/playwright/round7-home-empty.png`
+    - `output/playwright/round7-home-with-quest.png`
 - 문서 체계 정리:
   - 비어 있던 사이드 플랜 트랙 `dev/active/task-json-preset-scoring-side-plan`을 `dev/archive/`로 이동
 - 검증 통과:

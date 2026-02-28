@@ -111,3 +111,11 @@ Acceptance:
 - [x] 링 에너지 비율을 청크 합산 남은시간에 연동
 - [x] 청크 완료 시 에너지 즉시 감소 확인
 - [x] Playwright 캡처 + `typecheck/lint/test:mvp` 재검증
+
+## Phase 11: 퀘스트 카드 배치 미세조정 (2026-02-28) ✅ COMPLETE
+- [x] `퀘스트: 타이틀` 표기 형태 적용
+- [x] `미션 제목 / 우측 에너지%` 배치
+- [x] `타이머 / 우측 링서클` 배치
+- [x] 하단 네비 라벨 크기 추가 상향 + 영어 라벨 제거 유지
+- [x] Playwright 캡처(`round7-home-empty`, `round7-home-with-quest`)
+- [x] `typecheck/lint/test:mvp` 재검증
