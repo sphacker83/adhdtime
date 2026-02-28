@@ -3,8 +3,7 @@
 import { useRef, useState, type RefObject } from "react";
 import {
   MAX_TASK_TOTAL_MINUTES,
-  MIN_TASK_TOTAL_MINUTES,
-  type Task
+  MIN_TASK_TOTAL_MINUTES
 } from "@/features/mvp/types/domain";
 import type { SttCapability } from "@/features/mvp/integrations";
 import {
@@ -25,9 +24,6 @@ export interface TaskInputSectionProps {
   onStartStt: () => void;
   onStopStt: () => void;
   sttCapability: SttCapability;
-  onGenerateManualChunk: () => void;
-  isExecutionLocked: boolean;
-  activeTask: Task | null;
   onGenerateTask: () => void;
   isGenerating: boolean;
   taskTotalMinutesInput: string;
@@ -71,31 +67,29 @@ function formatMinutesButtonValue(rawValue: string): string {
   return `${Math.min(MAX_TASK_TOTAL_MINUTES, Math.max(MIN_TASK_TOTAL_MINUTES, parsed))}분`;
 }
 
-export function TaskInputSection({
-  styles,
-  sttSupportState,
-  taskInput,
-  onTaskInputChange,
-  isSttListening,
-  onStartStt,
-  onStopStt,
-  sttCapability,
-  onGenerateManualChunk,
-  isExecutionLocked,
-  activeTask,
-  onGenerateTask,
-  isGenerating,
-  taskTotalMinutesInput,
-  onSetTaskTotalMinutesFromScheduled,
-  onAdjustTaskTotalMinutesFromScheduled,
-  taskScheduledForInput,
-  onTaskScheduledForInputChange,
-  taskDueAtInput,
-  onTaskDueAtInputChange,
-  taskMetaFeedback,
-  sttTranscript,
-  sttError
-}: TaskInputSectionProps) {
+export function TaskInputSection(props: TaskInputSectionProps) {
+  const {
+    styles,
+    sttSupportState,
+    taskInput,
+    onTaskInputChange,
+    isSttListening,
+    onStartStt,
+    onStopStt,
+    sttCapability,
+    onGenerateTask,
+    isGenerating,
+    taskTotalMinutesInput,
+    onSetTaskTotalMinutesFromScheduled,
+    onAdjustTaskTotalMinutesFromScheduled,
+    taskScheduledForInput,
+    onTaskScheduledForInputChange,
+    taskDueAtInput,
+    onTaskDueAtInputChange,
+    taskMetaFeedback,
+    sttTranscript,
+    sttError
+  } = props;
   const [isComposerOpen, setIsComposerOpen] = useState(false);
   const scheduledForPickerRef = useRef<HTMLInputElement | null>(null);
   const dueAtPickerRef = useRef<HTMLInputElement | null>(null);
@@ -168,67 +162,17 @@ export function TaskInputSection({
   };
 
   return (
-    <section className={styles.inputCard}>
-      <div className={styles.capabilityHeader}>
-        <label className={styles.inputLabel} htmlFor="task-input">
-          무지성 태스크 청킹 (AI TASK CHUNKING)
-        </label>
-        <div className={styles.inputHeaderActions}>
-          <span className={`${styles.capabilityBadge} ${styles[`capability_${sttSupportState}`]}`}>
-            STT {sttSupportState}
-          </span>
-          <button
-            type="button"
-            className={styles.subtleButton}
-            onClick={() => setIsComposerOpen(true)}
-          >
-            퀘스트 추가
-          </button>
-        </div>
-      </div>
-      <div className={styles.inputRow}>
-        <div className={styles.inputWithStt}>
-          <input
-            id="task-input"
-            value={taskInput}
-            onChange={(event) => onTaskInputChange(event.target.value)}
-            placeholder="오늘 무엇을 쪼개볼까요? (예: 거실 청소)"
-            className={`${styles.input} ${styles.inputWithSttPadding}`}
-          />
-          <button
-            type="button"
-            className={isSttListening ? `${styles.sttIconButton} ${styles.sttIconButtonActive}` : styles.sttIconButton}
-            onClick={isSttListening ? onStopStt : onStartStt}
-            disabled={!sttCapability.canStartRecognition && !isSttListening}
-            aria-label={isSttListening ? "음성 입력 중지" : "음성 입력 시작"}
-            title={isSttListening ? "음성 입력 중지" : "음성 입력 시작"}
-          >
-            <span aria-hidden="true">{isSttListening ? "■" : "🎙"}</span>
-          </button>
-        </div>
+    <>
+      {!isComposerOpen ? (
         <button
           type="button"
-          className={styles.primaryButton}
-          disabled={isGenerating}
-          onClick={onGenerateTask}
+          className={styles.floatingQuestButton}
+          onClick={() => setIsComposerOpen(true)}
+          aria-label="AI 퀘스트 생성 모달 열기"
+          title="AI 퀘스트 생성"
         >
-          {isGenerating ? "생성 중..." : "AI가 쪼개기"}
+          <span className={styles.floatingQuestButtonIcon} aria-hidden="true">⚔️</span>
         </button>
-      </div>
-      <div className={styles.inputActionRow}>
-        <button
-          type="button"
-          className={styles.ghostButton}
-          onClick={onGenerateManualChunk}
-          disabled={isExecutionLocked || !activeTask}
-        >
-          청크 생성
-        </button>
-      </div>
-      {sttTranscript ? <p className={styles.transcriptPreview}>미리보기: {sttTranscript}</p> : null}
-      {sttError ? <p className={styles.errorText}>{sttError}</p> : null}
-      {!sttCapability.canStartRecognition ? (
-        <p className={styles.fallbackText}>STT를 지원하지 않는 환경입니다. 직접 텍스트 입력을 사용해주세요.</p>
       ) : null}
 
       {isComposerOpen ? (
@@ -241,11 +185,11 @@ export function TaskInputSection({
             className={styles.questModal}
             role="dialog"
             aria-modal="true"
-            aria-label="퀘스트 추가 또는 편집"
+            aria-label="AI 퀘스트 생성"
             onClick={(event) => event.stopPropagation()}
           >
             <header className={styles.questModalHeader}>
-              <h3>퀘스트 추가/편집</h3>
+              <h3>AI 퀘스트 생성</h3>
               <button
                 type="button"
                 className={styles.subtleButton}
@@ -256,16 +200,39 @@ export function TaskInputSection({
               </button>
             </header>
 
+            <div className={styles.inputHeaderActions}>
+              <span className={`${styles.capabilityBadge} ${styles[`capability_${sttSupportState}`]}`}>
+                STT {sttSupportState}
+              </span>
+            </div>
+
             <label className={styles.metaField} htmlFor="task-modal-name">
               <span>퀘스트 이름</span>
-              <input
-                id="task-modal-name"
-                value={taskInput}
-                onChange={(event) => onTaskInputChange(event.target.value)}
-                placeholder="청소하기"
-                className={styles.input}
-              />
+              <div className={styles.inputWithStt}>
+                <input
+                  id="task-modal-name"
+                  value={taskInput}
+                  onChange={(event) => onTaskInputChange(event.target.value)}
+                  placeholder="청소하기"
+                  className={`${styles.input} ${styles.inputWithSttPadding}`}
+                />
+                <button
+                  type="button"
+                  className={isSttListening ? `${styles.sttIconButton} ${styles.sttIconButtonActive}` : styles.sttIconButton}
+                  onClick={isSttListening ? onStopStt : onStartStt}
+                  disabled={!sttCapability.canStartRecognition && !isSttListening}
+                  aria-label={isSttListening ? "음성 입력 중지" : "음성 입력 시작"}
+                  title={isSttListening ? "음성 입력 중지" : "음성 입력 시작"}
+                >
+                  <span aria-hidden="true">{isSttListening ? "■" : "🎙"}</span>
+                </button>
+              </div>
             </label>
+            {sttTranscript ? <p className={styles.transcriptPreview}>미리보기: {sttTranscript}</p> : null}
+            {sttError ? <p className={styles.errorText}>{sttError}</p> : null}
+            {!sttCapability.canStartRecognition ? (
+              <p className={styles.fallbackText}>STT를 지원하지 않는 환경입니다. 직접 텍스트 입력을 사용해주세요.</p>
+            ) : null}
 
             <div className={styles.taskMetaGrid}>
               <div className={`${styles.metaField} ${styles.questTimeCard}`}>
@@ -364,17 +331,14 @@ export function TaskInputSection({
                 type="button"
                 className={styles.primaryButton}
                 disabled={isGenerating}
-                onClick={() => {
-                  onGenerateTask();
-                  setIsComposerOpen(false);
-                }}
+                onClick={onGenerateTask}
               >
-                {isGenerating ? "생성 중..." : "퀘스트 생성!"}
+                {isGenerating ? "생성 중..." : "AI 퀘스트 생성"}
               </button>
             </div>
           </section>
         </div>
       ) : null}
-    </section>
+    </>
   );
 }

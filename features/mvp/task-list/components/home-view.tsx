@@ -82,7 +82,22 @@ export function HomeView({
 }: HomeViewProps) {
   const getClassName = (classKey: string) => styles[classKey] ?? "";
   const statusClassName = homeChunk ? getClassName(`status_${homeChunk.status}`) : "";
-  const waitingTasks = homeTaskCards;
+  const waitingTasks = homeTaskCards.filter((task) => task.status !== "done");
+  const homeTaskActionableChunks = homeTask
+    ? orderChunks(chunks.filter((chunk) => chunk.taskId === homeTask.id && isActionableChunkStatus(chunk.status)))
+    : [];
+  const nextActionableChunks = (() => {
+    if (!homeChunk) {
+      return [] as Chunk[];
+    }
+
+    const currentIndex = homeTaskActionableChunks.findIndex((chunk) => chunk.id === homeChunk.id);
+    const followingChunks = currentIndex >= 0
+      ? homeTaskActionableChunks.slice(currentIndex + 1)
+      : homeTaskActionableChunks.filter((chunk) => chunk.id !== homeChunk.id);
+
+    return followingChunks.slice(0, 3);
+  })();
 
   return (
     <>
@@ -114,6 +129,23 @@ export function HomeView({
                 {" "}· 마감 {formatOptionalDateTime(homeTask.dueAt)}
               </p>
             ) : null}
+            <section className={getClassName("nextMissionSection")} aria-label="다음 미션">
+              <p className={getClassName("nextMissionTitle")}>다음 미션</p>
+              {nextActionableChunks.length > 0 ? (
+                <ol className={getClassName("nextMissionList")}>
+                  {nextActionableChunks.map((chunk) => (
+                    <li key={chunk.id} className={getClassName("nextMissionItem")}>
+                      <span className={getClassName("nextMissionAction")}>{chunk.action}</span>
+                      <span className={getClassName("nextMissionMeta")}>
+                        {chunk.estMinutes}분 · {chunkStatusLabel(chunk.status)}
+                      </span>
+                    </li>
+                  ))}
+                </ol>
+              ) : (
+                <p className={getClassName("nextMissionEmpty")}>현재 청크 이후의 미션이 없습니다.</p>
+              )}
+            </section>
 
             <div className={getClassName("actionRow")}>
               <ChunkPrimaryActions

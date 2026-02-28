@@ -1907,3 +1907,298 @@
     width: min(560px, calc(100% - 24px));
   }
 }
+
+/* Final parity lock: fixed header/footer, icon-only FAB, and next mission preview */
+
+.shell {
+  --layout-max-width: 560px;
+  --header-height: 108px;
+  --tab-height: 78px;
+  min-height: 100dvh;
+  height: 100dvh;
+  padding: 0;
+  overflow: hidden;
+  background: linear-gradient(180deg, #f4f7fc 0%, #e7eef8 100%);
+}
+
+.noiseLayer {
+  display: none;
+}
+
+.topBar {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(var(--layout-max-width), 100%);
+  min-height: calc(var(--header-height) + env(safe-area-inset-top));
+  padding: calc(10px + env(safe-area-inset-top)) 14px 10px;
+  border-radius: 0 0 16px 16px;
+  border: 1px solid #d4dfef;
+  border-top: 0;
+  background: #f1f5fb;
+  box-shadow: 0 4px 12px rgba(27, 47, 82, 0.08);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  z-index: 20;
+}
+
+.titleGroup {
+  min-width: 0;
+}
+
+.brandTitle {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: clamp(1.65rem, 7vw, 2rem);
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #1d2a3f;
+}
+
+.brandTitle::after {
+  content: "🧙";
+  font-size: 0.72em;
+  line-height: 1;
+}
+
+.levelSummary {
+  margin: 2px 0 0;
+  font-size: 0.95rem;
+  line-height: 1.15;
+  font-weight: 700;
+  color: #1f2d43;
+}
+
+.clock {
+  display: none;
+}
+
+.progressGroup {
+  gap: 3px;
+}
+
+.progressTitle {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.1;
+  font-weight: 800;
+  color: #314a72;
+}
+
+.progressTitle span {
+  font-size: 9px;
+  color: #7284a1;
+}
+
+.progressRing {
+  width: 52px;
+  height: 52px;
+  border-radius: 999px;
+  padding: 4px;
+}
+
+.progressRingInner strong {
+  font-size: 12px;
+}
+
+.app {
+  position: fixed;
+  top: calc(var(--header-height) + env(safe-area-inset-top));
+  bottom: calc(var(--tab-height) + env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(var(--layout-max-width), 100%);
+  margin: 0;
+  padding: 10px 12px 18px;
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  z-index: 1;
+}
+
+.statusSection {
+  gap: 6px;
+}
+
+.sectionHeader h2 {
+  margin: 0;
+  font-size: 1.45rem;
+  line-height: 1.15;
+}
+
+.statusCard,
+.inputCard,
+.currentChunkCard,
+.listCard {
+  border-radius: 14px;
+  border: 1px solid #d4dfef;
+  background: #fff;
+  box-shadow: 0 6px 16px rgba(27, 48, 83, 0.08);
+}
+
+.nextMissionSection {
+  margin-top: 8px;
+  padding: 8px;
+  border: 1px dashed #c7d8ec;
+  border-radius: 11px;
+  background: #f7fbff;
+  display: grid;
+  gap: 6px;
+}
+
+.nextMissionTitle {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 800;
+  color: #315079;
+}
+
+.nextMissionList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 4px;
+}
+
+.nextMissionItem {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.nextMissionAction {
+  min-width: 0;
+  font-size: 12px;
+  font-weight: 700;
+  color: #1d2f4d;
+}
+
+.nextMissionMeta {
+  flex: none;
+  font-size: 10px;
+  color: #5f7394;
+  white-space: nowrap;
+}
+
+.nextMissionEmpty {
+  margin: 0;
+  font-size: 11px;
+  color: #677b9b;
+}
+
+.floatingQuestButton {
+  position: fixed;
+  right: max(14px, calc(50% - (var(--layout-max-width) / 2) + 14px));
+  bottom: calc(var(--tab-height) + env(safe-area-inset-bottom) + 14px);
+  width: 58px;
+  height: 58px;
+  border: 1px solid #2f74be;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #4fb4ff 0%, #2d84d9 100%);
+  box-shadow: 0 12px 22px rgba(33, 99, 172, 0.28);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  z-index: 35;
+}
+
+.floatingQuestButtonIcon {
+  font-size: 25px;
+  line-height: 1;
+}
+
+.floatingQuestButton:focus-visible {
+  outline: 2px solid rgba(33, 132, 217, 0.35);
+  outline-offset: 2px;
+}
+
+.questModalBackdrop {
+  z-index: 50;
+  padding: 0 12px calc(var(--tab-height) + env(safe-area-inset-bottom) + 12px);
+}
+
+.questModal {
+  width: min(560px, calc(100% - 6px));
+}
+
+.taskMetaGrid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.questTimeCard {
+  min-height: 102px;
+}
+
+.tabBar {
+  position: fixed;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  width: min(var(--layout-max-width), 100%);
+  min-height: calc(var(--tab-height) + env(safe-area-inset-bottom));
+  padding: 6px 10px calc(6px + env(safe-area-inset-bottom));
+  border-radius: 0;
+  border: 0;
+  border-top: 1px solid #cdd9eb;
+  background: #fff;
+  box-shadow: 0 -6px 18px rgba(22, 39, 66, 0.14);
+  gap: 8px;
+  z-index: 30;
+}
+
+.tabButton,
+.tabButtonActive {
+  height: 52px;
+  border-radius: 10px;
+}
+
+.tabButton {
+  background: #f5f8fd;
+  color: #5c6f8f;
+}
+
+.tabButtonActive {
+  background: #dff0ff;
+  color: #2c5f9b;
+}
+
+.tabIcon {
+  font-size: 14px;
+}
+
+.tabLabelKr {
+  font-size: 10px;
+}
+
+.tabLabelEn {
+  font-size: 9px;
+}
+
+@media (min-width: 768px) {
+  .shell {
+    --header-height: 114px;
+    --tab-height: 80px;
+  }
+
+  .topBar,
+  .app,
+  .tabBar {
+    width: min(var(--layout-max-width), calc(100% - 24px));
+  }
+
+  .floatingQuestButton {
+    right: max(24px, calc(50% - (var(--layout-max-width) / 2) + 24px));
+  }
+}

@@ -223,7 +223,7 @@ export function MvpDashboard() {
   const [taskDueAtInput, setTaskDueAtInput] = useState("");
   const [taskMetaFeedback, setTaskMetaFeedback] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [feedback, setFeedback] = useState<string>("오늘은 가장 작은 행동부터 시작해요.");
+  const [, setFeedback] = useState<string>("오늘은 가장 작은 행동부터 시작해요.");
   const [clock, setClock] = useState(new Date());
   const [currentChunkId, setCurrentChunkId] = useState<string | null>(null);
   const [expandedHomeTaskId, setExpandedHomeTaskId] = useState<string | null>(null);
@@ -512,10 +512,29 @@ export function MvpDashboard() {
           return task;
         }
 
+        const fallbackStartAtMs = Date.parse(task.createdAt);
+        const fallbackStartAt = Number.isFinite(fallbackStartAtMs) ? new Date(fallbackStartAtMs) : new Date(nowIso);
+        const normalizedSchedule = normalizeTaskScheduleIso({
+          scheduledFor: task.scheduledFor,
+          dueAt: task.dueAt,
+          totalMinutes: task.totalMinutes,
+          fallbackStartAt
+        });
+        const nextScheduledFor = normalizedSchedule.scheduledFor;
+        const nextDueAt = normalizedSchedule.dueAt;
+
         const taskChunks = chunks.filter((chunk) => chunk.taskId === task.id);
         const openTaskChunks = taskChunks.filter((chunk) => !isTaskClosedStatus(chunk.status));
         if (taskChunks.length === 0) {
-          return task;
+          if (task.scheduledFor === nextScheduledFor && task.dueAt === nextDueAt) {
+            return task;
+          }
+
+          return {
+            ...task,
+            scheduledFor: nextScheduledFor,
+            dueAt: nextDueAt
+          };
         }
 
         const allClosed = taskChunks.every((chunk) => isTaskClosedStatus(chunk.status));
@@ -544,6 +563,8 @@ export function MvpDashboard() {
           task.status === nextStatus
           && task.startedAt === nextStartedAt
           && task.completedAt === nextCompletedAt
+          && task.scheduledFor === nextScheduledFor
+          && task.dueAt === nextDueAt
         ) {
           return task;
         }
@@ -552,7 +573,9 @@ export function MvpDashboard() {
           ...task,
           status: nextStatus,
           startedAt: nextStartedAt,
-          completedAt: nextCompletedAt
+          completedAt: nextCompletedAt,
+          scheduledFor: nextScheduledFor,
+          dueAt: nextDueAt
         };
       });
 
@@ -1084,116 +1107,6 @@ export function MvpDashboard() {
     }
   };
 
-  const handleGenerateManualChunk = () => {
-    if (!activeTask) {
-      setFeedback("청크를 추가할 과업을 먼저 선택해주세요.");
-      return;
-    }
-
-    if (isExecutionLocked) {
-      setFeedback("실행 중에는 수동 청크 생성을 잠글게요. 현재 청크를 먼저 마무리해주세요.");
-      return;
-    }
-
-    const nextActionRaw = window.prompt("추가할 청크 액션을 입력하세요.", "");
-    if (nextActionRaw === null) {
-      return;
-    }
-
-    const nextAction = nextActionRaw.trim();
-    if (!nextAction) {
-      setFeedback("청크 액션을 입력해주세요.");
-      return;
-    }
-
-    const nextMinutesRaw = window.prompt(
-      `예상 시간을 입력하세요. ${MIN_CHUNK_EST_MINUTES}~${MAX_CHUNK_EST_MINUTES}분`,
-      "5"
-    );
-    if (nextMinutesRaw === null) {
-      return;
-    }
-
-    const parsedMinutes = Number(nextMinutesRaw);
-    if (!Number.isFinite(parsedMinutes)) {
-      setFeedback("시간은 숫자로 입력해주세요.");
-      return;
-    }
-
-    const nextMinutes = Math.floor(parsedMinutes);
-    if (nextMinutes < MIN_CHUNK_EST_MINUTES || nextMinutes > MAX_CHUNK_EST_MINUTES) {
-      setFeedback(`청크 시간은 ${MIN_CHUNK_EST_MINUTES}~${MAX_CHUNK_EST_MINUTES}분으로 입력해주세요.`);
-      return;
-    }
-
-    const budgetUsageBefore = getTaskBudgetUsage(chunks, activeTask.id);
-    const budgetUsageAfter = budgetUsageBefore + nextMinutes;
-    if (budgetUsageAfter > activeTask.totalMinutes) {
-      setFeedback("과업 총 시간 예산을 초과해서 수동 청크를 추가할 수 없습니다.");
-      return;
-    }
-
-    const normalizedActiveTaskSchedule = normalizeTaskScheduleIso({
-      scheduledFor: activeTask.scheduledFor,
-      dueAt: activeTask.dueAt,
-      totalMinutes: activeTask.totalMinutes,
-      fallbackStartAt: new Date()
-    });
-    if (normalizedActiveTaskSchedule.changed) {
-      setTasks((prev) =>
-        prev.map((task) =>
-          task.id === activeTask.id
-            ? {
-                ...task,
-                scheduledFor: normalizedActiveTaskSchedule.scheduledFor,
-                dueAt: normalizedActiveTaskSchedule.dueAt
-              }
-            : task
-        )
-      );
-    }
-
-    const maxOrder = chunks
-      .filter((chunk) => chunk.taskId === activeTask.id)
-      .reduce((max, chunk) => Math.max(max, chunk.order), 0);
-    const nextChunk: Chunk = {
-      id: crypto.randomUUID(),
-      taskId: activeTask.id,
-      order: maxOrder + 1,
-      action: nextAction,
-      estMinutes: nextMinutes,
-      status: "todo"
-    };
-
-    setChunks((prev) => withReorderedTaskChunks([...prev, nextChunk], activeTask.id));
-    setRemainingSecondsByChunk((prev) => ({
-      ...prev,
-      [nextChunk.id]: nextChunk.estMinutes * 60
-    }));
-    setCurrentChunkId((prev) => prev ?? nextChunk.id);
-    setActiveTaskId(activeTask.id);
-
-    logEvent({
-      eventName: "chunk_generated",
-      source: "user",
-      taskId: activeTask.id,
-      chunkId: nextChunk.id,
-      meta: {
-        chunkCount: 1,
-        manual: true,
-        budgetUsageBefore,
-        budgetUsageAfter,
-        normalizedSchedule: normalizedActiveTaskSchedule.changed
-      }
-    });
-
-    setFeedback(
-      normalizedActiveTaskSchedule.changed
-        ? `기존 일정을 정규화하고 수동 청크를 추가했어요. 예산 ${budgetUsageAfter}/${activeTask.totalMinutes}분`
-        : `수동 청크를 추가했어요. 예산 ${budgetUsageAfter}/${activeTask.totalMinutes}분`
-    );
-  };
-
   const handleStartChunk = (chunkId: string) => {
     const target = chunks.find((chunk) => chunk.id === chunkId);
     if (!target || !isActionableChunkStatus(target.status)) {
@@ -1518,10 +1431,23 @@ export function MvpDashboard() {
     setTasks((prev) =>
       prev.map((item) =>
         item.id === task.id
-          ? {
-              ...item,
-              totalMinutes: parsedTotal
-            }
+          ? (() => {
+              const fallbackStartAtMs = Date.parse(item.createdAt);
+              const fallbackStartAt = Number.isFinite(fallbackStartAtMs) ? new Date(fallbackStartAtMs) : new Date();
+              const normalizedSchedule = normalizeTaskScheduleIso({
+                scheduledFor: item.scheduledFor,
+                dueAt: item.dueAt,
+                totalMinutes: parsedTotal,
+                fallbackStartAt
+              });
+
+              return {
+                ...item,
+                totalMinutes: parsedTotal,
+                scheduledFor: normalizedSchedule.scheduledFor,
+                dueAt: normalizedSchedule.dueAt
+              };
+            })()
           : item
       )
     );
@@ -1537,7 +1463,7 @@ export function MvpDashboard() {
       }
     });
 
-    setFeedback(`과업 총 시간을 ${parsedTotal}분으로 업데이트했습니다.`);
+    setFeedback(`과업 총 시간을 ${parsedTotal}분으로 업데이트하고 시작/마감 일정을 동기화했습니다.`);
   };
 
   const handleEditChunk = (chunk: Chunk) => {
@@ -1952,34 +1878,34 @@ export function MvpDashboard() {
   const canAdjustPlusOne = canAdjustRunningChunkMinutes(1);
   const canAdjustPlusFive = canAdjustRunningChunkMinutes(5);
 
-  const homeTaskCards = tasks.filter((task) => task.status !== "archived");
+  const homeTaskCards = tasks.filter((task) => task.status !== "archived" && task.status !== "done");
 
   return (
     <div className={styles.shell}>
       <div className={styles.noiseLayer} aria-hidden="true" />
 
-      <main className={styles.app}>
-        <header className={styles.topBar}>
-          <div className={styles.titleGroup}>
-            <h1 className={styles.brandTitle}>ADHDTime</h1>
-            <p className={styles.levelSummary}>레벨 {stats.level} (LV.{stats.level}) 모험가</p>
-            <p className={styles.clock} suppressHydrationWarning>
-              {formatDateTime(clock)}
-            </p>
-          </div>
-          <div className={styles.progressGroup}>
-            <p className={styles.progressTitle}>
-              오늘의 달성도
-              <span>DAILY PROGRESS</span>
-            </p>
-            <div className={styles.progressRing} style={dailyProgressRingStyle} aria-label={`오늘의 달성도 ${dailyProgressPercent}%`}>
-              <div className={styles.progressRingInner}>
-                <strong>{dailyProgressPercent}%</strong>
-              </div>
+      <header className={styles.topBar}>
+        <div className={styles.titleGroup}>
+          <h1 className={styles.brandTitle}>ADHDTime</h1>
+          <p className={styles.levelSummary}>레벨 {stats.level} (LV.{stats.level}) 모험가</p>
+          <p className={styles.clock} suppressHydrationWarning>
+            {formatDateTime(clock)}
+          </p>
+        </div>
+        <div className={styles.progressGroup}>
+          <p className={styles.progressTitle}>
+            오늘의 달성도
+            <span>DAILY PROGRESS</span>
+          </p>
+          <div className={styles.progressRing} style={dailyProgressRingStyle} aria-label={`오늘의 달성도 ${dailyProgressPercent}%`}>
+            <div className={styles.progressRingInner}>
+              <strong>{dailyProgressPercent}%</strong>
             </div>
           </div>
-        </header>
-        <p className={styles.feedback}>{feedback}</p>
+        </div>
+      </header>
+
+      <main className={styles.app}>
 
         {activeTab === "home" || activeTab === "stats" ? (
           <section className={styles.statusSection}>
@@ -2034,9 +1960,6 @@ export function MvpDashboard() {
               onStartStt={handleStartStt}
               onStopStt={handleStopStt}
               sttCapability={sttCapability}
-              onGenerateManualChunk={handleGenerateManualChunk}
-              isExecutionLocked={isExecutionLocked}
-              activeTask={activeTask}
               onGenerateTask={() => void handleGenerateTask()}
               isGenerating={isGenerating}
               taskTotalMinutesInput={taskTotalMinutesInput}
