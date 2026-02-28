@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState, type RefObject } from "react";
 import {
   MAX_TASK_TOTAL_MINUTES,
   MIN_TASK_TOTAL_MINUTES,
@@ -25,7 +25,8 @@ export interface TaskInputSectionProps {
   onGenerateTask: () => void;
   isGenerating: boolean;
   taskTotalMinutesInput: string;
-  onTaskTotalMinutesInputChange: (value: string) => void;
+  onSetTaskTotalMinutesFromScheduled: (value: number) => void;
+  onAdjustTaskTotalMinutesFromScheduled: (deltaMinutes: -5 | -1 | 1 | 5) => void;
   taskScheduledForInput: string;
   onTaskScheduledForInputChange: (value: string) => void;
   taskDueAtInput: string;
@@ -38,6 +39,52 @@ export interface TaskInputSectionProps {
 function toDateTimeLocalValue(date: Date): string {
   const pad = (value: number): string => String(value).padStart(2, "0");
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+function parseDateTimeLocalValue(rawValue: string): Date | null {
+  const trimmed = rawValue.trim();
+  if (!trimmed) {
+    return null;
+  }
+
+  const timestamp = Date.parse(trimmed);
+  if (!Number.isFinite(timestamp)) {
+    return null;
+  }
+
+  return new Date(timestamp);
+}
+
+function formatDateButtonValue(rawValue: string): string {
+  const parsedDate = parseDateTimeLocalValue(rawValue);
+  if (!parsedDate) {
+    return "--:--";
+  }
+
+  const now = new Date();
+  const todayKey = `${now.getFullYear()}-${now.getMonth()}-${now.getDate()}`;
+  const tomorrow = new Date(now);
+  tomorrow.setDate(now.getDate() + 1);
+  const tomorrowKey = `${tomorrow.getFullYear()}-${tomorrow.getMonth()}-${tomorrow.getDate()}`;
+  const parsedKey = `${parsedDate.getFullYear()}-${parsedDate.getMonth()}-${parsedDate.getDate()}`;
+  const timeLabel = `${String(parsedDate.getHours()).padStart(2, "0")}:${String(parsedDate.getMinutes()).padStart(2, "0")}`;
+
+  if (parsedKey === todayKey) {
+    return `오늘 ${timeLabel}`;
+  }
+  if (parsedKey === tomorrowKey) {
+    return `내일 ${timeLabel}`;
+  }
+  return `${parsedDate.getMonth() + 1}/${parsedDate.getDate()} ${timeLabel}`;
+}
+
+function formatMinutesButtonValue(rawValue: string): string {
+  const parsed = Number.parseInt(rawValue, 10);
+  if (!Number.isFinite(parsed)) {
+    return "--분";
+  }
+
+  return `${Math.min(MAX_TASK_TOTAL_MINUTES, Math.max(MIN_TASK_TOTAL_MINUTES, parsed))}분`;
 }
 
 export function TaskInputSection({
@@ -55,7 +102,8 @@ export function TaskInputSection({
   onGenerateTask,
   isGenerating,
   taskTotalMinutesInput,
-  onTaskTotalMinutesInputChange,
+  onSetTaskTotalMinutesFromScheduled,
+  onAdjustTaskTotalMinutesFromScheduled,
   taskScheduledForInput,
   onTaskScheduledForInputChange,
   taskDueAtInput,
@@ -65,6 +113,8 @@ export function TaskInputSection({
   sttError
 }: TaskInputSectionProps) {
   const [isComposerOpen, setIsComposerOpen] = useState(false);
+  const scheduledForPickerRef = useRef<HTMLInputElement | null>(null);
+  const dueAtPickerRef = useRef<HTMLInputElement | null>(null);
 
   const getSafeTotalMinutes = (): number => {
     const parsed = Number.parseInt(taskTotalMinutesInput, 10);
@@ -74,24 +124,60 @@ export function TaskInputSection({
     return 60;
   };
 
-  const applyTotalMinuteDelta = (deltaMinutes: number): void => {
-    const nextMinutes = Math.min(
-      MAX_TASK_TOTAL_MINUTES,
-      Math.max(MIN_TASK_TOTAL_MINUTES, getSafeTotalMinutes() + deltaMinutes)
-    );
-    onTaskTotalMinutesInputChange(String(nextMinutes));
-  };
-
-  const handleApplyAfternoonPreset = (): void => {
-    const scheduledDate = new Date();
-    scheduledDate.setHours(16, 30, 0, 0);
-    if (scheduledDate.getTime() < Date.now()) {
-      scheduledDate.setDate(scheduledDate.getDate() + 1);
+  const openDatePicker = (
+    pickerRef: RefObject<HTMLInputElement | null>,
+    fallbackValue: string,
+    onConfirm: (nextValue: string) => void
+  ): void => {
+    const picker = pickerRef.current as (HTMLInputElement & { showPicker?: () => void }) | null;
+    if (!picker) {
+      return;
     }
 
-    const dueAtDate = new Date(scheduledDate.getTime() + getSafeTotalMinutes() * 60 * 1000);
-    onTaskScheduledForInputChange(toDateTimeLocalValue(scheduledDate));
-    onTaskDueAtInputChange(toDateTimeLocalValue(dueAtDate));
+    if (typeof picker.showPicker === "function") {
+      picker.showPicker();
+      return;
+    }
+
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const promptedValue = window.prompt(
+      "날짜/시간을 선택하거나 YYYY-MM-DDTHH:mm 형식으로 입력하세요.",
+      fallbackValue
+    );
+    if (promptedValue === null) {
+      return;
+    }
+
+    const parsedDate = parseDateTimeLocalValue(promptedValue);
+    if (!parsedDate) {
+      return;
+    }
+
+    onConfirm(toDateTimeLocalValue(parsedDate));
+  };
+
+  const handleDurationPrompt = (): void => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const promptedValue = window.prompt(
+      `소요 시간을 입력하세요. (${MIN_TASK_TOTAL_MINUTES}~${MAX_TASK_TOTAL_MINUTES}분)`,
+      String(getSafeTotalMinutes())
+    );
+    if (promptedValue === null) {
+      return;
+    }
+
+    const parsedMinutes = Number.parseInt(promptedValue, 10);
+    if (!Number.isFinite(parsedMinutes)) {
+      return;
+    }
+
+    onSetTaskTotalMinutesFromScheduled(parsedMinutes);
   };
 
   return (
@@ -109,7 +195,7 @@ export function TaskInputSection({
             className={styles.subtleButton}
             onClick={() => setIsComposerOpen(true)}
           >
-            퀘스트 추가/편집
+            퀘스트 추가
           </button>
         </div>
       </div>
@@ -151,12 +237,7 @@ export function TaskInputSection({
         >
           청크 생성
         </button>
-        <p className={styles.helperText}>Easy for thumb access</p>
       </div>
-      <p className={styles.helperText}>
-        총 시간은 {MIN_TASK_TOTAL_MINUTES}~{MAX_TASK_TOTAL_MINUTES}분 범위이며, 시작 예정 시간은 마감보다 늦을 수 없습니다.
-      </p>
-      <p className={styles.helperText}>로컬 패턴 우선, 필요 시 AI 폴백으로 청킹합니다. STT 엔진: {sttCapability.engine}</p>
       {sttTranscript ? <p className={styles.transcriptPreview}>미리보기: {sttTranscript}</p> : null}
       {sttError ? <p className={styles.errorText}>{sttError}</p> : null}
       {!sttCapability.canStartRecognition ? (
@@ -200,59 +281,90 @@ export function TaskInputSection({
             </label>
 
             <div className={styles.taskMetaGrid}>
-              <label className={`${styles.metaField} ${styles.questTimeCard}`} htmlFor="task-scheduled-for">
-                <span>시작 예정 (StartAt)</span>
+              <div className={`${styles.metaField} ${styles.questTimeCard}`}>
+                <button
+                  type="button"
+                  className={styles.questTimeButton}
+                  onClick={() =>
+                    openDatePicker(
+                      scheduledForPickerRef,
+                      taskScheduledForInput || toDateTimeLocalValue(new Date()),
+                      onTaskScheduledForInputChange
+                    )
+                  }
+                >
+                  <span className={styles.questTimeLabelRow}>
+                    <span className={styles.questTimeIcon} aria-hidden="true">🕒</span>
+                    <span className={styles.questTimeTitle}>시작 예정</span>
+                    <span className={styles.questTimeSubLabel}>(StartAt)</span>
+                  </span>
+                  <strong className={styles.questTimeValue}>{formatDateButtonValue(taskScheduledForInput)}</strong>
+                </button>
                 <input
-                  id="task-scheduled-for"
+                  ref={scheduledForPickerRef}
                   type="datetime-local"
                   value={taskScheduledForInput}
                   onChange={(event) => onTaskScheduledForInputChange(event.target.value)}
-                  className={styles.input}
+                  className={styles.questHiddenDateInput}
+                  tabIndex={-1}
+                  aria-hidden="true"
                 />
-              </label>
-              <label className={`${styles.metaField} ${styles.questTimeCard}`} htmlFor="task-due-at">
-                <span>마감 기한 (DueAt)</span>
+              </div>
+              <div className={`${styles.metaField} ${styles.questTimeCard}`}>
+                <button
+                  type="button"
+                  className={styles.questTimeButton}
+                  onClick={() =>
+                    openDatePicker(
+                      dueAtPickerRef,
+                      taskDueAtInput || toDateTimeLocalValue(new Date()),
+                      onTaskDueAtInputChange
+                    )
+                  }
+                >
+                  <span className={styles.questTimeLabelRow}>
+                    <span className={styles.questTimeIcon} aria-hidden="true">📅</span>
+                    <span className={styles.questTimeTitle}>마감 기한</span>
+                    <span className={styles.questTimeSubLabel}>(DueAt)</span>
+                  </span>
+                  <strong className={styles.questTimeValue}>{formatDateButtonValue(taskDueAtInput)}</strong>
+                </button>
                 <input
-                  id="task-due-at"
+                  ref={dueAtPickerRef}
                   type="datetime-local"
                   value={taskDueAtInput}
                   onChange={(event) => onTaskDueAtInputChange(event.target.value)}
-                  className={styles.input}
+                  className={styles.questHiddenDateInput}
+                  tabIndex={-1}
+                  aria-hidden="true"
                 />
-              </label>
-              <label className={`${styles.metaField} ${styles.questTimeCard}`} htmlFor="task-total-minutes">
-                <span>소요 시간 (EstimateMin)</span>
-                <input
-                  id="task-total-minutes"
-                  type="number"
-                  min={MIN_TASK_TOTAL_MINUTES}
-                  max={MAX_TASK_TOTAL_MINUTES}
-                  value={taskTotalMinutesInput}
-                  onChange={(event) => onTaskTotalMinutesInputChange(event.target.value)}
-                  className={styles.input}
-                  inputMode="numeric"
-                  required
-                />
-              </label>
+              </div>
+              <div className={`${styles.metaField} ${styles.questTimeCard}`}>
+                <button
+                  type="button"
+                  className={styles.questTimeButton}
+                  onClick={handleDurationPrompt}
+                >
+                  <span className={styles.questTimeLabelRow}>
+                    <span className={styles.questTimeIcon} aria-hidden="true">⏳</span>
+                    <span className={styles.questTimeTitle}>소요 시간</span>
+                    <span className={styles.questTimeSubLabel}>(EstimateMin)</span>
+                  </span>
+                  <strong className={styles.questTimeValue}>{formatMinutesButtonValue(taskTotalMinutesInput)}</strong>
+                </button>
+              </div>
             </div>
 
             <div className={styles.questPresetRow}>
-              <button type="button" className={styles.taskChip} onClick={() => applyTotalMinuteDelta(10)}>+10분</button>
-              <button type="button" className={styles.taskChip} onClick={() => applyTotalMinuteDelta(1)}>+1분</button>
-              <button type="button" className={styles.taskChip} onClick={handleApplyAfternoonPreset}>오후 중</button>
-              <button type="button" className={styles.taskChip} onClick={() => applyTotalMinuteDelta(6)}>+6분</button>
+              <button type="button" className={styles.taskChip} onClick={() => onAdjustTaskTotalMinutesFromScheduled(-5)}>-5분</button>
+              <button type="button" className={styles.taskChip} onClick={() => onAdjustTaskTotalMinutesFromScheduled(-1)}>-1분</button>
+              <button type="button" className={styles.taskChip} onClick={() => onAdjustTaskTotalMinutesFromScheduled(1)}>+1분</button>
+              <button type="button" className={styles.taskChip} onClick={() => onAdjustTaskTotalMinutesFromScheduled(5)}>+5분</button>
             </div>
 
             {taskMetaFeedback ? <p className={styles.errorText}>{taskMetaFeedback}</p> : null}
 
             <div className={styles.questModalFooter}>
-              <button
-                type="button"
-                className={styles.ghostButton}
-                onClick={() => setIsComposerOpen(false)}
-              >
-                닫기
-              </button>
               <button
                 type="button"
                 className={styles.primaryButton}

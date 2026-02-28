@@ -795,7 +795,11 @@ export function MvpDashboard() {
     }
   };
 
-  const handleTaskMetaInputChange = (editedField: TaskMetaField, nextValue: string) => {
+  const handleTaskMetaInputChange = (
+    editedField: TaskMetaField,
+    nextValue: string,
+    options?: { forcedAnchorField?: TaskMetaField }
+  ) => {
     const nextInputs: TaskMetaInputs = {
       totalMinutesInput: editedField === "totalMinutes" ? nextValue : taskTotalMinutesInput,
       scheduledForInput: editedField === "scheduledFor" ? nextValue : taskScheduledForInput,
@@ -830,7 +834,11 @@ export function MvpDashboard() {
       && hasValidValue(previousEditedField)
         ? previousEditedField
         : null;
-    const anchorField = preferredAnchorField ?? pairCandidates.find((field) => hasValidValue(field)) ?? null;
+    const forcedAnchorField =
+      options?.forcedAnchorField && options.forcedAnchorField !== editedField && hasValidValue(options.forcedAnchorField)
+        ? options.forcedAnchorField
+        : null;
+    const anchorField = forcedAnchorField ?? preferredAnchorField ?? pairCandidates.find((field) => hasValidValue(field)) ?? null;
 
     let immediateFeedback: string | null = null;
 
@@ -879,16 +887,32 @@ export function MvpDashboard() {
     setTaskMetaFeedback(immediateFeedback ?? getTaskMetaConstraintFeedback(finalTotalMinutes, finalScheduledFor, finalDueAt));
   };
 
-  const handleTaskTotalMinutesInputChange = (nextValue: string) => {
-    handleTaskMetaInputChange("totalMinutes", nextValue);
-  };
-
   const handleTaskScheduledForInputChange = (nextValue: string) => {
-    handleTaskMetaInputChange("scheduledFor", nextValue);
+    handleTaskMetaInputChange("scheduledFor", nextValue, { forcedAnchorField: "totalMinutes" });
   };
 
   const handleTaskDueAtInputChange = (nextValue: string) => {
-    handleTaskMetaInputChange("dueAt", nextValue);
+    handleTaskMetaInputChange("dueAt", nextValue, { forcedAnchorField: "totalMinutes" });
+  };
+
+  const handleSetTaskTotalMinutesFromScheduled = (nextMinutes: number) => {
+    if (!Number.isFinite(nextMinutes)) {
+      return;
+    }
+
+    const normalizedMinutes = Math.min(
+      MAX_TASK_TOTAL_MINUTES,
+      Math.max(MIN_TASK_TOTAL_MINUTES, Math.floor(nextMinutes))
+    );
+    handleTaskMetaInputChange("totalMinutes", String(normalizedMinutes), {
+      forcedAnchorField: "scheduledFor"
+    });
+  };
+
+  const handleAdjustTaskTotalMinutesFromScheduled = (deltaMinutes: -5 | -1 | 1 | 5) => {
+    const parsedTotalMinutes = parseLooseMinuteInput(taskTotalMinutesInput);
+    const safeTotalMinutes = parsedTotalMinutes ?? DEFAULT_TASK_TOTAL_MINUTES;
+    handleSetTaskTotalMinutesFromScheduled(safeTotalMinutes + deltaMinutes);
   };
 
   const handleGenerateTask = async () => {
@@ -1991,7 +2015,8 @@ export function MvpDashboard() {
               onGenerateTask={() => void handleGenerateTask()}
               isGenerating={isGenerating}
               taskTotalMinutesInput={taskTotalMinutesInput}
-              onTaskTotalMinutesInputChange={handleTaskTotalMinutesInputChange}
+              onSetTaskTotalMinutesFromScheduled={handleSetTaskTotalMinutesFromScheduled}
+              onAdjustTaskTotalMinutesFromScheduled={handleAdjustTaskTotalMinutesFromScheduled}
               taskScheduledForInput={taskScheduledForInput}
               onTaskScheduledForInputChange={handleTaskScheduledForInputChange}
               taskDueAtInput={taskDueAtInput}
