@@ -91,10 +91,10 @@ import {
 import styles from "./mvp-dashboard.module.css";
 
 const TAB_ITEMS = [
-  { key: "home", label: "홈" },
-  { key: "tasks", label: "할 일" },
-  { key: "stats", label: "스탯" },
-  { key: "settings", label: "설정" }
+  { key: "home", labelKr: "홈", labelEn: "HOME", icon: "🏠" },
+  { key: "tasks", labelKr: "할 일", labelEn: "TASKS", icon: "🗒️" },
+  { key: "stats", labelKr: "스탯", labelEn: "STATS", icon: "📊" },
+  { key: "settings", labelKr: "설정", labelEn: "SETTINGS", icon: "⚙️" }
 ] as const;
 
 const RISKY_INPUT_PATTERN = /(자해|죽고\s?싶|폭탄|불법|마약|살인|테러)/i;
@@ -288,6 +288,10 @@ export function MvpDashboard() {
   );
 
   const xpProgressPercent = getXpProgressPercent(stats);
+  const dailyProgressPercent = Math.max(0, Math.min(100, completionRate));
+  const dailyProgressRingStyle = {
+    background: `conic-gradient(#4a88d4 0 ${dailyProgressPercent}%, #dbe5f2 ${dailyProgressPercent}% 100%)`
+  };
   const kpis = useMemo(() => computeMvpKpis(events), [events]);
 
   const radar = useMemo(
@@ -1907,102 +1911,121 @@ export function MvpDashboard() {
 
       <main className={styles.app}>
         <header className={styles.topBar}>
-          <div>
-            <p className={styles.eyebrow}>ADHDTIME MVP LOOP</p>
-            <h1>입력하고 바로 실행</h1>
+          <div className={styles.titleGroup}>
+            <h1 className={styles.brandTitle}>ADHDTime</h1>
+            <p className={styles.levelSummary}>레벨 {stats.level} (LV.{stats.level}) 모험가</p>
             <p className={styles.clock} suppressHydrationWarning>
               {formatDateTime(clock)}
             </p>
           </div>
-          <p className={styles.feedback}>{feedback}</p>
-        </header>
-
-        <section className={styles.statusCard}>
-          <div className={styles.levelBlock}>
-            <p className={styles.levelLabel}>LV {stats.level}</p>
-            <p className={styles.levelXp}>XP {stats.xp}</p>
-            <div className={styles.xpTrack} aria-hidden="true">
-              <span style={{ width: `${xpProgressPercent}%` }} />
+          <div className={styles.progressGroup}>
+            <p className={styles.progressTitle}>
+              오늘의 달성도
+              <span>DAILY PROGRESS</span>
+            </p>
+            <div className={styles.progressRing} style={dailyProgressRingStyle} aria-label={`오늘의 달성도 ${dailyProgressPercent}%`}>
+              <div className={styles.progressRingInner}>
+                <strong>{dailyProgressPercent}%</strong>
+              </div>
             </div>
-            <p className={styles.todaySummary}>오늘 완료 {stats.todayCompleted}개 · +{stats.todayXpGain} XP</p>
           </div>
-
-          <div className={styles.radarBlock}>
-            <svg viewBox="0 0 120 120" className={styles.radarSvg} role="img" aria-label="5스탯 레이더 차트">
-              {radar.grid.map((gridLine, index) => (
-                <polygon key={gridLine} points={gridLine} className={styles.radarGrid} data-level={index} />
-              ))}
-              {STAT_META.map((_, index) => {
-                const angle = (-Math.PI / 2) + (index * Math.PI * 2) / STAT_META.length;
-                const x = 60 + Math.cos(angle) * 48;
-                const y = 60 + Math.sin(angle) * 48;
-                return <line key={STAT_META[index].key} x1={60} y1={60} x2={x} y2={y} className={styles.radarAxis} />;
-              })}
-              <polygon points={radar.data} className={styles.radarData} />
-            </svg>
-            <ul className={styles.statList}>
-              {STAT_META.map((item) => (
-                <li key={item.key}>
-                  <span>{item.label}</span>
-                  <strong>{stats[item.key]}</strong>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </section>
-
-        <TaskInputSection
-          styles={styles}
-          sttSupportState={sttSupportState}
-          taskInput={taskInput}
-          onTaskInputChange={setTaskInput}
-          isSttListening={isSttListening}
-          onStartStt={handleStartStt}
-          onStopStt={handleStopStt}
-          sttCapability={sttCapability}
-          onGenerateManualChunk={handleGenerateManualChunk}
-          isExecutionLocked={isExecutionLocked}
-          activeTask={activeTask}
-          onGenerateTask={() => void handleGenerateTask()}
-          isGenerating={isGenerating}
-          taskTotalMinutesInput={taskTotalMinutesInput}
-          onTaskTotalMinutesInputChange={handleTaskTotalMinutesInputChange}
-          taskScheduledForInput={taskScheduledForInput}
-          onTaskScheduledForInputChange={handleTaskScheduledForInputChange}
-          taskDueAtInput={taskDueAtInput}
-          onTaskDueAtInputChange={handleTaskDueAtInputChange}
-          taskMetaFeedback={taskMetaFeedback}
-          sttTranscript={sttTranscript}
-          sttError={sttError}
-        />
+        </header>
+        <p className={styles.feedback}>{feedback}</p>
 
         {activeTab === "home" ? (
-          <HomeView
-            styles={styles}
-            homeChunk={homeChunk}
-            homeTask={homeTask}
-            homeRemaining={homeRemaining}
-            homeTaskBudgetUsage={homeTaskBudgetUsage}
-            completionRate={completionRate}
-            homeTaskCards={homeTaskCards}
-            chunks={chunks}
-            expandedHomeTaskId={expandedHomeTaskId}
-            remainingSecondsByChunk={remainingSecondsByChunk}
-            onSetActiveTaskId={setActiveTaskId}
-            onToggleExpandedHomeTaskId={(taskId) => {
-              setExpandedHomeTaskId((prev) => (prev === taskId ? null : taskId));
-            }}
-            onStartChunk={handleStartChunk}
-            onPauseChunk={handlePauseChunk}
-            onCompleteChunk={handleCompleteChunk}
-            onAdjustRunningChunkMinutes={handleAdjustRunningChunkMinutes}
-            canAdjustMinusFive={canAdjustMinusFive}
-            canAdjustMinusOne={canAdjustMinusOne}
-            canAdjustPlusOne={canAdjustPlusOne}
-            canAdjustPlusFive={canAdjustPlusFive}
-            onRechunk={handleRechunk}
-            onReschedule={handleReschedule}
-          />
+          <>
+            <section className={styles.statusSection}>
+              <header className={styles.sectionHeader}>
+                <h2>캐릭터 상태</h2>
+              </header>
+              <div className={styles.statusCard}>
+                <div className={styles.levelBlock}>
+                  <div className={styles.characterAvatar} aria-hidden="true">🧙</div>
+                  <p className={styles.levelLabel}>레벨 {stats.level}</p>
+                  <p className={styles.levelXp}>XP {stats.xp}</p>
+                  <div className={styles.xpTrack} aria-hidden="true">
+                    <span style={{ width: `${xpProgressPercent}%` }} />
+                  </div>
+                  <p className={styles.todaySummary}>오늘 완료 {stats.todayCompleted}개 · +{stats.todayXpGain} XP</p>
+                </div>
+
+                <div className={styles.radarBlock}>
+                  <svg viewBox="0 0 120 120" className={styles.radarSvg} role="img" aria-label="5스탯 레이더 차트">
+                    {radar.grid.map((gridLine, index) => (
+                      <polygon key={gridLine} points={gridLine} className={styles.radarGrid} data-level={index} />
+                    ))}
+                    {STAT_META.map((_, index) => {
+                      const angle = (-Math.PI / 2) + (index * Math.PI * 2) / STAT_META.length;
+                      const x = 60 + Math.cos(angle) * 48;
+                      const y = 60 + Math.sin(angle) * 48;
+                      return <line key={STAT_META[index].key} x1={60} y1={60} x2={x} y2={y} className={styles.radarAxis} />;
+                    })}
+                    <polygon points={radar.data} className={styles.radarData} />
+                  </svg>
+                  <ul className={styles.statList}>
+                    {STAT_META.map((item) => (
+                      <li key={item.key}>
+                        <span>{item.label}</span>
+                        <strong>{stats[item.key]}</strong>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </section>
+
+            <TaskInputSection
+              styles={styles}
+              sttSupportState={sttSupportState}
+              taskInput={taskInput}
+              onTaskInputChange={setTaskInput}
+              isSttListening={isSttListening}
+              onStartStt={handleStartStt}
+              onStopStt={handleStopStt}
+              sttCapability={sttCapability}
+              onGenerateManualChunk={handleGenerateManualChunk}
+              isExecutionLocked={isExecutionLocked}
+              activeTask={activeTask}
+              onGenerateTask={() => void handleGenerateTask()}
+              isGenerating={isGenerating}
+              taskTotalMinutesInput={taskTotalMinutesInput}
+              onTaskTotalMinutesInputChange={handleTaskTotalMinutesInputChange}
+              taskScheduledForInput={taskScheduledForInput}
+              onTaskScheduledForInputChange={handleTaskScheduledForInputChange}
+              taskDueAtInput={taskDueAtInput}
+              onTaskDueAtInputChange={handleTaskDueAtInputChange}
+              taskMetaFeedback={taskMetaFeedback}
+              sttTranscript={sttTranscript}
+              sttError={sttError}
+            />
+
+            <HomeView
+              styles={styles}
+              homeChunk={homeChunk}
+              homeTask={homeTask}
+              homeRemaining={homeRemaining}
+              homeTaskBudgetUsage={homeTaskBudgetUsage}
+              completionRate={completionRate}
+              homeTaskCards={homeTaskCards}
+              chunks={chunks}
+              expandedHomeTaskId={expandedHomeTaskId}
+              remainingSecondsByChunk={remainingSecondsByChunk}
+              onSetActiveTaskId={setActiveTaskId}
+              onToggleExpandedHomeTaskId={(taskId) => {
+                setExpandedHomeTaskId((prev) => (prev === taskId ? null : taskId));
+              }}
+              onStartChunk={handleStartChunk}
+              onPauseChunk={handlePauseChunk}
+              onCompleteChunk={handleCompleteChunk}
+              onAdjustRunningChunkMinutes={handleAdjustRunningChunkMinutes}
+              canAdjustMinusFive={canAdjustMinusFive}
+              canAdjustMinusOne={canAdjustMinusOne}
+              canAdjustPlusOne={canAdjustPlusOne}
+              canAdjustPlusFive={canAdjustPlusFive}
+              onRechunk={handleRechunk}
+              onReschedule={handleReschedule}
+            />
+          </>
         ) : null}
 
         {activeTab === "tasks" ? (
@@ -2070,7 +2093,9 @@ export function MvpDashboard() {
             className={tab.key === activeTab ? styles.tabButtonActive : styles.tabButton}
             onClick={() => setActiveTab(tab.key)}
           >
-            {tab.label}
+            <span className={styles.tabIcon} aria-hidden="true">{tab.icon}</span>
+            <span className={styles.tabLabelKr}>{tab.labelKr}</span>
+            <span className={styles.tabLabelEn}>{tab.labelEn}</span>
           </button>
         ))}
       </nav>

@@ -15,6 +15,22 @@ function joinClassNames(...classNames: Array<string | undefined>): string {
   return classNames.filter(Boolean).join(" ");
 }
 
+function resolveTaskIcon(task: Task, openChunks: number): string {
+  if (task.status === "done") {
+    return "😺";
+  }
+
+  if (task.status === "in_progress") {
+    return openChunks <= 1 ? "👾" : "😈";
+  }
+
+  if (openChunks <= 1) {
+    return "🧊";
+  }
+
+  return "👹";
+}
+
 export interface HomeViewProps {
   styles: CssModuleClassMap;
   homeChunk: Chunk | null;
@@ -66,18 +82,25 @@ export function HomeView({
 }: HomeViewProps) {
   const getClassName = (classKey: string) => styles[classKey] ?? "";
   const statusClassName = homeChunk ? getClassName(`status_${homeChunk.status}`) : "";
+  const waitingTasks = homeTaskCards;
 
   return (
     <>
       <section className={getClassName("currentChunkCard")}>
-        <header>
-          <p className={getClassName("sectionLabel")}>현재 퀘스트</p>
-          <h2>{homeChunk ? homeChunk.action : "진행할 청크가 없어요"}</h2>
-          {homeTask ? <p className={getClassName("taskTitle")}>과업: {homeTask.title}</p> : null}
+        <header className={getClassName("currentQuestHeader")}>
+          <p className={getClassName("sectionLabel")}>현재의 퀘스트</p>
+          <strong className={getClassName("currentQuestCount")}>{homeChunk ? "1개 +" : "0개 +"}</strong>
         </header>
 
         {homeChunk ? (
           <>
+            <div className={getClassName("currentQuestTop")}>
+              <div>
+                <h2>{homeChunk.action}</h2>
+                {homeTask ? <p className={getClassName("taskTitle")}>요약: {homeTask.title}</p> : null}
+              </div>
+              <span className={getClassName("currentQuestMonster")} aria-hidden="true">👾</span>
+            </div>
             <p className={getClassName("timerValue")}>{formatClock(homeRemaining)}</p>
             <div className={getClassName("chunkMetaRow")}>
               <span>{homeChunk.estMinutes}분 청크</span>
@@ -122,6 +145,7 @@ export function HomeView({
               onRechunk={onRechunk}
               onReschedule={onReschedule}
             />
+            <p className={getClassName("vibrationHint")}>⏰ 5분마다 미세 진동 알림</p>
           </>
         ) : (
           <p className={getClassName("helperText")}>입력창에서 할 일을 넣고 첫 청크를 만들어보세요.</p>
@@ -130,13 +154,13 @@ export function HomeView({
 
       <section className={getClassName("listCard")}>
         <header className={getClassName("listHeader")}>
-          <h3>오늘의 퀘스트</h3>
-          <p>완료율 {completionRate}%</p>
+          <h3>대기 중인 퀘스트</h3>
+          <p>{waitingTasks.length}개 · 완료율 {completionRate}%</p>
         </header>
 
         <ul className={getClassName("taskPreviewList")}>
-          {homeTaskCards.length === 0 ? <li className={getClassName("emptyRow")}>아직 생성된 과업이 없습니다.</li> : null}
-          {homeTaskCards.map((task) => {
+          {waitingTasks.length === 0 ? <li className={getClassName("emptyRow")}>대기 중인 과업이 없습니다.</li> : null}
+          {waitingTasks.map((task) => {
             const actionableTaskChunks = orderChunks(
               chunks.filter((chunk) => chunk.taskId === task.id && isActionableChunkStatus(chunk.status))
             );
@@ -155,8 +179,15 @@ export function HomeView({
                   aria-expanded={isExpanded}
                   aria-controls={`home-task-chunks-${task.id}`}
                 >
-                  <span className={getClassName("homeTaskTitle")}>{task.title}</span>
-                  <strong>{openChunks}개 남음</strong>
+                  <span className={getClassName("homeTaskIcon")} aria-hidden="true">
+                    {resolveTaskIcon(task, openChunks)}
+                  </span>
+                  <span className={getClassName("homeTaskMain")}>
+                    <span className={getClassName("homeTaskTitle")}>{task.title}</span>
+                    <span className={getClassName("homeTaskMeta")}>
+                      시작 {formatOptionalDateTime(task.scheduledFor)} · 마감 {formatOptionalDateTime(task.dueAt)} · {openChunks}개 남음
+                    </span>
+                  </span>
                   <span className={getClassName("homeTaskChevron")} aria-hidden="true">
                     {isExpanded ? "▾" : "▸"}
                   </span>
