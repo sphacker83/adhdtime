@@ -98,6 +98,8 @@ const TAB_ITEMS = [
   { key: "stats", labelKr: "스탯", labelEn: "STATS", icon: "📊" },
   { key: "settings", labelKr: "설정", labelEn: "SETTINGS", icon: "⚙️" }
 ] as const;
+const LEFT_TAB_ITEMS = TAB_ITEMS.slice(0, 2);
+const RIGHT_TAB_ITEMS = TAB_ITEMS.slice(2);
 
 const RISKY_INPUT_PATTERN = /(자해|죽고\s?싶|폭탄|불법|마약|살인|테러)/i;
 
@@ -224,6 +226,7 @@ export function MvpDashboard() {
   const [taskDueAtInput, setTaskDueAtInput] = useState("");
   const [taskMetaFeedback, setTaskMetaFeedback] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isQuestComposerOpen, setIsQuestComposerOpen] = useState(false);
   const [, setFeedback] = useState<string>("오늘은 가장 작은 행동부터 시작해요.");
   const [clock, setClock] = useState(new Date());
   const [currentChunkId, setCurrentChunkId] = useState<string | null>(null);
@@ -1918,6 +1921,8 @@ export function MvpDashboard() {
       <main className={styles.app}>
         <TaskInputSection
           styles={styles}
+          isComposerOpen={isQuestComposerOpen}
+          onCloseComposer={() => setIsQuestComposerOpen(false)}
           sttSupportState={sttSupportState}
           taskInput={taskInput}
           onTaskInputChange={setTaskInput}
@@ -2089,18 +2094,44 @@ export function MvpDashboard() {
       </main>
 
       <nav className={styles.tabBar} aria-label="하단 탭">
-        {TAB_ITEMS.map((tab) => (
-          <button
-            key={tab.key}
-            type="button"
-            className={tab.key === activeTab ? styles.tabButtonActive : styles.tabButton}
-            onClick={() => setActiveTab(tab.key)}
-          >
-            <span className={styles.tabIcon} aria-hidden="true">{tab.icon}</span>
-            <span className={styles.tabLabelKr}>{tab.labelKr}</span>
-            <span className={styles.tabLabelEn}>{tab.labelEn}</span>
-          </button>
-        ))}
+        <div className={styles.tabGroup}>
+          {LEFT_TAB_ITEMS.map((tab) => (
+            <button
+              key={tab.key}
+              type="button"
+              className={tab.key === activeTab ? styles.tabButtonActive : styles.tabButton}
+              onClick={() => setActiveTab(tab.key)}
+            >
+              <span className={styles.tabIcon} aria-hidden="true">{tab.icon}</span>
+              <span className={styles.tabLabelKr}>{tab.labelKr}</span>
+              <span className={styles.tabLabelEn}>{tab.labelEn}</span>
+            </button>
+          ))}
+        </div>
+        <button
+          type="button"
+          className={styles.tabCreateButton}
+          onClick={() => setIsQuestComposerOpen(true)}
+          aria-label="AI 퀘스트 생성 모달 열기"
+          title="AI 퀘스트 생성"
+        >
+          <span className={styles.tabCreateIcon} aria-hidden="true">⚔️</span>
+          <span className={styles.tabCreateLabel}>퀘스트 생성</span>
+        </button>
+        <div className={styles.tabGroup}>
+          {RIGHT_TAB_ITEMS.map((tab) => (
+            <button
+              key={tab.key}
+              type="button"
+              className={tab.key === activeTab ? styles.tabButtonActive : styles.tabButton}
+              onClick={() => setActiveTab(tab.key)}
+            >
+              <span className={styles.tabIcon} aria-hidden="true">{tab.icon}</span>
+              <span className={styles.tabLabelKr}>{tab.labelKr}</span>
+              <span className={styles.tabLabelEn}>{tab.labelEn}</span>
+            </button>
+          ))}
+        </div>
       </nav>
     </div>
   );

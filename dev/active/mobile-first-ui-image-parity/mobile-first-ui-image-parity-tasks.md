@@ -86,3 +86,10 @@ Acceptance:
 - [x] 퀘스트 생성 FAB 좌하단 이동 + 세로 레이아웃(아이콘 확대)
 - [x] Playwright 추가 검증(`after-plan-home`, `after-plan-modal`, `after-plan-home-v2`)
 - [x] Playwright 최종 검증(`post-fix-home-current`, `post-fix-home-current-v2`)
+
+## Phase 8: 중앙 돌출 퀘스트 CTA (2026-02-28) ✅ COMPLETE
+- [x] 좌하단 플로팅 퀘스트 생성 버튼 제거
+- [x] 하단 네비 중앙 원형 CTA 추가(`퀘스트 생성`)
+- [x] 네비 상단 돌출형(`---^---`) 시각 구조 구현
+- [x] 모달 상태를 부모로 이동해 중앙 CTA와 연결
+- [x] Playwright 캡처 + `typecheck/lint/test:mvp` 재검증

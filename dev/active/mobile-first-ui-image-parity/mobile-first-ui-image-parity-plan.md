@@ -27,6 +27,13 @@ Last Updated: 2026-02-28
 8. dev-docs/dev-docs-update 규칙에 맞게 문서 인수인계를 최신화한다.
 9. `docs/PRD.md`, `docs/DEVELOPMENT_PLAN.md`를 현재 구현 기준으로 동기화한다.
 
+## Round 4 Navigation CTA Rebuild (2026-02-28)
+1. 좌하단 플로팅 퀘스트 생성 버튼을 제거한다.
+2. 하단 네비 중앙에 원형 `퀘스트 생성` CTA를 배치한다.
+3. CTA가 네비 상단으로 돌출되는 `---^---` 시각 구조를 만든다.
+4. 기존 퀘스트 생성 모달 동작(성공 시 닫힘)은 그대로 유지한다.
+5. 기존 Phase 3의 플로팅 CTA 요구사항은 Round 4로 대체한다.
+
 ## New Requirements (12)
 1. 플로팅 버튼에 `퀘스트 생성` 텍스트 명시
 2. 플로팅 버튼을 우하단 고정으로 유지하고 모든 탭에서 노출
@@ -61,6 +68,10 @@ Last Updated: 2026-02-28
 - 기존 `handleEditChunk`, `handleDeleteChunk`, `handleEditTaskTotalMinutes`를 홈 뷰에 연결
 5. 헤더 정합 방식:
 - `Final parity lock` 블록만 수정해 충돌 최소화
+6. Round 4 CTA 방식:
+- 모달 상태를 `MvpDashboard`로 승격해 네비 중앙 CTA와 연결
+- `TaskInputSection`은 모달 렌더 전용으로 단순화
+- 하단 네비는 좌/우 탭 그룹 + 중앙 돌출 CTA 3영역 레이아웃으로 재구성
 
 ## Implementation Phases
 ### Phase 1: 문서/기반선 확정
@@ -102,7 +113,7 @@ Last Updated: 2026-02-28
   - 대응: `--header-height`/`.app top` 동시 보정
 
 ## Success Metrics
-- 전 탭에서 `퀘스트 생성` 플로팅 액션이 좌하단에 고정 노출된다.
+- 전 탭에서 `퀘스트 생성` CTA가 하단 네비 중앙 돌출 원형으로 노출된다.
 - 생성 성공 시 모달이 닫히고, 실패 시 열린 상태로 오류를 확인할 수 있다.
 - 현재 퀘스트 카드가 요구한 정보 구조(타이틀/예상소요/마감/남은시간/다음미션 위치)를 충족한다.
 - 다음 미션에 아이콘/삭제가 동작하고 상태 텍스트가 사라진다.

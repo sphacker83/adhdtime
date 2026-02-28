@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, type RefObject } from "react";
+import { useRef, type RefObject } from "react";
 import {
   MAX_TASK_TOTAL_MINUTES,
   MIN_TASK_TOTAL_MINUTES
@@ -17,6 +17,8 @@ type MvpDashboardStyles = Record<string, string>;
 
 export interface TaskInputSectionProps {
   styles: MvpDashboardStyles;
+  isComposerOpen: boolean;
+  onCloseComposer: () => void;
   sttSupportState: "supported" | "unsupported";
   taskInput: string;
   onTaskInputChange: (value: string) => void;
@@ -70,6 +72,8 @@ function formatMinutesButtonValue(rawValue: string): string {
 export function TaskInputSection(props: TaskInputSectionProps) {
   const {
     styles,
+    isComposerOpen,
+    onCloseComposer,
     sttSupportState,
     taskInput,
     onTaskInputChange,
@@ -90,7 +94,6 @@ export function TaskInputSection(props: TaskInputSectionProps) {
     sttTranscript,
     sttError
   } = props;
-  const [isComposerOpen, setIsComposerOpen] = useState(false);
   const scheduledForPickerRef = useRef<HTMLInputElement | null>(null);
   const dueAtPickerRef = useRef<HTMLInputElement | null>(null);
   const scheduledForButtonValue = formatDateButtonValue(taskScheduledForInput);
@@ -165,7 +168,7 @@ export function TaskInputSection(props: TaskInputSectionProps) {
     try {
       const isSuccess = await onGenerateTask();
       if (isSuccess) {
-        setIsComposerOpen(false);
+        onCloseComposer();
       }
     } catch {
       // 실패 시 모달은 열린 상태를 유지한다.
@@ -174,23 +177,10 @@ export function TaskInputSection(props: TaskInputSectionProps) {
 
   return (
     <>
-      {!isComposerOpen ? (
-        <button
-          type="button"
-          className={styles.floatingQuestButton}
-          onClick={() => setIsComposerOpen(true)}
-          aria-label="AI 퀘스트 생성 모달 열기"
-          title="AI 퀘스트 생성"
-        >
-          <span className={styles.floatingQuestButtonIcon} aria-hidden="true">⚔️</span>
-          <span className={styles.floatingQuestButtonLabel}>퀘스트 생성</span>
-        </button>
-      ) : null}
-
       {isComposerOpen ? (
         <div
           className={styles.questModalBackdrop}
-          onClick={() => setIsComposerOpen(false)}
+          onClick={onCloseComposer}
           role="presentation"
         >
           <section
@@ -205,7 +195,7 @@ export function TaskInputSection(props: TaskInputSectionProps) {
               <button
                 type="button"
                 className={styles.subtleButton}
-                onClick={() => setIsComposerOpen(false)}
+                onClick={onCloseComposer}
                 aria-label="퀘스트 모달 닫기"
               >
                 ✕

@@ -61,6 +61,16 @@ Last Updated: 2026-02-28
 - 상위 문서 동기화 완료:
   - `docs/PRD.md` v3.2 반영
   - `docs/DEVELOPMENT_PLAN.md` v2.2 반영
+- main 브랜치 1차 반영 완료:
+  - commit: `8f9f2b3`
+  - 내용: 모바일 UI 파리티 보정 + 문서 동기화 + Playwright 캡처
+- Round 4 네비 CTA 재구성 완료:
+  - 좌하단 플로팅 CTA 제거
+  - 하단 네비 중앙 원형 CTA + 상단 돌출(`---^---`) 형태 적용
+  - 모달 상태를 `MvpDashboard`로 승격해 중앙 CTA와 연결
+  - Playwright 캡처 추가:
+    - `output/playwright/nav-center-cta-home.png`
+    - `output/playwright/nav-center-cta-modal.png`
 - 문서 체계 정리:
   - 비어 있던 사이드 플랜 트랙 `dev/active/task-json-preset-scoring-side-plan`을 `dev/archive/`로 이동
 - 검증 통과:
@@ -76,7 +86,7 @@ Last Updated: 2026-02-28
 
 ## Key Decisions
 1. 이번 라운드는 `MvpDashboard` 경로만 수정한다. (`PhaseOneDashboard` 미사용)
-2. 플로팅 생성 버튼은 홈 탭 조건문 밖으로 이동해 전 탭에서 노출한다.
+2. 퀘스트 생성 CTA는 하단 네비 중앙 돌출 원형 버튼으로 유지한다(플로팅 사용 안 함).
 3. 생성 모달 닫힘은 `onGenerateTask` 성공 boolean 반환으로 제어한다.
 4. 미션 아이콘은 `Chunk.iconKey` optional 필드로 도입해 기존 데이터와 호환한다.
 5. 홈 뷰 편집/삭제 액션은 기존 핸들러를 재사용해 회귀 위험을 줄인다.
@@ -98,6 +108,6 @@ Last Updated: 2026-02-28
 - `dev/active/mobile-first-ui-image-parity/mobile-first-ui-image-parity-tasks.md`
 
 ## Quick Resume
-1. 수동 UI QA(`docs/ui/main_ui.png`, `docs/ui/add_ui.png` 비교)로 헤더/플로팅/홈카드를 확인한다.
+1. 수동 UI QA(`docs/ui/main_ui.png`, `docs/ui/add_ui.png` 비교)로 헤더/중앙 CTA/홈카드를 확인한다.
 2. 필요시 `mvp-dashboard.module.css` parity override만 미세 조정한다.
 3. 최종 커밋/푸시를 진행한다.

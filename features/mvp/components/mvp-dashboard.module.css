@@ -1912,9 +1912,9 @@
 
 .shell {
   --layout-max-width: 100%;
-  --tab-height: 52px;
+  --tab-height: 56px;
   min-height: 100dvh;
-  padding: 0 0 calc(var(--tab-height) + 6px);
+  padding: 0 0 calc(var(--tab-height) + 34px);
   overflow-x: hidden;
   background: linear-gradient(180deg, #f4f7fc 0%, #e7eef8 100%);
 }
@@ -2294,49 +2294,9 @@
   font-size: 14px;
 }
 
-.floatingQuestButton {
-  position: fixed;
-  left: clamp(12px, 3vw, 24px);
-  right: auto;
-  bottom: calc(var(--tab-height) + 10px);
-  width: 94px;
-  height: 94px;
-  padding: 10px 8px;
-  border: 1px solid #2f74be;
-  border-radius: 20px;
-  background: linear-gradient(180deg, #4fb4ff 0%, #2d84d9 100%);
-  box-shadow: 0 12px 22px rgba(33, 99, 172, 0.28);
-  color: #fff;
-  display: grid;
-  grid-template-rows: auto auto;
-  justify-items: center;
-  align-content: center;
-  gap: 4px;
-  cursor: pointer;
-  z-index: 35;
-  font-weight: 800;
-  font-size: 11px;
-}
-
-.floatingQuestButtonIcon {
-  font-size: 34px;
-  line-height: 1;
-}
-
-.floatingQuestButtonLabel {
-  line-height: 1.1;
-  text-align: center;
-  white-space: normal;
-}
-
-.floatingQuestButton:focus-visible {
-  outline: 2px solid rgba(33, 132, 217, 0.35);
-  outline-offset: 2px;
-}
-
 .questModalBackdrop {
   z-index: 55;
-  padding: 0 12px calc(var(--tab-height) + 8px);
+  padding: 0 12px calc(var(--tab-height) + 24px);
 }
 
 .questModal {
@@ -2366,16 +2326,79 @@
   border-top: 1px solid #cdd9eb;
   background: #fff;
   box-shadow: 0 -6px 18px rgba(22, 39, 66, 0.14);
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: stretch;
   gap: 8px;
   z-index: 70;
+  overflow: visible;
+}
+
+.tabBar::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: -18px;
+  width: 116px;
+  height: 38px;
+  transform: translateX(-50%);
+  border: 1px solid #cdd9eb;
+  border-bottom: 0;
+  border-top-left-radius: 999px;
+  border-top-right-radius: 999px;
+  background: #fff;
+  box-shadow: 0 -4px 14px rgba(22, 39, 66, 0.08);
+  pointer-events: none;
+}
+
+.tabGroup {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
   align-items: stretch;
+  z-index: 1;
+}
+
+.tabCreateButton {
+  width: 82px;
+  height: 82px;
+  margin-top: -36px;
+  border-radius: 999px;
+  border: 2px solid #2f74be;
+  background: linear-gradient(180deg, #4fb4ff 0%, #2d84d9 100%);
+  box-shadow: 0 10px 18px rgba(24, 84, 153, 0.35);
+  color: #fff;
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 2px;
+  padding: 8px 6px;
+  cursor: pointer;
+  z-index: 2;
+  align-self: start;
+}
+
+.tabCreateIcon {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.tabCreateLabel {
+  font-size: 10px;
+  line-height: 1.1;
+  font-weight: 800;
+  text-align: center;
+}
+
+.tabCreateButton:focus-visible {
+  outline: 2px solid rgba(33, 132, 217, 0.35);
+  outline-offset: 2px;
 }
 
 .tabButton,
 .tabButtonActive {
-  flex: 1 1 0;
+  width: 100%;
   min-width: 0;
   height: var(--tab-height);
   border-radius: 10px;
@@ -2412,7 +2435,7 @@
 
 @media (min-width: 768px) {
   .shell {
-    --tab-height: 52px;
+    --tab-height: 56px;
   }
 
   .app {
