@@ -105,6 +105,16 @@ Last Updated: 2026-02-28
   - Playwright 캡처 추가:
     - `output/playwright/round8-home-empty.png`
     - `output/playwright/round8-home-with-quest.png`
+- Round 9 모바일 레이아웃 안정화 완료:
+  - 모바일 모달 시간 카드(`시작예정/마감기한/소요시간`) 3열 유지
+  - 모바일 현재 퀘스트 메타(`예상소요시간/마감시간/마감까지`) 3열 유지
+  - 대기중 퀘스트 메타 아이콘/텍스트 크기 상향
+  - 메타 아이콘 1개가 2줄 텍스트를 커버하는 구조로 보정
+  - Playwright 캡처 추가:
+    - `output/playwright/round9-home-empty.png`
+    - `output/playwright/round9-modal-open.png`
+    - `output/playwright/round9-home-with-quest.png`
+    - `output/playwright/round9-waiting-icons.png`
 - 문서 체계 정리:
   - 비어 있던 사이드 플랜 트랙 `dev/active/task-json-preset-scoring-side-plan`을 `dev/archive/`로 이동
 - 검증 통과:

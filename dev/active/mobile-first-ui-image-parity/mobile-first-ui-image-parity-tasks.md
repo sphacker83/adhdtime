@@ -127,3 +127,10 @@ Acceptance:
 - [x] `미션 제목/에너지%`, `타이머/링서클` 간격 재정렬
 - [x] Playwright 캡처(`round8-home-empty`, `round8-home-with-quest`)
 - [x] `typecheck/lint/test:mvp` 재검증
+
+## Phase 13: 모바일 레이아웃 안정화 (2026-02-28) ✅ COMPLETE
+- [x] 모바일에서도 퀘스트 생성 모달 시간 카드 3열 유지
+- [x] 모바일에서도 현재 퀘스트 메타 3열 유지
+- [x] 대기중 퀘스트 메타 아이콘/텍스트 크기 상향
+- [x] 아이콘 1개가 2줄 텍스트를 커버하는 메타 구조 보정
+- [x] Playwright 캡처 + `typecheck/lint/test:mvp` 재검증
