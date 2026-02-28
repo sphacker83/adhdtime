@@ -7,8 +7,7 @@ import {
   isWithinTaskMissionBudget,
   mapMissioningResultToMissions,
   rankLocalPresetCandidates,
-  sumMissionEstMinutes,
-  validateMissioningResult
+  sumMissionEstMinutes
 } from "@/features/mvp/lib/missioning";
 import { appendEvent, createEvent } from "@/features/mvp/lib/events";
 import { computeMvpKpis } from "@/features/mvp/lib/kpi";
@@ -1579,13 +1578,6 @@ export function MvpDashboard() {
         return { ok: false, reason: "no_candidates", message };
       }
 
-      const validation = validateMissioningResult(missioning);
-      if (!validation.ok) {
-        const message = "추천된 미션 검증에 실패했습니다. 입력 문장을 바꿔 다시 시도해주세요.";
-        setFeedback(message);
-        return { ok: false, reason: "mission_validation_failed", message };
-      }
-
       const missioningLatencyMs = Date.now() - missioningStartedAt;
       const effectiveTotalMinutes = clampTaskTotalMinutes(
         parsedTotalMinutes ?? sumMissionEstMinutes(missioning.missions)
@@ -1980,28 +1972,65 @@ export function MvpDashboard() {
     const nextMission = candidateMissions.find((mission) => mission.order > target.order && isActionableMissionStatus(mission.status))
       ?? candidateMissions.find((mission) => isActionableMissionStatus(mission.status))
       ?? null;
+    const runningMissionIdsToPause = missions
+      .filter((mission) => mission.status === "running" && mission.id !== missionId && mission.id !== nextMission?.id)
+      .map((mission) => mission.id);
 
     setMissions((prev) =>
-      prev.map((mission) =>
-        mission.id === missionId
-          ? {
-              ...mission,
-              status: "done",
-              completedAt: nowIso,
-              actualSeconds
-            }
-          : mission
-      )
+      prev.map((mission) => {
+        if (mission.id === missionId) {
+          return {
+            ...mission,
+            status: "done",
+            completedAt: nowIso,
+            actualSeconds
+          };
+        }
+
+        if (nextMission && mission.id === nextMission.id) {
+          return {
+            ...mission,
+            status: "running",
+            startedAt: mission.startedAt ?? nowIso
+          };
+        }
+
+        if (nextMission && mission.status === "running") {
+          return {
+            ...mission,
+            status: "paused"
+          };
+        }
+
+        return mission;
+      })
     );
 
-    setRemainingSecondsByMission((prev) => ({
-      ...prev,
-      [missionId]: 0
-    }));
+    setRemainingSecondsByMission((prev) => {
+      const next: Record<string, number> = {
+        ...prev,
+        [missionId]: 0
+      };
+
+      if (nextMission) {
+        next[nextMission.id] = prev[nextMission.id] ?? nextMission.estMinutes * 60;
+      }
+
+      return next;
+    });
 
     upsertTimerSession(missionId, "ended", nowIso);
+    runningMissionIdsToPause.forEach((runningId) => {
+      upsertTimerSession(runningId, "paused", nowIso);
+    });
+    if (nextMission) {
+      upsertTimerSession(nextMission.id, "running", nowIso);
+    }
     setCurrentMissionId(nextMission?.id ?? null);
-    tickAccumulatorRef.current = createTimerElapsedAccumulator();
+    setActiveTaskId(target.taskId);
+    tickAccumulatorRef.current = nextMission
+      ? createTimerElapsedAccumulator(Date.now())
+      : createTimerElapsedAccumulator();
 
     const previousCharacterRank = stats.characterRank;
     const missionCompletionRewardParams: MissionCompletionRewardParams = {
@@ -2051,6 +2080,18 @@ export function MvpDashboard() {
       taskTitle,
       missionAction: target.action
     });
+    if (nextMission) {
+      logEvent({
+        eventName: "mission_started",
+        source: "system",
+        taskId: target.taskId,
+        missionId: nextMission.id,
+        meta: {
+          trigger: "auto_chain_after_complete",
+          previousMissionId: missionId
+        }
+      });
+    }
 
     const sgpGain = Math.max(0, Math.round(resolveRewardSgpGain(reward)));
     const questBonusFeedback = questCompletionBonusApplied
