@@ -3,28 +3,27 @@
 Last Updated: 2026-03-01
 
 ## Executive Summary
-추천/검색 엔진에서 사용할 **JSON 데이터셋 6개 파일**을 생성하고, 이를 **검증(validate)** 및 **샘플링(sample)** 할 수 있는 스크립트 기반 파이프라인을 구축한다.  
-데이터 생성은 사용자 파이프라인 3단계(컨셉 1200 → 매핑+렉시콘 → 템플릿 1200)로 구성하며, 검증은 스키마/참조 무결성/시간 합계 규칙을 중심으로 “결정적(Deterministic) 실행”을 목표로 한다.
+추천/검색 엔진에서 사용할 **JSON 데이터셋 파일들**을 생성하고, 이를 **검증(validate)** 및 **샘플링(sample)** 할 수 있는 파이프라인을 구축한다.
+
+데이터 생성은 사용자 파이프라인 3단계(컨셉 1200 → 매핑+렉시콘 → 템플릿 확장)로 구성하며, 검증은 스키마/참조 무결성/시간 합계 규칙을 중심으로 “결정적(Deterministic) 실행”을 목표로 한다.
 
 ## Scope
 ### In Scope
-- 산출물(필수 6파일, 경로/파일명은 계약으로 고정)
-  - `data/reco/templates.json` (목표 수량: 1200)
-  - `data/reco/lexicon.json`
-  - `data/reco/concepts.json` (목표 수량: 1200)
-  - `data/reco/clusters.json`
-  - `data/reco/concept_to_cluster.json`
-  - `data/reco/validation_rules.json`
+- 산출물(현재 저장소 기준 경로/파일명)
+  - `data/templates.json` (목표 수량: 2400 = 클러스터 120 × 20)
+  - `data/lexicon.json`
+  - `data/concepts.json` (목표 수량: 1200)
+  - `data/clusters.json`
+  - `data/concept_to_cluster.json`
+  - `data/validation_rules.json` (**필수 계약**, validate는 반드시 이 파일을 단일 진실 기준으로 읽는다)
 - 스크립트
-  - `scripts/reco-dataset/validate.ts`: 스키마 + 무결성 + 시간 규칙 검증
-  - `scripts/reco-dataset/sample.ts`: 샘플 추출(품질 확인/디버그용) + 리포트 출력
+  - `scripts/validate-data.ts`: 스키마 + 무결성 + 시간 규칙 검증
+  - `scripts/sample-run.ts`: 샘플 입력에 대한 추천 후보 출력(추가 예정)
 - 검증 규칙(최소 계약)
   - 스키마 검증(필수 필드/타입/enum/범위)
   - 참조 무결성(파일 간 키 참조 일치)
   - 시간 규칙: `time.default` 합계 검증(아래 “Validation Contract” 참조)
-- 실행 결과 리포팅(실패 원인 추적 가능해야 함)
-  - `output/reco-dataset/report.json` (요약/통계/실패 카운트)
-  - `output/reco-dataset/failures.jsonl` (실패 레코드 스트림)
+- 실행 결과 리포팅(현재는 stdout 요약/에러 출력; 필요 시 파일 리포트로 확장)
 
 ### Out of Scope
 - 추천/검색 랭킹 알고리즘 변경
@@ -40,21 +39,22 @@ Last Updated: 2026-03-01
 ## Pipeline: User Stages (1~3)
 ### Stage 1: Concepts (1200)
 - 목표: 추천/검색 인덱싱의 최소 단위(개념/토픽/키워드)를 1200개 정의
-- 산출: `data/reco/concepts.json`
+- 산출: `data/concepts.json`
 - AC(요약): 1200개 생성, 키 유일, 최소 필드 충족, 정렬/정규화 완료
 
 ### Stage 2: Mapping + Lexicon
 - 목표: concepts를 clusters(상위 묶음)로 매핑하고, 검색/추천용 표면형(동의어/표기 변형)을 lexicon으로 구축
 - 산출:
-  - `data/reco/clusters.json`
-  - `data/reco/concept_to_cluster.json`
-  - `data/reco/lexicon.json`
-- AC(요약): 모든 concept가 정확히 1개 cluster에 매핑(또는 계약에 명시된 예외), lexicon 참조 무결성 통과
+  - `data/clusters.json`
+  - `data/concept_to_cluster.json` (1:N 매핑)
+  - `data/lexicon.json` (concept 중심)
+- AC(요약): 모든 concept가 1:N로 매핑(최소 1개 이상), lexicon 참조 무결성 통과
 
-### Stage 3: Templates (1200)
-- 목표: 추천/검색 결과/플랜/액션 생성에 사용할 템플릿 1200개 생성
-- 산출: `data/reco/templates.json`
-- AC(요약): 1200개 생성, 참조 무결성(개념/클러스터 키) 통과, 시간 규칙 통과
+### Stage 3: Templates (2400)
+### Stage 3: Templates (2400)
+- 목표: 추천/검색 결과/플랜/액션 생성에 사용할 템플릿을 클러스터당 20개 수준으로 확장(총 2400개)
+- 산출: `data/templates.json`
+- AC(요약): 2400개 생성, 클러스터당 20개 충족, 참조 무결성(개념/클러스터 키) 통과, 시간 규칙 통과
 
 ## Validation Contract (Minimum)
 ### Schema
@@ -120,7 +120,7 @@ Acceptance Criteria
 ## Acceptance Criteria (Overall)
 1. 6개 데이터 파일이 생성/관리되는 단일 계약을 가진다(누락 불가).
 2. `validate`는 스키마/무결성/time.default 합계를 강제하고, 실패를 재작성 가능한 포인터로 기록한다.
-3. 사용자 파이프라인 단계별 목표 수량(컨셉 1200, 템플릿 1200)이 검증된다.
+3. 사용자 파이프라인 단계별 목표 수량(컨셉 1200, 템플릿 2400)이 검증된다.
 4. `sample`은 재현 가능한 샘플(동일 seed)을 제공한다.
 
 ## Risks And Mitigations
@@ -140,5 +140,4 @@ Acceptance Criteria
 ## Quick Resume
 1. `dev/active/reco-dataset-pipeline/reco-dataset-pipeline-context.md`의 `SESSION PROGRESS` 확인
 2. `dev/active/reco-dataset-pipeline/reco-dataset-pipeline-tasks.md`에서 “Next” 체크박스부터 진행
-3. validate 실행 → 실패 시 `output/reco-dataset/failures.jsonl` 기준으로 원인/포인터 추적
-
+3. `npm run -s dataset:validate` 실행 → 실패 항목을 수정(템플릿 재작성 우선)

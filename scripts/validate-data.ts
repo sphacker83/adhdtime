@@ -9,41 +9,22 @@ type Issue = {
   message: string;
 };
 
-const START_ACTION_TOKENS = [
-  "시작",
-  "준비",
-  "세팅",
-  "열기",
-  "켜기",
-  "모으기",
-  "꺼내기",
-  "범위 정하기",
-  "타이머 시작",
-  "착수",
-] as const;
-
-const END_ACTION_TOKENS = [
-  "완료",
-  "마무리",
-  "저장",
-  "제출",
-  "전송",
-  "정리",
-  "닫기",
-  "끄기",
-  "기록",
-  "앱에서 완료",
-  "종료",
-] as const;
-
-const BANNED_ACTION_SUBSTRINGS = [
-  "종료:",
-  "리마인더",
-  "다음 액션 기록",
-  "정리(최소한)",
-  "대충",
-  "개기/정리",
-] as const;
+type ValidationRules = {
+  version: number;
+  templateRules: {
+    missionsMin: number;
+    missionsMax: number;
+    mustMatchTimeDefaultExactly: boolean;
+    mustSatisfyTimeOrder: boolean;
+    requireStartEndHeuristic: boolean;
+  };
+  bannedActionSubstrings: string[];
+  startActionTokens: string[];
+  endActionTokens: string[];
+  clusterKeyPattern: string;
+  clusterKeyForbiddenTokens: string[];
+  clusterKeyForbiddenSegmentPatterns: string[];
+};
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -59,6 +40,11 @@ function isPositiveInteger(value: unknown): value is number {
 
 function includesAnyToken(text: string, tokens: readonly string[]): boolean {
   return tokens.some((token) => text.includes(token));
+}
+
+function safeStringArray(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter((v) => typeof v === "string");
 }
 
 function formatIssue(issue: Issue): string {
@@ -113,13 +99,20 @@ function safeArray(value: unknown): unknown[] {
 async function main(): Promise<void> {
   const issues: Issue[] = [];
 
-  const [templatesJson, conceptsJson, clustersJson, mappingJson, lexiconJson] =
-    await Promise.all([
+  const [
+    templatesJson,
+    conceptsJson,
+    clustersJson,
+    mappingJson,
+    lexiconJson,
+    validationRulesJson,
+  ] = await Promise.all([
       loadJsonFile("data/templates.json", issues),
       loadJsonFile("data/concepts.json", issues),
       loadJsonFile("data/clusters.json", issues),
       loadJsonFile("data/concept_to_cluster.json", issues),
       loadJsonFile("data/lexicon.json", issues),
+      loadJsonFile("data/validation_rules.json", issues),
     ]);
 
   const templatesRoot = isRecord(templatesJson) ? templatesJson : undefined;
@@ -127,6 +120,9 @@ async function main(): Promise<void> {
   const clustersRoot = isRecord(clustersJson) ? clustersJson : undefined;
   const mappingRoot = isRecord(mappingJson) ? mappingJson : undefined;
   const lexiconRoot = isRecord(lexiconJson) ? lexiconJson : undefined;
+  const rulesRoot = isRecord(validationRulesJson)
+    ? validationRulesJson
+    : undefined;
 
   if (!templatesRoot)
     issues.push({
@@ -158,6 +154,104 @@ async function main(): Promise<void> {
       code: "SCHEMA_INVALID",
       message: "data/lexicon.json: 루트가 객체가 아닙니다.",
     });
+  if (!rulesRoot)
+    issues.push({
+      level: "error",
+      code: "SCHEMA_INVALID",
+      message: "data/validation_rules.json: 루트가 객체가 아닙니다.",
+    });
+
+  const templateRules = isRecord(rulesRoot?.templateRules)
+    ? rulesRoot?.templateRules
+    : undefined;
+  const missionsMin =
+    typeof templateRules?.missionsMin === "number" &&
+    Number.isInteger(templateRules.missionsMin)
+      ? templateRules.missionsMin
+      : undefined;
+  const missionsMax =
+    typeof templateRules?.missionsMax === "number" &&
+    Number.isInteger(templateRules.missionsMax)
+      ? templateRules.missionsMax
+      : undefined;
+  const mustMatchTimeDefaultExactly =
+    typeof templateRules?.mustMatchTimeDefaultExactly === "boolean"
+      ? templateRules.mustMatchTimeDefaultExactly
+      : undefined;
+  const mustSatisfyTimeOrder =
+    typeof templateRules?.mustSatisfyTimeOrder === "boolean"
+      ? templateRules.mustSatisfyTimeOrder
+      : undefined;
+  const requireStartEndHeuristic =
+    typeof templateRules?.requireStartEndHeuristic === "boolean"
+      ? templateRules.requireStartEndHeuristic
+      : undefined;
+
+  const bannedActionSubstrings = safeStringArray(rulesRoot?.bannedActionSubstrings);
+  const startActionTokens = safeStringArray(rulesRoot?.startActionTokens);
+  const endActionTokens = safeStringArray(rulesRoot?.endActionTokens);
+  const clusterKeyForbiddenTokens = safeStringArray(
+    rulesRoot?.clusterKeyForbiddenTokens,
+  );
+  const clusterKeyForbiddenSegmentPatterns = safeStringArray(
+    rulesRoot?.clusterKeyForbiddenSegmentPatterns,
+  );
+
+  const clusterKeyPattern =
+    typeof rulesRoot?.clusterKeyPattern === "string"
+      ? rulesRoot.clusterKeyPattern
+      : undefined;
+
+  if (!templateRules) {
+    issues.push({
+      level: "error",
+      code: "RULES_INVALID",
+      message: "data/validation_rules.json: templateRules가 객체가 아닙니다.",
+    });
+  }
+  if (missionsMin === undefined || missionsMax === undefined) {
+    issues.push({
+      level: "error",
+      code: "RULES_INVALID",
+      message:
+        "data/validation_rules.json: templateRules.missionsMin/missionsMax가 정수가 아닙니다.",
+    });
+  }
+  if (
+    mustMatchTimeDefaultExactly === undefined ||
+    mustSatisfyTimeOrder === undefined ||
+    requireStartEndHeuristic === undefined
+  ) {
+    issues.push({
+      level: "error",
+      code: "RULES_INVALID",
+      message:
+        "data/validation_rules.json: templateRules.* 플래그가 boolean이 아닙니다.",
+    });
+  }
+  if (!clusterKeyPattern) {
+    issues.push({
+      level: "error",
+      code: "RULES_INVALID",
+      message: "data/validation_rules.json: clusterKeyPattern이 문자열이 아닙니다.",
+    });
+  }
+  if (bannedActionSubstrings.length === 0) {
+    issues.push({
+      level: "error",
+      code: "RULES_INVALID",
+      message:
+        "data/validation_rules.json: bannedActionSubstrings가 비어 있거나 배열이 아닙니다.",
+    });
+  }
+  if (startActionTokens.length === 0 || endActionTokens.length === 0) {
+    issues.push({
+      level: "error",
+      code: "RULES_INVALID",
+      message:
+        "data/validation_rules.json: startActionTokens/endActionTokens가 비어 있거나 배열이 아닙니다.",
+    });
+  }
 
   if (templatesRoot && !Array.isArray(templatesRoot.templates)) {
     issues.push({
@@ -228,13 +322,41 @@ async function main(): Promise<void> {
     }
     clusterKeys.push(cl.clusterKey);
 
-    const pattern = /^[A-Z][A-Z0-9_]+$/;
-    if (!pattern.test(cl.clusterKey)) {
+    const pattern = clusterKeyPattern ? new RegExp(clusterKeyPattern) : undefined;
+    if (pattern && !pattern.test(cl.clusterKey)) {
       issues.push({
-        level: "warn",
+        level: "error",
         code: "CLUSTER_KEY_PATTERN",
-        message: `clusterKey 패턴 경고: ${cl.clusterKey} (권장: ^[A-Z][A-Z0-9_]+$)`,
+        message: `clusterKey 패턴 위반: ${cl.clusterKey} (pattern=${clusterKeyPattern})`,
       });
+    }
+
+    const segments = cl.clusterKey.split("_").filter((s: string) => s.length > 0);
+    for (const seg of segments) {
+      if (clusterKeyForbiddenTokens.includes(seg)) {
+        issues.push({
+          level: "error",
+          code: "CLUSTER_KEY_FORBIDDEN_TOKEN",
+          message: `clusterKey 금지 토큰 포함: ${cl.clusterKey} (segment=${seg})`,
+        });
+      }
+      for (const pat of clusterKeyForbiddenSegmentPatterns) {
+        try {
+          if (new RegExp(pat).test(seg)) {
+            issues.push({
+              level: "error",
+              code: "CLUSTER_KEY_FORBIDDEN_SEGMENT",
+              message: `clusterKey 금지 세그먼트 패턴 매칭: ${cl.clusterKey} (segment=${seg}, pattern=${pat})`,
+            });
+          }
+        } catch {
+          issues.push({
+            level: "error",
+            code: "RULES_INVALID",
+            message: `data/validation_rules.json: clusterKeyForbiddenSegmentPatterns 정규식이 유효하지 않습니다: ${JSON.stringify(pat)}`,
+          });
+        }
+      }
     }
   }
 
@@ -329,11 +451,15 @@ async function main(): Promise<void> {
     }
 
     const missions = safeArray(t.missions);
-    if (missions.length < 3 || missions.length > 6) {
+    if (
+      missionsMin !== undefined &&
+      missionsMax !== undefined &&
+      (missions.length < missionsMin || missions.length > missionsMax)
+    ) {
       issues.push({
         level: "error",
         code: "TEMPLATE_MISSIONS_COUNT",
-        message: `template ${templateId}: missions 개수는 3~6이어야 합니다 (현재 ${missions.length}).`,
+        message: `template ${templateId}: missions 개수는 ${missionsMin}~${missionsMax}이어야 합니다 (현재 ${missions.length}).`,
       });
     }
 
@@ -361,7 +487,7 @@ async function main(): Promise<void> {
       } else {
         const action = m.action;
         missionActionsByIndex[i] = action;
-        for (const banned of BANNED_ACTION_SUBSTRINGS) {
+        for (const banned of bannedActionSubstrings) {
           if (action.includes(banned)) {
             issues.push({
               level: "error",
@@ -408,14 +534,14 @@ async function main(): Promise<void> {
           message: `template ${templateId}: time.min/max/default는 모두 양의 정수여야 합니다.`,
         });
       } else {
-        if (!(min <= def && def <= max)) {
+        if (mustSatisfyTimeOrder && !(min <= def && def <= max)) {
           issues.push({
             level: "error",
             code: "TIME_ORDER",
             message: `template ${templateId}: time.min <= time.default <= time.max 를 만족해야 합니다 (min=${min}, default=${def}, max=${max}).`,
           });
         }
-        if (missionSum !== def) {
+        if (mustMatchTimeDefaultExactly && missionSum !== def) {
           issues.push({
             level: "error",
             code: "TIME_DEFAULT_MISMATCH",
@@ -426,16 +552,16 @@ async function main(): Promise<void> {
     }
 
     // 시작/종료 휴리스틱
-    if (missions.length >= 2) {
+    if (requireStartEndHeuristic && missions.length >= 2) {
       const firstAction = (missionActionsByIndex[0] ?? "").trim();
       const lastAction = (
         missionActionsByIndex[missionActionsByIndex.length - 1] ?? ""
       ).trim();
 
-      const firstHasStart = includesAnyToken(firstAction, START_ACTION_TOKENS);
-      const firstHasEnd = includesAnyToken(firstAction, END_ACTION_TOKENS);
-      const lastHasStart = includesAnyToken(lastAction, START_ACTION_TOKENS);
-      const lastHasEnd = includesAnyToken(lastAction, END_ACTION_TOKENS);
+      const firstHasStart = includesAnyToken(firstAction, startActionTokens);
+      const firstHasEnd = includesAnyToken(firstAction, endActionTokens);
+      const lastHasStart = includesAnyToken(lastAction, startActionTokens);
+      const lastHasEnd = includesAnyToken(lastAction, endActionTokens);
 
       if (!firstHasStart) {
         issues.push({
@@ -472,7 +598,7 @@ async function main(): Promise<void> {
           message: `template ${templateId}: 첫 미션/마지막 미션 문장이 동일합니다.`,
         });
       }
-    } else if (missions.length > 0) {
+    } else if (requireStartEndHeuristic && missions.length > 0) {
       issues.push({
         level: "error",
         code: "START_END_HEURISTIC_SKIPPED",

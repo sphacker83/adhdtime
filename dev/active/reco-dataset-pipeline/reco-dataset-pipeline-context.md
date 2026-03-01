@@ -5,30 +5,37 @@ Last Updated: 2026-03-01
 ## SESSION PROGRESS (2026-03-01)
 ### ✅ COMPLETED
 - Dev Docs 트랙 생성: `plan/context/tasks` 3파일 생성
-- 목표/범위 합의(초안): 추천/검색 엔진용 데이터셋 6파일 + validate/sample 스크립트
-- 사용자 파이프라인 1~3단계 정의(컨셉 1200, 매핑+렉시콘, 템플릿 1200)
-- 검증 계약 정의(스키마/무결성/time.default 합계)
+- Stage 1 완료: `data/concepts.json`을 1200개로 확장(정렬/중복 제거/enum 검증) + 각 concept의 `tags`를 한 줄 배열로 포맷
+- Stage 2 완료: `data/concept_to_cluster.json`(map 1200) + `data/lexicon.json` 생성
+  - `concept_to_cluster`: concepts 1200개 전부 매핑, STATE 125개 전부 3개 이상(현재 6개) 클러스터로 다의성 매핑
+  - `lexicon`: `conceptLexemes` 121(클러스터 앵커 중심), `stateHints` 125(STATE 컨셉 전체), 문자열 배열은 한 줄 배열로 포맷
+- Stage 3 진행: `data/templates.json`을 370개까지 확장
+  - 커버 클러스터: 30개
+  - 클러스터당 템플릿 수: 7개 클러스터는 20개 달성, 나머지 23개 클러스터는 10개 유지(확장 진행 중)
+- 검증 스크립트: `scripts/validate-data.ts` + `npm run -s dataset:validate` 기준 errors/warnings 0 통과
+- `data/validation_rules.json` 복구/추가 + validate가 룰 파일을 단일 진실 기준으로 읽도록 전환
+- 중간 산출물 정리: `dev/active/.../(template_batches|concept_batches|lexicon_parts)` 제거(최종 산출물은 `data/*.json`만 유지)
+- 커밋: `aa68268` (concepts/mapping/lexicon/templates + validate 스크립트)
 
 ### 🟡 IN PROGRESS
-- 실제 스키마(필드명/ID 규칙/참조 관계) 확정 및 문서화
-- validate/sample 스크립트 경로 및 실행 명령 확정
+- Stage 3 템플릿 확장: 120 clusters × 20 templates = 2400 templates 목표까지 “직접 창작 → validate → 재작성” 루프 반복
+- 샘플 실행 스크립트 추가: `scripts/sample-run.ts` (입력 몇 개로 후보 템플릿/컨셉/클러스터 점수 출력)
 
 ### ⚠️ BLOCKERS / OPEN QUESTIONS
-- 6파일의 최종 파일명/디렉터리 규칙이 기존 데이터셋(`data/`) 구조와 충돌하는지 여부 확인 필요
-- `templates.json`의 시간 필드 구조(`time`, `missions[].estMin`)가 이미 존재하는 도메인 모델과 동일한지 확인 필요
+- lexicon 1:1 매칭 여부: `conceptLexemes`를 모든 concept(1200)에 만들지 않고, 앵커(121)+STATE(stateHints) + tags fallback 방식으로 운영 중(사용자 결정으로 유지)
 
 ## Dataset Contract Snapshot (Draft)
 ### Required Outputs (6)
-- `data/reco/templates.json`
-- `data/reco/lexicon.json`
-- `data/reco/concepts.json`
-- `data/reco/clusters.json`
-- `data/reco/concept_to_cluster.json`
-- `data/reco/validation_rules.json`
+- `data/templates.json`
+- `data/lexicon.json`
+- `data/concepts.json`
+- `data/clusters.json`
+- `data/concept_to_cluster.json`
+- `data/validation_rules.json`
 
 ### Required Scripts (2)
-- `scripts/reco-dataset/validate.ts`
-- `scripts/reco-dataset/sample.ts`
+- `scripts/validate-data.ts` (DONE)
+- `scripts/sample-run.ts` (TODO)
 
 ### Validation Must-Haves
 - 스키마 검증(필수/타입/enum/범위)
@@ -45,7 +52,6 @@ Last Updated: 2026-03-01
 - “1200” 목표 수량이 변경될 수 있음(변경 시 문서/검증/테스트 동시 갱신 필요)
 
 ## Quick Resume
-1. 스키마를 확정한다(필드명/ID 규칙/참조 관계) → `validate`가 강제할 수 있는 수준으로 고정
-2. `reco-dataset-pipeline-plan.md`의 “Validation Contract”를 스키마에 맞게 업데이트
-3. `reco-dataset-pipeline-tasks.md`의 Phase 0부터 체크박스를 진행
-
+1. `npm run -s dataset:validate`로 현재 데이터 상태 확인
+2. 다음 템플릿 배치(클러스터 10개 단위)를 생성하고 `data/templates.json`에 병합
+3. validate 통과가 깨지면 실패 템플릿을 삭제하지 말고 재작성(동일 id 유지 또는 새 id로 교체)
