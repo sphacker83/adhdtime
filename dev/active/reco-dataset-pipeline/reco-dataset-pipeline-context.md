@@ -19,6 +19,7 @@ Last Updated: 2026-03-01
 
 ### 🟡 IN PROGRESS
 - Stage 3 템플릿 확장: 120 clusters × 20 templates = 2400 templates 목표까지 “직접 창작 → validate → 재작성” 루프 반복
+- Stage 3 템플릿 톤 개선: 퀘스트/미션을 더 인간 친화적(대화체/부드러운 문장)으로 리라이트
 - 샘플 실행 스크립트 추가: `scripts/sample-run.ts` (입력 몇 개로 후보 템플릿/컨셉/클러스터 점수 출력)
 
 ### ⚠️ BLOCKERS / OPEN QUESTIONS
