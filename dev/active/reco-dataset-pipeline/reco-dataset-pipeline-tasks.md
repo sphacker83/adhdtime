@@ -23,11 +23,11 @@ Last Updated: 2026-03-01
 - [ ] 기존 템플릿 전체 리라이트: 퀘스트/미션을 “사람이 말하듯” 부드러운 문장 + 존댓말 지시문 중심으로 개선(룰/휴리스틱과 정합)
 - [ ] `data/templates.json` 2400개까지 확장(클러스터 120 × 20)
 
-## Phase 4: Validate Script ✅ COMPLETE
+## Phase 4: Validate(검증) 도구 ✅ COMPLETE
 - [x] `scripts/validate-data.ts` 추가 + `npm run -s dataset:validate` 통과(errors/warnings 0)
 - [x] `data/validation_rules.json` 룰 파일을 validate가 읽도록 전환
 
-## Phase 5: Sample Script ⏳ NOT STARTED
+## Phase 5: Sample(샘플링) 도구 ⏳ NOT STARTED
 - [ ] 샘플링 정책 확정(seed 고정, 추출 기준)
 - [ ] 샘플 출력 포맷 정의(요약 통계 + 표본 JSON)
 - [ ] 동일 seed 재현성 테스트 시나리오 작성

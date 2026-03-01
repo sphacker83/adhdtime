@@ -3,9 +3,11 @@
 Last Updated: 2026-03-01
 
 ## Executive Summary
-추천/검색 엔진에서 사용할 **JSON 데이터셋 파일들**을 생성하고, 이를 **검증(validate)** 및 **샘플링(sample)** 할 수 있는 파이프라인을 구축한다.
+추천/검색 엔진에서 사용할 **JSON 데이터셋 파일들**을 (LLM이 레코드 단위로 직접) 작성하고, 이를 **검증(validate) 명령 실행** 및 **샘플링(sample)** 으로 점검할 수 있는 파이프라인을 구축한다.
 
 데이터 생성은 사용자 파이프라인 3단계(컨셉 1200 → 매핑+렉시콘 → 템플릿 확장)로 구성하며, 검증은 스키마/참조 무결성/시간 합계 규칙을 중심으로 “결정적(Deterministic) 실행”을 목표로 한다.
+
+데이터셋 레코드(`concepts/clusters/lexicon/templates`)는 **LLM이 직접 작성(출력)**한다. 코드/도구는 **검증 및 샘플링(검증 보조) 명령**에만 사용하며, 데이터 레코드를 자동 생성/조립/치환하는 방식은 금지한다.
 
 ## Scope
 ### In Scope
@@ -16,10 +18,10 @@ Last Updated: 2026-03-01
   - `data/clusters.json`
   - `data/concept_to_cluster.json`
   - `data/validation_rules.json` (**필수 계약**, validate는 반드시 이 파일을 단일 진실 기준으로 읽는다)
-- 스크립트
+- 검증 도구/검증 명령
   - `scripts/validate-data.ts`: 스키마 + 무결성 + 시간 규칙 검증(품질 게이트)
   - (선택) `scripts/sample-run.ts`: 샘플 입력에 대한 추천 후보 출력
-    - 데이터 생성용 스크립트가 아니며, 데이터 레코드(templates/concepts/lexicon)를 스크립트로 “조립/치환 생성”하는 행위는 금지
+    - 데이터 레코드(templates/concepts/lexicon)를 코드로 “조립/치환 생성”하는 행위는 금지(레코드는 LLM이 직접 작성/출력)
     - 신규 작성/수정은 사용자 요청이 있을 때만 진행
 - 검증 규칙(최소 계약)
   - 스키마 검증(필수 필드/타입/enum/범위)
@@ -81,7 +83,7 @@ Last Updated: 2026-03-01
 - 스키마(초안)와 최소 검증 규칙 확정
 
 Acceptance Criteria
-1. 본 문서에 “산출물 6파일 + 스크립트 2개 + 리포트 2개” 계약이 명시되어 있다.
+1. 본 문서에 “산출물 6파일 + (기존) 검증 도구 1개 + (선택) 샘플 실행 도구 1개” 계약이 명시되어 있다.
 2. 스키마/규칙이 상호 모순 없이 `validate`에서 강제 가능한 형태다.
 
 ### Phase 1: Dataset IO + Normalization (1d)
@@ -92,7 +94,7 @@ Acceptance Criteria
 1. 파일 누락/파싱 실패가 결정적인 에러 메시지로 표준 포맷 출력된다.
 2. 동일 입력(또는 동일 생성 seed)에서 출력이 결정적이다.
 
-### Phase 2: Validate Script (1~2d)
+### Phase 2: Validate(검증) 도구 (1~2d)
 - 스키마 검증
 - 참조 무결성 검증
 - 시간 합계/범위 규칙 검증
@@ -102,7 +104,7 @@ Acceptance Criteria
 1. 실패 레코드는 `ruleId/severity/file/pointer/message`를 포함한다.
 2. time.default 합계 실패 케이스가 최소 1개 테스트 픽스처로 고정된다.
 
-### Phase 3: Sample Script (0.5~1d)
+### Phase 3: Sample(샘플링) 도구 (0.5~1d)
 - 샘플링 정책(랜덤 seed 고정/스트라타 샘플 등) 정의
 - 개발자/운영자가 빠르게 품질을 확인할 수 있는 출력(요약/표본 JSON)
 
@@ -111,7 +113,7 @@ Acceptance Criteria
 2. 샘플 결과에 필수 통계(개수/분포/상위 실패 규칙)가 포함된다.
 
 ### Phase 4: Pipeline Wiring (0.5~1d)
-- 실행 엔트리/스크립트 명령 확정(`npm run ...` 또는 `pnpm ...`)
+- 실행 엔트리/패키지 실행 명령 확정(`npm run ...` 또는 `pnpm ...`)
 - CI 게이트 정책(Shadow → Enforce 또는 단일 Enforce) 확정
 
 Acceptance Criteria
@@ -129,7 +131,7 @@ Acceptance Criteria
 - 스키마 드리프트(런타임 기대와 불일치): 스키마를 단일 진실 소스로 유지하고 validate에서 강제
 - 참조 불일치(키 변경/누락): 무결성 검증을 “에러”로 두고 failures.jsonl로 즉시 추적 가능하게
 - 시간 규칙 오탐/누락: 최소 규칙(time.default 합계)을 우선 게이트로, 추가 규칙은 severity로 분리
-- 데이터 품질 편차: sample 스크립트 + 수동 QA 체크리스트(상위 N개 샘플)로 보완
+- 데이터 품질 편차: 샘플 실행 도구 출력 + 수동 QA 체크리스트(상위 N개 샘플)로 보완
 
 ## Test / Validation Scenarios
 - 시나리오 A(정상): 6파일 로드 → validate PASS → report.valid=true
