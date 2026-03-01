@@ -275,7 +275,10 @@ function extractTranscriptBuffers(event: SpeechRecognitionEventLike): {
 }
 
 function clampMinuteInput(minutes: number): number {
-  return Math.min(15, Math.max(2, Math.floor(minutes)));
+  return Math.min(
+    MAX_MISSION_EST_MINUTES,
+    Math.max(MIN_MISSION_EST_MINUTES, Math.floor(minutes))
+  );
 }
 
 function clampTaskTotalMinutes(totalMinutes: number): number {
@@ -2411,7 +2414,7 @@ export function MvpDashboard() {
         taskId: target.taskId,
         order: target.order + 1,
         action: `${target.action} - 첫 5분 버전`,
-        estMinutes: Math.max(2, Math.floor(target.estMinutes / 2)),
+        estMinutes: Math.max(MIN_MISSION_EST_MINUTES, Math.floor(target.estMinutes / 2)),
         status: "todo",
         iconKey: target.iconKey,
         parentMissionId: target.id
@@ -2421,7 +2424,11 @@ export function MvpDashboard() {
         taskId: target.taskId,
         order: target.order + 2,
         action: `${target.action} - 마무리 5분 버전`,
-        estMinutes: Math.max(2, target.estMinutes - Math.max(2, Math.floor(target.estMinutes / 2))),
+        estMinutes: Math.max(
+          MIN_MISSION_EST_MINUTES,
+          target.estMinutes -
+            Math.max(MIN_MISSION_EST_MINUTES, Math.floor(target.estMinutes / 2))
+        ),
         status: "todo",
         iconKey: target.iconKey,
         parentMissionId: target.id

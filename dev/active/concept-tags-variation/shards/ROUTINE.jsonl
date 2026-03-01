@@ -1,0 +1,73 @@
+{"conceptId":"ROUTINE.BEDTIME_PREP","domain":"ROUTINE","type":"process","label":"취침 준비","description":"불 끄기/세면/내일 준비 등 취침 루틴","tags":["취침","자기전","루틴","준비","정리"]}
+{"conceptId":"ROUTINE.COMMUTE_PREP","domain":"ROUTINE","type":"process","label":"출근 준비","description":"이동 전 필요한 것(지갑/키/교통)을 점검","tags":["출근","이동","준비","지갑","키"]}
+{"conceptId":"ROUTINE.DAY_REVIEW","domain":"ROUTINE","type":"process","label":"하루 회고","description":"오늘 한 일/내일 할 일/남은 걱정을 정리","tags":["회고","정리","하루","리뷰","내일"]}
+{"conceptId":"ROUTINE.DAY_START","domain":"ROUTINE","type":"process","label":"하루 시작","description":"기상 후 하루를 시작하기 위한 최소 루틴","tags":["아침","시작","기상","루틴","출발"]}
+{"conceptId":"ROUTINE.HYDRATION","domain":"ROUTINE","type":"process","label":"물 마시기","description":"물 한 잔으로 컨디션 리셋","tags":["물","수분","마시기","컨디션","리셋"]}
+{"conceptId":"ROUTINE.LEAVE_HOME","domain":"ROUTINE","type":"process","label":"집 나가기","description":"외출 직전 체크(가스/문/필수품) 후 출발","tags":["외출","출발","체크","문잠금","가스"]}
+{"conceptId":"ROUTINE.MEAL_PLAN","domain":"ROUTINE","type":"process","label":"식단 계획","description":"오늘/내일 먹을 것을 대충이라도 정해 선택 부담 줄이기","tags":["식단","계획","선택","식사","메뉴"]}
+{"conceptId":"ROUTINE.MOVE_BODY","domain":"ROUTINE","type":"process","label":"몸 움직이기","description":"짧은 움직임으로 각성/기분 전환","tags":["움직이기","각성","기분전환","산책","스트레칭"]}
+{"conceptId":"ROUTINE.RETURN_HOME","domain":"ROUTINE","type":"process","label":"귀가 리셋","description":"집에 들어오며 가방/옷/손씻기 등 기본 리셋","tags":["귀가","리셋","정리","손씻기","가방"]}
+{"conceptId":"ROUTINE.SCREEN_BREAK","domain":"ROUTINE","type":"process","label":"스크린 휴식","description":"휴대폰/PC 화면을 잠깐 내려놓고 회복","tags":["화면","휴식","스마트폰","피로","브레이크"]}
+{"conceptId":"ROUTINE.STRETCH_BREAK","domain":"ROUTINE","type":"process","label":"스트레칭 휴식","description":"목/어깨/허리를 풀며 짧은 휴식","tags":["스트레칭","휴식","목","어깨","허리"]}
+{"conceptId":"ROUTINE.WEEK_PLAN","domain":"ROUTINE","type":"process","label":"주간 계획","description":"이번 주 일정/우선순위를 크게 잡기","tags":["주간","계획","일정","우선순위","리뷰"]}
+{"conceptId":"ROUTINE.MORNING_ROUTINE","domain":"ROUTINE","type":"process","label":"아침 루틴","description":"기상 후 10~20분 내 완료 가능한 아침 루틴","tags":["아침","루틴","기상","준비","시작"]}
+{"conceptId":"ROUTINE.NIGHT_ROUTINE","domain":"ROUTINE","type":"process","label":"밤 루틴","description":"하루를 마무리하고 잠들기 쉬운 상태 만들기","tags":["밤","마무리","루틴","취침","정리"]}
+{"conceptId":"ROUTINE.POMODORO_START","domain":"ROUTINE","type":"process","label":"포모도로 시작","description":"타이머를 설정하고 1블록 작업을 시작","tags":["포모도로","타이머","집중","25분","시작"]}
+{"conceptId":"ROUTINE.FOCUS_TIMER_SET","domain":"ROUTINE","type":"process","label":"타이머 맞추기","description":"집중 시간을 짧게 잡아 시작 장벽 낮추기","tags":["타이머","집중","시작","짧게","설정"]}
+{"conceptId":"ROUTINE.TASK_LIST_CAPTURE","domain":"ROUTINE","type":"process","label":"할 일 수집","description":"머릿속 할 일을 모두 꺼내 목록으로 수집","tags":["할일","수집","브레인덤프","메모","목록"]}
+{"conceptId":"ROUTINE.MICRO_TASK_PICK","domain":"ROUTINE","type":"process","label":"미니 작업 선택","description":"지금 가능한 가장 작은 1개를 고르기","tags":["미니","작게","한가지","선택","시작"]}
+{"conceptId":"ROUTINE.NOTIFICATIONS_OFF","domain":"ROUTINE","type":"process","label":"알림 끄기","description":"집중을 위해 알림/방해 요소를 잠깐 차단","tags":["알림","집중","방해","차단","모드"]}
+{"conceptId":"ROUTINE.PRIORITY_ONE","domain":"ROUTINE","type":"process","label":"오늘 1순위","description":"오늘의 최우선 1가지를 정해 흔들림 줄이기","tags":["우선순위","한가지","오늘","선택","집중"]}
+{"conceptId":"ROUTINE.BEFORE_MEETING_PREP","domain":"ROUTINE","type":"process","label":"회의 전 준비","description":"회의 직전에 안건/목표/자료를 빠르게 확인","tags":["회의","준비","안건","목표","자료"]}
+{"conceptId":"ROUTINE.AFTER_MEETING_RESET","domain":"ROUTINE","type":"process","label":"회의 후 정리","description":"결정/할 일/후속을 바로 기록해 누락 방지","tags":["회의","후속","정리","할일","기록"]}
+{"conceptId":"ROUTINE.BODY_SCAN","domain":"ROUTINE","type":"process","label":"몸 상태 점검","description":"배고픔/피로/긴장 등을 30초만 점검","tags":["점검","피로","배고픔","긴장","컨디션"]}
+{"conceptId":"ROUTINE.MICRO_RESET_60S","domain":"ROUTINE","type":"process","label":"60초 미니 리셋","description":"멈추고 숨-자세-다음 한 걸음을 60초 안에 재정렬하기","tags":["리셋","전환","60초","호흡","자세","집중"]}
+{"conceptId":"ROUTINE.DOORWAY_PAUSE","domain":"ROUTINE","type":"process","label":"문턱 멈춤","description":"방/공간을 이동할 때 3초 멈춰 목적을 다시 떠올리기","tags":["전환","문턱","목적","깜빡임","리마인드"]}
+{"conceptId":"ROUTINE.KEYS_WALLET_PHONE_CHECK","domain":"ROUTINE","type":"process","label":"열쇠-지갑-폰 체크","description":"외출 직전에 필수 3가지를 한 번에 확인하는 루틴","tags":["외출","체크리스트","분실방지","열쇠","지갑","휴대폰"]}
+{"conceptId":"ROUTINE.BAG_LAUNCHPAD_SETUP","domain":"ROUTINE","type":"goal","label":"가방 런치패드","description":"가방을 한 곳에 두고 내일 필요한 것만 모아두기","tags":["준비","가방","런치패드","분실방지","내일"]}
+{"conceptId":"ROUTINE.ENTRYWAY_RESET_5MIN","domain":"ROUTINE","type":"process","label":"현관 5분 리셋","description":"신발/우편/가방을 제자리로 돌려 현관을 다시 통로로 만들기","tags":["집도착","정리","리셋","현관","제자리"]}
+{"conceptId":"ROUTINE.AFTER_ERRAND_UNLOAD","domain":"ROUTINE","type":"process","label":"용무 후 언로딩","description":"밖에서 가져온 물건/영수증/메모를 즉시 분류해 쌓임을 막기","tags":["언로딩","정리","영수증","분류","누적방지"]}
+{"conceptId":"ROUTINE.DESK_SETUP_RITUAL","domain":"ROUTINE","type":"process","label":"책상 세팅 의식","description":"작업 시작 전에 공간-도구-물 한 잔을 2분 안에 세팅하기","tags":["시작","세팅","환경","집중","책상"]}
+{"conceptId":"ROUTINE.DESK_SHUTDOWN_RITUAL","domain":"ROUTINE","type":"process","label":"책상 종료 의식","description":"종료 시 열린 탭/메모/물건을 닫고 다음 시작점을 남기기","tags":["종료","정리","다음시작","마무리","책상"]}
+{"conceptId":"ROUTINE.TRANSITION_NOTEBOOK","domain":"ROUTINE","type":"process","label":"전환 노트","description":"작업을 바꿀 때 지금/다음/막힌 점을 3줄로 적고 이동하기","tags":["전환","기록","컨텍스트스위칭","3줄","정리"]}
+{"conceptId":"ROUTINE.BRAIN_DUMP_3MIN","domain":"ROUTINE","type":"process","label":"3분 브레인 덤프","description":"머릿속 할 일을 3분 타이머로 모두 적어 작업 기억을 비우기","tags":["덤프","기록","할일","작업기억","3분","타이머"]}
+{"conceptId":"ROUTINE.NEXT_ACTION_CLARIFY","domain":"ROUTINE","type":"process","label":"다음 행동 한 줄","description":"막힐 때 '다음에 할 행동'을 한 문장으로 쪼개기","tags":["다음행동","쪼개기","막힘","실행","명확화"]}
+{"conceptId":"ROUTINE.TWO_MINUTE_PATCH","domain":"ROUTINE","type":"process","label":"2분 틈새 패치","description":"기다림/틈새 2분에 할 수 있는 작은 정리·연락 1개만 처리하기","tags":["틈새","2분","미니작업","대기시간","정리","연락"]}
+{"conceptId":"ROUTINE.MIDDAY_CHECKIN","domain":"ROUTINE","type":"process","label":"정오 체크인","description":"하루 중간에 에너지/우선순위/남은 시간을 1분 점검하기","tags":["중간점검","에너지","우선순위","시간","리뷰"]}
+{"conceptId":"ROUTINE.LATE_START_RECOVER","domain":"ROUTINE","type":"process","label":"늦게 시작 회복","description":"시작이 늦어졌을 때 '축소 버전'으로 목표를 재설정하기","tags":["회복","리셋","늦은시작","축소","재설정"]}
+{"conceptId":"ROUTINE.PLAN_BROKE_REPLAN_5MIN","domain":"ROUTINE","type":"process","label":"계획 붕괴 5분 재계획","description":"일정이 깨졌을 때 5분만 써서 오늘 남은 최소 계획을 다시 짜기","tags":["재계획","변수","리커버리","5분","최소계획"]}
+{"conceptId":"ROUTINE.POST_MEETING_ACTIONS_2MIN","domain":"ROUTINE","type":"process","label":"회의 후 2분 액션","description":"회의/통화 직후 결정·다음 행동·담당자를 2분 안에 캡처하기","tags":["회의후","정리","다음행동","결정","캡처","2분"]}
+{"conceptId":"ROUTINE.AFTER_CALL_CAPTURE","domain":"ROUTINE","type":"process","label":"통화 후 메모 캡처","description":"짧은 통화 후에도 약속/주소/시간을 즉시 기록하기","tags":["통화","메모","약속","기록","누락방지"]}
+{"conceptId":"ROUTINE.POST_SCROLL_RECOVER","domain":"ROUTINE","type":"process","label":"스크롤 후 회복","description":"SNS/뉴스 스크롤 후 시선-호흡-몸 감각으로 30초 돌아오기","tags":["스크롤","회복","주의전환","호흡","감각"]}
+{"conceptId":"ROUTINE.SCREEN_TO_BODY_BREAK","domain":"ROUTINE","type":"process","label":"화면→몸 브레이크","description":"1시간마다 눈/목/어깨를 90초 풀어 과몰입을 끊기","tags":["휴식","스트레칭","눈","어깨","과몰입","90초"]}
+{"conceptId":"ROUTINE.SENSORY_COOLDOWN_2MIN","domain":"ROUTINE","type":"process","label":"감각 쿨다운 2분","description":"소음/빛/사람으로 과부하일 때 2분 동안 감각 자극을 낮추기","tags":["과부하","감각","휴식","소음","빛","2분"]}
+{"conceptId":"ROUTINE.NOISE_SHIELD","domain":"ROUTINE","type":"process","label":"소음 차단 세팅","description":"집중이 필요할 때 이어플러그/화이트노이즈로 소음을 관리하기","tags":["집중","소음","환경","화이트노이즈","차단"]}
+{"conceptId":"ROUTINE.LIGHTING_MUSIC_TUNE","domain":"ROUTINE","type":"process","label":"조명·음악 조절","description":"기분/에너지에 맞춰 조명 밝기와 음악을 조절해 모드 전환하기","tags":["모드전환","조명","음악","에너지","환경"]}
+{"conceptId":"ROUTINE.WATER_REFILL_CUE","domain":"ROUTINE","type":"process","label":"물 리필 신호","description":"물을 마신 뒤 병을 즉시 리필하거나 다음 리필 시간을 정하기","tags":["수분","리필","습관","트리거","물병"]}
+{"conceptId":"ROUTINE.SNACK_PREP","domain":"ROUTINE","type":"goal","label":"간식 준비","description":"에너지 떨어지기 전 간단한 간식/견과를 미리 준비해 두기","tags":["간식","에너지","혈당","준비","견과"]}
+{"conceptId":"ROUTINE.COMMUTE_DECOMPRESS","domain":"ROUTINE","type":"process","label":"이동 후 디컴프레스","description":"이동/외출 후 도착하면 2분 쉬며 속도를 낮추기","tags":["전환","이동","디컴프레스","리셋","호흡"]}
+{"conceptId":"ROUTINE.ARRIVAL_ANCHOR","domain":"ROUTINE","type":"process","label":"도착 앵커","description":"어디에 도착하든 '가방-물-자리' 3가지를 먼저 고정하기","tags":["도착","앵커","세팅","가방","물","자리"]}
+{"conceptId":"ROUTINE.PRE_OUTING_BUFFER","domain":"ROUTINE","type":"goal","label":"외출 전 버퍼","description":"약속 전 10분 버퍼를 확보해 급함·지각을 줄이기","tags":["외출","버퍼","시간관리","지각방지","전환"]}
+{"conceptId":"ROUTINE.MINI_CLEAN_SWEEP","domain":"ROUTINE","type":"process","label":"미니 청소 스윕","description":"타이머 3분으로 바닥/테이블의 눈에 띄는 것만 빠르게 쓸기","tags":["정리","청소","3분","타이머","스윕"]}
+{"conceptId":"ROUTINE.ONE_THING_TIDY","domain":"ROUTINE","type":"process","label":"하나만 정리","description":"힘이 없을 때도 물건 1개만 제자리로 보내는 최소 루틴","tags":["최소루틴","정리","1개","제자리","작은습관"]}
+{"conceptId":"ROUTINE.RETURN_ITEM_HOME","domain":"ROUTINE","type":"goal","label":"물건 집 만들기","description":"자주 잃어버리는 물건에 고정 위치를 만들고 바로 되돌리기","tags":["분실방지","제자리","정리","습관","고정위치"]}
+{"conceptId":"ROUTINE.KITCHEN_CLOSE_3MIN","domain":"ROUTINE","type":"process","label":"주방 닫기 3분","description":"설거지 전부가 아니라 싱크/카운터를 비워 '닫힌 주방' 만들기","tags":["주방","리셋","3분","정리","마감"]}
+{"conceptId":"ROUTINE.BEDTIME_BRAIN_DUMP","domain":"ROUTINE","type":"process","label":"취침 전 걱정 내려놓기","description":"잠들기 전에 걱정/할 일을 적어 내일로 넘기기","tags":["수면","불안","기록","내일","마무리"]}
+{"conceptId":"ROUTINE.TOMORROW_TOP3","domain":"ROUTINE","type":"process","label":"내일 TOP3","description":"내일 꼭 해야 할 3가지만 적어 다음날 선택 피로를 줄이기","tags":["내일","우선순위","TOP3","준비","결정피로"]}
+{"conceptId":"ROUTINE.CLOTHES_READY","domain":"ROUTINE","type":"goal","label":"옷 미리 꺼내기","description":"아침 의사결정을 줄이기 위해 내일 입을 옷을 미리 준비하기","tags":["준비","아침","의사결정","옷","시간절약"]}
+{"conceptId":"ROUTINE.CHARGE_ZONE","domain":"ROUTINE","type":"goal","label":"충전 존 만들기","description":"휴대폰/이어폰을 한 곳에서만 충전해 분실·배터리 이슈 줄이기","tags":["충전","배터리","제자리","휴대폰","이어폰"]}
+{"conceptId":"ROUTINE.NOTICE_DISTRACTION_NOTE","domain":"ROUTINE","type":"process","label":"산만함 메모","description":"집중이 깨질 때 방해요인을 '한 단어'로 적고 다시 돌아오기","tags":["집중","방해요인","메모","주의전환","라벨링"]}
+{"conceptId":"ROUTINE.EMOTION_LABEL_10S","domain":"ROUTINE","type":"process","label":"감정 10초 라벨","description":"짜증/불안이 올라올 때 감정을 이름 붙여 강도를 낮추기","tags":["감정","라벨링","10초","리셋","자기인식"]}
+{"conceptId":"ROUTINE.SELF_COMPASSION_RESET","domain":"ROUTINE","type":"process","label":"자기연민 리셋","description":"실수 후 자신을 몰아붙이기 대신 한 문장으로 자신을 달래기","tags":["실수","회복","자기연민","리셋","멘탈"]}
+{"conceptId":"ROUTINE.MICRO_GOAL_SHRINK","domain":"ROUTINE","type":"process","label":"목표 축소 버튼","description":"압도될 때 목표를 '5분 버전'으로 축소해 재시동하기","tags":["압도","축소","재시동","5분","실행"]}
+{"conceptId":"ROUTINE.PRE_FOCUS_SIGNAL","domain":"ROUTINE","type":"process","label":"집중 시작 신호","description":"작업 시작 전에 같은 신호(물 한 모금/헤드폰 착용 등)를 반복하기","tags":["시작신호","집중","루틴","헤드폰","트리거"]}
+{"conceptId":"ROUTINE.POST_TASK_REWARD","domain":"ROUTINE","type":"process","label":"작업 후 미니 보상","description":"작업을 끝내면 작은 보상으로 종료감을 만들고 다음을 쉬게 하기","tags":["보상","종료감","동기","휴식","작은습관"]}
+{"conceptId":"ROUTINE.PRE_SLEEP_SCREEN_OFF","domain":"ROUTINE","type":"goal","label":"잠들기 전 화면 끄기","description":"취침 30분 전부터 화면을 끄는 작은 경계 만들기","tags":["수면","스크린","경계","야간","습관"]}
+{"conceptId":"ROUTINE.WAKE_LIGHT_WATER","domain":"ROUTINE","type":"goal","label":"기상: 빛+물","description":"일어나자마자 커튼 열기와 물 한 모금으로 몸을 깨우기","tags":["기상","아침","빛","수분","시작"]}
+{"conceptId":"ROUTINE.MINI_GRATITUDE_NOTE","domain":"ROUTINE","type":"goal","label":"미니 감사 한 줄","description":"하루 중 아무 때나 감사한 것 1가지를 한 줄로 기록하기","tags":["감사","기록","마음","작은습관","리뷰"]}
+{"conceptId":"ROUTINE.WEEKLY_REFLECTION_15MIN","domain":"ROUTINE","type":"goal","label":"주간 회고 15분","description":"한 주에 15분만 써서 잘된 점/막힌 점/다음 실험 1개를 정리하기","tags":["주간","회고","리뷰","실험","15분"]}
+{"conceptId":"ROUTINE.MONTHLY_RESET_30MIN","domain":"ROUTINE","type":"goal","label":"월간 30분 리셋","description":"달 1회 30분으로 캘린더/할일/공간을 리셋해 누적을 털기","tags":["월간","리셋","정리","캘린더","30분"]}
+{"conceptId":"ROUTINE.REVIEW_DECISIONS_LOG","domain":"ROUTINE","type":"process","label":"결정 로그","description":"반복되는 결정을 기록해 다음엔 더 빨리 선택할 수 있게 만들기","tags":["결정","로그","반복","선택","피로"]}
+{"conceptId":"ROUTINE.WAITING_TIME_RITUAL","domain":"ROUTINE","type":"process","label":"대기 시간 루틴","description":"줄/로딩/대기 중 30초에 하는 호흡 또는 작은 정리 1개를 정해두기","tags":["대기","30초","호흡","미니정리","전환"]}
+{"conceptId":"ROUTINE.PHONE_PARKING_SPOT","domain":"ROUTINE","type":"goal","label":"폰 주차 자리","description":"집/작업 중 폰을 두는 고정 위치를 만들어 손에서 떼기","tags":["휴대폰","경계","집중","고정위치","산만함"]}
+{"conceptId":"ROUTINE.SINGLE_CAPTURE_INBOX","domain":"ROUTINE","type":"goal","label":"단일 캡처함","description":"메모/할 일을 한 곳으로만 모으는 단일 인박스를 유지하기","tags":["캡처","인박스","할일","정리","일관성"]}

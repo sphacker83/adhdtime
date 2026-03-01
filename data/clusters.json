@@ -1,0 +1,1812 @@
+{
+  "version": 1,
+  "clusters": [
+    {
+      "clusterKey": "HOME_DISHWASH",
+      "domain": "HOME",
+      "primaryType": "process",
+      "label": "설거지/싱크대 비우기",
+      "description": "그릇/컵/수저를 씻고 싱크대를 정리하는 템플릿 묶음",
+      "concepts": ["HOME.DISHWASH", "HOME.SINK_CLEAR"],
+      "defaultTimeBands": [5, 15, 25],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME", "AFTER_WORK"],
+        "goalFocus": ["SINK_CLEAR", "KITCHEN_RESET"],
+        "stateMode": ["NORMAL", "LOW_MOTIVATION"]
+      }
+    },
+    {
+      "clusterKey": "HOME_LAUNDRY_WASH",
+      "domain": "HOME",
+      "primaryType": "process",
+      "label": "세탁 돌리기",
+      "description": "빨래 분류→세탁기 세팅→세탁 시작까지의 템플릿 묶음",
+      "concepts": ["HOME.LAUNDRY_WASH"],
+      "defaultTimeBands": [5, 12, 20],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME"],
+        "goalFocus": ["START_WASH", "SORT_LAUNDRY"],
+        "stateMode": ["NORMAL", "LOW_ENERGY"]
+      }
+    },
+    {
+      "clusterKey": "HOME_LAUNDRY_DRY",
+      "domain": "HOME",
+      "primaryType": "process",
+      "label": "빨래 널기/건조",
+      "description": "세탁 후 빨래를 널거나 건조기로 옮겨 말리는 템플릿 묶음",
+      "concepts": ["HOME.LAUNDRY_DRY"],
+      "defaultTimeBands": [5, 10, 18],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME"],
+        "goalFocus": ["HANG_DRY", "DRYER_LOAD"],
+        "stateMode": ["NORMAL", "LOW_MOTIVATION"]
+      }
+    },
+    {
+      "clusterKey": "HOME_LAUNDRY_FOLD",
+      "domain": "HOME",
+      "primaryType": "process",
+      "label": "빨래 개기/정리",
+      "description": "마른 빨래를 개고 수납까지 정리하는 템플릿 묶음",
+      "concepts": ["HOME.LAUNDRY_FOLD"],
+      "defaultTimeBands": [8, 15, 30],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME"],
+        "goalFocus": ["FOLD_FAST", "PUT_AWAY"],
+        "stateMode": ["NORMAL", "LOW_ENERGY"]
+      }
+    },
+    {
+      "clusterKey": "HOME_TRASH_OUT",
+      "domain": "HOME",
+      "primaryType": "process",
+      "label": "쓰레기 버리기",
+      "description": "집안 쓰레기 모으기→봉투 묶기→배출까지의 템플릿 묶음",
+      "concepts": ["HOME.TRASH_OUT"],
+      "defaultTimeBands": [3, 7, 12],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME", "OUTSIDE"],
+        "goalFocus": ["TAKE_OUT", "BIN_RESET"],
+        "stateMode": ["NORMAL", "LOW_MOTIVATION"]
+      }
+    },
+    {
+      "clusterKey": "HOME_RECYCLE_SORT",
+      "domain": "HOME",
+      "primaryType": "process",
+      "label": "분리수거 정리",
+      "description": "캔/플라스틱/종이 등 분리수거를 분류하고 배출 준비하는 템플릿 묶음",
+      "concepts": ["HOME.RECYCLE_SORT"],
+      "defaultTimeBands": [5, 10, 18],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME"],
+        "goalFocus": ["SORT", "PACK"],
+        "stateMode": ["NORMAL", "LOW_ENERGY"]
+      }
+    },
+    {
+      "clusterKey": "HOME_SWEEP_MOP",
+      "domain": "HOME",
+      "primaryType": "process",
+      "label": "바닥 쓸기/물걸레",
+      "description": "눈에 보이는 바닥 먼지 제거와 간단 물걸레까지의 템플릿 묶음",
+      "concepts": ["HOME.SWEEP_MOP"],
+      "defaultTimeBands": [7, 15, 25],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME"],
+        "goalFocus": ["VISIBLE_DIRT", "FLOOR_RESET"],
+        "stateMode": ["NORMAL", "LOW_MOTIVATION"]
+      }
+    },
+    {
+      "clusterKey": "HOME_VACUUM",
+      "domain": "HOME",
+      "primaryType": "process",
+      "label": "청소기 돌리기",
+      "description": "청소기 준비→구역 나누기→흡입 청소→정리까지의 템플릿 묶음",
+      "concepts": ["HOME.VACUUM"],
+      "defaultTimeBands": [10, 20, 35],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME"],
+        "goalFocus": ["FLOOR_DUST", "ROOM_RESET"],
+        "stateMode": ["NORMAL", "LOW_ENERGY"]
+      }
+    },
+    {
+      "clusterKey": "HOME_BATHROOM_CLEAN",
+      "domain": "HOME",
+      "primaryType": "process",
+      "label": "욕실 청소",
+      "description": "세면대/거울/바닥 중심으로 욕실을 정리하고 청소하는 템플릿 묶음",
+      "concepts": ["HOME.BATHROOM_CLEAN"],
+      "defaultTimeBands": [8, 15, 25],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME"],
+        "goalFocus": ["SINK", "FLOOR", "MIRROR"],
+        "stateMode": ["NORMAL", "LOW_MOTIVATION"]
+      }
+    },
+    {
+      "clusterKey": "HOME_TOILET_CLEAN",
+      "domain": "HOME",
+      "primaryType": "process",
+      "label": "변기 청소",
+      "description": "변기 내부/외부를 빠르게 닦고 소독하는 템플릿 묶음",
+      "concepts": ["HOME.TOILET_CLEAN"],
+      "defaultTimeBands": [4, 8, 15],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME"],
+        "goalFocus": ["BOWL", "SEAT", "AROUND"],
+        "stateMode": ["NORMAL", "LOW_ENERGY"]
+      }
+    },
+    {
+      "clusterKey": "HOME_KITCHEN_RESET",
+      "domain": "HOME",
+      "primaryType": "process",
+      "label": "주방 리셋",
+      "description": "조리대/식탁/싱크대 주변을 정돈해 주방을 ‘다음 사용 가능’ 상태로 만드는 템플릿 묶음",
+      "concepts": ["HOME.KITCHEN_RESET"],
+      "defaultTimeBands": [8, 15, 25],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME", "AFTER_WORK"],
+        "goalFocus": ["COUNTER_CLEAR", "SINK_CLEAR", "TABLE_RESET"],
+        "stateMode": ["NORMAL", "LOW_MOTIVATION"]
+      }
+    },
+    {
+      "clusterKey": "HOME_FRIDGE_CHECK",
+      "domain": "HOME",
+      "primaryType": "process",
+      "label": "냉장고 점검",
+      "description": "남은 재료/유통기한/다음 장보기 필요를 빠르게 확인하는 템플릿 묶음",
+      "concepts": ["HOME.FRIDGE_CHECK"],
+      "defaultTimeBands": [5, 8, 15],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME"],
+        "goalFocus": ["EXPIRY_CHECK", "PLAN_MEAL"],
+        "stateMode": ["NORMAL", "LOW_ENERGY"]
+      }
+    },
+    {
+      "clusterKey": "HOME_MEAL_PREP",
+      "domain": "HOME",
+      "primaryType": "process",
+      "label": "간단한 밀프렙",
+      "description": "재료 손질/소분/보관 위주로 ‘먹기 쉬운 상태’를 만드는 템플릿 묶음",
+      "concepts": ["HOME.MEAL_PREP"],
+      "defaultTimeBands": [10, 20, 35],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME"],
+        "goalFocus": ["PREP_INGREDIENTS", "MAKE_SNACKS", "PORTION"],
+        "stateMode": ["NORMAL", "LOW_MOTIVATION"]
+      }
+    },
+    {
+      "clusterKey": "HOME_COOK_SIMPLE_MEAL",
+      "domain": "HOME",
+      "primaryType": "process",
+      "label": "간단 요리 한 끼",
+      "description": "부담 적은 요리(한 팬/한 냄비 등)로 한 끼를 준비하는 템플릿 묶음",
+      "concepts": ["HOME.COOK_SIMPLE_MEAL"],
+      "defaultTimeBands": [10, 20, 30],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME"],
+        "goalFocus": ["EAT_NOW", "PACK_LEFTOVERS"],
+        "stateMode": ["NORMAL", "LOW_ENERGY"]
+      }
+    },
+    {
+      "clusterKey": "HOME_GROCERY_LIST",
+      "domain": "HOME",
+      "primaryType": "process",
+      "label": "장보기 리스트 만들기",
+      "description": "집에 없는 것/필요한 것 위주로 장보기 목록을 빠르게 만드는 템플릿 묶음",
+      "concepts": ["HOME.GROCERY_LIST"],
+      "defaultTimeBands": [3, 6, 10],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME"],
+        "goalFocus": ["ESSENTIALS", "MEAL_BASED"],
+        "stateMode": ["NORMAL", "LOW_MOTIVATION"]
+      }
+    },
+    {
+      "clusterKey": "HOME_PANTRY_ORGANIZE",
+      "domain": "HOME",
+      "primaryType": "process",
+      "label": "팬트리/식재료 정리",
+      "description": "건식 식재료/간식/양념을 꺼내서 분류하고 정리하는 템플릿 묶음",
+      "concepts": ["HOME.PANTRY_ORGANIZE"],
+      "defaultTimeBands": [10, 18, 30],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME"],
+        "goalFocus": ["CLEAR_SHELF", "EXPIRE_FIRST"],
+        "stateMode": ["NORMAL", "LOW_ENERGY"]
+      }
+    },
+    {
+      "clusterKey": "HOME_DESK_CLEAR",
+      "domain": "HOME",
+      "primaryType": "process",
+      "label": "책상 위 정리",
+      "description": "작업 공간(책상/테이블)을 정리해 바로 앉을 수 있게 만드는 템플릿 묶음",
+      "concepts": ["HOME.DESK_CLEAR"],
+      "defaultTimeBands": [5, 10, 18],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME"],
+        "goalFocus": ["CLEAR_SURFACE", "PUT_BACK"],
+        "stateMode": ["NORMAL", "LOW_MOTIVATION"]
+      }
+    },
+    {
+      "clusterKey": "HOME_ROOM_TIDY",
+      "domain": "HOME",
+      "primaryType": "process",
+      "label": "방 정리",
+      "description": "바닥/침대/수납 중심으로 방을 빠르게 정돈하는 템플릿 묶음",
+      "concepts": ["HOME.ROOM_TIDY"],
+      "defaultTimeBands": [10, 20, 35],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME"],
+        "goalFocus": ["FLOOR_CLEAR", "BED_AREA", "CLOTHES"],
+        "stateMode": ["NORMAL", "LOW_ENERGY"]
+      }
+    },
+    {
+      "clusterKey": "HOME_BED_MAKE",
+      "domain": "HOME",
+      "primaryType": "process",
+      "label": "침대 정돈",
+      "description": "이불/베개를 정리해 침대를 ‘정리된 상태’로 만드는 템플릿 묶음",
+      "concepts": ["HOME.BED_MAKE"],
+      "defaultTimeBands": [2, 4, 8],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME"],
+        "goalFocus": ["MAKE_BED", "AIR_BEDDING"],
+        "stateMode": ["NORMAL", "LOW_MOTIVATION"]
+      }
+    },
+    {
+      "clusterKey": "HOME_SHEETS_CHANGE",
+      "domain": "HOME",
+      "primaryType": "process",
+      "label": "침구 교체",
+      "description": "시트/이불커버를 교체하고 세탁 준비까지 하는 템플릿 묶음",
+      "concepts": ["HOME.SHEETS_CHANGE"],
+      "defaultTimeBands": [10, 15, 25],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME"],
+        "goalFocus": ["CHANGE_SHEETS", "BAG_LAUNDRY"],
+        "stateMode": ["NORMAL", "LOW_ENERGY"]
+      }
+    },
+    {
+      "clusterKey": "HOME_DUST_WIPE",
+      "domain": "HOME",
+      "primaryType": "process",
+      "label": "먼지 닦기",
+      "description": "선반/가전/손이 닿는 표면의 먼지를 닦는 템플릿 묶음",
+      "concepts": ["HOME.DUST_WIPE"],
+      "defaultTimeBands": [5, 10, 18],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME"],
+        "goalFocus": ["HIGH_TOUCH", "VISIBLE_DUST"],
+        "stateMode": ["NORMAL", "LOW_MOTIVATION"]
+      }
+    },
+    {
+      "clusterKey": "HOME_VENTILATE",
+      "domain": "HOME",
+      "primaryType": "process",
+      "label": "환기/공기 리셋",
+      "description": "창문 열기/환기팬 켜기/냄새 제거 등 집 공기를 빠르게 바꾸는 템플릿 묶음",
+      "concepts": ["HOME.VENTILATE"],
+      "defaultTimeBands": [2, 5, 10],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME"],
+        "goalFocus": ["AIR_OUT", "ODOR_RESET"],
+        "stateMode": ["NORMAL", "LOW_ENERGY"]
+      }
+    },
+    {
+      "clusterKey": "HOME_PET_CARE",
+      "domain": "HOME",
+      "primaryType": "process",
+      "label": "반려동물 케어",
+      "description": "급여/물/산책/화장실 정리 등 기본 케어 템플릿 묶음",
+      "concepts": ["HOME.PET_CARE"],
+      "defaultTimeBands": [5, 10, 20],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME", "OUTSIDE"],
+        "goalFocus": ["FEED_WATER", "LITTER_CLEAN", "WALK"],
+        "stateMode": ["NORMAL", "LOW_ENERGY"]
+      }
+    },
+    {
+      "clusterKey": "HOME_PLANT_CARE",
+      "domain": "HOME",
+      "primaryType": "process",
+      "label": "식물 물주기/관리",
+      "description": "물주기/잎 닦기/화분 상태 확인 등 식물 관리 템플릿 묶음",
+      "concepts": ["HOME.PLANT_CARE"],
+      "defaultTimeBands": [4, 8, 15],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME"],
+        "goalFocus": ["WATER", "CHECK_SOIL"],
+        "stateMode": ["NORMAL", "LOW_MOTIVATION"]
+      }
+    },
+    {
+      "clusterKey": "HOME_MINOR_REPAIR",
+      "domain": "HOME",
+      "primaryType": "process",
+      "label": "간단 수리/정비",
+      "description": "나사 조임/배터리 교체/간단한 고장 점검 등 소소한 수리 템플릿 묶음",
+      "concepts": ["HOME.MINOR_REPAIR"],
+      "defaultTimeBands": [8, 15, 30],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME"],
+        "goalFocus": ["FIX_SMALL", "REPLACE_BATTERY"],
+        "stateMode": ["NORMAL", "LOW_ENERGY"]
+      }
+    },
+    {
+      "clusterKey": "HOME_DELIVERIES_SORT",
+      "domain": "HOME",
+      "primaryType": "process",
+      "label": "택배/우편 정리",
+      "description": "받은 택배/우편을 열고 분류해 필요한 곳에 놓는 템플릿 묶음",
+      "concepts": ["HOME.DELIVERIES_SORT"],
+      "defaultTimeBands": [5, 10, 18],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME"],
+        "goalFocus": ["OPEN_SORT", "RECYCLE_PACKAGING"],
+        "stateMode": ["NORMAL", "LOW_MOTIVATION"]
+      }
+    },
+    {
+      "clusterKey": "HOME_BATHROOM_RESTOCK",
+      "domain": "HOME",
+      "primaryType": "process",
+      "label": "욕실 소모품 채우기",
+      "description": "휴지/비누/치약 등 욕실 소모품을 확인하고 보충하는 템플릿 묶음",
+      "concepts": ["HOME.BATHROOM_RESTOCK"],
+      "defaultTimeBands": [3, 6, 10],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME"],
+        "goalFocus": ["CHECK_REPLACE", "RESTOCK"],
+        "stateMode": ["NORMAL", "LOW_ENERGY"]
+      }
+    },
+    {
+      "clusterKey": "HOME_ENTRYWAY_RESET",
+      "domain": "HOME",
+      "primaryType": "process",
+      "label": "현관/입구 정리",
+      "description": "신발/가방/겉옷 등 현관 주변을 정리해 출입 동선을 깔끔하게 만드는 템플릿 묶음",
+      "concepts": ["HOME.ENTRYWAY_RESET"],
+      "defaultTimeBands": [5, 8, 15],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME"],
+        "goalFocus": ["SHOES", "BAGS", "KEYS"],
+        "stateMode": ["NORMAL", "LOW_MOTIVATION"]
+      }
+    },
+
+    {
+      "clusterKey": "ROUTINE_DAY_START",
+      "domain": "ROUTINE",
+      "primaryType": "process",
+      "label": "하루 시작 루틴",
+      "description": "기상 후 ‘오늘을 시작한다’는 감각을 만드는 짧은 루틴 템플릿 묶음",
+      "concepts": ["ROUTINE.DAY_START"],
+      "defaultTimeBands": [3, 7, 12],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME", "OUTSIDE"],
+        "goalFocus": ["WAKE_UP", "SET_TONE"],
+        "stateMode": ["NORMAL", "LOW_ENERGY"]
+      }
+    },
+    {
+      "clusterKey": "ROUTINE_BEDTIME_PREP",
+      "domain": "ROUTINE",
+      "primaryType": "process",
+      "label": "취침 준비 루틴",
+      "description": "잠들기 전에 몸/공간/머리를 정리하는 취침 준비 템플릿 묶음",
+      "concepts": ["ROUTINE.BEDTIME_PREP"],
+      "defaultTimeBands": [5, 12, 20],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["BEFORE_SLEEP", "HOME"],
+        "goalFocus": ["WIND_DOWN", "SLEEP_READY"],
+        "stateMode": ["NORMAL", "ANXIOUS"]
+      }
+    },
+    {
+      "clusterKey": "ROUTINE_MEAL_PLAN",
+      "domain": "ROUTINE",
+      "primaryType": "process",
+      "label": "식사 계획 간단히 세우기",
+      "description": "오늘/이번주 식사를 대충이라도 계획해 선택 피로를 줄이는 템플릿 묶음",
+      "concepts": ["ROUTINE.MEAL_PLAN"],
+      "defaultTimeBands": [5, 8, 15],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME"],
+        "goalFocus": ["PLAN_TODAY", "PLAN_WEEK"],
+        "stateMode": ["NORMAL", "OVERWHELM"]
+      }
+    },
+    {
+      "clusterKey": "ROUTINE_HYDRATION_CHECK",
+      "domain": "ROUTINE",
+      "primaryType": "process",
+      "label": "물 마시기 리셋",
+      "description": "물 한 잔/물병 채우기 등 수분 섭취를 다시 궤도에 올리는 템플릿 묶음",
+      "concepts": ["ROUTINE.HYDRATION"],
+      "defaultTimeBands": [1, 3, 6],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME", "WORK", "OUTSIDE"],
+        "goalFocus": ["DRINK_NOW", "REFILL_BOTTLE"],
+        "stateMode": ["NORMAL", "DISTRACTED"]
+      }
+    },
+    {
+      "clusterKey": "ROUTINE_STRETCH_BREAK",
+      "domain": "ROUTINE",
+      "primaryType": "process",
+      "label": "짧은 스트레칭/몸 풀기",
+      "description": "앉아있다 끊고 몸을 풀어주는 3~10분 스트레칭 템플릿 묶음",
+      "concepts": ["ROUTINE.STRETCH_BREAK"],
+      "defaultTimeBands": [3, 6, 10],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["WORK", "HOME"],
+        "goalFocus": ["NECK_SHOULDER", "LOW_BACK"],
+        "stateMode": ["NORMAL", "LOW_ENERGY"]
+      }
+    },
+    {
+      "clusterKey": "ROUTINE_COMMUTE_PREP",
+      "domain": "ROUTINE",
+      "primaryType": "process",
+      "label": "출발/이동 준비",
+      "description": "외출/출근/약속 전에 필요한 준비물을 모으고 동선을 정리하는 템플릿 묶음",
+      "concepts": ["ROUTINE.COMMUTE_PREP"],
+      "defaultTimeBands": [5, 10, 18],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME", "OUTSIDE"],
+        "goalFocus": ["BAG_KEYS", "CLOTHES", "CHECKLIST"],
+        "stateMode": ["NORMAL", "OVERWHELM"]
+      }
+    },
+    {
+      "clusterKey": "ROUTINE_LEAVE_HOME",
+      "domain": "ROUTINE",
+      "primaryType": "process",
+      "label": "집 나가기(마지막 5분)",
+      "description": "문 나서기 직전 ‘마지막 확인’을 빠르게 끝내는 템플릿 묶음",
+      "concepts": ["ROUTINE.LEAVE_HOME"],
+      "defaultTimeBands": [2, 5, 8],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME", "OUTSIDE"],
+        "goalFocus": ["LOCK_OFF", "TAKE_ITEMS"],
+        "stateMode": ["NORMAL", "DISTRACTED"]
+      }
+    },
+    {
+      "clusterKey": "ROUTINE_RETURN_HOME",
+      "domain": "ROUTINE",
+      "primaryType": "process",
+      "label": "귀가 후 리셋",
+      "description": "집에 들어온 직후 가방/겉옷/짐을 정리해 피로를 줄이는 템플릿 묶음",
+      "concepts": ["ROUTINE.RETURN_HOME"],
+      "defaultTimeBands": [3, 7, 12],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["AFTER_WORK", "HOME"],
+        "goalFocus": ["DROP_ZONE", "CHANGE_CLOTHES"],
+        "stateMode": ["NORMAL", "LOW_ENERGY"]
+      }
+    },
+    {
+      "clusterKey": "ROUTINE_WEEK_PLAN",
+      "domain": "ROUTINE",
+      "primaryType": "process",
+      "label": "이번주 계획(아주 간단히)",
+      "description": "큰 일정/우선순위/해야 할 일 3개만 잡는 주간 계획 템플릿 묶음",
+      "concepts": ["ROUTINE.WEEK_PLAN"],
+      "defaultTimeBands": [8, 12, 20],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME", "WORK"],
+        "goalFocus": ["TOP3", "SCHEDULE_ANCHORS"],
+        "stateMode": ["NORMAL", "OVERWHELM"]
+      }
+    },
+    {
+      "clusterKey": "ROUTINE_DAY_REVIEW",
+      "domain": "ROUTINE",
+      "primaryType": "process",
+      "label": "오늘 정리/회고",
+      "description": "하루를 짧게 되돌아보고 내일을 가볍게 준비하는 템플릿 묶음",
+      "concepts": ["ROUTINE.DAY_REVIEW"],
+      "defaultTimeBands": [5, 10, 15],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME", "BEFORE_SLEEP"],
+        "goalFocus": ["CLOSE_OPEN_LOOPS", "PLAN_TOMORROW"],
+        "stateMode": ["NORMAL", "ANXIOUS"]
+      }
+    },
+    {
+      "clusterKey": "ROUTINE_SCREEN_BREAK",
+      "domain": "ROUTINE",
+      "primaryType": "process",
+      "label": "스크린 브레이크",
+      "description": "휴대폰/PC를 잠깐 내려놓고 시선과 뇌를 쉬게 하는 템플릿 묶음",
+      "concepts": ["ROUTINE.SCREEN_BREAK"],
+      "defaultTimeBands": [2, 5, 10],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["WORK", "HOME"],
+        "goalFocus": ["EYES_REST", "BRAIN_RESET"],
+        "stateMode": ["NORMAL", "DISTRACTED"]
+      }
+    },
+    {
+      "clusterKey": "ROUTINE_MOVE_BODY",
+      "domain": "ROUTINE",
+      "primaryType": "process",
+      "label": "몸 움직이기(짧게)",
+      "description": "에너지 전환을 위한 짧은 움직임(걷기/계단/가벼운 동작) 템플릿 묶음",
+      "concepts": ["ROUTINE.MOVE_BODY"],
+      "defaultTimeBands": [3, 8, 15],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["OUTSIDE", "HOME", "WORK"],
+        "goalFocus": ["GET_MOVING", "RESET_ENERGY"],
+        "stateMode": ["NORMAL", "LOW_ENERGY"]
+      }
+    },
+
+    {
+      "clusterKey": "WORK_EMAIL_TRIAGE",
+      "domain": "WORK",
+      "primaryType": "process",
+      "label": "업무 메일 빠른 분류",
+      "description": "메일을 빠르게 분류(지금/나중/위임/보관)해 부담을 줄이는 템플릿 묶음",
+      "concepts": ["WORK.EMAIL_TRIAGE"],
+      "defaultTimeBands": [5, 10, 20],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["WORK"],
+        "goalFocus": ["SORT", "RESPOND_NOW"],
+        "stateMode": ["NORMAL", "OVERWHELM"]
+      }
+    },
+    {
+      "clusterKey": "WORK_INBOX_ZERO",
+      "domain": "WORK",
+      "primaryType": "narrative",
+      "label": "인박스 정리(0에 가깝게)",
+      "description": "메일/메신저/알림 인박스를 정리해 처리 대기 항목을 줄이는 템플릿 묶음",
+      "concepts": ["WORK.INBOX_ZERO"],
+      "defaultTimeBands": [10, 20, 35],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["WORK"],
+        "goalFocus": ["CLOSE_LOOPS", "ARCHIVE"],
+        "stateMode": ["NORMAL", "LOW_MOTIVATION"]
+      }
+    },
+    {
+      "clusterKey": "WORK_CALENDAR_REVIEW",
+      "domain": "WORK",
+      "primaryType": "process",
+      "label": "캘린더 확인/정리",
+      "description": "오늘 일정/미팅 준비시간/충돌을 확인하고 캘린더를 정리하는 템플릿 묶음",
+      "concepts": ["WORK.CALENDAR_REVIEW"],
+      "defaultTimeBands": [5, 8, 15],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["WORK"],
+        "goalFocus": ["CHECK_TODAY", "RESOLVE_CONFLICTS"],
+        "stateMode": ["NORMAL", "DISTRACTED"]
+      }
+    },
+    {
+      "clusterKey": "WORK_MEETING_PREP",
+      "domain": "WORK",
+      "primaryType": "process",
+      "label": "미팅 준비",
+      "description": "아젠다/목표/필요자료를 정리해 미팅을 준비하는 템플릿 묶음",
+      "concepts": ["WORK.MEETING_PREP"],
+      "defaultTimeBands": [8, 12, 20],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["WORK"],
+        "goalFocus": ["AGENDA", "DECISIONS"],
+        "stateMode": ["NORMAL", "ANXIOUS"]
+      }
+    },
+    {
+      "clusterKey": "WORK_MEETING_NOTES",
+      "domain": "WORK",
+      "primaryType": "process",
+      "label": "미팅 노트 잡기",
+      "description": "미팅 중 결정/액션/질문을 빠르게 남길 수 있게 세팅하는 템플릿 묶음",
+      "concepts": ["WORK.MEETING_NOTES"],
+      "defaultTimeBands": [3, 6, 10],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["WORK"],
+        "goalFocus": ["DECISIONS", "ACTIONS"],
+        "stateMode": ["NORMAL", "DISTRACTED"]
+      }
+    },
+    {
+      "clusterKey": "WORK_MEETING_FOLLOWUP",
+      "domain": "WORK",
+      "primaryType": "process",
+      "label": "미팅 후속조치",
+      "description": "미팅 후 액션아이템 정리/배분/전송을 빠르게 끝내는 템플릿 묶음",
+      "concepts": ["WORK.MEETING_FOLLOWUP"],
+      "defaultTimeBands": [8, 12, 20],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["WORK"],
+        "goalFocus": ["SEND_SUMMARY", "ASSIGN_ACTIONS"],
+        "stateMode": ["NORMAL", "LOW_MOTIVATION"]
+      }
+    },
+    {
+      "clusterKey": "WORK_TASK_PRIORITIZE",
+      "domain": "WORK",
+      "primaryType": "process",
+      "label": "업무 우선순위 정하기",
+      "description": "해야 할 일을 훑고 오늘의 우선순위를 정하는 템플릿 묶음",
+      "concepts": ["WORK.TASK_PRIORITIZE"],
+      "defaultTimeBands": [5, 10, 18],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["WORK"],
+        "goalFocus": ["TOP3", "NEXT_ACTIONS"],
+        "stateMode": ["NORMAL", "OVERWHELM"]
+      }
+    },
+    {
+      "clusterKey": "WORK_DAY_PLAN",
+      "domain": "WORK",
+      "primaryType": "process",
+      "label": "업무 하루 계획",
+      "description": "오늘 일정/미팅/집중 블록을 배치해 하루를 설계하는 템플릿 묶음",
+      "concepts": ["WORK.DAY_PLAN"],
+      "defaultTimeBands": [8, 12, 20],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["WORK"],
+        "goalFocus": ["TIME_BLOCK", "RISK_SPOTS"],
+        "stateMode": ["NORMAL", "ANXIOUS"]
+      }
+    },
+    {
+      "clusterKey": "WORK_FOCUS_BLOCK_START",
+      "domain": "WORK",
+      "primaryType": "process",
+      "label": "집중 블록 착수",
+      "description": "방해요소 제거→작업 범위 고정→첫 1분 착수까지의 템플릿 묶음",
+      "concepts": ["WORK.FOCUS_BLOCK_START"],
+      "defaultTimeBands": [3, 6, 10],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["WORK", "HOME"],
+        "goalFocus": ["START_NOW", "REMOVE_DISTRACTIONS"],
+        "stateMode": ["NORMAL", "PROCRASTINATION"]
+      }
+    },
+    {
+      "clusterKey": "WORK_CONTEXT_RESET",
+      "domain": "WORK",
+      "primaryType": "process",
+      "label": "컨텍스트 리셋",
+      "description": "작업이 꼬이거나 산만할 때, 다시 정리하고 재착수하는 템플릿 묶음",
+      "concepts": ["WORK.CONTEXT_RESET"],
+      "defaultTimeBands": [3, 7, 12],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["WORK"],
+        "goalFocus": ["RESET_SCOPE", "NEXT_STEP"],
+        "stateMode": ["NORMAL", "DISTRACTED", "OVERWHELM"]
+      }
+    },
+    {
+      "clusterKey": "WORK_DOC_WRITE",
+      "domain": "WORK",
+      "primaryType": "narrative",
+      "label": "문서 작성",
+      "description": "요구사항/기획/공유 문서를 작성하는 템플릿 묶음",
+      "concepts": ["WORK.DOC_WRITE"],
+      "defaultTimeBands": [15, 25, 45],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["WORK"],
+        "goalFocus": ["OUTLINE", "FIRST_DRAFT"],
+        "stateMode": ["NORMAL", "ANXIOUS"]
+      }
+    },
+    {
+      "clusterKey": "WORK_DOC_EDIT",
+      "domain": "WORK",
+      "primaryType": "process",
+      "label": "문서 다듬기/정리",
+      "description": "문서의 구조/표현/근거를 다듬고 공유 준비하는 템플릿 묶음",
+      "concepts": ["WORK.DOC_EDIT"],
+      "defaultTimeBands": [10, 18, 30],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["WORK"],
+        "goalFocus": ["CLARITY", "FORMAT", "SEND"],
+        "stateMode": ["NORMAL", "LOW_ENERGY"]
+      }
+    },
+    {
+      "clusterKey": "WORK_REPORT_DRAFT",
+      "domain": "WORK",
+      "primaryType": "narrative",
+      "label": "리포트 초안",
+      "description": "주간/월간/상태 리포트를 빠르게 초안으로 만드는 템플릿 묶음",
+      "concepts": ["WORK.REPORT_DRAFT"],
+      "defaultTimeBands": [15, 25, 40],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["WORK"],
+        "goalFocus": ["DRAFT_FAST", "BULLETS_FIRST"],
+        "stateMode": ["NORMAL", "LOW_MOTIVATION"]
+      }
+    },
+    {
+      "clusterKey": "WORK_SLIDE_DECK_PREP",
+      "domain": "WORK",
+      "primaryType": "narrative",
+      "label": "슬라이드/자료 만들기",
+      "description": "발표/공유용 슬라이드를 만들고 구조를 잡는 템플릿 묶음",
+      "concepts": ["WORK.SLIDE_DECK_PREP"],
+      "defaultTimeBands": [15, 30, 50],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["WORK"],
+        "goalFocus": ["STORYLINE", "KEY_SLIDES"],
+        "stateMode": ["NORMAL", "OVERWHELM"]
+      }
+    },
+    {
+      "clusterKey": "WORK_PRESENTATION_REHEARSE",
+      "domain": "WORK",
+      "primaryType": "process",
+      "label": "발표 리허설",
+      "description": "발표 흐름을 빠르게 점검하고 말할 포인트를 정리하는 템플릿 묶음",
+      "concepts": ["WORK.PRESENTATION_REHEARSE"],
+      "defaultTimeBands": [8, 12, 20],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["WORK", "HOME"],
+        "goalFocus": ["RUN_THROUGH", "QNA_PREP"],
+        "stateMode": ["NORMAL", "ANXIOUS"]
+      }
+    },
+    {
+      "clusterKey": "WORK_CODE_REVIEW",
+      "domain": "WORK",
+      "primaryType": "process",
+      "label": "코드 리뷰",
+      "description": "PR을 읽고 핵심을 파악해 피드백을 남기는 템플릿 묶음",
+      "concepts": ["WORK.CODE_REVIEW"],
+      "defaultTimeBands": [10, 20, 35],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["WORK"],
+        "goalFocus": ["UNDERSTAND_CHANGE", "LEAVE_FEEDBACK"],
+        "stateMode": ["NORMAL", "LOW_ENERGY"]
+      }
+    },
+    {
+      "clusterKey": "WORK_BUGFIX",
+      "domain": "WORK",
+      "primaryType": "narrative",
+      "label": "버그 수정 착수",
+      "description": "현상 재현→원인 가설→첫 수정 시도까지의 템플릿 묶음",
+      "concepts": ["WORK.BUGFIX"],
+      "defaultTimeBands": [15, 25, 45],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["WORK"],
+        "goalFocus": ["REPRO", "FIX_FIRST"],
+        "stateMode": ["NORMAL", "OVERWHELM"]
+      }
+    },
+    {
+      "clusterKey": "WORK_DEBUG_TRACE",
+      "domain": "WORK",
+      "primaryType": "process",
+      "label": "디버깅 단서 잡기",
+      "description": "로그/재현 조건/최소 케이스를 만들어 디버깅을 전진시키는 템플릿 묶음",
+      "concepts": ["WORK.DEBUG_TRACE"],
+      "defaultTimeBands": [10, 18, 30],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["WORK"],
+        "goalFocus": ["COLLECT_SIGNALS", "MIN_CASE"],
+        "stateMode": ["NORMAL", "ANXIOUS"]
+      }
+    },
+    {
+      "clusterKey": "WORK_DEPLOY_CHECKLIST",
+      "domain": "WORK",
+      "primaryType": "process",
+      "label": "배포 체크리스트",
+      "description": "배포 전 확인/릴리즈 노트/롤백 대비를 정리하는 템플릿 묶음",
+      "concepts": ["WORK.DEPLOY_CHECKLIST"],
+      "defaultTimeBands": [8, 12, 20],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["WORK"],
+        "goalFocus": ["VERIFY", "ROLLBACK_READY"],
+        "stateMode": ["NORMAL", "DISTRACTED"]
+      }
+    },
+    {
+      "clusterKey": "WORK_PULL_REQUEST_SUBMIT",
+      "domain": "WORK",
+      "primaryType": "process",
+      "label": "PR 올리기",
+      "description": "변경사항 정리/테스트/설명 작성 후 PR을 제출하는 템플릿 묶음",
+      "concepts": ["WORK.PULL_REQUEST_SUBMIT"],
+      "defaultTimeBands": [8, 15, 25],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["WORK"],
+        "goalFocus": ["WRITE_DESC", "RUN_TESTS"],
+        "stateMode": ["NORMAL", "LOW_ENERGY"]
+      }
+    },
+    {
+      "clusterKey": "WORK_TEAM_UPDATE",
+      "domain": "WORK",
+      "primaryType": "process",
+      "label": "팀 공유/업데이트",
+      "description": "진행상황/막힘/다음 계획을 팀에 공유하는 템플릿 묶음",
+      "concepts": ["WORK.TEAM_UPDATE"],
+      "defaultTimeBands": [5, 8, 12],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["WORK"],
+        "goalFocus": ["STATUS", "BLOCKERS"],
+        "stateMode": ["NORMAL", "ANXIOUS"]
+      }
+    },
+    {
+      "clusterKey": "WORK_CHAT_REPLY",
+      "domain": "WORK",
+      "primaryType": "process",
+      "label": "업무 메신저 답장",
+      "description": "놓치기 쉬운 DM/스레드 답장을 빠르게 처리하는 템플릿 묶음",
+      "concepts": ["WORK.CHAT_REPLY"],
+      "defaultTimeBands": [3, 6, 10],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["WORK"],
+        "goalFocus": ["REPLY_FAST", "CAPTURE_TASKS"],
+        "stateMode": ["NORMAL", "DISTRACTED"]
+      }
+    },
+    {
+      "clusterKey": "WORK_CUSTOMER_REPLY",
+      "domain": "WORK",
+      "primaryType": "process",
+      "label": "고객/외부 응답",
+      "description": "고객 메일/티켓/외부 요청에 핵심을 놓치지 않고 답하는 템플릿 묶음",
+      "concepts": ["WORK.CUSTOMER_REPLY"],
+      "defaultTimeBands": [8, 12, 20],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["WORK"],
+        "goalFocus": ["ACKNOWLEDGE", "NEXT_STEPS"],
+        "stateMode": ["NORMAL", "ANXIOUS"]
+      }
+    },
+    {
+      "clusterKey": "WORK_DATA_CHECK",
+      "domain": "WORK",
+      "primaryType": "process",
+      "label": "데이터/지표 빠른 확인",
+      "description": "대시보드/로그/지표를 빠르게 확인해 이상 징후를 찾는 템플릿 묶음",
+      "concepts": ["WORK.DATA_CHECK"],
+      "defaultTimeBands": [5, 8, 15],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["WORK"],
+        "goalFocus": ["CHECK_ALERTS", "SPOT_ANOMALY"],
+        "stateMode": ["NORMAL", "DISTRACTED"]
+      }
+    },
+    {
+      "clusterKey": "WORK_SPREADSHEET_CLEAN",
+      "domain": "WORK",
+      "primaryType": "process",
+      "label": "스프레드시트 정리",
+      "description": "행/열 정리, 값 점검, 보기 좋게 다듬기 등 스프레드시트를 정돈하는 템플릿 묶음",
+      "concepts": ["WORK.SPREADSHEET_CLEAN"],
+      "defaultTimeBands": [10, 18, 30],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["WORK"],
+        "goalFocus": ["CLEANUP", "FORMAT"],
+        "stateMode": ["NORMAL", "LOW_ENERGY"]
+      }
+    },
+    {
+      "clusterKey": "WORK_DECISION_LOG",
+      "domain": "WORK",
+      "primaryType": "process",
+      "label": "결정사항 기록",
+      "description": "결정 배경/대안/결론을 짧게 남겨 나중 혼란을 줄이는 템플릿 묶음",
+      "concepts": ["WORK.DECISION_LOG"],
+      "defaultTimeBands": [5, 8, 12],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["WORK"],
+        "goalFocus": ["WHY", "WHAT", "NEXT"],
+        "stateMode": ["NORMAL", "OVERWHELM"]
+      }
+    },
+    {
+      "clusterKey": "WORK_PROJECT_STATUS",
+      "domain": "WORK",
+      "primaryType": "narrative",
+      "label": "프로젝트 상태 정리",
+      "description": "진척/리스크/다음 마일스톤을 정리해 프로젝트 상태를 파악하는 템플릿 묶음",
+      "concepts": ["WORK.PROJECT_STATUS"],
+      "defaultTimeBands": [10, 18, 30],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["WORK"],
+        "goalFocus": ["RISKS", "MILESTONES"],
+        "stateMode": ["NORMAL", "ANXIOUS"]
+      }
+    },
+    {
+      "clusterKey": "WORK_BACKLOG_GROOM",
+      "domain": "WORK",
+      "primaryType": "process",
+      "label": "백로그 정리",
+      "description": "할 일 목록을 정리(삭제/병합/우선순위/다음 액션)하는 템플릿 묶음",
+      "concepts": ["WORK.BACKLOG_GROOM"],
+      "defaultTimeBands": [10, 15, 25],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["WORK"],
+        "goalFocus": ["CLEAN", "PRIORITIZE"],
+        "stateMode": ["NORMAL", "OVERWHELM"]
+      }
+    },
+    {
+      "clusterKey": "WORK_REQUIREMENTS_CLARIFY",
+      "domain": "WORK",
+      "primaryType": "process",
+      "label": "요구사항 명확화",
+      "description": "요청을 읽고 질문을 만들어 불확실성을 줄이는 템플릿 묶음",
+      "concepts": ["WORK.REQUIREMENTS_CLARIFY"],
+      "defaultTimeBands": [8, 12, 20],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["WORK"],
+        "goalFocus": ["ASK_QUESTIONS", "DEFINE_DONE"],
+        "stateMode": ["NORMAL", "ANXIOUS"]
+      }
+    },
+    {
+      "clusterKey": "WORK_ONBOARDING_TASKS",
+      "domain": "WORK",
+      "primaryType": "process",
+      "label": "온보딩/세팅 작업",
+      "description": "계정/권한/환경설정 같은 온보딩 작업을 빠르게 진행하는 템플릿 묶음",
+      "concepts": ["WORK.ONBOARDING_TASKS"],
+      "defaultTimeBands": [10, 18, 30],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["WORK", "HOME"],
+        "goalFocus": ["ACCESS", "SETUP"],
+        "stateMode": ["NORMAL", "OVERWHELM"]
+      }
+    },
+
+    {
+      "clusterKey": "STUDY_SESSION_START",
+      "domain": "STUDY",
+      "primaryType": "process",
+      "label": "공부 시작 세팅",
+      "description": "공부를 시작하기 위한 환경/범위/첫 행동을 정하는 템플릿 묶음",
+      "concepts": ["STUDY.SESSION_START"],
+      "defaultTimeBands": [3, 6, 10],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME", "OUTSIDE"],
+        "goalFocus": ["OPEN_MATERIALS", "SET_GOAL"],
+        "stateMode": ["NORMAL", "PROCRASTINATION"]
+      }
+    },
+    {
+      "clusterKey": "STUDY_READING_BLOCK",
+      "domain": "STUDY",
+      "primaryType": "narrative",
+      "label": "읽기 집중",
+      "description": "교재/논문/자료를 읽고 핵심을 잡는 템플릿 묶음",
+      "concepts": ["STUDY.READING_BLOCK"],
+      "defaultTimeBands": [10, 20, 35],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME", "OUTSIDE"],
+        "goalFocus": ["UNDERSTAND", "MARK_KEY"],
+        "stateMode": ["NORMAL", "DISTRACTED"]
+      }
+    },
+    {
+      "clusterKey": "STUDY_NOTE_TAKING",
+      "domain": "STUDY",
+      "primaryType": "process",
+      "label": "노트 정리",
+      "description": "수업/읽기 내용을 노트로 정리하는 템플릿 묶음",
+      "concepts": ["STUDY.NOTE_TAKING"],
+      "defaultTimeBands": [8, 15, 25],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME", "OUTSIDE"],
+        "goalFocus": ["STRUCTURE", "EXAMPLES"],
+        "stateMode": ["NORMAL", "LOW_ENERGY"]
+      }
+    },
+    {
+      "clusterKey": "STUDY_SUMMARY_WRITE",
+      "domain": "STUDY",
+      "primaryType": "narrative",
+      "label": "요약문 쓰기",
+      "description": "읽은/들은 내용을 내 언어로 요약해 이해를 굳히는 템플릿 묶음",
+      "concepts": ["STUDY.SUMMARY_WRITE"],
+      "defaultTimeBands": [10, 18, 30],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME", "OUTSIDE"],
+        "goalFocus": ["BULLETS", "ONE_PAGE"],
+        "stateMode": ["NORMAL", "ANXIOUS"]
+      }
+    },
+    {
+      "clusterKey": "STUDY_FLASHCARDS_REVIEW",
+      "domain": "STUDY",
+      "primaryType": "process",
+      "label": "플래시카드 복습",
+      "description": "암기 항목을 카드로 빠르게 복습하는 템플릿 묶음",
+      "concepts": ["STUDY.FLASHCARDS_REVIEW"],
+      "defaultTimeBands": [5, 10, 18],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME", "OUTSIDE"],
+        "goalFocus": ["SPACED", "WEAK_POINTS"],
+        "stateMode": ["NORMAL", "LOW_ENERGY"]
+      }
+    },
+    {
+      "clusterKey": "STUDY_PRACTICE_PROBLEMS",
+      "domain": "STUDY",
+      "primaryType": "narrative",
+      "label": "문제 풀이",
+      "description": "연습문제를 풀고 오답을 정리하는 템플릿 묶음",
+      "concepts": ["STUDY.PRACTICE_PROBLEMS"],
+      "defaultTimeBands": [15, 25, 45],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME", "OUTSIDE"],
+        "goalFocus": ["SOLVE", "REVIEW_MISTAKES"],
+        "stateMode": ["NORMAL", "OVERWHELM"]
+      }
+    },
+    {
+      "clusterKey": "STUDY_PAST_EXAMS",
+      "domain": "STUDY",
+      "primaryType": "narrative",
+      "label": "기출문제/모의고사",
+      "description": "기출/모의고사로 실전 감각을 점검하는 템플릿 묶음",
+      "concepts": ["STUDY.PAST_EXAMS"],
+      "defaultTimeBands": [20, 35, 60],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME"],
+        "goalFocus": ["SIMULATE", "ANALYZE"],
+        "stateMode": ["NORMAL", "ANXIOUS"]
+      }
+    },
+    {
+      "clusterKey": "STUDY_ASSIGNMENT_PLAN",
+      "domain": "STUDY",
+      "primaryType": "process",
+      "label": "과제 계획",
+      "description": "과제 요구사항을 읽고 해야 할 일을 쪼개 계획하는 템플릿 묶음",
+      "concepts": ["STUDY.ASSIGNMENT_PLAN"],
+      "defaultTimeBands": [8, 12, 20],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME", "OUTSIDE"],
+        "goalFocus": ["BREAKDOWN", "SCHEDULE"],
+        "stateMode": ["NORMAL", "OVERWHELM"]
+      }
+    },
+    {
+      "clusterKey": "STUDY_ESSAY_DRAFT",
+      "domain": "STUDY",
+      "primaryType": "narrative",
+      "label": "글/에세이 초안",
+      "description": "서론-본론-결론 구조로 초안을 빠르게 만드는 템플릿 묶음",
+      "concepts": ["STUDY.ESSAY_DRAFT"],
+      "defaultTimeBands": [15, 25, 45],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME", "OUTSIDE"],
+        "goalFocus": ["OUTLINE", "DRAFT"],
+        "stateMode": ["NORMAL", "PROCRASTINATION"]
+      }
+    },
+    {
+      "clusterKey": "STUDY_CODING_PRACTICE",
+      "domain": "STUDY",
+      "primaryType": "narrative",
+      "label": "코딩 연습",
+      "description": "작은 문제를 코딩으로 풀며 실력을 쌓는 템플릿 묶음",
+      "concepts": ["STUDY.CODING_PRACTICE"],
+      "defaultTimeBands": [15, 25, 45],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME", "OUTSIDE"],
+        "goalFocus": ["SOLVE_ONE", "REFLECT"],
+        "stateMode": ["NORMAL", "DISTRACTED"]
+      }
+    },
+    {
+      "clusterKey": "STUDY_LANGUAGE_SPEAKING",
+      "domain": "STUDY",
+      "primaryType": "process",
+      "label": "외국어 말하기 연습",
+      "description": "짧은 주제로 말하기 연습을 하고 녹음/피드백을 남기는 템플릿 묶음",
+      "concepts": ["STUDY.LANGUAGE_SPEAKING"],
+      "defaultTimeBands": [8, 12, 20],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME", "OUTSIDE"],
+        "goalFocus": ["SPEAK", "REPEAT"],
+        "stateMode": ["NORMAL", "ANXIOUS"]
+      }
+    },
+    {
+      "clusterKey": "STUDY_LANGUAGE_LISTENING",
+      "domain": "STUDY",
+      "primaryType": "process",
+      "label": "외국어 듣기",
+      "description": "짧은 오디오/영상으로 듣기 연습을 하는 템플릿 묶음",
+      "concepts": ["STUDY.LANGUAGE_LISTENING"],
+      "defaultTimeBands": [8, 15, 25],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME", "OUTSIDE"],
+        "goalFocus": ["LISTEN", "CAPTURE_PHRASES"],
+        "stateMode": ["NORMAL", "LOW_ENERGY"]
+      }
+    },
+    {
+      "clusterKey": "STUDY_MATH_DRILL",
+      "domain": "STUDY",
+      "primaryType": "process",
+      "label": "수학/공식 드릴",
+      "description": "기본 공식/풀이 패턴을 반복해 손에 익히는 템플릿 묶음",
+      "concepts": ["STUDY.MATH_DRILL"],
+      "defaultTimeBands": [10, 18, 30],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME"],
+        "goalFocus": ["REPEAT", "SPEED"],
+        "stateMode": ["NORMAL", "LOW_MOTIVATION"]
+      }
+    },
+    {
+      "clusterKey": "STUDY_MEMORIZATION",
+      "domain": "STUDY",
+      "primaryType": "process",
+      "label": "암기",
+      "description": "짧은 덩어리로 쪼개서 외우고 확인하는 템플릿 묶음",
+      "concepts": ["STUDY.MEMORIZATION"],
+      "defaultTimeBands": [8, 12, 20],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME", "OUTSIDE"],
+        "goalFocus": ["CHUNK", "RECALL"],
+        "stateMode": ["NORMAL", "LOW_ENERGY"]
+      }
+    },
+    {
+      "clusterKey": "STUDY_RESEARCH_GATHER",
+      "domain": "STUDY",
+      "primaryType": "process",
+      "label": "자료 조사/수집",
+      "description": "과제/레포트에 필요한 출처/자료를 모으는 템플릿 묶음",
+      "concepts": ["STUDY.RESEARCH_GATHER"],
+      "defaultTimeBands": [10, 18, 30],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME", "OUTSIDE"],
+        "goalFocus": ["FIND_SOURCES", "SAVE_LINKS"],
+        "stateMode": ["NORMAL", "OVERWHELM"]
+      }
+    },
+    {
+      "clusterKey": "STUDY_CITATION_FORMAT",
+      "domain": "STUDY",
+      "primaryType": "process",
+      "label": "출처/참고문헌 정리",
+      "description": "참고문헌/인용 형식을 맞춰 제출 가능한 상태로 만드는 템플릿 묶음",
+      "concepts": ["STUDY.CITATION_FORMAT"],
+      "defaultTimeBands": [8, 12, 20],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME"],
+        "goalFocus": ["FORMAT", "CHECK_MISSING"],
+        "stateMode": ["NORMAL", "LOW_ENERGY"]
+      }
+    },
+    {
+      "clusterKey": "STUDY_PRESENTATION_BUILD",
+      "domain": "STUDY",
+      "primaryType": "narrative",
+      "label": "발표 과제 만들기",
+      "description": "발표 주제 정리→구조 잡기→핵심 슬라이드 만들기 템플릿 묶음",
+      "concepts": ["STUDY.PRESENTATION_BUILD"],
+      "defaultTimeBands": [15, 30, 50],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME"],
+        "goalFocus": ["STRUCTURE", "KEY_POINTS"],
+        "stateMode": ["NORMAL", "ANXIOUS"]
+      }
+    },
+    {
+      "clusterKey": "STUDY_GROUP_STUDY_PLAN",
+      "domain": "STUDY",
+      "primaryType": "process",
+      "label": "스터디 계획/진행",
+      "description": "스터디 모임을 계획하고 역할/범위를 정하는 템플릿 묶음",
+      "concepts": ["STUDY.GROUP_STUDY_PLAN"],
+      "defaultTimeBands": [8, 12, 20],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["OUTSIDE", "HOME"],
+        "goalFocus": ["AGENDA", "ROLES"],
+        "stateMode": ["NORMAL", "OVERWHELM"]
+      }
+    },
+    {
+      "clusterKey": "STUDY_CLASS_PREP",
+      "domain": "STUDY",
+      "primaryType": "process",
+      "label": "수업/강의 준비",
+      "description": "수업 전에 교재/질문/준비물을 챙기는 템플릿 묶음",
+      "concepts": ["STUDY.CLASS_PREP"],
+      "defaultTimeBands": [5, 8, 12],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME", "OUTSIDE"],
+        "goalFocus": ["PACK", "QUESTIONS"],
+        "stateMode": ["NORMAL", "DISTRACTED"]
+      }
+    },
+    {
+      "clusterKey": "STUDY_HOMEWORK_SUBMIT",
+      "domain": "STUDY",
+      "primaryType": "process",
+      "label": "과제 제출/업로드",
+      "description": "제출 형식 확인→파일 정리→업로드/제출까지의 템플릿 묶음",
+      "concepts": ["STUDY.HOMEWORK_SUBMIT"],
+      "defaultTimeBands": [5, 8, 15],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME", "OUTSIDE"],
+        "goalFocus": ["CHECK_REQUIREMENTS", "UPLOAD"],
+        "stateMode": ["NORMAL", "ANXIOUS"]
+      }
+    },
+
+    {
+      "clusterKey": "ADMIN_BILLS_PAY",
+      "domain": "ADMIN",
+      "primaryType": "process",
+      "label": "고지서/요금 납부",
+      "description": "고지서 확인→납부→영수증 보관까지의 템플릿 묶음",
+      "concepts": ["ADMIN.BILLS_PAY"],
+      "defaultTimeBands": [5, 8, 15],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME", "WORK"],
+        "goalFocus": ["PAY", "SAVE_RECEIPT"],
+        "stateMode": ["NORMAL", "ANXIOUS"]
+      }
+    },
+    {
+      "clusterKey": "ADMIN_BANKING_REVIEW",
+      "domain": "ADMIN",
+      "primaryType": "process",
+      "label": "통장/지출 확인",
+      "description": "최근 결제/잔액/구독을 빠르게 점검하는 템플릿 묶음",
+      "concepts": ["ADMIN.BANKING_REVIEW"],
+      "defaultTimeBands": [5, 10, 18],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME"],
+        "goalFocus": ["CHECK_TRANSACTIONS", "SPOT_SUBSCRIPTIONS"],
+        "stateMode": ["NORMAL", "OVERWHELM"]
+      }
+    },
+    {
+      "clusterKey": "ADMIN_TAX_PREP",
+      "domain": "ADMIN",
+      "primaryType": "narrative",
+      "label": "세금/연말정산 준비",
+      "description": "필요서류를 모으고 빠뜨린 항목을 확인하는 템플릿 묶음",
+      "concepts": ["ADMIN.TAX_PREP"],
+      "defaultTimeBands": [15, 25, 45],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME"],
+        "goalFocus": ["GATHER_DOCS", "CHECK_LIST"],
+        "stateMode": ["NORMAL", "ANXIOUS", "OVERWHELM"]
+      }
+    },
+    {
+      "clusterKey": "ADMIN_DOCUMENT_SCAN",
+      "domain": "ADMIN",
+      "primaryType": "process",
+      "label": "서류 스캔/정리",
+      "description": "종이 서류를 스캔하고 폴더에 저장해 찾기 쉽게 만드는 템플릿 묶음",
+      "concepts": ["ADMIN.DOCUMENT_SCAN"],
+      "defaultTimeBands": [8, 12, 20],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME", "WORK"],
+        "goalFocus": ["SCAN", "FILE_NAMING"],
+        "stateMode": ["NORMAL", "LOW_ENERGY"]
+      }
+    },
+    {
+      "clusterKey": "ADMIN_APPOINTMENT_SCHEDULE",
+      "domain": "ADMIN",
+      "primaryType": "process",
+      "label": "예약/일정 잡기",
+      "description": "병원/미용/정비 등 예약을 잡고 캘린더에 넣는 템플릿 묶음",
+      "concepts": ["ADMIN.APPOINTMENT_SCHEDULE"],
+      "defaultTimeBands": [5, 8, 15],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME", "WORK"],
+        "goalFocus": ["CALL_BOOK", "ADD_CALENDAR"],
+        "stateMode": ["NORMAL", "PROCRASTINATION"]
+      }
+    },
+    {
+      "clusterKey": "ADMIN_INSURANCE_CHECK",
+      "domain": "ADMIN",
+      "primaryType": "process",
+      "label": "보험/보장 확인",
+      "description": "보험 서류/보장/갱신 정보를 확인해 필요한 행동을 정하는 템플릿 묶음",
+      "concepts": ["ADMIN.INSURANCE_CHECK"],
+      "defaultTimeBands": [10, 15, 25],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME"],
+        "goalFocus": ["CHECK_COVERAGE", "NOTE_ACTIONS"],
+        "stateMode": ["NORMAL", "ANXIOUS"]
+      }
+    },
+    {
+      "clusterKey": "ADMIN_SUBSCRIPTIONS_MANAGE",
+      "domain": "ADMIN",
+      "primaryType": "process",
+      "label": "구독/정기결제 정리",
+      "description": "불필요한 구독을 찾고 해지/변경하는 템플릿 묶음",
+      "concepts": ["ADMIN.SUBSCRIPTIONS_MANAGE"],
+      "defaultTimeBands": [8, 12, 20],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME"],
+        "goalFocus": ["FIND", "CANCEL", "DOWNGRADE"],
+        "stateMode": ["NORMAL", "LOW_MOTIVATION"]
+      }
+    },
+    {
+      "clusterKey": "ADMIN_TRAVEL_PLAN",
+      "domain": "ADMIN",
+      "primaryType": "narrative",
+      "label": "여행/이동 계획",
+      "description": "교통/숙소/일정을 대강이라도 잡아 스트레스를 줄이는 템플릿 묶음",
+      "concepts": ["ADMIN.TRAVEL_PLAN"],
+      "defaultTimeBands": [15, 25, 45],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME"],
+        "goalFocus": ["BOOK", "ITINERARY", "PACK_LIST"],
+        "stateMode": ["NORMAL", "OVERWHELM"]
+      }
+    },
+
+    {
+      "clusterKey": "SOCIAL_MESSAGE_REPLY",
+      "domain": "SOCIAL",
+      "primaryType": "process",
+      "label": "연락 답장(개인)",
+      "description": "미뤄둔 답장/DM을 골라 간단히 처리하는 템플릿 묶음",
+      "concepts": ["SOCIAL.MESSAGE_REPLY"],
+      "defaultTimeBands": [3, 6, 12],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME", "OUTSIDE"],
+        "goalFocus": ["REPLY_SIMPLE", "SET_TIME"],
+        "stateMode": ["NORMAL", "LOW_MOTIVATION"]
+      }
+    },
+    {
+      "clusterKey": "SOCIAL_CALL_FAMILY",
+      "domain": "SOCIAL",
+      "primaryType": "process",
+      "label": "가족/지인 안부 전화",
+      "description": "짧게라도 전화를 걸어 안부를 확인하는 템플릿 묶음",
+      "concepts": ["SOCIAL.CALL_FAMILY"],
+      "defaultTimeBands": [5, 10, 18],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME", "OUTSIDE"],
+        "goalFocus": ["CALL_NOW", "SCHEDULE_CALL"],
+        "stateMode": ["NORMAL", "ANXIOUS"]
+      }
+    },
+    {
+      "clusterKey": "SOCIAL_PLAN_MEETUP",
+      "domain": "SOCIAL",
+      "primaryType": "process",
+      "label": "약속 잡기",
+      "description": "만날 날짜/장소를 정하고 캘린더에 넣는 템플릿 묶음",
+      "concepts": ["SOCIAL.PLAN_MEETUP"],
+      "defaultTimeBands": [5, 8, 15],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME", "OUTSIDE"],
+        "goalFocus": ["PICK_TIME", "PICK_PLACE"],
+        "stateMode": ["NORMAL", "PROCRASTINATION"]
+      }
+    },
+    {
+      "clusterKey": "SOCIAL_THANK_YOU_NOTE",
+      "domain": "SOCIAL",
+      "primaryType": "process",
+      "label": "감사/인사 메시지 보내기",
+      "description": "짧은 감사/인사 메시지를 보내 관계를 유지하는 템플릿 묶음",
+      "concepts": ["SOCIAL.THANK_YOU_NOTE"],
+      "defaultTimeBands": [2, 4, 8],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME", "OUTSIDE"],
+        "goalFocus": ["SEND", "KEEP_SIMPLE"],
+        "stateMode": ["NORMAL", "LOW_ENERGY"]
+      }
+    },
+    {
+      "clusterKey": "SOCIAL_CONFLICT_REPAIR",
+      "domain": "SOCIAL",
+      "primaryType": "narrative",
+      "label": "관계 회복/사과",
+      "description": "어색함/갈등 이후 대화를 시작하고 관계를 회복하는 템플릿 묶음",
+      "concepts": ["SOCIAL.CONFLICT_REPAIR"],
+      "defaultTimeBands": [10, 15, 25],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME"],
+        "goalFocus": ["APOLOGIZE", "OPEN_CONVERSATION"],
+        "stateMode": ["NORMAL", "ANXIOUS"]
+      }
+    },
+    {
+      "clusterKey": "SOCIAL_NETWORKING_REACHOUT",
+      "domain": "SOCIAL",
+      "primaryType": "process",
+      "label": "네트워킹 연락",
+      "description": "오랜만에 연락/소개 요청/가벼운 근황 공유를 보내는 템플릿 묶음",
+      "concepts": ["SOCIAL.NETWORKING_REACHOUT"],
+      "defaultTimeBands": [5, 8, 15],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME", "OUTSIDE"],
+        "goalFocus": ["REACH_OUT", "FOLLOW_UP"],
+        "stateMode": ["NORMAL", "ANXIOUS"]
+      }
+    },
+    {
+      "clusterKey": "SOCIAL_EVENT_PREP",
+      "domain": "SOCIAL",
+      "primaryType": "process",
+      "label": "모임 준비",
+      "description": "모임 전 필요한 준비(선물/복장/시간/장소)를 정리하는 템플릿 묶음",
+      "concepts": ["SOCIAL.EVENT_PREP"],
+      "defaultTimeBands": [8, 12, 20],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME", "OUTSIDE"],
+        "goalFocus": ["PACK", "PLAN_ROUTE"],
+        "stateMode": ["NORMAL", "OVERWHELM"]
+      }
+    },
+    {
+      "clusterKey": "SOCIAL_RELATIONSHIP_CHECKIN",
+      "domain": "SOCIAL",
+      "primaryType": "process",
+      "label": "관계 체크인",
+      "description": "지인 목록을 훑고 ‘누구에게 연락하면 좋을지’를 고르는 템플릿 묶음",
+      "concepts": ["SOCIAL.RELATIONSHIP_CHECKIN"],
+      "defaultTimeBands": [5, 8, 12],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME"],
+        "goalFocus": ["PICK_ONE", "SEND_PING"],
+        "stateMode": ["NORMAL", "LOW_MOTIVATION"]
+      }
+    },
+
+    {
+      "clusterKey": "HEALTH_WALK_OUTSIDE",
+      "domain": "HEALTH",
+      "primaryType": "process",
+      "label": "걷기",
+      "description": "짧게라도 밖에 나가 걷고 몸을 깨우는 템플릿 묶음",
+      "concepts": ["HEALTH.WALK_OUTSIDE"],
+      "defaultTimeBands": [8, 15, 25],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["OUTSIDE"],
+        "goalFocus": ["WALK", "SUNLIGHT"],
+        "stateMode": ["NORMAL", "LOW_ENERGY"]
+      }
+    },
+    {
+      "clusterKey": "HEALTH_WORKOUT_START",
+      "domain": "HEALTH",
+      "primaryType": "process",
+      "label": "운동 시작",
+      "description": "운동복/공간 세팅→간단 워밍업→첫 세트까지 착수하는 템플릿 묶음",
+      "concepts": ["HEALTH.WORKOUT_START"],
+      "defaultTimeBands": [8, 12, 20],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME", "OUTSIDE"],
+        "goalFocus": ["START", "WARMUP"],
+        "stateMode": ["NORMAL", "LOW_MOTIVATION"]
+      }
+    },
+    {
+      "clusterKey": "HEALTH_STRETCH_RECOVERY",
+      "domain": "HEALTH",
+      "primaryType": "process",
+      "label": "회복/스트레칭",
+      "description": "뻣뻣함/통증을 줄이기 위한 회복 스트레칭 템플릿 묶음",
+      "concepts": ["HEALTH.STRETCH_RECOVERY"],
+      "defaultTimeBands": [5, 10, 18],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME"],
+        "goalFocus": ["MOBILITY", "RELIEF"],
+        "stateMode": ["NORMAL", "LOW_ENERGY"]
+      }
+    },
+    {
+      "clusterKey": "HEALTH_MEAL_BALANCE",
+      "domain": "HEALTH",
+      "primaryType": "process",
+      "label": "식사 균형 맞추기",
+      "description": "지금 먹을 것을 ‘괜찮은 선택’으로 정리하는 템플릿 묶음",
+      "concepts": ["HEALTH.MEAL_BALANCE"],
+      "defaultTimeBands": [5, 8, 15],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME", "WORK"],
+        "goalFocus": ["PROTEIN", "VEGGIES", "HYDRATION"],
+        "stateMode": ["NORMAL", "OVERWHELM"]
+      }
+    },
+    {
+      "clusterKey": "HEALTH_MEDICATION_CHECK",
+      "domain": "HEALTH",
+      "primaryType": "process",
+      "label": "약 챙기기/복용 체크",
+      "description": "약 복용/리필/알림 세팅을 정리하는 템플릿 묶음",
+      "concepts": ["HEALTH.MEDICATION_CHECK"],
+      "defaultTimeBands": [2, 4, 8],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME"],
+        "goalFocus": ["TAKE_MED", "REFILL"],
+        "stateMode": ["NORMAL", "DISTRACTED"]
+      }
+    },
+    {
+      "clusterKey": "HEALTH_DOCTOR_VISIT_PREP",
+      "domain": "HEALTH",
+      "primaryType": "process",
+      "label": "병원 방문 준비",
+      "description": "증상/질문/기록을 정리해 진료를 효율적으로 받는 템플릿 묶음",
+      "concepts": ["HEALTH.DOCTOR_VISIT_PREP"],
+      "defaultTimeBands": [8, 12, 20],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME"],
+        "goalFocus": ["LIST_SYMPTOMS", "QUESTIONS"],
+        "stateMode": ["NORMAL", "ANXIOUS"]
+      }
+    },
+    {
+      "clusterKey": "HEALTH_SLEEP_HYGIENE",
+      "domain": "HEALTH",
+      "primaryType": "process",
+      "label": "수면 위생",
+      "description": "잠을 돕는 환경/습관을 정리하는 템플릿 묶음",
+      "concepts": ["HEALTH.SLEEP_HYGIENE"],
+      "defaultTimeBands": [5, 10, 18],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["BEFORE_SLEEP", "HOME"],
+        "goalFocus": ["DIM_LIGHTS", "NO_SCREEN"],
+        "stateMode": ["NORMAL", "ANXIOUS"]
+      }
+    },
+    {
+      "clusterKey": "HEALTH_MINDFULNESS_BREATHING",
+      "domain": "HEALTH",
+      "primaryType": "process",
+      "label": "호흡/마인드풀니스",
+      "description": "불안/산만을 낮추기 위한 짧은 호흡 루틴 템플릿 묶음",
+      "concepts": ["HEALTH.MINDFULNESS_BREATHING"],
+      "defaultTimeBands": [2, 5, 10],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME", "WORK", "OUTSIDE"],
+        "goalFocus": ["BREATH", "GROUNDING"],
+        "stateMode": ["NORMAL", "ANXIOUS", "DISTRACTED"]
+      }
+    },
+
+    {
+      "clusterKey": "STATE_LOW_MOTIVATION_ACTIVATION",
+      "domain": "STATE",
+      "primaryType": "friction",
+      "label": "의욕 없음 돌파",
+      "description": "의욕이 없을 때 ‘아주 작은 시작’을 만들어 움직이게 하는 템플릿 묶음",
+      "concepts": ["STATE.LOW_MOTIVATION"],
+      "defaultTimeBands": [2, 5, 10],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME", "WORK"],
+        "goalFocus": ["MICRO_START", "REMOVE_FRICTION"],
+        "stateMode": ["LOW_MOTIVATION"]
+      }
+    },
+    {
+      "clusterKey": "STATE_LOW_ENERGY_RECOVERY",
+      "domain": "STATE",
+      "primaryType": "friction",
+      "label": "기운 없음 회복",
+      "description": "피곤/저에너지 상태에서 회복을 돕는 짧은 리셋 템플릿 묶음",
+      "concepts": ["STATE.LOW_ENERGY"],
+      "defaultTimeBands": [2, 6, 12],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME"],
+        "goalFocus": ["HYDRATE", "REST", "EASY_MOVE"],
+        "stateMode": ["LOW_ENERGY"]
+      }
+    },
+    {
+      "clusterKey": "STATE_OVERWHELM_RESET",
+      "domain": "STATE",
+      "primaryType": "friction",
+      "label": "압도/막막 리셋",
+      "description": "할 일이 너무 많아 막막할 때, 범위를 줄이고 다음 1개를 정하는 템플릿 묶음",
+      "concepts": ["STATE.OVERWHELM"],
+      "defaultTimeBands": [3, 7, 12],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME", "WORK"],
+        "goalFocus": ["SHRINK_SCOPE", "PICK_ONE"],
+        "stateMode": ["OVERWHELM"]
+      }
+    },
+    {
+      "clusterKey": "STATE_ANXIETY_GROUNDING",
+      "domain": "STATE",
+      "primaryType": "friction",
+      "label": "불안 가라앉히기",
+      "description": "불안/초조를 낮추기 위한 그라운딩/호흡/정리 템플릿 묶음",
+      "concepts": ["STATE.ANXIOUS"],
+      "defaultTimeBands": [2, 6, 12],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["HOME", "WORK"],
+        "goalFocus": ["GROUNDING", "NAME_FEELING"],
+        "stateMode": ["ANXIOUS"]
+      }
+    },
+    {
+      "clusterKey": "STATE_DISTRACTION_REFRESH",
+      "domain": "STATE",
+      "primaryType": "friction",
+      "label": "산만함 리셋",
+      "description": "딴생각/산만함을 줄이고 다시 집중할 준비를 하는 템플릿 묶음",
+      "concepts": ["STATE.DISTRACTED"],
+      "defaultTimeBands": [2, 5, 10],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["WORK", "HOME"],
+        "goalFocus": ["CLEAR_DISTRACTIONS", "RESET_TIMER"],
+        "stateMode": ["DISTRACTED"]
+      }
+    },
+    {
+      "clusterKey": "STATE_PROCRASTINATION_BREAK",
+      "domain": "STATE",
+      "primaryType": "friction",
+      "label": "미루기 끊기",
+      "description": "미루는 패턴을 끊고 ‘첫 1분’을 만들기 위한 템플릿 묶음",
+      "concepts": ["STATE.PROCRASTINATION"],
+      "defaultTimeBands": [2, 5, 10],
+      "variantAxes": {
+        "intensity": ["MIN", "STD", "FULL"],
+        "context": ["WORK", "HOME"],
+        "goalFocus": ["START_ONE_MIN", "LOWER_BAR"],
+        "stateMode": ["PROCRASTINATION"]
+      }
+    }
+  ]
+}

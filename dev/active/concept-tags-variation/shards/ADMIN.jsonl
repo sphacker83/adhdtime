@@ -1,0 +1,73 @@
+{"conceptId":"ADMIN.APPOINTMENT_SCHEDULE","domain":"ADMIN","type":"process","label":"일정 잡기","description":"병원/관공서/미팅 등 약속 시간을 확정하고 캘린더에 등록","tags":["예약","일정","캘린더","시간잡기","확정"]}
+{"conceptId":"ADMIN.BANKING_REVIEW","domain":"ADMIN","type":"process","label":"은행/계좌 확인","description":"잔고·이체·거래 내역을 확인하고 필요한 조치 찾기","tags":["은행","계좌","잔고","거래내역","이체"]}
+{"conceptId":"ADMIN.BILLS_PAY","domain":"ADMIN","type":"process","label":"요금 납부","description":"공과금/카드/구독 등 결제해야 할 청구서 처리","tags":["납부","청구서","공과금","카드값","자동이체"]}
+{"conceptId":"ADMIN.DOCUMENT_SCAN","domain":"ADMIN","type":"process","label":"서류 스캔","description":"종이 서류를 스캔/촬영해 파일로 정리","tags":["스캔","서류","문서","PDF","촬영"]}
+{"conceptId":"ADMIN.INSURANCE_CHECK","domain":"ADMIN","type":"process","label":"보험 확인","description":"보험 증권/보장/만기/청구 절차를 확인","tags":["보험","보장","만기","청구","증권"]}
+{"conceptId":"ADMIN.SUBSCRIPTIONS_MANAGE","domain":"ADMIN","type":"process","label":"구독 관리","description":"정기결제/구독 서비스의 유지·해지·요금 확인","tags":["구독","정기결제","해지","요금","서비스"]}
+{"conceptId":"ADMIN.TAX_PREP","domain":"ADMIN","type":"process","label":"세금 준비","description":"세금 신고를 위한 자료 수집/정리/일정 확인","tags":["세금","신고","자료","영수증","기한"]}
+{"conceptId":"ADMIN.TRAVEL_PLAN","domain":"ADMIN","type":"goal","label":"여행 계획","description":"교통/숙소/일정/예산을 정리해 여행 계획 완성","tags":["여행","일정","숙소","교통","예산"]}
+{"conceptId":"ADMIN.ADDRESS_CHANGE","domain":"ADMIN","type":"goal","label":"주소 변경","description":"이사/우편 수령을 위한 주소 업데이트를 완료","tags":["주소변경","이사","우편","등록","변경"]}
+{"conceptId":"ADMIN.MAIL_SORT","domain":"ADMIN","type":"process","label":"우편 분류","description":"우편/고지서/안내문을 즉시 처리/보관/폐기","tags":["우편","고지서","서류","분류","정리"]}
+{"conceptId":"ADMIN.RECEIPTS_SORT","domain":"ADMIN","type":"process","label":"영수증 정리","description":"영수증을 모아 분류하고 필요 항목을 기록","tags":["영수증","정리","지출","증빙","보관"]}
+{"conceptId":"ADMIN.EXPENSE_REPORT","domain":"ADMIN","type":"goal","label":"비용 처리","description":"경비/비용 정산 서류를 작성·제출 완료","tags":["정산","경비","비용처리","영수증","제출"]}
+{"conceptId":"ADMIN.FORM_FILL","domain":"ADMIN","type":"process","label":"서식 작성","description":"신청서/동의서 등 폼을 빠짐없이 작성","tags":["신청서","서식","폼","작성","서류"]}
+{"conceptId":"ADMIN.PASSWORD_RESET","domain":"ADMIN","type":"process","label":"비밀번호 재설정","description":"로그인 문제를 해결하기 위한 비밀번호/2FA 정리","tags":["비밀번호","재설정","로그인","계정","2FA"]}
+{"conceptId":"ADMIN.ACCOUNT_CLEANUP","domain":"ADMIN","type":"process","label":"계정 정리","description":"사용하지 않는 계정/연동/알림을 정리","tags":["계정","연동","정리","탈퇴","알림"]}
+{"conceptId":"ADMIN.CLAIMS_SUBMIT","domain":"ADMIN","type":"goal","label":"청구 제출","description":"보험/환급/비용 청구를 서류 포함해 제출 완료","tags":["청구","제출","서류","증빙","환급"]}
+{"conceptId":"ADMIN.ID_RENEW","domain":"ADMIN","type":"goal","label":"신분증 갱신","description":"신분증/면허/여권 등의 갱신 절차 진행","tags":["신분증","갱신","면허","여권","만료"]}
+{"conceptId":"ADMIN.BUDGET_PLAN","domain":"ADMIN","type":"goal","label":"예산 계획","description":"이번 달 예산/카테고리 한도를 정해 계획 확정","tags":["예산","가계부","한도","지출","계획"]}
+{"conceptId":"ADMIN.SAVINGS_TRANSFER","domain":"ADMIN","type":"process","label":"저축 이체","description":"저축/비상금 계좌로 자동/수동 이체 실행","tags":["저축","이체","비상금","계좌","자동이체"]}
+{"conceptId":"ADMIN.CREDIT_SCORE_CHECK","domain":"ADMIN","type":"process","label":"신용 점검","description":"신용/대출/카드 상태를 주기적으로 점검","tags":["신용","점수","대출","카드","점검"]}
+{"conceptId":"ADMIN.CONTRACT_REVIEW","domain":"ADMIN","type":"process","label":"계약 확인","description":"약관/계약서 핵심 조항을 읽고 체크리스트로 정리","tags":["계약","약관","조항","검토","체크"]}
+{"conceptId":"ADMIN.SERVICE_CANCEL","domain":"ADMIN","type":"goal","label":"서비스 해지","description":"더 이상 쓰지 않는 서비스/구독 해지 완료","tags":["해지","구독","서비스","정기결제","취소"]}
+{"conceptId":"ADMIN.UTILITY_SETUP","domain":"ADMIN","type":"goal","label":"공과금 설정","description":"전기/가스/인터넷 등 납부 방식/계정 설정","tags":["전기","가스","인터넷","공과금","설정"]}
+{"conceptId":"ADMIN.REFUND_REQUEST","domain":"ADMIN","type":"process","label":"환불 요청","description":"구매/결제 건에 대해 환불 조건을 확인하고 요청을 접수","tags":["환불","요청","결제","고객센터","증빙"]}
+{"conceptId":"ADMIN.REFUND_TRACK","domain":"ADMIN","type":"process","label":"환불 진행 추적","description":"환불 상태를 확인하고 지연 시 필요한 후속 연락 수행","tags":["환불","진행","추적","지연","확인"]}
+{"conceptId":"ADMIN.RETURN_PROCESS","domain":"ADMIN","type":"process","label":"반품 진행","description":"반품 조건/기간을 확인하고 반품 절차를 완료","tags":["반품","교환","기간","택배","접수"]}
+{"conceptId":"ADMIN.RETURN_SHIPPING","domain":"ADMIN","type":"process","label":"반품 배송 처리","description":"반품 송장 발급/포장/발송 및 수거 일정 조율","tags":["반품","배송","송장","포장","수거"]}
+{"conceptId":"ADMIN.CHARGEBACK_FILE","domain":"ADMIN","type":"process","label":"결제 이의제기(차지백) 신청","description":"카드사/결제사에 결제 이의를 접수하고 증빙을 제출","tags":["차지백","이의제기","카드","증빙","분쟁"]}
+{"conceptId":"ADMIN.AUTOPAY_SETUP","domain":"ADMIN","type":"process","label":"자동이체 설정","description":"청구서/구독의 자동이체를 설정해 납부 누락을 예방","tags":["자동이체","납부","설정","청구서","누락방지"]}
+{"conceptId":"ADMIN.AUTOPAY_CHANGE","domain":"ADMIN","type":"process","label":"자동이체 변경","description":"자동이체 계좌/카드/일자를 변경하고 정상 반영 확인","tags":["자동이체","변경","계좌","카드","확인"]}
+{"conceptId":"ADMIN.INVOICE_RECONCILE","domain":"ADMIN","type":"process","label":"청구서 대사","description":"청구서/명세서와 실제 결제 내역을 비교해 이상을 찾기","tags":["청구서","명세서","대사","오류","확인"]}
+{"conceptId":"ADMIN.LATE_FEE_HANDLE","domain":"ADMIN","type":"process","label":"연체 대응","description":"연체 원인을 파악하고 납부/유예/분할 등 해결 경로 선택","tags":["연체","미납","유예","분할납부","해결"]}
+{"conceptId":"ADMIN.DEBT_PAYMENT_PLAN","domain":"ADMIN","type":"goal","label":"상환 계획 수립","description":"대출/카드/미납금 상환 우선순위와 일정표를 확정","tags":["상환","대출","카드","계획","우선순위"]}
+{"conceptId":"ADMIN.LOAN_RATE_COMPARE","domain":"ADMIN","type":"process","label":"대출 조건 비교","description":"금리/수수료/중도상환 조건을 비교해 선택지 정리","tags":["대출","금리","수수료","비교","조건"]}
+{"conceptId":"ADMIN.RENT_PAYMENT","domain":"ADMIN","type":"process","label":"월세 납부","description":"월세 납부 방식(계좌이체/자동이체)을 확정하고 실행","tags":["월세","납부","이체","자동이체","기한"]}
+{"conceptId":"ADMIN.LEASE_RENEWAL","domain":"ADMIN","type":"goal","label":"임대차 갱신","description":"임대차 계약 갱신 여부를 결정하고 필요한 서류/서명 완료","tags":["임대차","계약","갱신","서명","기간"]}
+{"conceptId":"ADMIN.LEASE_TERMINATION","domain":"ADMIN","type":"goal","label":"임대차 해지","description":"해지 통보/정산/원상복구 일정을 확정하고 해지 완료","tags":["임대차","해지","통보","정산","원상복구"]}
+{"conceptId":"ADMIN.DEPOSIT_SETTLEMENT","domain":"ADMIN","type":"goal","label":"보증금 정산","description":"퇴거 후 보증금 반환/공제 내역을 확인하고 정산 완료","tags":["보증금","정산","공제","퇴거","반환"]}
+{"conceptId":"ADMIN.MOVE_QUOTE_COMPARE","domain":"ADMIN","type":"process","label":"이사 견적 받기","description":"이사 날짜/물량을 정리하고 업체 견적을 수집·비교","tags":["이사","견적","업체","날짜","비교"]}
+{"conceptId":"ADMIN.MOVING_BOX_PACK","domain":"ADMIN","type":"process","label":"이사 포장","description":"박스/라벨링/깨짐주의 분류로 이사 짐을 포장","tags":["이사","포장","박스","라벨","분류"]}
+{"conceptId":"ADMIN.MOVE_OUT_CLEANING","domain":"ADMIN","type":"process","label":"퇴거 청소","description":"퇴거 전 청소/수리 체크리스트를 따라 정리","tags":["퇴거","청소","체크리스트","정리","원상복구"]}
+{"conceptId":"ADMIN.MOVE_IN_SETUP","domain":"ADMIN","type":"goal","label":"입주 셋업","description":"필수 가구/생활용품 배치와 초기 생활 동선을 구축","tags":["입주","셋업","배치","생활용품","동선"]}
+{"conceptId":"ADMIN.UTILITY_TRANSFER","domain":"ADMIN","type":"goal","label":"공과금 이전","description":"이사에 맞춰 전기/가스/수도/인터넷 명의를 이전 완료","tags":["이사","전기","가스","수도","명의변경"]}
+{"conceptId":"ADMIN.INTERNET_INSTALL_APPOINTMENT","domain":"ADMIN","type":"process","label":"인터넷 설치 예약","description":"설치 일정/장비/기사 방문 시간을 예약하고 준비물 확인","tags":["인터넷","설치","예약","기사방문","장비"]}
+{"conceptId":"ADMIN.REPAIR_REQUEST","domain":"ADMIN","type":"process","label":"수리 접수","description":"고장 증상을 정리하고 A/S 또는 수리 예약을 접수","tags":["수리","A/S","접수","고장","예약"]}
+{"conceptId":"ADMIN.WARRANTY_REGISTER","domain":"ADMIN","type":"process","label":"보증 등록","description":"제품 보증/연장보증 정보를 등록하고 증빙을 보관","tags":["보증","등록","연장보증","영수증","제품"]}
+{"conceptId":"ADMIN.SERVICE_TICKET_FOLLOWUP","domain":"ADMIN","type":"process","label":"고객센터 티켓 후속","description":"접수 번호를 기준으로 처리 상황을 확인하고 추가 정보 제공","tags":["고객센터","티켓","후속","접수번호","확인"]}
+{"conceptId":"ADMIN.CERTIFICATE_ISSUE","domain":"ADMIN","type":"goal","label":"증명서 발급","description":"필요한 증명서를 발급받아 제출 가능한 형태로 확보","tags":["증명서","발급","제출","서류","요건"]}
+{"conceptId":"ADMIN.IDENTITY_VERIFICATION","domain":"ADMIN","type":"process","label":"본인 인증","description":"서비스 가입/변경을 위한 본인 인증을 단계별로 완료","tags":["본인인증","인증","가입","변경","보안"]}
+{"conceptId":"ADMIN.E_SIGNATURE_COMPLETE","domain":"ADMIN","type":"goal","label":"전자서명 완료","description":"전자서명 링크/문서를 확인하고 서명·제출까지 완료","tags":["전자서명","서명","문서","제출","링크"]}
+{"conceptId":"ADMIN.NOTARIZATION_PREP","domain":"ADMIN","type":"process","label":"공증/인증 준비","description":"공증/인증에 필요한 신분증·서류·예약을 준비","tags":["공증","인증","서류","준비","예약"]}
+{"conceptId":"ADMIN.DOCUMENT_EXPIRY_TRACK","domain":"ADMIN","type":"process","label":"서류 만료 관리","description":"여권/보험/자격 등 만료일을 기록하고 갱신 알림 설정","tags":["만료","갱신","알림","서류","기한"]}
+{"conceptId":"ADMIN.DOCUMENT_BACKUP","domain":"ADMIN","type":"process","label":"서류 백업","description":"중요 서류를 안전한 저장소에 백업하고 접근 경로를 정리","tags":["서류","백업","클라우드","보관","접근"]}
+{"conceptId":"ADMIN.DOCUMENT_ARCHIVE_ORGANIZE","domain":"ADMIN","type":"process","label":"문서 보관함 정리","description":"폴더 구조/파일명 규칙을 정해 문서 보관함을 정리","tags":["문서","보관함","정리","폴더","파일명"]}
+{"conceptId":"ADMIN.DOCUMENT_SHREDDING","domain":"ADMIN","type":"process","label":"불필요 서류 폐기","description":"보관 기간이 지난 서류를 안전하게 파기/폐기","tags":["폐기","파기","개인정보","서류","정리"]}
+{"conceptId":"ADMIN.MAIL_FORWARDING_SETUP","domain":"ADMIN","type":"goal","label":"우편물 전환 신청","description":"이사/부재 기간에 맞춰 우편물 전환(포워딩)을 신청 완료","tags":["우편","포워딩","전환","이사","부재"]}
+{"conceptId":"ADMIN.PACKAGE_DELIVERY_COORDINATE","domain":"ADMIN","type":"process","label":"택배 수령 조율","description":"배송 일정/수령 장소를 조율하고 분실을 예방","tags":["택배","배송","수령","조율","분실방지"]}
+{"conceptId":"ADMIN.EMAIL_INBOX_ZERO","domain":"ADMIN","type":"goal","label":"이메일 정리(인박스 제로)","description":"중요 메일을 처리하고 불필요 메일을 정리해 인박스를 비우기","tags":["이메일","정리","인박스","필터","구독해지"]}
+{"conceptId":"ADMIN.DIGITAL_STORAGE_CLEANUP","domain":"ADMIN","type":"process","label":"디지털 저장공간 정리","description":"클라우드/로컬 저장공간의 중복 파일을 정리하고 용량 확보","tags":["저장공간","정리","클라우드","중복","용량"]}
+{"conceptId":"ADMIN.PHOTO_BACKUP","domain":"ADMIN","type":"process","label":"사진 백업","description":"사진/영상 백업을 설정하고 중복/누락을 점검","tags":["사진","백업","영상","중복","누락"]}
+{"conceptId":"ADMIN.PASSWORD_MANAGER_SETUP","domain":"ADMIN","type":"goal","label":"비밀번호 관리자 구축","description":"비밀번호 관리자를 설정하고 핵심 계정을 우선 등록","tags":["비밀번호","관리자","보안","계정","설정"]}
+{"conceptId":"ADMIN.TWO_FACTOR_SETUP","domain":"ADMIN","type":"process","label":"2단계 인증 설정","description":"주요 계정에 2FA를 설정하고 복구 수단을 저장","tags":["2FA","보안","복구코드","계정","설정"]}
+{"conceptId":"ADMIN.PRIVACY_DATA_REQUEST","domain":"ADMIN","type":"goal","label":"개인정보 요청/삭제","description":"서비스에 저장된 개인정보 열람/삭제 요청을 완료","tags":["개인정보","삭제요청","열람","보안","권리"]}
+{"conceptId":"ADMIN.FRAUD_REPORT","domain":"ADMIN","type":"goal","label":"사기/피해 신고","description":"피해 사실을 정리하고 금융사/플랫폼/기관에 신고를 완료","tags":["사기","신고","피해","증거","계정"]}
+{"conceptId":"ADMIN.MEDICAL_BILL_REVIEW","domain":"ADMIN","type":"process","label":"의료비 청구 확인","description":"진료비/처방/검사 청구 내역을 확인하고 오류를 정정 요청","tags":["의료비","청구","확인","오류","정정"]}
+{"conceptId":"ADMIN.MEDICAL_PAPERWORK_PREP","domain":"ADMIN","type":"process","label":"의료 서류 준비","description":"진료/검사/보험 청구에 필요한 서류를 준비해 제출","tags":["의료","서류","제출","보험","진료"]}
+{"conceptId":"ADMIN.INSURANCE_CLAIM_FOLLOWUP","domain":"ADMIN","type":"process","label":"보험 청구 후속","description":"청구 후 추가 서류 요청/보완 사항을 처리해 지급까지 추적","tags":["보험","청구","후속","서류보완","지급"]}
+{"conceptId":"ADMIN.TAX_REFUND_TRACK","domain":"ADMIN","type":"process","label":"세금 환급 추적","description":"환급 예정일/계좌 정보를 확인하고 지연 시 문의","tags":["세금","환급","추적","예정일","문의"]}
+{"conceptId":"ADMIN.VEHICLE_REGISTRATION_RENEW","domain":"ADMIN","type":"goal","label":"차량 등록 갱신","description":"차량 등록/검사/보험 등 갱신 항목을 확인하고 갱신 완료","tags":["차량","등록","갱신","검사","보험"]}
+{"conceptId":"ADMIN.PARKING_TICKET_PAY","domain":"ADMIN","type":"process","label":"과태료/벌금 납부","description":"주차 위반 등 과태료를 기한 내 납부하고 영수증 보관","tags":["과태료","벌금","납부","기한","영수증"]}
+{"conceptId":"ADMIN.PROFESSIONAL_LICENSE_RENEW","domain":"ADMIN","type":"goal","label":"자격/면허 갱신","description":"자격증/면허 갱신 요건을 충족하고 갱신 신청 완료","tags":["자격증","면허","갱신","요건","신청"]}
+{"conceptId":"ADMIN.COURSE_REGISTRATION","domain":"ADMIN","type":"process","label":"수강/등록 행정","description":"수강 신청/등록금/서류 제출 등 교육 관련 행정 처리","tags":["수강신청","등록","등록금","서류","행정"]}
+{"conceptId":"ADMIN.TRAVEL_BOOKING","domain":"ADMIN","type":"process","label":"여행 예약 진행","description":"항공/숙소/교통 예약을 실제로 진행하고 확인서를 저장","tags":["여행","예약","항공","숙소","확인서"]}

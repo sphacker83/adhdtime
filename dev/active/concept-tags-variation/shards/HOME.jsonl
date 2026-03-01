@@ -1,0 +1,96 @@
+{"conceptId":"HOME.BATHROOM_CLEAN","domain":"HOME","type":"process","label":"욕실 청소","description":"세면대/바닥/거울을 빠르게 청소","tags":["욕실","청소","세면대","바닥","거울"]}
+{"conceptId":"HOME.BATHROOM_RESTOCK","domain":"HOME","type":"process","label":"욕실 보충","description":"휴지/세제/치약 등 욕실 소모품 보충","tags":["욕실","휴지","세제","보충","소모품"]}
+{"conceptId":"HOME.BED_MAKE","domain":"HOME","type":"process","label":"침대 정리","description":"이불/베개를 정돈해 공간을 정리","tags":["침대","이불","정리","정돈","아침"]}
+{"conceptId":"HOME.COOK_SIMPLE_MEAL","domain":"HOME","type":"process","label":"간단 요리","description":"빠르게 한 끼를 만들기(계란/면/샐러드 등)","tags":["요리","간단","한끼","주방","레시피"]}
+{"conceptId":"HOME.DELIVERIES_SORT","domain":"HOME","type":"process","label":"택배 정리","description":"포장 제거/분류/반품 여부 확인","tags":["택배","상자","포장","정리","반품"]}
+{"conceptId":"HOME.DESK_CLEAR","domain":"HOME","type":"process","label":"책상 비우기","description":"작업 공간을 확보하기 위해 책상 위 정리","tags":["책상","정리","작업공간","물건","치우기"]}
+{"conceptId":"HOME.DISHWASH","domain":"HOME","type":"process","label":"설거지","description":"그릇/컵/수저를 씻고 싱크대를 정리","tags":["설거지","그릇","접시","싱크대","세제"]}
+{"conceptId":"HOME.DUST_WIPE","domain":"HOME","type":"process","label":"먼지 닦기","description":"자주 만지는 표면의 먼지를 빠르게 제거","tags":["먼지","닦기","가구","표면","청소"]}
+{"conceptId":"HOME.ENTRYWAY_RESET","domain":"HOME","type":"process","label":"현관 리셋","description":"신발/우편/가방을 정리해 입구를 정돈","tags":["현관","신발","가방","정리","리셋"]}
+{"conceptId":"HOME.FRIDGE_CHECK","domain":"HOME","type":"process","label":"냉장고 점검","description":"유통기한/남은 재료를 확인하고 계획에 반영","tags":["냉장고","유통기한","재료","점검","정리"]}
+{"conceptId":"HOME.GROCERY_LIST","domain":"HOME","type":"process","label":"장보기 목록","description":"필요한 식재료/생활용품 목록을 만들기","tags":["장보기","목록","식재료","생활용품","메모"]}
+{"conceptId":"HOME.KITCHEN_RESET","domain":"HOME","type":"process","label":"주방 리셋","description":"조리대/식탁/싱크 주변을 기본 상태로 복원","tags":["주방","리셋","조리대","식탁","정리"]}
+{"conceptId":"HOME.LAUNDRY_DRY","domain":"HOME","type":"process","label":"빨래 말리기","description":"건조기 돌리기/널기/회수까지 진행","tags":["빨래","건조","널기","건조기","회수"]}
+{"conceptId":"HOME.LAUNDRY_FOLD","domain":"HOME","type":"process","label":"빨래 개기","description":"마른 빨래를 개고 분류해 제자리에 두기","tags":["빨래","개기","정리","옷","서랍"]}
+{"conceptId":"HOME.LAUNDRY_WASH","domain":"HOME","type":"process","label":"빨래 돌리기","description":"세탁물 분류/세제/세탁기 가동","tags":["빨래","세탁","세탁기","세제","분류"]}
+{"conceptId":"HOME.MEAL_PREP","domain":"HOME","type":"process","label":"식사 준비","description":"미리 재료 손질/반찬 준비로 평일 부담 줄이기","tags":["식사","준비","손질","반찬","미리"]}
+{"conceptId":"HOME.MINOR_REPAIR","domain":"HOME","type":"process","label":"간단 수리","description":"전구/나사/문고리 등 작은 집 수리 처리","tags":["수리","전구","도구","나사","고치기"]}
+{"conceptId":"HOME.PANTRY_ORGANIZE","domain":"HOME","type":"process","label":"팬트리 정리","description":"건식품/간식/재료를 분류하고 재고 파악","tags":["팬트리","정리","재고","식재료","분류"]}
+{"conceptId":"HOME.PET_CARE","domain":"HOME","type":"process","label":"반려동물 돌봄","description":"먹이/물/배변/놀이 등 기본 케어","tags":["반려동물","먹이","물","산책","배변"]}
+{"conceptId":"HOME.PLANT_CARE","domain":"HOME","type":"process","label":"식물 돌봄","description":"물주기/잎 정리/햇빛 위치 조절","tags":["식물","물주기","화분","관리","햇빛"]}
+{"conceptId":"HOME.RECYCLE_SORT","domain":"HOME","type":"process","label":"분리수거 분류","description":"재활용/일반/음식물 등을 분류해 정리","tags":["분리수거","재활용","분류","쓰레기","정리"]}
+{"conceptId":"HOME.ROOM_TIDY","domain":"HOME","type":"process","label":"방 정리","description":"바닥/침대 주변을 정돈해 기본 상태로 만들기","tags":["방","정리","치우기","바닥","정돈"]}
+{"conceptId":"HOME.SHEETS_CHANGE","domain":"HOME","type":"process","label":"이불/시트 교체","description":"시트/베개커버를 갈아 위생 유지","tags":["시트","이불","교체","베개","위생"]}
+{"conceptId":"HOME.SINK_CLEAR","domain":"HOME","type":"process","label":"싱크대 비우기","description":"싱크대 위 설거지/잡동사니를 치워 작업 공간 확보","tags":["싱크대","비우기","설거지","주방","정리"]}
+{"conceptId":"HOME.SWEEP_MOP","domain":"HOME","type":"process","label":"쓸고 닦기","description":"바닥을 쓸고 물걸레로 닦아 기본 청결 유지","tags":["바닥","쓸기","물걸레","청소","먼지"]}
+{"conceptId":"HOME.TOILET_CLEAN","domain":"HOME","type":"process","label":"변기 청소","description":"변기/주변을 소독하고 냄새를 줄이기","tags":["변기","청소","소독","냄새","욕실"]}
+{"conceptId":"HOME.TRASH_OUT","domain":"HOME","type":"process","label":"쓰레기 버리기","description":"쓰레기봉투를 묶어 배출하고 새 봉투 교체","tags":["쓰레기","버리기","봉투","배출","교체"]}
+{"conceptId":"HOME.VACUUM","domain":"HOME","type":"process","label":"청소기","description":"청소기로 바닥/러그의 먼지 제거","tags":["청소기","먼지","바닥","러그","청소"]}
+{"conceptId":"HOME.VENTILATE","domain":"HOME","type":"process","label":"환기","description":"창문을 열어 공기 순환/냄새 제거","tags":["환기","창문","공기","냄새","리셋"]}
+{"conceptId":"HOME.CLEAN_GENERAL","domain":"HOME","type":"process","label":"집 청소(기본)","description":"짧게 돌며 눈에 띄는 것부터 치우는 기본 청소","tags":["집청소","기본","치우기","정리","리셋"]}
+{"conceptId":"HOME.LIVINGROOM_RESET","domain":"HOME","type":"process","label":"거실 리셋","description":"거실 테이블/소파 주변을 정돈해 시야를 정리","tags":["거실","리셋","정리","테이블","소파"]}
+{"conceptId":"HOME.BEDROOM_RESET","domain":"HOME","type":"process","label":"침실 리셋","description":"침실 바닥/옷/충전 케이블을 정리","tags":["침실","정리","옷","바닥","리셋"]}
+{"conceptId":"HOME.CLOSET_ORGANIZE","domain":"HOME","type":"process","label":"옷장 정리","description":"옷장을 정돈하고 자주 입는 옷을 앞에 배치","tags":["옷장","정리","옷","분류","정돈"]}
+{"conceptId":"HOME.DRAWER_RESET","domain":"HOME","type":"process","label":"서랍 리셋","description":"한 서랍만 골라 비우고 다시 넣는 미니 정리","tags":["서랍","정리","리셋","미니","정돈"]}
+{"conceptId":"HOME.WINDOW_CLEAN","domain":"HOME","type":"process","label":"창문 닦기","description":"유리/틀의 먼지와 손자국을 닦아 시야 개선","tags":["창문","유리","닦기","먼지","손자국"]}
+{"conceptId":"HOME.MAIL_AREA_RESET","domain":"HOME","type":"process","label":"우편 존 정리","description":"우편이 쌓이는 장소를 정리해 미루기 방지","tags":["우편","정리","서류","고지서","보관"]}
+{"conceptId":"HOME.SHOES_SORT","domain":"HOME","type":"process","label":"신발 정리","description":"현관 신발을 정돈하고 자주 신는 것만 남기기","tags":["신발","현관","정리","정돈","분류"]}
+{"conceptId":"HOME.BAG_PACK","domain":"HOME","type":"process","label":"가방 챙기기","description":"외출/출근용 가방에 필수품을 미리 챙김","tags":["가방","챙기기","외출","출근","준비물"]}
+{"conceptId":"HOME.LINEN_ORGANIZE","domain":"HOME","type":"process","label":"리넨 정리","description":"수건/이불/시트를 분류해 보관 공간 정돈","tags":["수건","이불","시트","보관","정리"]}
+{"conceptId":"HOME.GROCERY_ORDER","domain":"HOME","type":"goal","label":"온라인 장보기","description":"필요 물품을 온라인으로 주문 완료","tags":["장보기","주문","마트","배송","온라인"]}
+{"conceptId":"HOME.LEFTOVERS_SORT","domain":"HOME","type":"process","label":"남은 음식 정리","description":"남은 음식을 용기에 담아 라벨링/냉장 보관","tags":["남은음식","용기","라벨","냉장","보관"]}
+{"conceptId":"HOME.FREEZER_CHECK","domain":"HOME","type":"process","label":"냉동실 점검","description":"냉동 재고를 파악하고 해동/소비 계획 세우기","tags":["냉동실","재고","점검","해동","정리"]}
+{"conceptId":"HOME.COOK_BATCH","domain":"HOME","type":"process","label":"대량 조리","description":"한 번에 여러 끼를 만들고 소분해 보관","tags":["대량","조리","소분","보관","식사"]}
+{"conceptId":"HOME.HOME_SAFETY_CHECK","domain":"HOME","type":"process","label":"집 안전 점검","description":"소화기/화재경보기/가스밸브 등 간단 점검","tags":["안전","점검","가스","화재","소화기"]}
+{"conceptId":"HOME.TOOLS_ORGANIZE","domain":"HOME","type":"process","label":"도구 정리","description":"드라이버/테이프 등 공구를 한 곳에 모아 정리","tags":["공구","도구","정리","수리","보관"]}
+{"conceptId":"HOME.PANTRY_RESTOCK","domain":"HOME","type":"process","label":"식재료 보충","description":"자주 쓰는 재료/양념이 떨어졌는지 확인하고 보충","tags":["식재료","양념","보충","재고","확인"]}
+{"conceptId":"HOME.AIR_FILTER_CHANGE","domain":"HOME","type":"process","label":"필터 교체·세척하기","description":"공기청정기/환기장치/청소기 등의 필터를 점검하고 필요 시 교체 또는 세척","tags":["필터","공기질","유지보수","알레르기","쾌적","정기점검"]}
+{"conceptId":"HOME.SMOKE_DETECTOR_TEST","domain":"HOME","type":"process","label":"화재 감지기 테스트하기","description":"연기/일산화탄소 감지기 작동 여부를 테스트하고 배터리 상태를 확인","tags":["안전","화재","감지기","배터리","정기점검"]}
+{"conceptId":"HOME.FIRE_EXTINGUISHER_CHECK","domain":"HOME","type":"process","label":"소화기 상태 점검하기","description":"소화기 압력·유효기간·보관 위치를 확인하고 필요 시 교체/재충전","tags":["안전","소화기","유효기간","점검","비상대비"]}
+{"conceptId":"HOME.EMERGENCY_KIT_RESTOCK","domain":"HOME","type":"process","label":"비상키트 보충하기","description":"정전/지진/폭우 등 상황을 대비해 손전등·건전지·물·비상식량·구급품을 보충","tags":["비상","재난대비","정전","구급","물","비축"]}
+{"conceptId":"HOME.POWER_OUTAGE_PREP","domain":"HOME","type":"process","label":"정전 대비 루틴 만들기","description":"정전 시 필요한 행동(보조배터리 충전, 랜턴 위치, 냉장고 문 최소화)을 미리 정리","tags":["정전","루틴","대응","배터리","냉장고","대비"]}
+{"conceptId":"HOME.WATER_SHUTOFF_LOCATE","domain":"HOME","type":"process","label":"수도 차단 위치 확인하기","description":"누수/동파 상황에 대비해 수도 메인 밸브 위치를 확인하고 잠그는 법을 익힘","tags":["누수","동파","수도","밸브","안전","대비"]}
+{"conceptId":"HOME.PEST_PREVENTION","domain":"HOME","type":"process","label":"해충 유입 막기","description":"방충망·틈새·배수구를 점검하고 음식물 관리/트랩/실리콘 보수 등으로 유입을 예방","tags":["해충","예방","틈새","방충망","배수구","위생"]}
+{"conceptId":"HOME.MOLD_PREVENTION","domain":"HOME","type":"process","label":"곰팡이 예방하기","description":"습한 구역(욕실·창가·옷장)을 중심으로 물기 제거/환기/제습/실리카겔 교체를 루틴화","tags":["곰팡이","습기","제습","환기","욕실","옷장"]}
+{"conceptId":"HOME.HUMIDITY_CONTROL","domain":"HOME","type":"goal","label":"집 안 습도 적정 유지","description":"체감 쾌적함과 건강을 위해 습도를 적정 범위로 유지(제습기/가습기/환기 조합)","tags":["습도","쾌적","건강","제습기","가습기","공기질"]}
+{"conceptId":"HOME.ODOR_CONTROL","domain":"HOME","type":"process","label":"집 냄새 관리하기","description":"음식·반려동물·하수구 등 원인을 찾아 제거하고(세정/탈취/환기) 재발을 줄임","tags":["탈취","냄새","환기","위생","원인제거"]}
+{"conceptId":"HOME.WASHING_MACHINE_CLEAN","domain":"HOME","type":"process","label":"세탁기 통세척하기","description":"세탁조·필터·세제 투입구를 청소하고 통세척 코스를 돌려 냄새/세균을 줄임","tags":["세탁기","통세척","필터","냄새","위생","정기관리"]}
+{"conceptId":"HOME.DRYER_LINT_CLEAN","domain":"HOME","type":"process","label":"건조기 보풀필터 청소","description":"건조기 보풀필터·배기구 주변을 청소해 화재 위험을 낮추고 건조 효율을 유지","tags":["건조기","보풀필터","안전","화재예방","유지보수"]}
+{"conceptId":"HOME.DISHWASHER_MAINTENANCE","domain":"HOME","type":"process","label":"식기세척기 관리하기","description":"식기세척기 필터를 청소하고 세척제/린스 상태를 확인해 냄새·물때를 예방","tags":["식기세척기","필터","물때","냄새","유지보수"]}
+{"conceptId":"HOME.DRAIN_DEODORIZE","domain":"HOME","type":"process","label":"배수구 냄새 잡기","description":"트랩·거름망을 청소하고 뜨거운 물/세정제를 활용해 배수구 냄새와 막힘을 예방","tags":["배수구","냄새","막힘","청소","위생","예방"]}
+{"conceptId":"HOME.FRIDGE_DEEP_CLEAN","domain":"HOME","type":"process","label":"냉장고 속 청소하기","description":"선반·서랍을 꺼내 닦고 유통기한 지난 식품을 정리해 악취·교차오염을 줄임","tags":["냉장고","정리","유통기한","위생","악취","식품관리"]}
+{"conceptId":"HOME.FREEZER_DEFROST","domain":"HOME","type":"process","label":"냉동실 성에 제거","description":"성에가 쌓였을 때 정리/해동/닦기를 통해 수납 공간과 냉각 효율을 회복","tags":["냉동실","성에","정리","유지보수","효율"]}
+{"conceptId":"HOME.OVEN_HOOD_CLEAN","domain":"HOME","type":"process","label":"후드·기름때 청소","description":"환풍기/후드 필터를 세척하고 주변 기름때를 제거해 냄새·연기·화재 위험을 줄임","tags":["후드","기름때","필터","청소","안전","주방"]}
+{"conceptId":"HOME.MEAL_PLAN_WEEKLY","domain":"HOME","type":"process","label":"주간 식단 계획하기","description":"한 주의 식사/간식을 대략 정하고 재료를 연결해 장보기·조리 부담을 낮춤","tags":["식단","계획","장보기","시간절약","요리","루틴"]}
+{"conceptId":"HOME.PANTRY_EXPIRY_SCAN","domain":"HOME","type":"process","label":"식재료 유통기한 훑기","description":"팬트리/양념/건식품을 빠르게 훑어 유통기한 임박 재료를 우선 사용하도록 표시","tags":["유통기한","식재료","팬트리","낭비줄이기","정리"]}
+{"conceptId":"HOME.HOUSEHOLD_SUPPLIES_INVENTORY","domain":"HOME","type":"process","label":"생활용품 재고 파악","description":"휴지·세제·쓰레기봉투·세면도구 등 소모품을 빠르게 체크해 품절/과다구매를 방지","tags":["재고","소모품","루틴","구매","절약","관리"]}
+{"conceptId":"HOME.CLEANING_CADDY_SETUP","domain":"HOME","type":"process","label":"청소 도구 한 세트 만들기","description":"필요한 세정제·장갑·천·솔 등을 한 바구니로 묶어 ‘시작 비용’을 낮추고 바로 실행","tags":["청소","도구","준비","마찰줄이기","루틴"]}
+{"conceptId":"HOME.CLEAN_ROUTINE_DESIGN","domain":"HOME","type":"process","label":"청소 루틴 설계하기","description":"매일/주간/월간으로 나눠 현실적인 청소 루틴을 만들고 과부하 없이 유지","tags":["루틴","가사","계획","분할","지속","과부하방지"]}
+{"conceptId":"HOME.ROBOT_CLEANING_AUTOMATE","domain":"HOME","type":"process","label":"로봇청소 자동화 세팅","description":"로봇청소기 일정/금지구역/정리 규칙을 정해 ‘사전 정리→자동 청소’ 흐름을 만든다","tags":["로봇청소기","자동화","일정","동선","유지","시간절약"]}
+{"conceptId":"HOME.LIGHT_BULB_REPLACE","domain":"HOME","type":"process","label":"전구 교체·예비 확보","description":"꺼진 조명/깜빡임을 해결하고 자주 쓰는 규격의 예비 전구를 한 곳에 보관","tags":["조명","전구","유지보수","쾌적","예비","안전"]}
+{"conceptId":"HOME.BATTERY_REPLACE_ROTATION","domain":"HOME","type":"process","label":"건전지 교체 루틴","description":"리모컨·체중계·도어락·센서 등의 건전지를 주기적으로 점검하고 교체/폐기","tags":["건전지","도어락","센서","점검","폐기","유지보수"]}
+{"conceptId":"HOME.GUEST_READY_QUICK_RESET","domain":"HOME","type":"process","label":"손님 맞이 20분 리셋","description":"현관/거실/욕실의 ‘보이는 구역’만 우선 정리해 단시간에 손님맞이 상태로 전환","tags":["손님","빠른정리","우선순위","가시영역","루틴"]}
+{"conceptId":"HOME.POST_GUEST_RECOVER","domain":"HOME","type":"process","label":"방문 후 회복 정리","description":"잔컵·쓰레기·린넨·냄새를 정리하고 원래 동선/수납으로 되돌려 피로를 줄임","tags":["손님","회복","정리","린넨","탈취","루틴"]}
+{"conceptId":"HOME.DONATION_BOX_MAINTAIN","domain":"HOME","type":"process","label":"기부·버림 박스 유지","description":"애매한 물건을 ‘결정 보류’로 쌓아두지 않도록 기부/중고/폐기 박스를 운영하고 주기적으로 비움","tags":["정리","미니멀","기부","중고","폐기","결정피로"]}
+{"conceptId":"HOME.SEASONAL_DECLUTTER","domain":"HOME","type":"process","label":"계절 바뀔 때 대정리","description":"계절 전환 시 옷·침구·잡동사니를 기준으로 ‘꺼내기-분류-돌려놓기’를 한 번에 수행","tags":["계절","대정리","옷","침구","수납","분류"]}
+{"conceptId":"HOME.STORAGE_LABELING","domain":"HOME","type":"process","label":"수납 라벨 붙이기","description":"자주 헷갈리는 수납함/서랍에 라벨을 붙여 ‘찾기-되돌리기’를 단순화","tags":["라벨","수납","정리","유지","찾기쉬움"]}
+{"conceptId":"HOME.RETURN_PACKAGE_ZONE","domain":"HOME","type":"process","label":"반품 존 만들기","description":"반품할 물건을 한 곳에 모아 송장/포장재/기한을 함께 관리해 ‘반품 미루기’를 줄임","tags":["반품","택배","포장재","기한","정리","미루기방지"]}
+{"conceptId":"HOME.MAIL_PAPER_INBOX","domain":"HOME","type":"process","label":"우편물 인박스 운영","description":"우편물·고지서·안내장을 한 인박스로 모으고 ‘버리기/처리/보관’ 3분류로 빠르게 순환","tags":["우편물","인박스","분류","정리","처리","고지서"]}
+{"conceptId":"HOME.HOME_DOCS_ORGANIZE","domain":"HOME","type":"process","label":"집 관련 서류 정리","description":"보증서·설명서·수리 기록·임대차 관련 문서를 한 폴더로 모아 ‘필요할 때 바로 찾기’","tags":["서류","보증서","설명서","수리기록","정리","찾기"]}
+{"conceptId":"HOME.CLOTHING_STAIN_TREAT","domain":"HOME","type":"process","label":"얼룩 바로 처리","description":"옷에 얼룩이 생겼을 때 ‘미루지 않고’ 즉시 전처리(라벨 확인, 부분 세정)로 실패를 줄임","tags":["세탁","얼룩","전처리","미루기방지","관리"]}
+{"conceptId":"HOME.CLOTHING_REPAIR_BASIC","domain":"HOME","type":"process","label":"간단 의류 수선","description":"단추 달기·작은 뜯김·올 풀림 등을 최소한의 도구로 바로 수선해 ‘수선 더미’를 줄임","tags":["수선","의류","단추","도구","정리","지속"]}
+{"conceptId":"HOME.SHOE_CARE","domain":"HOME","type":"process","label":"신발 관리하기","description":"자주 신는 신발을 건조/탈취/솔질하고 비 오는 날 대비 방수·깔창 상태를 점검","tags":["신발","관리","탈취","건조","방수","깔창"]}
+{"conceptId":"HOME.MATTRESS_ROTATE","domain":"HOME","type":"process","label":"매트리스 뒤집기·회전","description":"매트리스/토퍼를 회전·뒤집어 꺼짐을 줄이고 수면 품질을 유지","tags":["매트리스","수면","유지보수","토퍼","쾌적"]}
+{"conceptId":"HOME.CURTAIN_WASH","domain":"HOME","type":"process","label":"커튼·블라인드 청소","description":"먼지가 쌓이기 쉬운 커튼/블라인드를 세탁·진공·닦기로 관리해 알레르기 부담을 낮춤","tags":["커튼","블라인드","먼지","알레르기","세탁","청소"]}
+{"conceptId":"HOME.MINI_FIX_IT_SESSION","domain":"HOME","type":"process","label":"5분 수리 타임","description":"미뤄둔 작은 문제(나사 조이기, 삐걱임, 문고리 헐거움)를 5~10분만 잡고 해결","tags":["수리","5분","미루기","도구","유지보수","생활개선"]}
+{"conceptId":"HOME.CLEAN_SPILL_IMMEDIATELY","domain":"HOME","type":"process","label":"흘린 것 즉시 닦기","description":"커피/기름/소스 등을 바로 처리해 얼룩·벌레·냄새로 커지지 않게 막는다","tags":["즉시처리","얼룩","청소","예방","주방","바닥"]}
+{"conceptId":"HOME.FIRST_AID_KIT_CHECK","domain":"HOME","type":"process","label":"구급함 점검하기","description":"밴드·소독제·진통제 등 구급품의 재고/유통기한을 확인하고 부족분을 보충","tags":["구급함","유통기한","재고","응급","안전"]}
+{"conceptId":"HOME.MEDICINE_STORAGE_CHECK","domain":"HOME","type":"process","label":"상비약 보관 점검","description":"상비약/처방약을 습기·온도·어린이 접근 관점에서 정리하고 만료 약은 폐기","tags":["상비약","처방약","보관","안전","유통기한","정리"]}
+{"conceptId":"HOME.CHILDPROOFING_CHECK","domain":"HOME","type":"process","label":"안전사고 위험 줄이기","description":"아이/반려동물 관점에서 모서리·콘센트·삼킴 위험 물건을 점검하고 안전장치를 적용","tags":["안전","아이","반려동물","콘센트","사고예방","점검"]}
+{"conceptId":"HOME.PET_FEEDING_STATION_SANITIZE","domain":"HOME","type":"process","label":"급식/물그릇 위생관리","description":"반려동물 급식대·물그릇을 세척하고 사료 보관 상태를 점검해 냄새/세균을 줄임","tags":["반려동물","위생","급식","물그릇","냄새","사료"]}
+{"conceptId":"HOME.SEASONAL_HOME_PREP","domain":"HOME","type":"process","label":"계절 대비 점검","description":"폭염/한파/장마에 대비해 단열·제습·선풍기/난방기 점검 등 필요한 준비를 수행","tags":["계절","장마","한파","폭염","점검","대비"]}
+{"conceptId":"HOME.KEYS_WALLET_LAUNCHPAD","domain":"HOME","type":"process","label":"외출 필수품 자리 고정","description":"열쇠·지갑·이어폰 등 외출 필수품을 한 자리(트레이/후크)에 고정해 ‘찾기 시간’을 없앰","tags":["외출","열쇠","지갑","자리고정","분실방지","루틴"]}
+{"conceptId":"HOME.TOMORROW_PREP","domain":"HOME","type":"process","label":"내일 준비 10분","description":"옷·가방·도시락·충전 등 내일 필요한 준비를 잠깐 해두어 아침 혼란을 줄임","tags":["내일준비","아침","가방","옷","충전","루틴"]}
+{"conceptId":"HOME.NIGHTLY_SHUTDOWN","domain":"HOME","type":"process","label":"취침 전 셧다운 루틴","description":"문 잠금·가스/전기 확인·조명 끄기·물 한 컵 준비 등 잠들기 전 불안을 줄이는 체크","tags":["취침","안전","체크리스트","루틴","불안감소"]}
+{"conceptId":"HOME.ARRIVAL_RESET","domain":"HOME","type":"process","label":"귀가 후 5분 리셋","description":"가방·겉옷·영수증·택배 등을 ‘임시 자리’로 두지 않고 바로 정해진 위치로 되돌림","tags":["귀가","리셋","루틴","정리","동선","미루기방지"]}
+{"conceptId":"HOME.DEEP_CLEAN_MICROLIST","domain":"HOME","type":"process","label":"깊은 청소 마이크로리스트","description":"한 번에 하기 어려운 깊은 청소를 10~15분 단위 ‘마이크로 작업’으로 쪼개어 진행","tags":["깊은청소","마이크로작업","분할","루틴","가사"]}

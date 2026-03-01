@@ -77,9 +77,11 @@ describe("reward gate", () => {
 });
 
 describe("reward outcome v3 (integer model)", () => {
+  const FIXED_TODAY = "2026-02-28";
+
   it("no-reward helper는 필요 시 todayCompleted만 증가시키고 gain은 0으로 유지한다", () => {
     const baseStats = {
-      ...createInitialStats("2026-02-28"),
+      ...createInitialStats(FIXED_TODAY),
       todayCompleted: 2,
       todayAxpGain: 40,
       todaySgpGain: 5,
@@ -88,7 +90,8 @@ describe("reward outcome v3 (integer model)", () => {
 
     const outcome = createNoRewardOutcome({
       stats: baseStats,
-      incrementTodayCompleted: true
+      incrementTodayCompleted: true,
+      today: FIXED_TODAY
     });
 
     expect(outcome.axpGain).toBe(0);
@@ -110,7 +113,7 @@ describe("reward outcome v3 (integer model)", () => {
 
   it("미션 1회 보상은 기존 대비 작은 정수 SGP를 지급하고 누적 상태를 유지한다", () => {
     const baseStats = {
-      ...createInitialStats("2026-02-28"),
+      ...createInitialStats(FIXED_TODAY),
       axp: 70,
       accountLevel: 1,
       todayAxpGain: 10,
@@ -121,7 +124,8 @@ describe("reward outcome v3 (integer model)", () => {
     const outcome = applyMissionCompletionReward({
       stats: baseStats,
       estMinutes: 10,
-      actualSeconds: 600
+      actualSeconds: 600,
+      today: FIXED_TODAY
     });
 
     expect(outcome.axpGain).toBe(39);

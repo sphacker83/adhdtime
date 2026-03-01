@@ -1,0 +1,68 @@
+{"conceptId":"SOCIAL.CALL_FAMILY","domain":"SOCIAL","type":"process","label":"가족에게 전화","description":"가족에게 안부를 전하는 연락","tags":["가족","전화","안부","연락","통화"]}
+{"conceptId":"SOCIAL.CONFLICT_REPAIR","domain":"SOCIAL","type":"goal","label":"갈등 수습","description":"오해/갈등을 풀기 위한 사과/대화 시도","tags":["갈등","사과","대화","오해","수습"]}
+{"conceptId":"SOCIAL.EVENT_PREP","domain":"SOCIAL","type":"process","label":"약속 준비","description":"모임/행사 전 옷/시간/장소를 확인","tags":["모임","약속","준비","장소","시간"]}
+{"conceptId":"SOCIAL.MESSAGE_REPLY","domain":"SOCIAL","type":"process","label":"메시지 답장","description":"미뤄둔 답장을 짧게라도 보내 관계 유지","tags":["답장","메시지","카톡","DM","연락"]}
+{"conceptId":"SOCIAL.NETWORKING_REACHOUT","domain":"SOCIAL","type":"goal","label":"네트워킹 연락","description":"가벼운 근황/감사/제안으로 먼저 연락하기","tags":["네트워킹","연락","근황","제안","커리어"]}
+{"conceptId":"SOCIAL.PLAN_MEETUP","domain":"SOCIAL","type":"goal","label":"만남 잡기","description":"친구/지인과 만남을 구체적으로 확정","tags":["만남","약속","일정","장소","확정"]}
+{"conceptId":"SOCIAL.RELATIONSHIP_CHECKIN","domain":"SOCIAL","type":"process","label":"관계 점검","description":"가까운 사람과 감정/필요를 확인하는 체크인","tags":["관계","체크인","대화","감정","연결"]}
+{"conceptId":"SOCIAL.THANK_YOU_NOTE","domain":"SOCIAL","type":"goal","label":"감사 인사","description":"고마운 마음을 메시지/메모로 전달","tags":["감사","인사","메시지","고마움","표현"]}
+{"conceptId":"SOCIAL.FOLLOW_UP","domain":"SOCIAL","type":"process","label":"후속 연락","description":"대화/미팅 이후 필요한 후속 메시지 보내기","tags":["후속","연락","팔로업","메시지","정리"]}
+{"conceptId":"SOCIAL.BOUNDARY_SET","domain":"SOCIAL","type":"goal","label":"경계 세우기","description":"부담을 줄이기 위해 가능한 범위를 명확히 전달","tags":["경계","거절","범위","부담","대화"]}
+{"conceptId":"SOCIAL.SAY_NO","domain":"SOCIAL","type":"goal","label":"정중히 거절","description":"무리한 요청을 정중하게 거절하고 대안 제시","tags":["거절","요청","정중","대안","부담"]}
+{"conceptId":"SOCIAL.SMALL_TALK","domain":"SOCIAL","type":"process","label":"스몰토크","description":"짧은 대화로 분위기 만들기/어색함 줄이기","tags":["스몰토크","대화","어색함","분위기","인사"]}
+{"conceptId":"SOCIAL.INTRODUCE_SELF","domain":"SOCIAL","type":"goal","label":"자기소개 준비","description":"한두 문장으로 나를 설명하는 소개 문장 만들기","tags":["자기소개","소개","문장","네트워킹","준비"]}
+{"conceptId":"SOCIAL.GIFT_SEND","domain":"SOCIAL","type":"goal","label":"선물 보내기","description":"감사/축하 선물을 고르고 전달 완료","tags":["선물","축하","감사","배송","준비"]}
+{"conceptId":"SOCIAL.BIRTHDAY_REMINDER","domain":"SOCIAL","type":"process","label":"기념일 챙기기","description":"생일/기념일을 확인하고 간단한 준비를 잡기","tags":["기념일","생일","캘린더","알림","챙기기"]}
+{"conceptId":"SOCIAL.SUPPORT_CHECKIN","domain":"SOCIAL","type":"process","label":"안부 체크인","description":"힘든 사람에게 가벼운 안부/지지 메시지 보내기","tags":["안부","체크인","지지","연락","친구"]}
+{"conceptId":"SOCIAL.PARTNER_DATE_PLAN","domain":"SOCIAL","type":"goal","label":"데이트 계획","description":"파트너와의 시간을 구체적으로 계획하고 확정","tags":["데이트","파트너","일정","장소","계획"]}
+{"conceptId":"SOCIAL.HOUSEHOLD_COORDINATE","domain":"SOCIAL","type":"process","label":"가사 조율","description":"가족/룸메와 집안일 분담/일정 조율","tags":["가사","분담","조율","가족","룸메"]}
+{"conceptId":"SOCIAL.RSVP_INVITE","domain":"SOCIAL","type":"process","label":"초대 응답(RSVP)","description":"초대에 참석/불참을 정하고 기한 내에 짧게라도 답장","tags":["초대","RSVP","참석","불참","응답","확정"]}
+{"conceptId":"SOCIAL.RESCHEDULE_MEETUP","domain":"SOCIAL","type":"goal","label":"약속 일정 변경","description":"변경 사유를 간단히 전하고 대안을 제시해 새 일정을 확정","tags":["약속","일정변경","재조율","캘린더","대안제시","확정"]}
+{"conceptId":"SOCIAL.CANCEL_MEETUP","domain":"SOCIAL","type":"goal","label":"약속 취소 알리기","description":"가능한 빨리 양해를 구하고 필요 시 대안/보상 제안까지 마무리","tags":["약속","취소","양해","통보","대안","예의"]}
+{"conceptId":"SOCIAL.LATE_NOTICE","domain":"SOCIAL","type":"process","label":"늦는다고 미리 알리기","description":"현재 위치/예상 도착 시간을 함께 보내 상대의 불안을 줄이기","tags":["지각","연락","ETA","사과","시간","약속"]}
+{"conceptId":"SOCIAL.APOLOGY_LATE_REPLY","domain":"SOCIAL","type":"process","label":"늦은 답장 사과하기","description":"답장이 늦은 것을 인정하고 지금 가능한 최소 답을 보내 관계 부담 낮추기","tags":["답장","지연","사과","관계유지","메시지","부담"]}
+{"conceptId":"SOCIAL.CHECK_AVAILABILITY","domain":"SOCIAL","type":"process","label":"가능한 시간 물어보기","description":"후보 시간을 2~4개로 좁혀 물어보고 답을 받기 쉽게 만들기","tags":["일정조율","가능시간","후보","투표","약속잡기"]}
+{"conceptId":"SOCIAL.SEND_LOCATION","domain":"SOCIAL","type":"process","label":"위치/길 안내 보내기","description":"주소/링크/만나는 지점(출구, 건물명)을 한 메시지로 정리해 전달","tags":["위치","길안내","지도","주소","공유","만남"]}
+{"conceptId":"SOCIAL.ARRIVAL_CONFIRM","domain":"SOCIAL","type":"process","label":"출발/도착 알리기","description":"출발/도착 여부를 간단히 공유해 기다림과 혼선을 줄이기","tags":["출발","도착","확인","약속","안심","연락"]}
+{"conceptId":"SOCIAL.EXIT_CONVERSATION","domain":"SOCIAL","type":"goal","label":"자연스럽게 대화 마무리","description":"대화 마무리 문장+다음 연결(연락/약속)을 남기고 무리 없이 자리 뜨기","tags":["대화","마무리","자리뜨기","인사","어색함","경계"]}
+{"conceptId":"SOCIAL.REMEMBER_NAMES","domain":"SOCIAL","type":"goal","label":"이름 기억하기 시스템","description":"이름/특징/만난 맥락을 짧게 메모해 다음 만남에서 자연스럽게 호칭","tags":["이름","기억","메모","소개","호칭","관계"]}
+{"conceptId":"SOCIAL.INTRODUCE_OTHERS","domain":"SOCIAL","type":"process","label":"사람들 서로 소개하기","description":"이름+관계+공통점을 한 문장으로 연결해 어색함을 줄이기","tags":["소개","연결","네트워킹","호칭","공통점"]}
+{"conceptId":"SOCIAL.EXCHANGE_CONTACTS","domain":"SOCIAL","type":"process","label":"연락처 교환하기","description":"연락처를 교환하고 목적(정보 공유/후속 연락)을 한 줄로 정리","tags":["연락처","교환","명함","카톡","추가","연결"]}
+{"conceptId":"SOCIAL.FOLLOW_ON_SOCIAL_MEDIA","domain":"SOCIAL","type":"process","label":"SNS로 가볍게 연결","description":"상대가 편한 방식으로 팔로우/연결하고 과한 반응을 피하기","tags":["SNS","팔로우","연결","가벼운관계","프로필","예의"]}
+{"conceptId":"SOCIAL.GROUP_CHAT_ETIQUETTE","domain":"SOCIAL","type":"goal","label":"단톡방 규칙/톤 정하기","description":"공지/답장 규칙/알림 민감도 등 최소 합의를 만들어 피로를 줄이기","tags":["단톡방","규칙","공지","톤","불필요알림","배려"]}
+{"conceptId":"SOCIAL.GROUP_CHAT_SUMMARY","domain":"SOCIAL","type":"process","label":"단톡 결정사항 요약","description":"결정/미결/담당/기한을 짧게 정리해 모두가 같은 정보를 갖게 하기","tags":["단톡방","요약","결정","할일","정리","확정"]}
+{"conceptId":"SOCIAL.DIVIDE_BILL","domain":"SOCIAL","type":"goal","label":"비용 정산 마무리","description":"총액/인원/정산 방식(더치, 한 번에) 합의 후 송금까지 끝내기","tags":["정산","더치페이","송금","영수증","돈","깔끔"]}
+{"conceptId":"SOCIAL.HOST_GATHERING","domain":"SOCIAL","type":"goal","label":"모임 주최하기","description":"목적/장소/시간/인원을 정하고 초대 및 진행 흐름을 잡기","tags":["주최","초대","장소","준비","진행","모임"]}
+{"conceptId":"SOCIAL.GUEST_ETIQUETTE","domain":"SOCIAL","type":"process","label":"초대받았을 때 예절","description":"도착 시간/신발/정리 등 기본 매너를 챙겨 부담을 줄이기","tags":["방문","예절","시간","선물","정리","배려"]}
+{"conceptId":"SOCIAL.BRING_DISH","domain":"SOCIAL","type":"goal","label":"가져갈 음식/선물 준비","description":"모임 성격에 맞는 음식/간식/작은 선물을 골라 가져가기","tags":["포틀럭","음식","준비","선물","공유","모임"]}
+{"conceptId":"SOCIAL.DIETARY_PREFERENCES","domain":"SOCIAL","type":"process","label":"식단/알레르기 확인","description":"알레르기/종교/취향을 사전에 확인해 메뉴 선택 실수를 줄이기","tags":["알레르기","식단","채식","금기","배려","메뉴"]}
+{"conceptId":"SOCIAL.GIVE_COMPLIMENT","domain":"SOCIAL","type":"process","label":"칭찬 한마디 건네기","description":"구체적인 관찰(행동/노력)을 짧게 말해 진심을 전달","tags":["칭찬","분위기","관계","진심","어색함해소"]}
+{"conceptId":"SOCIAL.RECEIVE_COMPLIMENT","domain":"SOCIAL","type":"process","label":"칭찬 받았을 때 답하기","description":"부정하지 않고 감사로 받되 과장 없이 한 문장으로 마무리","tags":["칭찬","반응","감사","겸손","대화"]}
+{"conceptId":"SOCIAL.ASK_FOR_HELP","domain":"SOCIAL","type":"goal","label":"도움 요청을 명확히 하기","description":"무엇을/언제까지/어느 정도를 부탁하는지 구체화해 부담을 줄이기","tags":["도움요청","부탁","구체화","기한","부담줄이기"]}
+{"conceptId":"SOCIAL.OFFER_HELP","domain":"SOCIAL","type":"process","label":"도움 제안하고 범위 제시","description":"가능한 범위/시간을 함께 말해 상대가 받기 쉬운 제안을 만들기","tags":["도움제안","지지","구체적","범위","배려"]}
+{"conceptId":"SOCIAL.SET_EXPECTATIONS","domain":"SOCIAL","type":"goal","label":"관계 기대치 맞추기","description":"연락 빈도/약속 방식/서로의 필요를 점검해 오해를 줄이기","tags":["기대치","관계","소통","오해","균형","경계"]}
+{"conceptId":"SOCIAL.DISCUSS_MONEY","domain":"SOCIAL","type":"goal","label":"돈/비용 얘기 꺼내기","description":"빌림/갚기/분담 등 민감한 돈 이야기를 명확하고 짧게 합의","tags":["돈","비용","정산","빌림","갚기","불편","명확"]}
+{"conceptId":"SOCIAL.LEND_BORROW_ITEM","domain":"SOCIAL","type":"process","label":"물건 빌리기/빌려주기","description":"반납 기한/상태/책임을 함께 합의해 분쟁을 예방","tags":["빌리기","대여","약속","기한","책임","물건"]}
+{"conceptId":"SOCIAL.RETURN_ITEM","domain":"SOCIAL","type":"goal","label":"빌린 물건 반납 완료","description":"기한 내에 반납하고 감사/상태(훼손 여부)를 함께 전달","tags":["반납","정리","기한","감사","물건","약속"]}
+{"conceptId":"SOCIAL.CONDOLENCE_MESSAGE","domain":"SOCIAL","type":"process","label":"위로/조문 메시지 보내기","description":"짧고 조심스럽게 애도를 전하고 상대의 부담을 늘리지 않기","tags":["위로","조문","경조사","애도","문자","배려"]}
+{"conceptId":"SOCIAL.CONGRATS_MESSAGE","domain":"SOCIAL","type":"process","label":"축하 메시지 보내기","description":"구체적으로 무엇을 축하하는지 한 줄로 전하고 기분을 북돋기","tags":["축하","기쁜일","메시지","관계","기념"]}
+{"conceptId":"SOCIAL.ATTEND_FUNERAL","domain":"SOCIAL","type":"process","label":"장례식 참석 준비","description":"복장/시간/조문 절차를 확인하고 무리 없이 참석","tags":["장례","조문","복장","예절","시간","경조사"]}
+{"conceptId":"SOCIAL.ATTEND_WEDDING","domain":"SOCIAL","type":"process","label":"결혼식 참석 준비","description":"장소/시간/복장/축의 방식 등을 확인해 늦지 않게 참석","tags":["결혼식","청첩장","복장","축의","장소","경조사"]}
+{"conceptId":"SOCIAL.SEND_FLOWERS","domain":"SOCIAL","type":"goal","label":"꽃/부의/축하 화환 보내기","description":"보낼 대상과 예산을 정하고 배송/문구까지 포함해 전달 완료","tags":["꽃","화환","조화","배송","경조사","예의"]}
+{"conceptId":"SOCIAL.THANK_AFTER_EVENT","domain":"SOCIAL","type":"process","label":"모임 후 감사 인사","description":"참석/초대/도움을 고마워했다는 메시지를 짧게 보내기","tags":["감사","후기","모임","주최","연락","관계유지"]}
+{"conceptId":"SOCIAL.KEEP_IN_TOUCH_WEAK_TIES","domain":"SOCIAL","type":"goal","label":"약한 연결 유지하기","description":"가벼운 근황 공유/반응으로 끊기기 쉬운 관계를 유지","tags":["관계유지","가벼운연락","지인","근황","네트워크"]}
+{"conceptId":"SOCIAL.RECONNECT_AFTER_SILENCE","domain":"SOCIAL","type":"goal","label":"오랜만에 다시 연락하기","description":"공백을 인정하고 부담 없는 한 문장으로 재연락 시작","tags":["재연락","오랜만","어색함","용기","관계회복"]}
+{"conceptId":"SOCIAL.DECLINE_INVITE","domain":"SOCIAL","type":"process","label":"초대/모임 정중히 거절","description":"감사 표현→불참 전달→필요 시 대안(다음에/짧게) 제시","tags":["초대거절","불참","예의","대안","관계유지"]}
+{"conceptId":"SOCIAL.ACCEPT_INVITE","domain":"SOCIAL","type":"process","label":"초대 수락하고 확정","description":"참석 의사를 밝히고 시간/장소/준비물(필요 시)을 확인","tags":["참석","확정","RSVP","시간","장소","약속"]}
+{"conceptId":"SOCIAL.MANAGE_SOCIAL_OVERLOAD","domain":"SOCIAL","type":"goal","label":"사교 피로 관리 알리기","description":"에너지 한계를 인정하고 휴식/거리두기를 미리 공유해 소진 예방","tags":["사교피로","휴식","자기관리","경계","회복","에너지"]}
+{"conceptId":"SOCIAL.SET_COMMUNICATION_CHANNEL","domain":"SOCIAL","type":"goal","label":"연락 방식 합의하기","description":"카톡/전화/이메일 등 서로 편한 채널과 긴급 기준을 정하기","tags":["연락","채널","카톡","전화","이메일","합의","편의"]}
+{"conceptId":"SOCIAL.HANDLE_GOSSIP","domain":"SOCIAL","type":"process","label":"가십/뒷담화 대응","description":"동조를 피하고 화제를 전환하거나 경계를 표현해 관계 피해를 줄이기","tags":["가십","뒷담화","전환","거리두기","윤리","관계"]}
+{"conceptId":"SOCIAL.DEESCALATE_ARGUMENT","domain":"SOCIAL","type":"process","label":"말다툼 진정시키기","description":"감정 고조를 인정하고 잠깐 멈춤/재논의 시간 합의로 확전 방지","tags":["갈등","진정","톤다운","휴식","정리","대화"]}
+{"conceptId":"SOCIAL.GIVE_FEEDBACK_KINDLY","domain":"SOCIAL","type":"process","label":"부드럽게 피드백 전달","description":"사실-영향-요청 순서로 말해 비난 없이 개선을 제안","tags":["피드백","배려","표현","요청","갈등예방"]}
+{"conceptId":"SOCIAL.RECEIVE_FEEDBACK","domain":"SOCIAL","type":"process","label":"피드백 듣고 확인 질문","description":"방어하지 않고 요약/확인 질문으로 오해 없이 이해하기","tags":["피드백","경청","요약","확인","감정"]}
+{"conceptId":"SOCIAL.NEGOTIATE_BOUNDARIES_GROUP","domain":"SOCIAL","type":"goal","label":"단체 경계 합의","description":"역할/연락 시간/의사결정 방식 등 단체의 기본 경계를 합의","tags":["경계","단체","합의","규칙","역할","조율"]}
+{"conceptId":"SOCIAL.PLAN_GROUP_MEETUP","domain":"SOCIAL","type":"goal","label":"그룹 모임 일정 확정","description":"후보 날짜/시간/장소를 좁혀 투표나 합의로 확정","tags":["모임","그룹","일정조율","투표","장소","확정"]}
+{"conceptId":"SOCIAL.CREATE_AGENDA_MEETUP","domain":"SOCIAL","type":"process","label":"만남 목적/안건 제안","description":"만남의 목적과 하고 싶은 것을 미리 공유해 만족도를 높이기","tags":["안건","목적","계획","대화","시간효율","모임"]}
+{"conceptId":"SOCIAL.CHECK_IN_AFTER_CONFLICT","domain":"SOCIAL","type":"process","label":"갈등 후 회복 체크인","description":"대화 후 감정/합의가 유지되는지 짧게 확인하고 재오해를 줄이기","tags":["갈등후","체크인","관계회복","안부","오해"]}
+{"conceptId":"SOCIAL.SEND_REMINDER_BEFORE_MEETUP","domain":"SOCIAL","type":"process","label":"약속 전 리마인드 보내기","description":"전날/당일에 시간·장소·만나는 지점을 한 번 더 확인","tags":["리마인드","약속","시간","장소","확인","지각방지"]}
+{"conceptId":"SOCIAL.FOLLOW_UP_NO_RESPONSE","domain":"SOCIAL","type":"goal","label":"답 없을 때 부드럽게 재문의","description":"재촉 없이 선택지를 주며 한 번 더 확인해 응답 가능성을 높이기","tags":["재문의","무응답","부담줄이기","후속연락","확인"]}

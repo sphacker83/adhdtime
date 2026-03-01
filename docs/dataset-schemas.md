@@ -1,7 +1,3 @@
-맞습니다. 스키마를 던져놓고 **필드 의미/제약/상호관계/검증 규칙**을 같이 못 박지 않으면, Codex가 데이터 뽑을 때 바로 가비지/불일치가 생깁니다. 아래는 **데이터셋 제작용 “완전 스키마 문서”**입니다. (필드 설명/제약/예시/검증 규칙 포함)
-
----
-
 # `docs/dataset-schemas.md` (완전판)
 
 ## 0) 용어 정리(반드시 고정)
@@ -18,9 +14,10 @@
 
 ---
 
-## 1) 파일 목록(권장)
+## 1) 파일 목록(본 프로젝트 구현 기준)
 
-필수 4개 + 선택 2개
+본 프로젝트의 dataset pipeline 구현에서는 아래 6개 파일을 **모두 필수**로 취급합니다.
+하나라도 누락되면 검증은 즉시 실패해야 합니다.
 
 ### 필수
 
@@ -28,9 +25,6 @@
 2. `data/lexicon.json`
 3. `data/concepts.json`
 4. `data/clusters.json`
-
-### 선택(강력 추천)
-
 5. `data/concept_to_cluster.json` (1:N 매핑)
 6. `data/validation_rules.json` (금지어/검증룰 단일 관리)
 
@@ -151,7 +145,7 @@
 
 ---
 
-# 4) `data/concept_to_cluster.json` — 매핑(선택 강추)
+# 4) `data/concept_to_cluster.json` — 매핑(본 프로젝트 구현: 필수)
 
 ## 4.1 목적
 
@@ -179,6 +173,7 @@
 
 * `conceptId`는 concepts.json에 반드시 존재
 * `clusters[]`의 모든 값은 clusters.json에 반드시 존재
+* 파일이 없거나 비어 있으면 pipeline을 즉시 실패 처리해야 함
 
 ---
 
@@ -252,7 +247,7 @@
 
 * `normalization`: 엔진 정규화 옵션(엔진이 이미 고정이면 참고용)
 * `fillers`: 제거 대상 군더더기(의미 훼손 큰 단어는 넣지 말 것)
-* `typos`: 오타/붙여쓰기/비표준 표현 치환
+* `typos`: 오타/붙여쓰기/비표준 표현 치환 **(반드시 Record<string, string> 형식의 Key-Value 객체여야 하며 배열로 만들면 절대 안 됨)**
 * `timeHints`: 시간/강도 힌트 추출용
 * `contextHints`: HOME/WORK 등 상황 키워드
 * `stateHints`: state 컨셉 트리거용 표현(중요)
@@ -314,6 +309,7 @@
 * `id` (string, **필수**, 유니크)
 
   * 권장 규칙: `TPL_{CLUSTER}_{INTENSITY}_{DEFAULT}_{CONTEXT}`
+  * **[주의]** 만약 특정 퀘스트에 INTENSITY(강도)나 CONTEXT(상황) 개념이 없다면 `NULL`이나 `UNDEFINED`라는 문자열을 넣지 말고 그 세그먼트를 생략하십시오. (예: `TPL_HOME_DISHWASH_15`)
 * `clusterKey` (string, **필수**)
 
   * clusters.json에 존재해야 함
@@ -322,6 +318,7 @@
   * `process`: 절차형(세탁/설거지/출발준비)
   * `narrative`: 기승전결형(업무/공부/기획)
   * `friction`: 상태 돌파형(의욕/피곤/압도)
+  * **[주의]** Concept의 type인 `goal`, `state`를 Template의 `type` 필드에 착각하여 넣는 경우가 종종 발생하니 절대 섞어 쓰지 마십시오.
 * `title` (string, **필수**): 사용자에게 보여줄 제목(상황/시간/목표가 보이면 좋음)
 * `concepts` (string[], **필수**, 1~5개 권장)
 
@@ -335,7 +332,8 @@
 * `time` (object, **필수**)
 
   * `min/max/default` 분 단위
-  * **강제 규칙**: `default == sum(missions.estMin)`
+  * **[강제 진실 규칙]**: `default == sum(missions.estMin)`
+  * AI가 자주 범하는 수학적 환각(산술 계산착오)으로 인해 검증이 깨지는 주원인입니다. 출력 확정 전 반드시 `default` 분(min)과 하위 미션들의 `estMin` 단순 합산치(sum)가 오차 없이 100% 일치하는지 재계산하여 검수하십시오.
 * `missions` (array, **필수**)
 
   * 3~6개(권장 4~5)
@@ -363,7 +361,7 @@
 
 ---
 
-# 7) `data/validation_rules.json` — 검증 룰(선택 강추)
+# 7) `data/validation_rules.json` — 검증 룰(본 프로젝트 구현: 필수)
 
 ## 7.1 목적
 
@@ -378,7 +376,9 @@
   "templateRules": {
     "missionsMin": 3,
     "missionsMax": 6,
-    "mustMatchTimeDefaultExactly": true
+    "mustMatchTimeDefaultExactly": true,
+    "mustSatisfyTimeOrder": true,
+    "requireStartEndHeuristic": true
   },
   "bannedActionSubstrings": [
     "종료:",
@@ -388,7 +388,35 @@
     "대충",
     "개기/정리"
   ],
-  "clusterKeyPattern": "^[A-Z][A-Z0-9_]+$"
+  "startActionTokens": ["시작", "준비", "세팅", "열기", "켜기", "모으기", "꺼내기", "범위 정하기", "타이머 시작", "착수"],
+  "endActionTokens": ["완료", "마무리", "저장", "제출", "전송", "정리", "닫기", "끄기", "기록", "앱에서 완료", "종료"],
+  "clusterKeyPattern": "^[A-Z][A-Z0-9_]+$",
+  "clusterKeyForbiddenTokens": [
+    "MIN",
+    "MINS",
+    "MINUTE",
+    "MINUTES",
+    "HOUR",
+    "HOURS",
+    "HR",
+    "AM",
+    "PM",
+    "MORNING",
+    "EVENING",
+    "NIGHT",
+    "WEEKEND",
+    "QUICK",
+    "SHORT",
+    "LONG",
+    "LIGHT",
+    "DEEP",
+    "STD",
+    "FULL",
+    "LEVEL",
+    "LV",
+    "STEP"
+  ],
+  "clusterKeyForbiddenSegmentPatterns": ["^\\d+$", "^\\d+(MIN|MINS|H|HR)$", "^(LEVEL|LV|STEP)\\d+$"]
 }
 ```
 
@@ -422,3 +450,52 @@
 * lexicon은 concept 중심이다.
 * cluster는 다양성 제어용이다.
 * time.default는 미션 합계와 반드시 일치.
+
+---
+
+## 11) 구현 모호점 해소(파이프라인 구현 기준)
+
+### 11.1 필수 입력 파일 처리 규칙
+
+아래 2개는 본 프로젝트 파이프라인에서 **필수 파일**이다.
+
+* `data/concept_to_cluster.json`
+* `data/validation_rules.json`
+
+강제 규칙:
+
+1. 파일 누락 시 즉시 실패(exit code 1)
+2. 파일 파싱 실패 시 즉시 실패
+3. 빈 구조(`map` 비어 있음, 룰 핵심 키 누락)면 실패
+
+### 11.2 시간 필드 강제 규칙
+
+각 템플릿의 `time`은 아래를 동시에 만족해야 한다.
+
+1. `time.min <= time.default <= time.max`
+2. `time.default == sum(missions.estMin)`
+3. `time.min`, `time.default`, `time.max`, `missions[].estMin`은 모두 양의 정수
+
+### 11.3 시작/종료 휴리스틱 기준
+
+검증기는 각 템플릿의 `missions`에 대해 아래를 모두 검사한다.
+
+1. 시작 기준: `missions[0].action`이 `startActionTokens` 중 1개 이상 포함
+2. 종료 기준: `missions[last].action`이 `endActionTokens` 중 1개 이상 포함
+3. 역전 금지: 시작 미션은 종료 토큰만 포함하면 실패, 종료 미션은 시작 토큰만 포함하면 실패
+4. 중복 금지: 첫 미션/마지막 미션 문장이 동일하면 실패
+
+### 11.4 `clusterKey` 금지 토큰 규칙
+
+`clusterKey`는 의미 클러스터를 표현해야 하며 시간/강도/레벨 변형을 포함하면 안 된다.
+
+강제 규칙:
+
+1. 패턴: `^[A-Z][A-Z0-9_]+$`
+2. 세그먼트 분해 기준(`_`)으로 금지 토큰 검사 수행
+3. 금지 토큰 또는 금지 패턴에 매칭되면 실패
+
+예시:
+
+* 허용: `WORK_EMAIL_TRIAGE`, `HOME_DISHWASH`
+* 금지: `WORK_EMAIL_15MIN`, `HOME_DISHWASH_STD`, `STUDY_REVIEW_LEVEL2`
