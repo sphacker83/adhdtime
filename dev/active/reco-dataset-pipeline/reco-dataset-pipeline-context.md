@@ -9,17 +9,17 @@ Last Updated: 2026-03-01
 - Stage 2 완료: `data/concept_to_cluster.json`(map 1200) + `data/lexicon.json` 생성
   - `concept_to_cluster`: concepts 1200개 전부 매핑, STATE 125개 전부 3개 이상(현재 6개) 클러스터로 다의성 매핑
   - `lexicon`: `conceptLexemes` 121(클러스터 앵커 중심), `stateHints` 125(STATE 컨셉 전체), 문자열 배열은 한 줄 배열로 포맷
-- Stage 3 진행: `data/templates.json`을 370개까지 확장
-  - 커버 클러스터: 30개
-  - 클러스터당 템플릿 수: 7개 클러스터는 20개 달성, 나머지 23개 클러스터는 10개 유지(확장 진행 중)
+- Stage 3 완료: `data/templates.json`을 2400개(120 clusters × 20 templates)로 확장
+  - 커버 클러스터: 120개(전 클러스터)
+  - 클러스터당 템플릿 수: min=20, max=20
+  - 기존 템플릿 포함 전체를 사람 친화적/존댓말 지시문 중심으로 리라이트
+  - missions 3~6, 시작/종료 휴리스틱, `sum(estMin)==time.default` 규칙 충족
 - 검증 도구/검증 명령: `scripts/validate-data.ts` + `npm run -s dataset:validate` 기준 errors/warnings 0 통과
 - `data/validation_rules.json` 복구/추가 + validate가 룰 파일을 단일 진실 기준으로 읽도록 전환
 - 중간 산출물 정리: `dev/active/.../(template_batches|concept_batches|lexicon_parts)` 제거(최종 산출물은 `data/*.json`만 유지)
 - 커밋: `aa68268` (concepts/mapping/lexicon/templates + validate 도구)
 
 ### 🟡 IN PROGRESS
-- Stage 3 템플릿 확장: 120 clusters × 20 templates = 2400 templates 목표까지 “직접 창작 → 검증 명령 실행 → 재작성” 루프 반복
-- Stage 3 템플릿 톤 개선: 퀘스트/미션을 더 인간 친화적(대화체/부드러운 문장)으로 리라이트
 - (선택) 샘플 실행 도구: `scripts/sample-run.ts` (입력 몇 개로 후보 템플릿/컨셉/클러스터 점수 출력)
   - 데이터 레코드는 LLM이 직접 작성(출력)하며, 코드로 자동 조립/치환하지 않음
   - 신규 작성/수정은 사용자 요청이 있을 때만 진행
@@ -56,5 +56,5 @@ Last Updated: 2026-03-01
 
 ## Quick Resume
 1. `npm run -s dataset:validate`로 현재 데이터 상태 확인
-2. 다음 템플릿 **묶음(클러스터 단위)**을 LLM이 직접 작성해 `data/templates.json`에 추가
-3. validate 통과가 깨지면 실패 템플릿을 삭제하지 말고 재작성(동일 id 유지 또는 새 id로 교체)
+2. Phase 5(샘플링 정책/포맷/재현성) 작업을 시작할지 결정
+3. 후속 작업 전 `tasks/context` 체크박스 및 진행 상태 동기화
