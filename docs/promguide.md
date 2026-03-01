@@ -5,7 +5,7 @@
   - data/clusters.json (약 120개)
   - data/concepts.json (600~1200개 권장)
   - data/concept_to_cluster.json (컨셉→클러스터 1:N 매핑)
-  - data/templates.json (최소 1200개 = 클러스터 120×10)
+  - data/templates.json (초기 최소 1200개, 목표 2400개 = 클러스터 120×20)
   - data/lexicon.json (컨셉 중심 표현 사전: variants 대량)
   - data/validation_rules.json (금지어/검증룰)
  
@@ -14,6 +14,7 @@
   - 모든 JSON 구조/필드 제약/무결성 규칙은 docs/dataset-schemas.md를 기준으로 한다.
   - templates는 missions 3개 이상으로 구성, 시작/종료 명확, 불친절/가비지 문장 금지,
   sum(estMin)==time.default, 미션들은 가급적 순차적이어야 하고 연관성이 있어야 한다.
+  - templates의 title/mission action은 “사람이 사람에게 말하듯” 자연스럽고 인지 가능한 문장으로 쓴다(존댓말 지시문 권장).
   - lexicon은 concept 중심으로 작성(클러스터 중심 금지), variants를 충분히 크게 확장, patterns는 컨셉당 3개 이상
   - validate-data.ts를 작성하여:
     1) 참조 무결성 검사(templates↔clusters, templates↔concepts,lexicon↔concepts, concept_to_cluster↔clusters)
@@ -43,3 +44,9 @@
 ### 3. 작업 실행 방식 및 프로세스
 - **작업 샤딩(Sharding)**: 방대한 데이터셋이 요구되므로, 복수의 에이전트를 동원하여 작업을 논리적인 단위로 분할(Sharding)해 병렬로 진행합니다.
 - **컨텍스트 유지 지침**: 멀티 세션이나 긴 작업으로 인해 프롬프트 컨텍스트가 유실되거나 룰이 기억나지 않을 경우, 즉각적으로 `docs/promguide.md` 파일을 다시 읽어 지침을 복구하시기 바랍니다.
+
+### 4. 문장 톤(휴먼 프렌들리)
+- **퀘스트(title)**: 딱딱한 문서형 표현보다, 사용자가 “아, 이거네” 하고 이해할 만한 부드러운 문장으로 작성합니다.
+  - 예: “활기찬 하루의 시작을 위한 아침 10분 루틴”, “오늘 업무가 귀찮으니 일단 메일만 확인하자”
+- **미션(action)**: 행동을 바로 할 수 있게, 가능한 한 **존댓말 지시문**으로 작성합니다.
+  - 예: “식기를 모두 모아 설거지통에 넣으세요.”, “메일함을 열어보세요. 제목 3개만 확인합니다.”

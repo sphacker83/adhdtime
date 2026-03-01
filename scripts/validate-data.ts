@@ -197,6 +197,32 @@ async function main(): Promise<void> {
     rulesRoot?.clusterKeyForbiddenSegmentPatterns,
   );
 
+  const styleRules = isRecord(rulesRoot?.styleRules) ? rulesRoot?.styleRules : undefined;
+  const enforcePoliteMissions =
+    typeof styleRules?.enforcePoliteMissions === "boolean"
+      ? styleRules.enforcePoliteMissions
+      : false;
+  const politeMissionMarkers = safeStringArray(styleRules?.politeMissionMarkers);
+  const discourageNominalizedMissions =
+    typeof styleRules?.discourageNominalizedMissions === "boolean"
+      ? styleRules.discourageNominalizedMissions
+      : false;
+  const nominalizedMissionEndingPatterns = safeStringArray(
+    styleRules?.nominalizedMissionEndingPatterns,
+  );
+  const nominalizedRegexes: RegExp[] = [];
+  for (const pat of nominalizedMissionEndingPatterns) {
+    try {
+      nominalizedRegexes.push(new RegExp(pat));
+    } catch {
+      issues.push({
+        level: "error",
+        code: "RULES_INVALID",
+        message: `data/validation_rules.json: styleRules.nominalizedMissionEndingPatterns 정규식이 유효하지 않습니다: ${JSON.stringify(pat)}`,
+      });
+    }
+  }
+
   const clusterKeyPattern =
     typeof rulesRoot?.clusterKeyPattern === "string"
       ? rulesRoot.clusterKeyPattern
@@ -494,6 +520,33 @@ async function main(): Promise<void> {
               code: "BANNED_ACTION_SUBSTRING",
               message: `template ${templateId}: missions[${i}].action에 금지 substring 포함: ${JSON.stringify(banned)}`,
             });
+          }
+        }
+
+        if (enforcePoliteMissions && politeMissionMarkers.length > 0) {
+          const hasPoliteMarker = politeMissionMarkers.some((marker) =>
+            action.includes(marker),
+          );
+          if (!hasPoliteMarker) {
+            issues.push({
+              level: "error",
+              code: "STYLE_POLITE_MISSION_REQUIRED",
+              message: `template ${templateId}: missions[${i}].action에 존댓말/지시문 표식이 부족합니다.`,
+            });
+          }
+        }
+
+        if (discourageNominalizedMissions && nominalizedRegexes.length > 0) {
+          const trimmed = action.trim();
+          for (const re of nominalizedRegexes) {
+            if (re.test(trimmed)) {
+              issues.push({
+                level: "warn",
+                code: "STYLE_NOMINALIZED_MISSION",
+                message: `template ${templateId}: missions[${i}].action이 명사형(…기/…하기)으로 끝나는 경향이 있습니다: ${JSON.stringify(trimmed)}`,
+              });
+              break;
+            }
           }
         }
       }

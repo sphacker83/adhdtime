@@ -20,6 +20,7 @@ Last Updated: 2026-03-01
 - [x] `data/templates.json` 10개 샘플 생성(스키마/휴리스틱/time 합계 검증)
 - [x] `data/templates.json` 200개까지 확장(20 클러스터 × 10)
 - [x] `data/templates.json` 370개까지 확장(30 클러스터 커버, 일부 클러스터 20개 도달)
+- [ ] 기존 템플릿 전체 리라이트: 퀘스트/미션을 “사람이 말하듯” 부드러운 문장 + 존댓말 지시문 중심으로 개선(룰/휴리스틱과 정합)
 - [ ] `data/templates.json` 2400개까지 확장(클러스터 120 × 20)
 
 ## Phase 4: Validate Script ✅ COMPLETE

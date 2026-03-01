@@ -320,6 +320,8 @@
   * `friction`: 상태 돌파형(의욕/피곤/압도)
   * **[주의]** Concept의 type인 `goal`, `state`를 Template의 `type` 필드에 착각하여 넣는 경우가 종종 발생하니 절대 섞어 쓰지 마십시오.
 * `title` (string, **필수**): 사용자에게 보여줄 제목(상황/시간/목표가 보이면 좋음)
+
+  * 권장: 사람이 사람에게 말하듯 부드러운 문장(제안/상황 공감 포함 가능, 존댓말도 허용)
 * `concepts` (string[], **필수**, 1~5개 권장)
 
   * 이 템플릿이 어떤 입력과 매칭되는지
@@ -340,6 +342,7 @@
 * `missions[].action` (string, **필수**)
 
   * 동사+대상+조건/예시. “뭘 하라는지” 1초 안에 이해되게
+  * 권장: 존댓말 지시문(예: “~하세요”, “~해보세요”, “~해주세요”)
 * `missions[].estMin` (int, **필수**)
 
   * 1~30 권장(집중 블록은 더 길어도 가능하나 남발 금지)
@@ -388,8 +391,8 @@
     "대충",
     "개기/정리"
   ],
-  "startActionTokens": ["시작", "준비", "세팅", "열기", "켜기", "모으기", "꺼내기", "범위 정하기", "타이머 시작", "착수"],
-  "endActionTokens": ["완료", "마무리", "저장", "제출", "전송", "정리", "닫기", "끄기", "기록", "앱에서 완료", "종료"],
+  "startActionTokens": ["시작", "시작해", "준비", "준비해", "세팅", "세팅해", "열기", "열어", "열어보", "켜기", "켜", "켜보", "모으기", "모아", "꺼내기", "꺼내", "범위 정하기", "범위를 정하", "타이머 시작", "타이머", "착수", "우선", "먼저"],
+  "endActionTokens": ["완료", "완료해", "마무리", "마무리해", "저장", "저장해", "제출", "제출해", "전송", "전송해", "정리", "정리해", "닫기", "닫아", "끄기", "끄고", "기록", "기록해", "앱에서 완료", "완료를 눌러", "종료"],
   "clusterKeyPattern": "^[A-Z][A-Z0-9_]+$",
   "clusterKeyForbiddenTokens": [
     "MIN",
@@ -416,7 +419,14 @@
     "LV",
     "STEP"
   ],
-  "clusterKeyForbiddenSegmentPatterns": ["^\\d+$", "^\\d+(MIN|MINS|H|HR)$", "^(LEVEL|LV|STEP)\\d+$"]
+  "clusterKeyForbiddenSegmentPatterns": ["^\\d+$", "^\\d+(MIN|MINS|H|HR)$", "^(LEVEL|LV|STEP)\\d+$"],
+  "styleRules": {
+    "preferredPoliteness": "polite",
+    "enforcePoliteMissions": false,
+    "politeMissionMarkers": ["세요", "주세요", "해보세요", "해주세요", "해 주세요", "해요"],
+    "discourageNominalizedMissions": false,
+    "nominalizedMissionEndingPatterns": ["(모으기|꺼내기|열기|켜기|정리하기|확인하기|하기)$"]
+  }
 }
 ```
 
