@@ -141,7 +141,7 @@
 * `description` (string, 선택)
 * `concepts` (string[], **필수**): 연결된 대표 conceptId들
 * `defaultTimeBands` (int[], 선택): 자주 쓰는 시간대(템플릿 생성용)
-* `variantAxes` (object, 선택): 템플릿 변형 축(대량 생성 제어)
+* `variantAxes` (object, 선택): 템플릿 변형 축(대량 작성/확장 제어)
 
 ---
 
@@ -368,8 +368,8 @@
 
 ## 7.1 목적
 
-* Codex 생성물에서 가비지/불일치 자동 필터링
-* 룰을 파일로 빼면 반복 생성/정제가 쉬움
+* 검증 명령 실행 시 가비지/불일치 필터링
+* 룰을 파일로 빼면 반복 작성/정제가 쉬움
 
 ## 7.2 스키마
 
@@ -448,8 +448,8 @@
 1. clusters.json (120개) 확정
 2. concepts.json (600~1200개) 확정
 3. concept_to_cluster.json 매핑 생성
-4. templates.json 대량 생성(1200+)
-5. lexicon.json 대량 확장(variants 폭발)
+4. templates.json 대량 작성(1200+)
+5. lexicon.json 대량 확장(variants 직접 작성)
 6. validation_rules.json 기준으로 반복 정제
 
 ---

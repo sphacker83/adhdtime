@@ -6,7 +6,7 @@
 우리의 데이터 구조는 다음과 같아:
 - Lexicon (사용자의 자연어 입력을 포착) -> Concept (1,200개의 사전) -> Cluster (120개의 서랍) -> Templates (실제 할 일)
 
-이번 미션은 제공된 `concepts.json`을 읽고, 유저가 이 컨셉을 의도할 때 검색창에 입력할 법한 한국어 키워드/문장들을 모아 **`lexicon.json`을 창작**하는 거야.
+이번 미션은 제공된 `concepts.json`을 읽고, 유저가 이 컨셉을 의도할 때 검색창에 입력할 법한 한국어 키워드/문장들을 모아 **`lexicon.json`을 직접 작성(출력)**하는 거야.
 
 ---
 
@@ -30,7 +30,7 @@
    - 절대로 유저의 입력을 예쁜 표준어로 "교정(Correction)"하지 마라.
    - ADHD 유저는 완벽하게 타자를 치지 않는다. "방청소하기기차나", "공부해야대는데", "씻기시러" 같은 날것의 데이터를 의도적으로 30% 이상 섞어라.
 
-5. **절대! 스크립트로 짠 듯한 기계적인(평균 회귀) 수치를 만들지 마라.**
+5. **절대! 인위적으로 균일하게 맞춘 기계적인(평균 회귀) 수치를 만들지 마라.**
    - 모든 컨셉의 `variants` 개수를 똑같이 '5개'나 '10개'로 맞추는 짓을 반복하지 마라.
    - `HOME.CLEAN_GENERAL`, `STATE.DISTRACTED` 같이 범용적인 컨셉은 `variants`를 20개 넘게 폭발적으로 넣고, `ADMIN.PASSWORD_RESET` 같은 좁은 컨셉은 5~8개만 넣어라. 정보량에 따라 변주를 주어라.
 
@@ -39,30 +39,69 @@
 ## 🛠️ 작업 지시
 
 내가 입력창에 `concepts.json` 데이터의 전문(또는 일부)을 줄 것이다.
-너는 위의 5대 규칙, 특히 **3번(variants 극단적 팽창)과 4번(날것의 구어체 30% 포함)**의 멘탈 모델을 완벽히 장착한 뒤, 아래의 JSON 포맷에 맞추어 `lexicon.json`을 생성하라.
+너는 위의 5대 규칙, 특히 **3번(variants 극단적 팽창)과 4번(날것의 구어체 30% 포함)**의 멘탈 모델을 완벽히 장착한 뒤, `docs/dataset-schemas.md`의 `data/lexicon.json` 스키마에 맞춰 `lexicon.json`을 **직접 작성(출력)**하라.
 
+검증은 `npm run -s dataset:validate` **명령을 실행**해 통과 여부를 확인한다.
 결과물은 오직 검증을 통과하는 완벽한 JSON 포맷이어야만 한다.
 
 ```json
 {
   "version": 1,
+  "language": "ko",
+  "normalization": {
+    "lowercase": true,
+    "collapseSpaces": true,
+    "removeFillers": true
+  },
+  "fillers": ["그냥", "좀", "진짜", "너무", "일단"],
   "typos": {
     "청쇼": "청소",
     "설겆이": "설거지",
     "공부하기시러": "공부하기 싫어"
   },
-  "entries": [
+  "timeHints": {
+    "minsPatterns": ["(\\d+)\\s*분", "(\\d+)\\s*min"],
+    "rangePatterns": ["(\\d+)\\s*~\\s*(\\d+)\\s*분"],
+    "quickTokens": ["빨리", "짧게", "간단히", "후딱"],
+    "deepTokens": ["제대로", "집중", "완전", "끝내자"],
+    "nowTokens": ["지금", "당장", "바로"]
+  },
+  "contextHints": {
+    "HOME": ["집", "주방", "귀가", "퇴근후"],
+    "WORK": ["회사", "사무실", "출근", "업무"],
+    "OUTSIDE": ["밖", "외출", "이동"],
+    "MORNING": ["아침", "기상", "출근전"],
+    "BEFORE_SLEEP": ["자기전", "취침전"],
+    "AFTER_WORK": ["퇴근후", "귀가후"]
+  },
+  "stateHints": {
+    "STATE.LOW_MOTIVATION": ["의욕없", "하기 싫", "귀찮", "무기력", "멍", "집중 안"],
+    "STATE.DISTRACTED": ["산만", "집중 안", "딴생각"]
+  },
+  "conceptLexemes": [
     {
       "conceptId": "HOME.DISHWASH",
-      "patterns": [
-        "설거지\\s*(해야|할)",
-        "싱크대\\s*(치우|비우)"
-      ],
+      "keywords": ["설거지", "그릇", "접시", "싱크대", "주방"],
       "variants": [
         "설거지", "그릇 씻기", "주방 치우기", "싱크대 비우기", "설겆이", "밀린 설거지", "설거지 산더미", "밥먹고 치우기", "그릇 닦기", "식기세척기 돌리기", "설거지 하기 귀찮아", "설거지 언제 다해", "주방 마감"
-      ]
+      ],
+      "patterns": ["^(.*)(설거지|그릇|접시|싱크대)(.*)$"],
+      "negativePatterns": ["(설거지)(가|는)\\s*아니"]
     },
-    // ... 나머지 conceptId들에 대한 entry 작성
-  ]
+    {
+      "conceptId": "WORK.EMAIL_TRIAGE",
+      "keywords": ["메일", "이메일", "메일함", "인박스", "읽기"],
+      "variants": [
+        "메일 확인", "메일함 열기", "인박스 좀 보자", "안 읽은 메일 처리", "급한 메일부터 보자", "메일 쌓였네", "메일 답장해야 되는데", "메일 회신", "메일 정리", "이메일 체크", "메일함 터졌어", "메일부터 처리하자"
+      ],
+      "patterns": ["^(.*)(메일|이메일|인박스)(.*)$"],
+      "negativePatterns": []
+    }
+  ],
+  "aliases": {
+    "conceptAlias": {
+      "HOME.DISHWASH": ["HOME.SINK_CLEAR", "HOME.KITCHEN_DISHES"]
+    }
+  }
 }
 ```
