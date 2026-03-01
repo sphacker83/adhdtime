@@ -116,9 +116,10 @@ Step C) concept_to_cluster.json 생성(필수)
 	•	특히 STATE 계열 컨셉은 다의적 추천을 위해 기본 3방향 클러스터가 포함되도록 필수 구성
 
 Step D) templates.json 대량 생성
-	•	초기 목표: 120 clusters × 평균 10 = 1200 templates
+	•	최소 목표: 120 clusters × 10 = 1200 templates
+	•	본 프로젝트 목표: 120 clusters × 20 = 2400 templates (클러스터당 20개)
 	•	이후 확장: 2000~5000도 가능(앱 인클루드 가능)
-	•	각 클러스터별로 최소 6~12개 템플릿을 만든다.
+	•	각 클러스터별로 최소 20개 템플릿을 만든다.
 
 클러스터별 변형 축(최소 2개 이상 적용)
 	•	강도: 최소 / 기본 / 완전
@@ -137,7 +138,7 @@ lexicon은 컨셉 중심이며, 클러스터 중심으로 만들지 않는다.
 (컨셉→클러스터는 매핑 파일/템플릿에서 해결)
 
 Step F) 검증/정제(반복)
-	•	validate-data.ts로 실패 항목을 수집
+	•	`npm run -s dataset:validate`로 실패 항목을 수집 (검증 스크립트는 “데이터 생성”이 아니라 “품질 게이트”다)
 	•	실패 템플릿은 삭제하지 말고 재작성으로 살린다
 	•	무결성(참조 관계) 깨지면 즉시 수정
 
@@ -147,16 +148,16 @@ Step F) 검증/정제(반복)
 
 4.1 생성 → 검증 → 재작성 루프
 	1.	클러스터/컨셉/매핑을 먼저 생성
-	2.	템플릿을 클러스터 단위로 배치 생성
-	3.	lexicon을 컨셉 단위로 배치 생성
-	4.	validate 실행
+	2.	템플릿을 클러스터 단위로 **묶어서 직접 창작**해 추가한다(“배치”=스크립트 조립이 아니라, 사람이 읽을 수 있는 문장을 여러 개 작성하는 단위)
+	3.	lexicon을 컨셉 단위로 **묶어서 직접 창작**해 variants를 확장한다
+	4.	validate 실행(`npm run -s dataset:validate`)
 	5.	실패 목록만 AI 모델이 직접 실패 원인을 인지하고 사람의 관점에서 자연스럽게 재작성 (스크립트 기반 기계 치환 금지)
 	6.	반복
 
 4.2 생성 단위(권장)
-	•	Cluster batch: 클러스터 1개당 템플릿 10개 생성
-	•	Concept batch: 컨셉 1개당 variants 50~150개 생성
-	•	State batch: state 컨셉은 표현(variants)과 패턴을 더 촘촘히(다의성 트리거 핵심)
+	•	클러스터 단위(직접 창작): 클러스터 1개당 템플릿 20개 생성(각각 문장/미션이 실제로 다르게)
+	•	컨셉 단위(직접 창작): 컨셉 1개당 variants 50~150개 생성
+	•	STATE 단위(직접 창작): state 컨셉은 표현(variants)과 패턴을 더 촘촘히(다의성 트리거 핵심)
 
 ⸻
 
@@ -240,7 +241,7 @@ lexicon 스키마는 docs/dataset-schemas.md 기준.
 - data/clusters.json (약 120개)
 - data/concepts.json (600~1200개 권장)
 - data/concept_to_cluster.json (컨셉→클러스터 1:N 매핑, 필수)
-- data/templates.json (최소 1200개 = 클러스터 120×10)
+- data/templates.json (최소 1200개, 목표 2400개 = 클러스터 120×20)
 - data/lexicon.json (컨셉 중심 표현 사전: variants 대량)
 
 ※ 주의: `data/validation_rules.json`은 생성 대상이 아니며, 데이터셋 검증을 위한 **단일 진실 기준**으로, 반드시 이 파일을 먼저 읽고 규칙에 절대 복종해야 함.
@@ -250,16 +251,13 @@ lexicon 스키마는 docs/dataset-schemas.md 기준.
 - 모든 JSON 구조/필드 제약/무결성 규칙은 docs/dataset-schemas.md를 기준으로 한다.
 - templates는 missions 3~6, 시작/종료 명확, 불친절/가비지 문장 금지, sum(estMin)==time.default
 - lexicon은 concept 중심으로 작성(클러스터 중심 금지), variants를 충분히 크게 확장, patterns는 컨셉당 1~3개
-- validate-data.ts를 작성하여:
-  1) 참조 무결성 검사(templates↔clusters, templates↔concepts, lexicon↔concepts, concept_to_cluster↔clusters)
-  2) 템플릿 품질 검사(미션 수, 금지어, time 합계, 시작/종료 휴리스틱)
-  3) 중복 id 검사
+- 검증은 `npm run -s dataset:validate`로 수행한다. (검증 스크립트는 품질 게이트이며, 데이터 생성용이 아니다)
+- **데이터 생성을 위해 스크립트/코드를 새로 만들거나 수정하지 않는다.** (사용자가 명시적으로 요청한 경우만 예외)
 - 실패한 템플릿은 삭제하지 말고 재작성 대상으로 목록화한다.
 
 출력:
 - 위 6개 데이터 파일을 완성본으로 생성
-- scripts/validate-data.ts 생성
-- scripts/sample-run.ts 생성(임의 입력 몇 개로 추천 후보 매칭 샘플 출력)
+- `npm run -s dataset:validate` 기준 errors/warnings 0 통과
 
 
 ⸻

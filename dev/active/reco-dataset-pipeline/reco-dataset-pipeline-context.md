@@ -20,7 +20,8 @@ Last Updated: 2026-03-01
 ### 🟡 IN PROGRESS
 - Stage 3 템플릿 확장: 120 clusters × 20 templates = 2400 templates 목표까지 “직접 창작 → validate → 재작성” 루프 반복
 - Stage 3 템플릿 톤 개선: 퀘스트/미션을 더 인간 친화적(대화체/부드러운 문장)으로 리라이트
-- 샘플 실행 스크립트 추가: `scripts/sample-run.ts` (입력 몇 개로 후보 템플릿/컨셉/클러스터 점수 출력)
+- (선택) 샘플 실행 스크립트: `scripts/sample-run.ts` (입력 몇 개로 후보 템플릿/컨셉/클러스터 점수 출력)
+  - 데이터 생성용 스크립트가 아니며, 신규 작성/수정은 사용자 요청이 있을 때만 진행
 
 ### ⚠️ BLOCKERS / OPEN QUESTIONS
 - lexicon 1:1 매칭 여부: `conceptLexemes`를 모든 concept(1200)에 만들지 않고, 앵커(121)+STATE(stateHints) + tags fallback 방식으로 운영 중(사용자 결정으로 유지)
@@ -36,7 +37,7 @@ Last Updated: 2026-03-01
 
 ### Required Scripts (2)
 - `scripts/validate-data.ts` (DONE)
-- `scripts/sample-run.ts` (TODO)
+- (선택) `scripts/sample-run.ts` (TODO, 사용자 요청 시만)
 
 ### Validation Must-Haves
 - 스키마 검증(필수/타입/enum/범위)

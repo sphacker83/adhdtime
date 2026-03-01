@@ -16,16 +16,13 @@
   sum(estMin)==time.default, 미션들은 가급적 순차적이어야 하고 연관성이 있어야 한다.
   - templates의 title/mission action은 “사람이 사람에게 말하듯” 자연스럽고 인지 가능한 문장으로 쓴다(존댓말 지시문 권장).
   - lexicon은 concept 중심으로 작성(클러스터 중심 금지), variants를 충분히 크게 확장, patterns는 컨셉당 3개 이상
-  - validate-data.ts를 작성하여:
-    1) 참조 무결성 검사(templates↔clusters, templates↔concepts,lexicon↔concepts, concept_to_cluster↔clusters)
-    2) 템플릿 품질 검사(미션 수, 금지어, time 합계, 시작/종료 휴리스틱)
-    3) 중복 id 검사
+  - 검증은 `npm run -s dataset:validate`로 수행한다. (검증은 데이터 품질 게이트이며, **데이터 생성용 스크립트를 만들거나 조립해서 생성하는 행위는 금지**)
+  - **데이터 생성(templates/concepts/lexicon 등)을 위해 스크립트/코드를 새로 만들거나 수정하지 않는다.** (사용자가 명시적으로 요청한 경우만 예외)
   - 실패한 템플릿은 삭제하지 말고 재작성 대상으로 목록화한다.
  
   출력:
   - 위 6개 데이터 파일을 완성본으로 생성
-  - scripts/validate-data.ts 생성
-  - scripts/sample-run.ts 생성(임의 입력 몇 개로 추천 후보 매칭 샘플 출력)
+  - `npm run -s dataset:validate` 기준 errors/warnings 0 통과
  
  ## [AI 에이전트 프롬프트 요구사항]
 

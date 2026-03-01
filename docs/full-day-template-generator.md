@@ -1,9 +1,15 @@
-아래는 Codex/LLM에게 **“풀타임(8시간) 여가생활/하루플랜 템플릿”**을 안정적으로 대량 생성시키기 위한 전용 프롬프트/문서입니다.
-(이 문서는 스키마를 다시 적지 않고, docs/dataset-schemas.md를 참조하도록만 합니다.)
+⚠️ 비활성 문서(Deprecated)
+
+이 문서는 “풀데이(8시간) 템플릿” 아이디어를 정리한 참고용 문서입니다.
+현재 프로젝트의 `data/validation_rules.json`은 `missions` 개수를 3~6개로 강제하므로,
+**이 문서의 ‘20~40개 미션’ 풀데이 템플릿은 현 스키마/검증 계약과 불일치**합니다.
+
+따라서 현 단계에서는 이 문서를 실행 지시/생성 프롬프트로 사용하지 않습니다.
+(또한 데이터 생성을 위해 스크립트/코드를 만들거나 조립하는 방식은 금지입니다.)
 
 ⸻
 
-docs/full-day-template-generator.md — 풀데이(8시간) 템플릿 생성 지침 (Codex/LLM용)
+docs/full-day-template-generator.md — (비활성) 풀데이(8시간) 템플릿 아이디어 메모
 
 0) 목적
 
@@ -178,7 +184,7 @@ docs/dataset-schemas.md 스키마는 유지하면서 다음을 만족하도록 �
 
 ⸻
 
-9) 검증(필수)
+9) 검증(참고)
 
 풀데이 템플릿도 일반 템플릿과 동일하게 검증한다.
 	•	sum(estMin)==480 (오차 0)
@@ -186,23 +192,12 @@ docs/dataset-schemas.md 스키마는 유지하면서 다음을 만족하도록 �
 	•	제목/테마와 미션 일관성
 	•	시작/마무리 존재
 
-검증 자동화는 scripts/validate-data.ts에서 수행한다.
+검증은 `npm run -s dataset:validate`로 수행한다.
 (검증 규칙의 단일 기준은 data/validation_rules.json)
 
 ⸻
 
-10) Codex 실행용 지시(배치 생성)
+10) 실행 지시 없음
 
-다음 클러스터에 대해 풀데이 템플릿을 각각 10개씩 생성하라(총 30개):
-- ROUTINE_HOLIDAY_HEALING_DAY
-- ROUTINE_CREATIVE_IMMERSION_DAY
-- ROUTINE_OUTDOOR_LEISURE_DAY
-
-각 템플릿은:
-- docs/dataset-schemas.md 스키마 준수
-- time.default=480, sum(estMin)=480 정확히
-- missions 20~40개(수십개)
-- 테마/제목과 100% 일치하는 미션만 포함
-- 금지 표현 없음
-
-출력은 templates.json에 붙일 수 있도록 Template JSON 객체들을 JSON 배열로 출력하라.
+이 문서는 “아이디어/테마 참고”까지만 제공한다.
+풀데이 템플릿을 실제로 도입하려면, 먼저 스키마/검증 계약(`missions` 개수 제한 포함)부터 별도 트랙으로 확장/합의해야 한다.

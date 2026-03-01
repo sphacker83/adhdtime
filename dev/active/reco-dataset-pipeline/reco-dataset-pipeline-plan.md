@@ -17,8 +17,10 @@ Last Updated: 2026-03-01
   - `data/concept_to_cluster.json`
   - `data/validation_rules.json` (**필수 계약**, validate는 반드시 이 파일을 단일 진실 기준으로 읽는다)
 - 스크립트
-  - `scripts/validate-data.ts`: 스키마 + 무결성 + 시간 규칙 검증
-  - `scripts/sample-run.ts`: 샘플 입력에 대한 추천 후보 출력(추가 예정)
+  - `scripts/validate-data.ts`: 스키마 + 무결성 + 시간 규칙 검증(품질 게이트)
+  - (선택) `scripts/sample-run.ts`: 샘플 입력에 대한 추천 후보 출력
+    - 데이터 생성용 스크립트가 아니며, 데이터 레코드(templates/concepts/lexicon)를 스크립트로 “조립/치환 생성”하는 행위는 금지
+    - 신규 작성/수정은 사용자 요청이 있을 때만 진행
 - 검증 규칙(최소 계약)
   - 스키마 검증(필수 필드/타입/enum/범위)
   - 참조 무결성(파일 간 키 참조 일치)
@@ -50,7 +52,6 @@ Last Updated: 2026-03-01
   - `data/lexicon.json` (concept 중심)
 - AC(요약): 모든 concept가 1:N로 매핑(최소 1개 이상), lexicon 참조 무결성 통과
 
-### Stage 3: Templates (2400)
 ### Stage 3: Templates (2400)
 - 목표: 추천/검색 결과/플랜/액션 생성에 사용할 템플릿을 클러스터당 20개 수준으로 확장(총 2400개)
 - 산출: `data/templates.json`
