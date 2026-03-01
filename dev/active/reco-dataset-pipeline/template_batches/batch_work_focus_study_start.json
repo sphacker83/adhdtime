@@ -1,0 +1,722 @@
+[
+  {
+    "id": "TPL_WORK_FOCUS_BLOCK_START_MIN_15_WORK",
+    "clusterKey": "WORK_FOCUS_BLOCK_START",
+    "type": "process",
+    "title": "집중 블록 15분 시작(초단기 착수·업무)",
+    "concepts": [
+      "WORK.FOCUS_BLOCK_START"
+    ],
+    "contexts": [
+      "WORK"
+    ],
+    "states": [],
+    "time": {
+      "min": 12,
+      "max": 20,
+      "default": 15
+    },
+    "missions": [
+      {
+        "action": "지금 할 작업 1개 고르기(완료 조건 1줄)(준비)",
+        "estMin": 2
+      },
+      {
+        "action": "알림 끄기 + 메신저/탭 3개만 남기기",
+        "estMin": 2
+      },
+      {
+        "action": "8분만 바로 착수(타이머 유지, 멈추면 즉시 재개)",
+        "estMin": 8
+      },
+      {
+        "action": "막힌 지점 1개를 ‘다음 1분 행동’으로 쪼개기",
+        "estMin": 2
+      },
+      {
+        "action": "파일 저장 + 앱에서 완료 누르기",
+        "estMin": 1
+      }
+    ]
+  },
+  {
+    "id": "TPL_WORK_FOCUS_BLOCK_START_STD_20_HOME",
+    "clusterKey": "WORK_FOCUS_BLOCK_START",
+    "type": "process",
+    "title": "집중 블록 20분 시작(재택·산만 차단)",
+    "concepts": [
+      "WORK.FOCUS_BLOCK_START"
+    ],
+    "contexts": [
+      "HOME"
+    ],
+    "states": [],
+    "time": {
+      "min": 15,
+      "max": 30,
+      "default": 20
+    },
+    "missions": [
+      {
+        "action": "책상 위 3가지만 남기고 치우기(물/노트/노트북)(준비)",
+        "estMin": 3
+      },
+      {
+        "action": "타이머 20분 + 휴대폰 멀리 두기/집중모드 켜기",
+        "estMin": 3
+      },
+      {
+        "action": "핵심 작업에 12분 착수(중간에 앱/메신저 금지)",
+        "estMin": 12
+      },
+      {
+        "action": "1분 점검: 다음 1단계가 뭔지 한 문장으로 정리",
+        "estMin": 1
+      },
+      {
+        "action": "저장하고 앱에서 완료",
+        "estMin": 1
+      }
+    ]
+  },
+  {
+    "id": "TPL_WORK_FOCUS_BLOCK_START_STD_25_WORK",
+    "clusterKey": "WORK_FOCUS_BLOCK_START",
+    "type": "process",
+    "title": "집중 블록 25분 시작(포모도로·업무)",
+    "concepts": [
+      "WORK.FOCUS_BLOCK_START"
+    ],
+    "contexts": [
+      "WORK"
+    ],
+    "states": [],
+    "time": {
+      "min": 20,
+      "max": 35,
+      "default": 25
+    },
+    "missions": [
+      {
+        "action": "이번 25분 목표 1개 정하기(완료 조건 1줄)(준비)",
+        "estMin": 3
+      },
+      {
+        "action": "알림/슬랙/메일 잠금 + 필요한 문서 1개만 열기",
+        "estMin": 4
+      },
+      {
+        "action": "15분 집중 진행(타이머 유지, 멈추면 즉시 재개)",
+        "estMin": 15
+      },
+      {
+        "action": "막힌 지점 1개를 다음 액션 2단계로 쪼개기",
+        "estMin": 2
+      },
+      {
+        "action": "결과 저장 + 앱에서 완료",
+        "estMin": 1
+      }
+    ]
+  },
+  {
+    "id": "TPL_WORK_FOCUS_BLOCK_START_STD_30_WORK",
+    "clusterKey": "WORK_FOCUS_BLOCK_START",
+    "type": "process",
+    "title": "집중 블록 30분 시작(범위 고정·업무)",
+    "concepts": [
+      "WORK.FOCUS_BLOCK_START"
+    ],
+    "contexts": [
+      "WORK"
+    ],
+    "states": [],
+    "time": {
+      "min": 24,
+      "max": 40,
+      "default": 30
+    },
+    "missions": [
+      {
+        "action": "할 일 범위 고정(시작점/끝점 1줄로 쓰기)",
+        "estMin": 4
+      },
+      {
+        "action": "방해 요소 제거(알림 끄기/탭 정리/물만 두기)",
+        "estMin": 4
+      },
+      {
+        "action": "18분 착수(‘첫 결과물’이 나오게 진행)",
+        "estMin": 18
+      },
+      {
+        "action": "체크포인트 3분: 막힌 이유 1개와 우회안 1개 적기",
+        "estMin": 3
+      },
+      {
+        "action": "저장하고 앱에서 완료",
+        "estMin": 1
+      }
+    ]
+  },
+  {
+    "id": "TPL_WORK_FOCUS_BLOCK_START_FULL_35_WORK",
+    "clusterKey": "WORK_FOCUS_BLOCK_START",
+    "type": "process",
+    "title": "집중 블록 35분 시작(딥워크 준비 포함·업무)",
+    "concepts": [
+      "WORK.FOCUS_BLOCK_START"
+    ],
+    "contexts": [
+      "WORK"
+    ],
+    "states": [],
+    "time": {
+      "min": 28,
+      "max": 50,
+      "default": 35
+    },
+    "missions": [
+      {
+        "action": "작업 문서/티켓 열기 + ‘완료 기준’ 2줄 쓰기",
+        "estMin": 5
+      },
+      {
+        "action": "방해 차단 세팅(알림/회의실 예약/방해금지)",
+        "estMin": 5
+      },
+      {
+        "action": "20분 집중 진행(한 번만 멈추고 즉시 복귀)",
+        "estMin": 20
+      },
+      {
+        "action": "4분 점검: 다음 10분을 위한 미니 플랜 3개",
+        "estMin": 4
+      },
+      {
+        "action": "저장하고 앱에서 완료",
+        "estMin": 1
+      }
+    ]
+  },
+  {
+    "id": "TPL_WORK_FOCUS_BLOCK_START_STD_40_HOME",
+    "clusterKey": "WORK_FOCUS_BLOCK_START",
+    "type": "process",
+    "title": "집중 블록 40분 시작(재택·방해요소 제거)",
+    "concepts": [
+      "WORK.FOCUS_BLOCK_START"
+    ],
+    "contexts": [
+      "HOME"
+    ],
+    "states": [],
+    "time": {
+      "min": 32,
+      "max": 55,
+      "default": 40
+    },
+    "missions": [
+      {
+        "action": "오늘 목표 1개 정하기 + 필요한 파일/링크 3개만 열기",
+        "estMin": 4
+      },
+      {
+        "action": "환경 세팅(이어폰/음악/알림 끄기/휴대폰 멀리)",
+        "estMin": 6
+      },
+      {
+        "action": "핵심 작업 25분 착수(타이머 유지)",
+        "estMin": 25
+      },
+      {
+        "action": "3분 점검: 막힌 지점 1개를 다음 액션으로 쪼개기",
+        "estMin": 3
+      },
+      {
+        "action": "저장 + 앱에서 완료",
+        "estMin": 2
+      }
+    ]
+  },
+  {
+    "id": "TPL_WORK_FOCUS_BLOCK_START_FULL_45_WORK",
+    "clusterKey": "WORK_FOCUS_BLOCK_START",
+    "type": "process",
+    "title": "집중 블록 45분 시작(성과 1개 만들기·업무)",
+    "concepts": [
+      "WORK.FOCUS_BLOCK_START"
+    ],
+    "contexts": [
+      "WORK"
+    ],
+    "states": [],
+    "time": {
+      "min": 35,
+      "max": 60,
+      "default": 45
+    },
+    "missions": [
+      {
+        "action": "이번 블록 산출물 1개 정의(파일/PR/메모 등)(준비)",
+        "estMin": 5
+      },
+      {
+        "action": "방해 제거(알림 끄기/탭 정리/회의 알림 끄기)",
+        "estMin": 6
+      },
+      {
+        "action": "28분 집중 진행(산출물 형태로 계속 남기기)",
+        "estMin": 28
+      },
+      {
+        "action": "4분 점검: 다음 막힘 1개를 해결 질문으로 바꾸기",
+        "estMin": 4
+      },
+      {
+        "action": "저장/업로드 + 앱에서 완료",
+        "estMin": 2
+      }
+    ]
+  },
+  {
+    "id": "TPL_WORK_FOCUS_BLOCK_START_FULL_50_WORK",
+    "clusterKey": "WORK_FOCUS_BLOCK_START",
+    "type": "process",
+    "title": "집중 블록 50분 시작(딥워크·업무)",
+    "concepts": [
+      "WORK.FOCUS_BLOCK_START"
+    ],
+    "contexts": [
+      "WORK"
+    ],
+    "states": [],
+    "time": {
+      "min": 40,
+      "max": 70,
+      "default": 50
+    },
+    "missions": [
+      {
+        "action": "작업 범위/우선순위 고정(해야 할 것 1개, 안 할 것 1개)(준비)",
+        "estMin": 6
+      },
+      {
+        "action": "방해 차단 세팅(알림/메일 닫기/메신저 상태 변경)",
+        "estMin": 7
+      },
+      {
+        "action": "32분 집중 진행(타이머 유지, 검색은 1회만)",
+        "estMin": 32
+      },
+      {
+        "action": "3분 점검: 결과물 상태 확인 + 다음 액션 1개 정하기",
+        "estMin": 3
+      },
+      {
+        "action": "저장하고 앱에서 완료",
+        "estMin": 2
+      }
+    ]
+  },
+  {
+    "id": "TPL_WORK_FOCUS_BLOCK_START_FULL_60_WORK",
+    "clusterKey": "WORK_FOCUS_BLOCK_START",
+    "type": "process",
+    "title": "집중 블록 60분 시작(긴 호흡·업무)",
+    "concepts": [
+      "WORK.FOCUS_BLOCK_START"
+    ],
+    "contexts": [
+      "WORK"
+    ],
+    "states": [],
+    "time": {
+      "min": 50,
+      "max": 80,
+      "default": 60
+    },
+    "missions": [
+      {
+        "action": "이번 60분 목표 1개 + 완료 기준 2줄 쓰기(준비)",
+        "estMin": 6
+      },
+      {
+        "action": "방해 요소 제거(알림 끄기/메신저 닫기/탭 정리)",
+        "estMin": 8
+      },
+      {
+        "action": "40분 집중 진행(산출물 중심, 멈추면 즉시 재개)",
+        "estMin": 40
+      },
+      {
+        "action": "4분 리뷰: 다음 15분 계획 3개로 쪼개기",
+        "estMin": 4
+      },
+      {
+        "action": "저장/공유 준비 + 앱에서 완료",
+        "estMin": 2
+      }
+    ]
+  },
+  {
+    "id": "TPL_STUDY_SESSION_START_MIN_20_HOME",
+    "clusterKey": "STUDY_SESSION_START",
+    "type": "process",
+    "title": "공부 세션 20분 시작(워밍업·집)",
+    "concepts": [
+      "STUDY.SESSION_START"
+    ],
+    "contexts": [
+      "HOME"
+    ],
+    "states": [],
+    "time": {
+      "min": 15,
+      "max": 28,
+      "default": 20
+    },
+    "missions": [
+      {
+        "action": "교재/노트 꺼내기 + 타이머 20분 시작(준비)",
+        "estMin": 3
+      },
+      {
+        "action": "오늘 범위 1개 정하기(페이지/문제 수/챕터)",
+        "estMin": 3
+      },
+      {
+        "action": "12분 집중 학습 진행(한 번만 멈춤)",
+        "estMin": 12
+      },
+      {
+        "action": "1분 점검: 이해 안 된 부분 1개 표시",
+        "estMin": 1
+      },
+      {
+        "action": "정리하고 앱에서 완료",
+        "estMin": 1
+      }
+    ]
+  },
+  {
+    "id": "TPL_STUDY_SESSION_START_STD_25_OUTSIDE",
+    "clusterKey": "STUDY_SESSION_START",
+    "type": "process",
+    "title": "공부 세션 25분 시작(읽기·밖)",
+    "concepts": [
+      "STUDY.SESSION_START"
+    ],
+    "contexts": [
+      "OUTSIDE"
+    ],
+    "states": [],
+    "time": {
+      "min": 20,
+      "max": 35,
+      "default": 25
+    },
+    "missions": [
+      {
+        "action": "자료/책 펼치기 + 읽을 파트 1개 지정(준비)",
+        "estMin": 3
+      },
+      {
+        "action": "읽기 목표 1줄 정하기(이해할 것/찾을 것)",
+        "estMin": 3
+      },
+      {
+        "action": "16분 읽기 집중(표시할 곳만 밑줄, 멈추지 않기)",
+        "estMin": 16
+      },
+      {
+        "action": "2분 표시/메모: 핵심 3줄 + 모르는 용어 1개",
+        "estMin": 2
+      },
+      {
+        "action": "정리하고 앱에서 완료",
+        "estMin": 1
+      }
+    ]
+  },
+  {
+    "id": "TPL_STUDY_SESSION_START_STD_30_HOME",
+    "clusterKey": "STUDY_SESSION_START",
+    "type": "process",
+    "title": "공부 세션 30분 시작(복습·오답·집)",
+    "concepts": [
+      "STUDY.SESSION_START"
+    ],
+    "contexts": [
+      "HOME"
+    ],
+    "states": [],
+    "time": {
+      "min": 24,
+      "max": 42,
+      "default": 30
+    },
+    "missions": [
+      {
+        "action": "복습할 범위 고르기(지난 노트/오답 1개)(준비)",
+        "estMin": 4
+      },
+      {
+        "action": "오늘 목표 정하기(오답 5개/핵심 3개 등)",
+        "estMin": 4
+      },
+      {
+        "action": "18분 복습 진행(모르면 표시만 하고 계속)",
+        "estMin": 18
+      },
+      {
+        "action": "3분 오답 처리: 틀린 이유 1줄 + 정답 근거 1줄",
+        "estMin": 3
+      },
+      {
+        "action": "정리하고 앱에서 완료",
+        "estMin": 1
+      }
+    ]
+  },
+  {
+    "id": "TPL_STUDY_SESSION_START_STD_35_OUTSIDE",
+    "clusterKey": "STUDY_SESSION_START",
+    "type": "process",
+    "title": "공부 세션 35분 시작(과제 착수·밖)",
+    "concepts": [
+      "STUDY.SESSION_START"
+    ],
+    "contexts": [
+      "OUTSIDE"
+    ],
+    "states": [],
+    "time": {
+      "min": 28,
+      "max": 50,
+      "default": 35
+    },
+    "missions": [
+      {
+        "action": "과제 요구사항/평가기준 읽고 핵심 3개 표시(준비)",
+        "estMin": 5
+      },
+      {
+        "action": "산출물 파일/문서 만들기 + 목차/구조 3개 잡기",
+        "estMin": 4
+      },
+      {
+        "action": "20분 1차 작성(문장/코드/풀이를 일단 채우기)",
+        "estMin": 20
+      },
+      {
+        "action": "체크리스트 4분: 빠진 항목 2개만 표시",
+        "estMin": 4
+      },
+      {
+        "action": "저장/백업하고 앱에서 완료",
+        "estMin": 2
+      }
+    ]
+  },
+  {
+    "id": "TPL_STUDY_SESSION_START_STD_40_HOME",
+    "clusterKey": "STUDY_SESSION_START",
+    "type": "process",
+    "title": "공부 세션 40분 시작(시험 대비·집)",
+    "concepts": [
+      "STUDY.SESSION_START"
+    ],
+    "contexts": [
+      "HOME"
+    ],
+    "states": [],
+    "time": {
+      "min": 30,
+      "max": 55,
+      "default": 40
+    },
+    "missions": [
+      {
+        "action": "기출/문제집 펼치기 + 타이머 시작(준비)",
+        "estMin": 3
+      },
+      {
+        "action": "목표 설정(문제 10개/파트 1개 등) + 쉬는 기준 정하기",
+        "estMin": 5
+      },
+      {
+        "action": "25분 문제풀이/서술 진행(멈추면 체크만 하고 계속)",
+        "estMin": 25
+      },
+      {
+        "action": "5분 채점/오답 표시(틀린 번호만 체크)",
+        "estMin": 5
+      },
+      {
+        "action": "정리하고 앱에서 완료",
+        "estMin": 2
+      }
+    ]
+  },
+  {
+    "id": "TPL_STUDY_SESSION_START_FULL_45_OUTSIDE",
+    "clusterKey": "STUDY_SESSION_START",
+    "type": "process",
+    "title": "공부 세션 45분 시작(시험 대비·집중 문제풀이·밖)",
+    "concepts": [
+      "STUDY.SESSION_START"
+    ],
+    "contexts": [
+      "OUTSIDE"
+    ],
+    "states": [],
+    "time": {
+      "min": 35,
+      "max": 65,
+      "default": 45
+    },
+    "missions": [
+      {
+        "action": "교재/계산기/필기구 세팅 + 타이머 45분(준비)",
+        "estMin": 4
+      },
+      {
+        "action": "범위 정하기(파트 1개) + 목표 점수/문제 수 1줄",
+        "estMin": 6
+      },
+      {
+        "action": "28분 집중 풀이/암기 진행(중간 검색 1회만)",
+        "estMin": 28
+      },
+      {
+        "action": "5분 정리: 모르는 개념 2개를 질문 형태로 바꾸기",
+        "estMin": 5
+      },
+      {
+        "action": "정리하고 앱에서 완료",
+        "estMin": 2
+      }
+    ]
+  },
+  {
+    "id": "TPL_STUDY_SESSION_START_FULL_50_HOME",
+    "clusterKey": "STUDY_SESSION_START",
+    "type": "process",
+    "title": "공부 세션 50분 시작(코딩/실습·집)",
+    "concepts": [
+      "STUDY.SESSION_START"
+    ],
+    "contexts": [
+      "HOME"
+    ],
+    "states": [],
+    "time": {
+      "min": 40,
+      "max": 70,
+      "default": 50
+    },
+    "missions": [
+      {
+        "action": "개발 환경 켜기(IDE/레포) + 실행 확인(준비)",
+        "estMin": 6
+      },
+      {
+        "action": "오늘 목표 1개 정하기(문제 1개/기능 1개)",
+        "estMin": 6
+      },
+      {
+        "action": "32분 구현/풀이 진행(막히면 TODO로 남기고 계속)",
+        "estMin": 32
+      },
+      {
+        "action": "4분 테스트/실행: 실패 1개만 고치기",
+        "estMin": 4
+      },
+      {
+        "action": "학습노트 3줄 쓰고 앱에서 완료",
+        "estMin": 2
+      }
+    ]
+  },
+  {
+    "id": "TPL_STUDY_SESSION_START_FULL_55_OUTSIDE",
+    "clusterKey": "STUDY_SESSION_START",
+    "type": "process",
+    "title": "공부 세션 55분 시작(논문/자료 읽기+노트·밖)",
+    "concepts": [
+      "STUDY.SESSION_START"
+    ],
+    "contexts": [
+      "OUTSIDE"
+    ],
+    "states": [],
+    "time": {
+      "min": 45,
+      "max": 80,
+      "default": 55
+    },
+    "missions": [
+      {
+        "action": "자료/논문 열기 + 읽을 섹션 1개 지정(준비)",
+        "estMin": 5
+      },
+      {
+        "action": "읽기 질문 2개 정하기(무엇을 확인할지)",
+        "estMin": 5
+      },
+      {
+        "action": "35분 읽기 집중(핵심만 표시, 멈추면 바로 복귀)",
+        "estMin": 35
+      },
+      {
+        "action": "7분 요약 노트: 핵심 5줄 + 용어 2개 정리",
+        "estMin": 7
+      },
+      {
+        "action": "정리하고 앱에서 완료",
+        "estMin": 3
+      }
+    ]
+  },
+  {
+    "id": "TPL_STUDY_SESSION_START_FULL_60_HOME",
+    "clusterKey": "STUDY_SESSION_START",
+    "type": "process",
+    "title": "공부 세션 60분 시작(레포트/과제 초안·집)",
+    "concepts": [
+      "STUDY.SESSION_START"
+    ],
+    "contexts": [
+      "HOME"
+    ],
+    "states": [],
+    "time": {
+      "min": 50,
+      "max": 85,
+      "default": 60
+    },
+    "missions": [
+      {
+        "action": "요구사항/평가기준 읽고 핵심 3개 표시(준비)",
+        "estMin": 6
+      },
+      {
+        "action": "목차/구조 잡기(섹션 3~5개) + 자료 링크 3개 모으기",
+        "estMin": 8
+      },
+      {
+        "action": "38분 초안 작성(문장/표/코드 블록으로 일단 채우기)",
+        "estMin": 38
+      },
+      {
+        "action": "6분 근거/출처 표시(인용/링크/페이지)",
+        "estMin": 6
+      },
+      {
+        "action": "저장/백업하고 앱에서 완료",
+        "estMin": 2
+      }
+    ]
+  }
+]

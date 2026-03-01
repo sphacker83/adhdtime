@@ -1,0 +1,8336 @@
+{
+  "version": 1,
+  "templates": [
+    {
+      "id": "TPL_ADMIN_BILLS_PAY_FULL_25_HOME",
+      "clusterKey": "ADMIN_BILLS_PAY",
+      "type": "process",
+      "title": "자동이체 25분 설정(1건) + 확인 저장",
+      "concepts": [
+        "ADMIN.BILLS_PAY"
+      ],
+      "contexts": [
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 20,
+        "max": 40,
+        "default": 25
+      },
+      "missions": [
+        {
+          "action": "결제수단(계좌/카드)과 인증 수단 준비(OTP/문자)",
+          "estMin": 3
+        },
+        {
+          "action": "해당 서비스/카드사에 로그인하고 납부 메뉴 진입",
+          "estMin": 4
+        },
+        {
+          "action": "자동이체/자동결제 설정 메뉴 찾기",
+          "estMin": 4
+        },
+        {
+          "action": "납부일/금액 옵션 선택(전액/최소/지정일)",
+          "estMin": 6
+        },
+        {
+          "action": "인증을 완료하고 설정 저장",
+          "estMin": 5
+        },
+        {
+          "action": "설정 완료 화면 저장 + 다음 결제 예정일 확인",
+          "estMin": 3
+        }
+      ],
+      "meta": {
+        "intensity": "FULL",
+        "contextVariant": "HOME"
+      }
+    },
+    {
+      "id": "TPL_ADMIN_BILLS_PAY_STD_08_HOME",
+      "clusterKey": "ADMIN_BILLS_PAY",
+      "type": "process",
+      "title": "공과금 8분 빠른 납부(1~2건)",
+      "concepts": [
+        "ADMIN.BILLS_PAY"
+      ],
+      "contexts": [
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 6,
+        "max": 12,
+        "default": 8
+      },
+      "missions": [
+        {
+          "action": "납부 앱/웹 열고 로그인하기(준비)",
+          "estMin": 2
+        },
+        {
+          "action": "미납 공과금 1~2건 선택하고 금액 확인",
+          "estMin": 2
+        },
+        {
+          "action": "결제 수단 선택 후 납부 실행",
+          "estMin": 3
+        },
+        {
+          "action": "납부 완료 화면을 저장(캡처/다운로드 중 1개)",
+          "estMin": 1
+        }
+      ],
+      "meta": {
+        "intensity": "STD",
+        "contextVariant": "HOME"
+      }
+    },
+    {
+      "id": "TPL_ADMIN_BILLS_PAY_STD_10_MORNING",
+      "clusterKey": "ADMIN_BILLS_PAY",
+      "type": "process",
+      "title": "자동결제 10분 정상 동작 확인(예정/수단/최근 납부)",
+      "concepts": [
+        "ADMIN.BILLS_PAY"
+      ],
+      "contexts": [
+        "MORNING"
+      ],
+      "states": [],
+      "time": {
+        "min": 8,
+        "max": 15,
+        "default": 10
+      },
+      "missions": [
+        {
+          "action": "자동결제/자동이체 목록 화면 열기",
+          "estMin": 3
+        },
+        {
+          "action": "다음 결제 예정일과 결제 수단 확인",
+          "estMin": 3
+        },
+        {
+          "action": "최근 납부 내역 1건 열어 정상 처리 여부 확인",
+          "estMin": 3
+        },
+        {
+          "action": "이상 징후가 있으면 고객센터/문의 메뉴까지 열어두기 + 앱에서 완료",
+          "estMin": 1
+        }
+      ],
+      "meta": {
+        "intensity": "STD",
+        "contextVariant": "MORNING"
+      }
+    },
+    {
+      "id": "TPL_ADMIN_BILLS_PAY_STD_12_HOME",
+      "clusterKey": "ADMIN_BILLS_PAY",
+      "type": "process",
+      "title": "결제 확인서 12분 모아서 저장(PDF/캡처 정리)",
+      "concepts": [
+        "ADMIN.BILLS_PAY"
+      ],
+      "contexts": [
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 10,
+        "max": 18,
+        "default": 12
+      },
+      "missions": [
+        {
+          "action": "이번 달 납부 확인 메일/앱 3건 찾아 열기",
+          "estMin": 4
+        },
+        {
+          "action": "각 건의 확인서/PDF를 다운로드하기",
+          "estMin": 4
+        },
+        {
+          "action": "파일명 바꾸기(YYYY-MM_항목_금액 형태)",
+          "estMin": 2
+        },
+        {
+          "action": "폴더/클라우드의 '청구서_확인' 위치로 이동 저장",
+          "estMin": 2
+        }
+      ],
+      "meta": {
+        "intensity": "STD",
+        "contextVariant": "HOME"
+      }
+    },
+    {
+      "id": "TPL_ADMIN_BILLS_PAY_STD_15_AFTER_WORK",
+      "clusterKey": "ADMIN_BILLS_PAY",
+      "type": "process",
+      "title": "연체 방지 15분 마감일 캘린더 정리",
+      "concepts": [
+        "ADMIN.BILLS_PAY"
+      ],
+      "contexts": [
+        "AFTER_WORK",
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 12,
+        "max": 22,
+        "default": 15
+      },
+      "missions": [
+        {
+          "action": "자주 내는 청구서 3~5개 마감일 화면 열기",
+          "estMin": 4
+        },
+        {
+          "action": "각 항목의 자동결제 여부를 표시해두기",
+          "estMin": 2
+        },
+        {
+          "action": "캘린더에 마감일을 입력하고 반복 설정(월 1회)",
+          "estMin": 5
+        },
+        {
+          "action": "결제 계좌/카드에서 이번 주 결제 가능한지 금액 확인",
+          "estMin": 3
+        },
+        {
+          "action": "이번 주에 처리할 1건만 바로 지정하기 + 앱에서 완료",
+          "estMin": 1
+        }
+      ],
+      "meta": {
+        "intensity": "STD",
+        "contextVariant": "AFTER_WORK"
+      }
+    },
+    {
+      "id": "TPL_ADMIN_BILLS_PAY_STD_15_HOME",
+      "clusterKey": "ADMIN_BILLS_PAY",
+      "type": "process",
+      "title": "전자고지/수신처 15분 업데이트(메일/문자)",
+      "concepts": [
+        "ADMIN.BILLS_PAY"
+      ],
+      "contexts": [
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 12,
+        "max": 22,
+        "default": 15
+      },
+      "missions": [
+        {
+          "action": "해당 서비스의 청구서 설정 화면 열기",
+          "estMin": 3
+        },
+        {
+          "action": "전자고지/문자 안내 수신 방식 선택",
+          "estMin": 4
+        },
+        {
+          "action": "이메일/전화번호 입력값이 맞는지 확인",
+          "estMin": 3
+        },
+        {
+          "action": "동의/저장을 눌러 설정 완료",
+          "estMin": 3
+        },
+        {
+          "action": "변경 완료 화면을 저장(캡처/다운로드)",
+          "estMin": 2
+        }
+      ],
+      "meta": {
+        "intensity": "STD",
+        "contextVariant": "HOME"
+      }
+    },
+    {
+      "id": "TPL_ADMIN_BILLS_PAY_STD_15_WORK",
+      "clusterKey": "ADMIN_BILLS_PAY",
+      "type": "process",
+      "title": "이메일 15분 청구서 메일 정리→결제 링크 처리",
+      "concepts": [
+        "ADMIN.BILLS_PAY"
+      ],
+      "contexts": [
+        "WORK"
+      ],
+      "states": [],
+      "time": {
+        "min": 12,
+        "max": 22,
+        "default": 15
+      },
+      "missions": [
+        {
+          "action": "메일에서 '청구서' 또는 '납부'로 검색하기(준비)",
+          "estMin": 3
+        },
+        {
+          "action": "이번 달 미납 가능성이 있는 2건에만 별표/태그 달기",
+          "estMin": 3
+        },
+        {
+          "action": "결제 링크를 열어 금액/마감일 확인",
+          "estMin": 4
+        },
+        {
+          "action": "바로 결제하거나 결제 예정일을 캘린더에 입력",
+          "estMin": 4
+        },
+        {
+          "action": "처리 완료 메일은 아카이브로 보내기",
+          "estMin": 1
+        }
+      ],
+      "meta": {
+        "intensity": "STD",
+        "contextVariant": "WORK"
+      }
+    },
+    {
+      "id": "TPL_ADMIN_BILLS_PAY_STD_18_HOME",
+      "clusterKey": "ADMIN_BILLS_PAY",
+      "type": "process",
+      "title": "카드/대출 18분 최소납부 우선 결제(급한 것부터)",
+      "concepts": [
+        "ADMIN.BILLS_PAY"
+      ],
+      "contexts": [
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 15,
+        "max": 28,
+        "default": 18
+      },
+      "missions": [
+        {
+          "action": "카드/대출 등 최소납부액과 마감일을 확인(준비)",
+          "estMin": 4
+        },
+        {
+          "action": "결제 계좌/잔액을 확인해 가능한 범위 파악",
+          "estMin": 3
+        },
+        {
+          "action": "우선순위 1~3 순서를 정하기(마감일+연체이자 기준)",
+          "estMin": 2
+        },
+        {
+          "action": "1순위 항목 결제 실행",
+          "estMin": 5
+        },
+        {
+          "action": "2순위 항목 결제 실행 + 앱에서 완료",
+          "estMin": 4
+        }
+      ],
+      "meta": {
+        "intensity": "STD",
+        "contextVariant": "HOME"
+      }
+    },
+    {
+      "id": "TPL_ADMIN_BILLS_PAY_STD_20_HOME",
+      "clusterKey": "ADMIN_BILLS_PAY",
+      "type": "process",
+      "title": "월말 20분 청구서 일괄 처리(결제+정리)",
+      "concepts": [
+        "ADMIN.BILLS_PAY"
+      ],
+      "contexts": [
+        "HOME",
+        "AFTER_WORK"
+      ],
+      "states": [],
+      "time": {
+        "min": 16,
+        "max": 30,
+        "default": 20
+      },
+      "missions": [
+        {
+          "action": "이번 달 청구서/명세서 3건만 찾아 열기(앱/메일)",
+          "estMin": 4
+        },
+        {
+          "action": "각 건의 금액과 마감일을 다시 한 번 확인",
+          "estMin": 3
+        },
+        {
+          "action": "결제 실행(가능하면 한 결제수단으로 통일)",
+          "estMin": 8
+        },
+        {
+          "action": "결제 확인 화면을 저장(캡처/다운로드)",
+          "estMin": 3
+        },
+        {
+          "action": "완료된 건은 폴더/메일에서 '처리됨'으로 정리",
+          "estMin": 2
+        }
+      ],
+      "meta": {
+        "intensity": "STD",
+        "contextVariant": "HOME"
+      }
+    },
+    {
+      "id": "TPL_ADMIN_BILLS_PAY_STD_25_HOME",
+      "clusterKey": "ADMIN_BILLS_PAY",
+      "type": "process",
+      "title": "청구서 25분 정리+결제(미납 처리)",
+      "concepts": [
+        "ADMIN.BILLS_PAY"
+      ],
+      "contexts": [
+        "HOME",
+        "ADMIN"
+      ],
+      "states": [],
+      "time": {
+        "min": 20,
+        "max": 40,
+        "default": 25
+      },
+      "missions": [
+        {
+          "action": "청구서/은행앱/카드앱 모으기(준비)",
+          "estMin": 3
+        },
+        {
+          "action": "금액/마감일 확인해서 우선순위 정하기",
+          "estMin": 5
+        },
+        {
+          "action": "이체/자동이체/카드결제로 1~3건 결제 진행",
+          "estMin": 8
+        },
+        {
+          "action": "확인 화면/영수증 저장하고 메모 한 줄 남기기",
+          "estMin": 6
+        },
+        {
+          "action": "미처리 항목만 남기고 목록 정리 + 앱에서 완료",
+          "estMin": 3
+        }
+      ]
+    },
+    {
+      "id": "TPL_HEALTH_WALK_OUTSIDE_FULL_25_OUTSIDE",
+      "clusterKey": "HEALTH_WALK_OUTSIDE",
+      "type": "process",
+      "title": "밖에서 25분 페이스 업 걷기(운동 느낌)",
+      "concepts": [
+        "HEALTH.WALK_OUTSIDE"
+      ],
+      "contexts": [
+        "OUTSIDE"
+      ],
+      "states": [],
+      "time": {
+        "min": 20,
+        "max": 35,
+        "default": 25
+      },
+      "missions": [
+        {
+          "action": "3분 워밍업 걷기(발목/무릎 느낌 체크)(준비)",
+          "estMin": 3
+        },
+        {
+          "action": "15분 빠른 걸음 유지(말은 가능, 노래는 힘든 정도)",
+          "estMin": 15
+        },
+        {
+          "action": "4분 속도 낮추며 쿨다운 걷기",
+          "estMin": 4
+        },
+        {
+          "action": "3분 종아리/햄스트링 스트레칭 + 앱에서 완료",
+          "estMin": 3
+        }
+      ],
+      "meta": {
+        "intensity": "FULL",
+        "contextVariant": "OUTSIDE"
+      }
+    },
+    {
+      "id": "TPL_HEALTH_WALK_OUTSIDE_FULL_30_OUTSIDE",
+      "clusterKey": "HEALTH_WALK_OUTSIDE",
+      "type": "process",
+      "title": "밖에서 30분 루트 산책(주말/여유 있을 때)",
+      "concepts": [
+        "HEALTH.WALK_OUTSIDE"
+      ],
+      "contexts": [
+        "OUTSIDE"
+      ],
+      "states": [],
+      "time": {
+        "min": 25,
+        "max": 45,
+        "default": 30
+      },
+      "missions": [
+        {
+          "action": "오늘 걷기 루트 1개 선택(왕복/원형 중 하나)(준비)",
+          "estMin": 2
+        },
+        {
+          "action": "3분 워밍업(어깨/팔 크게 흔들며 걷기)",
+          "estMin": 3
+        },
+        {
+          "action": "20분 일정 페이스로 걷기(중간에 물 한 모금)",
+          "estMin": 20
+        },
+        {
+          "action": "3분 계단/경사 구간을 천천히 올라가 보기",
+          "estMin": 3
+        },
+        {
+          "action": "2분 쿨다운 + 호흡 정리",
+          "estMin": 2
+        }
+      ],
+      "meta": {
+        "intensity": "FULL",
+        "contextVariant": "OUTSIDE"
+      }
+    },
+    {
+      "id": "TPL_HEALTH_WALK_OUTSIDE_MIN_05_OUTSIDE",
+      "clusterKey": "HEALTH_WALK_OUTSIDE",
+      "type": "process",
+      "title": "밖에서 5분 공기 마시기 산책(초간단)",
+      "concepts": [
+        "HEALTH.WALK_OUTSIDE"
+      ],
+      "contexts": [
+        "OUTSIDE"
+      ],
+      "states": [],
+      "time": {
+        "min": 4,
+        "max": 8,
+        "default": 5
+      },
+      "missions": [
+        {
+          "action": "현관에서 신발 신고 열쇠/폰만 챙기기(준비)",
+          "estMin": 1
+        },
+        {
+          "action": "건물/블록 한 바퀴만 천천히 걷기",
+          "estMin": 3
+        },
+        {
+          "action": "집에 들어오기 전에 어깨 3번 돌리고 숨 고르기 + 앱에서 완료",
+          "estMin": 1
+        }
+      ],
+      "meta": {
+        "intensity": "MIN",
+        "contextVariant": "OUTSIDE"
+      }
+    },
+    {
+      "id": "TPL_HEALTH_WALK_OUTSIDE_MIN_10_MORNING",
+      "clusterKey": "HEALTH_WALK_OUTSIDE",
+      "type": "process",
+      "title": "아침 10분 밖 걷기(몸 깨우기)",
+      "concepts": [
+        "HEALTH.WALK_OUTSIDE"
+      ],
+      "contexts": [
+        "OUTSIDE",
+        "MORNING"
+      ],
+      "states": [],
+      "time": {
+        "min": 8,
+        "max": 15,
+        "default": 10
+      },
+      "missions": [
+        {
+          "action": "겉옷/모자 챙기고 물 한 모금 마시기(준비)",
+          "estMin": 1
+        },
+        {
+          "action": "현관에서 햇빛 방향으로 3분 천천히 워밍업 걷기",
+          "estMin": 3
+        },
+        {
+          "action": "조금 빠른 걸음으로 5분 걷기(호흡은 편하게)",
+          "estMin": 5
+        },
+        {
+          "action": "집에 들어오기 전 1분 천천히 걸으며 호흡 정리",
+          "estMin": 1
+        }
+      ],
+      "meta": {
+        "intensity": "MIN",
+        "contextVariant": "MORNING"
+      }
+    },
+    {
+      "id": "TPL_HEALTH_WALK_OUTSIDE_STD_12_AFTER_WORK",
+      "clusterKey": "HEALTH_WALK_OUTSIDE",
+      "type": "process",
+      "title": "퇴근 후 12분 우산 산책(비 오는 날도 유지)",
+      "concepts": [
+        "HEALTH.WALK_OUTSIDE"
+      ],
+      "contexts": [
+        "OUTSIDE",
+        "AFTER_WORK"
+      ],
+      "states": [],
+      "time": {
+        "min": 10,
+        "max": 18,
+        "default": 12
+      },
+      "missions": [
+        {
+          "action": "우산/겉옷 챙기고 이어폰은 넣어두기(주변 소리 듣기)(준비)",
+          "estMin": 1
+        },
+        {
+          "action": "젖지 않는 동선으로 8분 걷기(횡단보도는 천천히)",
+          "estMin": 8
+        },
+        {
+          "action": "현관 앞에서 바닥/신발 물기 털고 어깨 풀기",
+          "estMin": 2
+        },
+        {
+          "action": "젖은 겉옷 걸어두고 손 씻기까지 마무리",
+          "estMin": 1
+        }
+      ],
+      "meta": {
+        "intensity": "STD",
+        "contextVariant": "AFTER_WORK"
+      }
+    },
+    {
+      "id": "TPL_HEALTH_WALK_OUTSIDE_STD_15_AFTER_WORK",
+      "clusterKey": "HEALTH_WALK_OUTSIDE",
+      "type": "process",
+      "title": "퇴근 후 15분 리셋 산책(머리 환기)",
+      "concepts": [
+        "HEALTH.WALK_OUTSIDE"
+      ],
+      "contexts": [
+        "OUTSIDE",
+        "AFTER_WORK"
+      ],
+      "states": [],
+      "time": {
+        "min": 12,
+        "max": 22,
+        "default": 15
+      },
+      "missions": [
+        {
+          "action": "집 앞에서 2분 느린 걸음으로 워밍업(어깨 힘 빼기)(준비)",
+          "estMin": 2
+        },
+        {
+          "action": "평소보다 빠른 페이스로 10분 걷기(신호등에서 숨 고르기)",
+          "estMin": 10
+        },
+        {
+          "action": "집에 가까워지면 2분 천천히 걸으며 마음 정리",
+          "estMin": 2
+        },
+        {
+          "action": "현관 들어가기 전 1분 스트레칭(종아리/허벅지) + 앱에서 완료",
+          "estMin": 1
+        }
+      ],
+      "meta": {
+        "intensity": "STD",
+        "contextVariant": "AFTER_WORK"
+      }
+    },
+    {
+      "id": "TPL_HEALTH_WALK_OUTSIDE_STD_15_BEFORE_SLEEP",
+      "clusterKey": "HEALTH_WALK_OUTSIDE",
+      "type": "process",
+      "title": "자기 전 15분 가벼운 밤 산책(긴장 풀기)",
+      "concepts": [
+        "HEALTH.WALK_OUTSIDE"
+      ],
+      "contexts": [
+        "OUTSIDE",
+        "BEFORE_SLEEP"
+      ],
+      "states": [],
+      "time": {
+        "min": 12,
+        "max": 22,
+        "default": 15
+      },
+      "missions": [
+        {
+          "action": "얇은 겉옷 챙기고 화면 밝기 낮춘 뒤 나가기(준비)",
+          "estMin": 2
+        },
+        {
+          "action": "10분 천천히 걷기(발소리/바람 소리에 집중)",
+          "estMin": 10
+        },
+        {
+          "action": "2분 목/어깨/손목 풀기",
+          "estMin": 2
+        },
+        {
+          "action": "집에 들어오며 1분 심호흡 3번 + 턱 힘 풀기 + 앱에서 완료",
+          "estMin": 1
+        }
+      ],
+      "meta": {
+        "intensity": "STD",
+        "contextVariant": "BEFORE_SLEEP"
+      }
+    },
+    {
+      "id": "TPL_HEALTH_WALK_OUTSIDE_STD_15_MORNING",
+      "clusterKey": "HEALTH_WALK_OUTSIDE",
+      "type": "process",
+      "title": "아침 햇빛 15분 산책(기분/각성 올리기)",
+      "concepts": [
+        "HEALTH.WALK_OUTSIDE"
+      ],
+      "contexts": [
+        "OUTSIDE",
+        "MORNING"
+      ],
+      "states": [],
+      "time": {
+        "min": 12,
+        "max": 22,
+        "default": 15
+      },
+      "missions": [
+        {
+          "action": "모자/선크림/이어폰 중 1개만 선택하고 나가기(준비)",
+          "estMin": 2
+        },
+        {
+          "action": "햇빛 받으며 10분 걷기(중간에 1번 크게 하품해도 OK)",
+          "estMin": 10
+        },
+        {
+          "action": "벤치/난간에 기대서 2분 목/어깨 풀기",
+          "estMin": 2
+        },
+        {
+          "action": "집에 들어오며 1분 동안 오늘 첫 일정만 떠올리기 + 앱에서 완료",
+          "estMin": 1
+        }
+      ],
+      "meta": {
+        "intensity": "STD",
+        "contextVariant": "MORNING"
+      }
+    },
+    {
+      "id": "TPL_HEALTH_WALK_OUTSIDE_STD_20_OUTSIDE",
+      "clusterKey": "HEALTH_WALK_OUTSIDE",
+      "type": "process",
+      "title": "밖에서 20분 걷기(리셋 산책)",
+      "concepts": [
+        "HEALTH.WALK_OUTSIDE"
+      ],
+      "contexts": [
+        "OUTSIDE"
+      ],
+      "states": [],
+      "time": {
+        "min": 15,
+        "max": 30,
+        "default": 20
+      },
+      "missions": [
+        {
+          "action": "신발 신고 물 챙기기(준비)",
+          "estMin": 2
+        },
+        {
+          "action": "밖으로 나가서 3분 가볍게 몸 풀기",
+          "estMin": 3
+        },
+        {
+          "action": "12분 걷기(호흡에만 집중)",
+          "estMin": 12
+        },
+        {
+          "action": "집에 들어와 물 마시고 앱에서 완료",
+          "estMin": 3
+        }
+      ]
+    },
+    {
+      "id": "TPL_HEALTH_WALK_OUTSIDE_STD_20_OUTSIDE_SUNLIGHT",
+      "clusterKey": "HEALTH_WALK_OUTSIDE",
+      "type": "process",
+      "title": "밖에서 20분 햇빛 산책(점심 전후)",
+      "concepts": [
+        "HEALTH.WALK_OUTSIDE"
+      ],
+      "contexts": [
+        "OUTSIDE"
+      ],
+      "states": [],
+      "time": {
+        "min": 16,
+        "max": 28,
+        "default": 20
+      },
+      "missions": [
+        {
+          "action": "걷기 동선 1개만 정하기(공원/큰 길/블록)(준비)",
+          "estMin": 2
+        },
+        {
+          "action": "3분 천천히 워밍업(손/발 온도 올리기)",
+          "estMin": 3
+        },
+        {
+          "action": "14분 일정 페이스로 걷기(중간에 자세 1번 바로잡기)",
+          "estMin": 14
+        },
+        {
+          "action": "1분 천천히 걸으며 마무리 + 심호흡 3번",
+          "estMin": 1
+        }
+      ],
+      "meta": {
+        "intensity": "STD",
+        "contextVariant": "OUTSIDE"
+      }
+    },
+    {
+      "id": "TPL_HOME_DISHWASH_FULL_25_WEEKEND_HOME",
+      "clusterKey": "HOME_DISHWASH",
+      "type": "process",
+      "title": "설거지 25분 주말 한 번에(많이 쌓였을 때)",
+      "concepts": [
+        "HOME.DISHWASH",
+        "HOME.SINK_CLEAR"
+      ],
+      "contexts": [
+        "WEEKEND",
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 20,
+        "max": 35,
+        "default": 25
+      },
+      "missions": [
+        {
+          "action": "주말 설거지거리 분류(유리/플라스틱/팬)하기(준비)",
+          "estMin": 4
+        },
+        {
+          "action": "뜨거운물+세제 받아 팬/볼 불림 세팅(세팅)",
+          "estMin": 4
+        },
+        {
+          "action": "그릇→컵→수저→팬 순서로 세척하기",
+          "estMin": 12
+        },
+        {
+          "action": "건조대 정돈 + 싱크대/조리대 닦기",
+          "estMin": 4
+        },
+        {
+          "action": "도구 제자리 두고 앱에서 완료",
+          "estMin": 1
+        }
+      ],
+      "meta": {
+        "intensity": "FULL",
+        "goalFocus": "KITCHEN_RESET",
+        "contextVariant": "HOME",
+        "stateMode": "NORMAL"
+      }
+    },
+    {
+      "id": "TPL_HOME_DISHWASH_FULL_30_HOME",
+      "clusterKey": "HOME_DISHWASH",
+      "type": "process",
+      "title": "설거지 30분 주방 전체 리셋(조리대까지)",
+      "concepts": [
+        "HOME.DISHWASH",
+        "HOME.SINK_CLEAR"
+      ],
+      "contexts": [
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 25,
+        "max": 40,
+        "default": 30
+      },
+      "missions": [
+        {
+          "action": "음식물 버리고 설거지 거리 모으기(준비)",
+          "estMin": 4
+        },
+        {
+          "action": "뜨거운물+세제 받아 불림 + 타이머 시작(타이머 시작)",
+          "estMin": 3
+        },
+        {
+          "action": "그릇/컵/수저 세척하기",
+          "estMin": 15
+        },
+        {
+          "action": "조리대/싱크대/수전 닦기",
+          "estMin": 6
+        },
+        {
+          "action": "수세미 헹궈 말리고 세제 제자리 + 앱에서 완료",
+          "estMin": 2
+        }
+      ],
+      "meta": {
+        "intensity": "FULL",
+        "goalFocus": "KITCHEN_RESET",
+        "contextVariant": "HOME",
+        "stateMode": "NORMAL"
+      }
+    },
+    {
+      "id": "TPL_HOME_DISHWASH_MIN_10_AFTER_WORK_HOME",
+      "clusterKey": "HOME_DISHWASH",
+      "type": "process",
+      "title": "설거지 10분 귀가 직후 싱크대 비우기",
+      "concepts": [
+        "HOME.DISHWASH",
+        "HOME.SINK_CLEAR"
+      ],
+      "contexts": [
+        "AFTER_WORK",
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 8,
+        "max": 15,
+        "default": 10
+      },
+      "missions": [
+        {
+          "action": "그릇/컵 한곳에 모으기(준비)",
+          "estMin": 2
+        },
+        {
+          "action": "뜨거운물+세제 받아 2분 불림(세팅)",
+          "estMin": 2
+        },
+        {
+          "action": "그릇→컵→수저 세척하기",
+          "estMin": 4
+        },
+        {
+          "action": "건조대에 올리고 싱크대 물기 닦기",
+          "estMin": 1
+        },
+        {
+          "action": "세제/수세미 제자리 + 앱에서 완료",
+          "estMin": 1
+        }
+      ],
+      "meta": {
+        "intensity": "MIN",
+        "goalFocus": "SINK_CLEAR",
+        "contextVariant": "AFTER_WORK",
+        "stateMode": "LOW_MOTIVATION"
+      }
+    },
+    {
+      "id": "TPL_HOME_DISHWASH_MIN_6_HOME",
+      "clusterKey": "HOME_DISHWASH",
+      "type": "process",
+      "title": "설거지 6분 미니(컵/수저만)",
+      "concepts": [
+        "HOME.DISHWASH",
+        "HOME.SINK_CLEAR"
+      ],
+      "contexts": [
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 5,
+        "max": 10,
+        "default": 6
+      },
+      "missions": [
+        {
+          "action": "설거지 거리(컵/수저) 한곳에 모으기(준비)",
+          "estMin": 1
+        },
+        {
+          "action": "미지근한 물+세제 1번 세팅(세팅)",
+          "estMin": 1
+        },
+        {
+          "action": "컵/수저 빠르게 세척하기",
+          "estMin": 3
+        },
+        {
+          "action": "물기 털고 제자리 두기 + 앱에서 완료",
+          "estMin": 1
+        }
+      ],
+      "meta": {
+        "intensity": "MIN",
+        "goalFocus": "SINK_CLEAR",
+        "contextVariant": "HOME",
+        "stateMode": "NORMAL"
+      }
+    },
+    {
+      "id": "TPL_HOME_DISHWASH_MIN_8_MORNING_HOME",
+      "clusterKey": "HOME_DISHWASH",
+      "type": "process",
+      "title": "설거지 8분 아침 빠른 세척(싱크대 비우기)",
+      "concepts": [
+        "HOME.DISHWASH",
+        "HOME.SINK_CLEAR"
+      ],
+      "contexts": [
+        "MORNING",
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 6,
+        "max": 12,
+        "default": 8
+      },
+      "missions": [
+        {
+          "action": "아침 설거지거리 한곳에 모으기(모으기)",
+          "estMin": 1
+        },
+        {
+          "action": "음식물/기름기 살짝 제거하기(준비)",
+          "estMin": 1
+        },
+        {
+          "action": "컵→그릇→수저 순서로 세척하기",
+          "estMin": 4
+        },
+        {
+          "action": "건조대에 올리고 싱크대 물기 닦기 + 앱에서 완료",
+          "estMin": 2
+        }
+      ],
+      "meta": {
+        "intensity": "MIN",
+        "goalFocus": "SINK_CLEAR",
+        "contextVariant": "HOME",
+        "stateMode": "NORMAL"
+      }
+    },
+    {
+      "id": "TPL_HOME_DISHWASH_STD_12_BEFORE_SLEEP_HOME",
+      "clusterKey": "HOME_DISHWASH",
+      "type": "process",
+      "title": "설거지 12분 자기 전 싱크대 리셋",
+      "concepts": [
+        "HOME.DISHWASH",
+        "HOME.SINK_CLEAR"
+      ],
+      "contexts": [
+        "BEFORE_SLEEP",
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 10,
+        "max": 18,
+        "default": 12
+      },
+      "missions": [
+        {
+          "action": "뜨거운물 받아 수세미/세제 꺼내기(준비)",
+          "estMin": 2
+        },
+        {
+          "action": "음식물/기름기 먼저 제거하기",
+          "estMin": 2
+        },
+        {
+          "action": "그릇/컵/수저 세척하기",
+          "estMin": 6
+        },
+        {
+          "action": "건조대 정돈 + 싱크대 물기 닦기",
+          "estMin": 1
+        },
+        {
+          "action": "도구 제자리 두고 앱에서 완료",
+          "estMin": 1
+        }
+      ],
+      "meta": {
+        "intensity": "STD",
+        "goalFocus": "SINK_CLEAR",
+        "contextVariant": "HOME",
+        "stateMode": "NORMAL"
+      }
+    },
+    {
+      "id": "TPL_HOME_DISHWASH_STD_15_AFTER_WORK_HOME",
+      "clusterKey": "HOME_DISHWASH",
+      "type": "process",
+      "title": "설거지 15분 저항 낮게(퇴근 후 한 번에)",
+      "concepts": [
+        "HOME.DISHWASH",
+        "HOME.SINK_CLEAR"
+      ],
+      "contexts": [
+        "AFTER_WORK",
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 12,
+        "max": 22,
+        "default": 15
+      },
+      "missions": [
+        {
+          "action": "설거지거리 한곳에 모으기(준비)",
+          "estMin": 2
+        },
+        {
+          "action": "뜨거운물+세제 받아 3분 불림(세팅)",
+          "estMin": 3
+        },
+        {
+          "action": "그릇 10개(또는 1바구니)만 세척하기(착수)",
+          "estMin": 7
+        },
+        {
+          "action": "싱크대 물기 닦고 건조대 정돈하기",
+          "estMin": 2
+        },
+        {
+          "action": "세제/수세미 제자리 + 앱에서 완료",
+          "estMin": 1
+        }
+      ],
+      "meta": {
+        "intensity": "STD",
+        "goalFocus": "SINK_CLEAR",
+        "contextVariant": "AFTER_WORK",
+        "stateMode": "LOW_MOTIVATION"
+      }
+    },
+    {
+      "id": "TPL_HOME_DISHWASH_STD_15_HOME",
+      "clusterKey": "HOME_DISHWASH",
+      "type": "process",
+      "title": "설거지 15분 기본 프로세스(집)",
+      "concepts": [
+        "HOME.DISHWASH",
+        "HOME.SINK_CLEAR"
+      ],
+      "contexts": [
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 10,
+        "max": 25,
+        "default": 15
+      },
+      "missions": [
+        {
+          "action": "설거지 거리 한곳에 모으기(준비)",
+          "estMin": 2
+        },
+        {
+          "action": "음식물/기름기 먼저 제거하기(휴지/수세미 1차)",
+          "estMin": 2
+        },
+        {
+          "action": "그릇→컵→수저 순서로 세척하기",
+          "estMin": 7
+        },
+        {
+          "action": "건조대 정리 + 싱크대 물기 닦기",
+          "estMin": 3
+        },
+        {
+          "action": "세제/수세미 제자리 두고 앱에서 완료 누르기",
+          "estMin": 1
+        }
+      ],
+      "meta": {
+        "intensity": "STD",
+        "goalFocus": "SINK_CLEAR",
+        "contextVariant": "HOME",
+        "stateMode": "NORMAL"
+      }
+    },
+    {
+      "id": "TPL_HOME_DISHWASH_STD_18_HOME",
+      "clusterKey": "HOME_DISHWASH",
+      "type": "process",
+      "title": "설거지 18분 주방 리셋(팬 포함)",
+      "concepts": [
+        "HOME.DISHWASH",
+        "HOME.SINK_CLEAR"
+      ],
+      "contexts": [
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 15,
+        "max": 25,
+        "default": 18
+      },
+      "missions": [
+        {
+          "action": "큰 그릇/팬 따로 빼고 불림 물 받기(준비)",
+          "estMin": 2
+        },
+        {
+          "action": "프라이팬/냄비 기름기 닦고 불림하기(세팅)",
+          "estMin": 2
+        },
+        {
+          "action": "그릇→컵→수저 세척하기",
+          "estMin": 9
+        },
+        {
+          "action": "조리대/싱크대 닦기",
+          "estMin": 3
+        },
+        {
+          "action": "도구 제자리 두고 앱에서 완료",
+          "estMin": 2
+        }
+      ],
+      "meta": {
+        "intensity": "STD",
+        "goalFocus": "KITCHEN_RESET",
+        "contextVariant": "HOME",
+        "stateMode": "NORMAL"
+      }
+    },
+    {
+      "id": "TPL_HOME_DISHWASH_STD_20_AFTER_LUNCH_HOME",
+      "clusterKey": "HOME_DISHWASH",
+      "type": "process",
+      "title": "설거지 20분 점심 후 싱크대 비우기(도시락 포함)",
+      "concepts": [
+        "HOME.DISHWASH",
+        "HOME.SINK_CLEAR"
+      ],
+      "contexts": [
+        "AFTER_LUNCH",
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 15,
+        "max": 28,
+        "default": 20
+      },
+      "missions": [
+        {
+          "action": "점심 설거지거리 모으기 + 배수구망 비우기(준비)",
+          "estMin": 2
+        },
+        {
+          "action": "세제/수세미 꺼내고 뜨거운물 받아두기(세팅)",
+          "estMin": 2
+        },
+        {
+          "action": "그릇/도시락/수저 세척하기",
+          "estMin": 10
+        },
+        {
+          "action": "건조대 배치 정돈하기",
+          "estMin": 3
+        },
+        {
+          "action": "싱크대/수전 물기 닦기",
+          "estMin": 2
+        },
+        {
+          "action": "세제 제자리 두고 앱에서 완료",
+          "estMin": 1
+        }
+      ],
+      "meta": {
+        "intensity": "STD",
+        "goalFocus": "SINK_CLEAR",
+        "contextVariant": "HOME",
+        "stateMode": "NORMAL"
+      }
+    },
+    {
+      "id": "TPL_HOME_VACUUM_FULL_30_WEEKEND_HOME",
+      "clusterKey": "HOME_VACUUM",
+      "type": "process",
+      "title": "청소기 30분 주말 방 전체 훑기(바닥 물건 포함)",
+      "concepts": [
+        "HOME.VACUUM"
+      ],
+      "contexts": [
+        "WEEKEND",
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 25,
+        "max": 42,
+        "default": 30
+      },
+      "missions": [
+        {
+          "action": "필터/먼지통 상태 확인하고 준비물 꺼내기(준비)",
+          "estMin": 3
+        },
+        {
+          "action": "방마다 바닥 물건 바구니에 모으기(모으기)",
+          "estMin": 5
+        },
+        {
+          "action": "전체 바닥 청소기 돌리기",
+          "estMin": 17
+        },
+        {
+          "action": "모서리/문턱 마무리하기",
+          "estMin": 3
+        },
+        {
+          "action": "먼지통 비우고 도구 제자리 + 앱에서 완료",
+          "estMin": 2
+        }
+      ],
+      "meta": {
+        "intensity": "FULL",
+        "goalFocus": "ROOM_RESET",
+        "contextVariant": "HOME",
+        "stateMode": "NORMAL"
+      }
+    },
+    {
+      "id": "TPL_HOME_VACUUM_FULL_35_HOME",
+      "clusterKey": "HOME_VACUUM",
+      "type": "process",
+      "title": "청소기 35분 집안 리셋(방 3곳+거실)",
+      "concepts": [
+        "HOME.VACUUM"
+      ],
+      "contexts": [
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 30,
+        "max": 50,
+        "default": 35
+      },
+      "missions": [
+        {
+          "action": "청소 구역 계획하고 타이머 시작(타이머 시작)",
+          "estMin": 3
+        },
+        {
+          "action": "바닥 물건 제자리로 옮기기(착수)",
+          "estMin": 6
+        },
+        {
+          "action": "방 3곳 + 거실 청소기 돌리기",
+          "estMin": 20
+        },
+        {
+          "action": "카펫/러그/모서리 한 번 더 훑기",
+          "estMin": 4
+        },
+        {
+          "action": "필터/먼지통 간단히 관리하기",
+          "estMin": 1
+        },
+        {
+          "action": "청소기 충전하고 앱에서 완료",
+          "estMin": 1
+        }
+      ],
+      "meta": {
+        "intensity": "FULL",
+        "goalFocus": "ROOM_RESET",
+        "contextVariant": "HOME",
+        "stateMode": "NORMAL"
+      }
+    },
+    {
+      "id": "TPL_HOME_VACUUM_MIN_10_MORNING_HOME",
+      "clusterKey": "HOME_VACUUM",
+      "type": "process",
+      "title": "청소기 10분 아침 동선만(거실/주방)",
+      "concepts": [
+        "HOME.VACUUM"
+      ],
+      "contexts": [
+        "MORNING",
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 8,
+        "max": 15,
+        "default": 10
+      },
+      "missions": [
+        {
+          "action": "청소기 꺼내기 + 동선만 정하기(준비)",
+          "estMin": 2
+        },
+        {
+          "action": "바닥 물건 5개만 의자 위로 올리기(착수)",
+          "estMin": 2
+        },
+        {
+          "action": "거실/주방 동선만 청소기 돌리기",
+          "estMin": 5
+        },
+        {
+          "action": "먼지통 확인하고 앱에서 완료",
+          "estMin": 1
+        }
+      ],
+      "meta": {
+        "intensity": "MIN",
+        "goalFocus": "FLOOR_DUST",
+        "contextVariant": "HOME",
+        "stateMode": "NORMAL"
+      }
+    },
+    {
+      "id": "TPL_HOME_VACUUM_MIN_12_AFTER_WORK_HOME",
+      "clusterKey": "HOME_VACUUM",
+      "type": "process",
+      "title": "청소기 12분 퇴근 후 현관~거실 빠르게",
+      "concepts": [
+        "HOME.VACUUM"
+      ],
+      "contexts": [
+        "AFTER_WORK",
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 10,
+        "max": 18,
+        "default": 12
+      },
+      "missions": [
+        {
+          "action": "청소기(또는 빗자루) 꺼내기(준비)",
+          "estMin": 2
+        },
+        {
+          "action": "현관 매트 큰 먼지 먼저 모으기(모으기)",
+          "estMin": 2
+        },
+        {
+          "action": "현관→거실 동선 청소기 돌리기",
+          "estMin": 6
+        },
+        {
+          "action": "헤드에 엉킨 머리카락 제거하기",
+          "estMin": 1
+        },
+        {
+          "action": "도구 제자리 두고 앱에서 완료",
+          "estMin": 1
+        }
+      ],
+      "meta": {
+        "intensity": "MIN",
+        "goalFocus": "FLOOR_DUST",
+        "contextVariant": "HOME",
+        "stateMode": "LOW_ENERGY"
+      }
+    },
+    {
+      "id": "TPL_HOME_VACUUM_MIN_14_HOME",
+      "clusterKey": "HOME_VACUUM",
+      "type": "process",
+      "title": "청소기 14분 저에너지 한 구역만(방 1곳+복도)",
+      "concepts": [
+        "HOME.VACUUM"
+      ],
+      "contexts": [
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 12,
+        "max": 20,
+        "default": 14
+      },
+      "missions": [
+        {
+          "action": "청소기 꺼내고 배터리/모드 확인(준비)",
+          "estMin": 2
+        },
+        {
+          "action": "바닥 물건 8개만 한곳에 모으기(모으기)",
+          "estMin": 3
+        },
+        {
+          "action": "방 1곳 + 복도만 청소기 돌리기",
+          "estMin": 8
+        },
+        {
+          "action": "헤드/먼지통 확인하고 앱에서 완료",
+          "estMin": 1
+        }
+      ],
+      "meta": {
+        "intensity": "MIN",
+        "goalFocus": "FLOOR_DUST",
+        "contextVariant": "HOME",
+        "stateMode": "LOW_ENERGY"
+      }
+    },
+    {
+      "id": "TPL_HOME_VACUUM_STD_15_BEFORE_SLEEP_HOME",
+      "clusterKey": "HOME_VACUUM",
+      "type": "process",
+      "title": "청소기 15분 자기 전 조용히(침실 바닥 정돈)",
+      "concepts": [
+        "HOME.VACUUM"
+      ],
+      "contexts": [
+        "BEFORE_SLEEP",
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 12,
+        "max": 22,
+        "default": 15
+      },
+      "missions": [
+        {
+          "action": "조용한 모드/헤드 선택하기(세팅)",
+          "estMin": 2
+        },
+        {
+          "action": "침대 주변 물건 바구니에 모으기(모으기)",
+          "estMin": 2
+        },
+        {
+          "action": "침실 바닥 천천히 청소기 돌리기",
+          "estMin": 8
+        },
+        {
+          "action": "머리카락/실밥 제거하기",
+          "estMin": 2
+        },
+        {
+          "action": "청소기 충전 위치에 두고 앱에서 완료",
+          "estMin": 1
+        }
+      ],
+      "meta": {
+        "intensity": "STD",
+        "goalFocus": "FLOOR_DUST",
+        "contextVariant": "HOME",
+        "stateMode": "LOW_ENERGY"
+      }
+    },
+    {
+      "id": "TPL_HOME_VACUUM_STD_18_HOME",
+      "clusterKey": "HOME_VACUUM",
+      "type": "process",
+      "title": "청소기 18분 거실 중심(러그/모서리 포함)",
+      "concepts": [
+        "HOME.VACUUM"
+      ],
+      "contexts": [
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 15,
+        "max": 26,
+        "default": 18
+      },
+      "missions": [
+        {
+          "action": "청소기 꺼내기 + 구역 2곳만 정하기(준비)",
+          "estMin": 2
+        },
+        {
+          "action": "바닥 물건 10개만 제자리로 옮기기(착수)",
+          "estMin": 3
+        },
+        {
+          "action": "거실→복도 순서로 청소기 돌리기",
+          "estMin": 9
+        },
+        {
+          "action": "러그/모서리 한 번 더 훑기",
+          "estMin": 3
+        },
+        {
+          "action": "먼지통 비우고 앱에서 완료",
+          "estMin": 1
+        }
+      ],
+      "meta": {
+        "intensity": "STD",
+        "goalFocus": "ROOM_RESET",
+        "contextVariant": "HOME",
+        "stateMode": "NORMAL"
+      }
+    },
+    {
+      "id": "TPL_HOME_VACUUM_STD_20_HOME",
+      "clusterKey": "HOME_VACUUM",
+      "type": "process",
+      "title": "집 청소기 20분 빠른 루틴(거실 중심)",
+      "concepts": [
+        "HOME.VACUUM"
+      ],
+      "contexts": [
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 15,
+        "max": 30,
+        "default": 20
+      },
+      "missions": [
+        {
+          "action": "청소기(또는 빗자루) 꺼내기 + 범위 정하기(준비)",
+          "estMin": 2
+        },
+        {
+          "action": "바닥 물건 10개만 주워서 제자리 모으기",
+          "estMin": 3
+        },
+        {
+          "action": "거실→복도→방 입구 순서로 청소기 돌리기",
+          "estMin": 10
+        },
+        {
+          "action": "모서리/러그 한 번 더 훑기",
+          "estMin": 3
+        },
+        {
+          "action": "먼지통 비우고 도구 제자리 + 앱에서 완료",
+          "estMin": 2
+        }
+      ]
+    },
+    {
+      "id": "TPL_HOME_VACUUM_STD_22_AFTER_LUNCH_HOME",
+      "clusterKey": "HOME_VACUUM",
+      "type": "process",
+      "title": "청소기 22분 점심 후 부스러기 제거(식탁 아래)",
+      "concepts": [
+        "HOME.VACUUM"
+      ],
+      "contexts": [
+        "AFTER_LUNCH",
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 18,
+        "max": 30,
+        "default": 22
+      },
+      "missions": [
+        {
+          "action": "식탁 의자 밀어두고 범위 정하기(준비)",
+          "estMin": 3
+        },
+        {
+          "action": "큰 부스러기 한 번 주워 담기(모으기)",
+          "estMin": 2
+        },
+        {
+          "action": "식탁 아래/주방 바닥 청소기 돌리기",
+          "estMin": 12
+        },
+        {
+          "action": "식탁 다리 주변 한번 닦기",
+          "estMin": 4
+        },
+        {
+          "action": "도구 제자리 두고 앱에서 완료",
+          "estMin": 1
+        }
+      ],
+      "meta": {
+        "intensity": "STD",
+        "goalFocus": "FLOOR_DUST",
+        "contextVariant": "HOME",
+        "stateMode": "NORMAL"
+      }
+    },
+    {
+      "id": "TPL_HOME_VACUUM_STD_25_WEEKDAY_HOME",
+      "clusterKey": "HOME_VACUUM",
+      "type": "process",
+      "title": "청소기 25분 평일 저녁 리셋(구역 3곳)",
+      "concepts": [
+        "HOME.VACUUM"
+      ],
+      "contexts": [
+        "WEEKDAY",
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 20,
+        "max": 35,
+        "default": 25
+      },
+      "missions": [
+        {
+          "action": "청소기 꺼내기 + 오늘 구역 3곳 정하기(준비)",
+          "estMin": 3
+        },
+        {
+          "action": "바닥 물건 바구니에 모으기(모으기)",
+          "estMin": 4
+        },
+        {
+          "action": "구역 3곳 청소기 돌리기",
+          "estMin": 14
+        },
+        {
+          "action": "문턱/모서리 한 번 더 훑기",
+          "estMin": 3
+        },
+        {
+          "action": "먼지통 비우고 앱에서 완료",
+          "estMin": 1
+        }
+      ],
+      "meta": {
+        "intensity": "STD",
+        "goalFocus": "FLOOR_DUST",
+        "contextVariant": "HOME",
+        "stateMode": "NORMAL"
+      }
+    },
+    {
+      "id": "TPL_ROUTINE_DAY_START_FULL_22_MORNING",
+      "clusterKey": "ROUTINE_DAY_START",
+      "type": "process",
+      "title": "하루 시작 22분 풀 세팅(집)",
+      "concepts": [
+        "ROUTINE.DAY_START"
+      ],
+      "contexts": [
+        "MORNING",
+        "HOME",
+        "WORKDAY"
+      ],
+      "states": [],
+      "time": {
+        "min": 18,
+        "max": 32,
+        "default": 22
+      },
+      "missions": [
+        {
+          "action": "물 한 컵 준비 + 타이머 시작(준비)",
+          "estMin": 3
+        },
+        {
+          "action": "세안/양치 + 옷 갈아입기",
+          "estMin": 5
+        },
+        {
+          "action": "캘린더 열고 오늘 일정/미팅 3개 확인",
+          "estMin": 5
+        },
+        {
+          "action": "오늘 TOP3 정하고 첫 액션 1개를 1문장으로 쪼개기",
+          "estMin": 5
+        },
+        {
+          "action": "가방/책상 정리하고 앱에서 완료",
+          "estMin": 4
+        }
+      ]
+    },
+    {
+      "id": "TPL_ROUTINE_DAY_START_MIN_10_MORNING",
+      "clusterKey": "ROUTINE_DAY_START",
+      "type": "process",
+      "title": "하루 시작 10분 미니 세팅(집)",
+      "concepts": [
+        "ROUTINE.DAY_START"
+      ],
+      "contexts": [
+        "MORNING",
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 8,
+        "max": 15,
+        "default": 10
+      },
+      "missions": [
+        {
+          "action": "커튼 열기 + 물 한 컵 준비(준비)",
+          "estMin": 2
+        },
+        {
+          "action": "세안/양치로 몸 깨우기",
+          "estMin": 5
+        },
+        {
+          "action": "가방/현관 런치패드 3분 정리하고 앱에서 완료",
+          "estMin": 3
+        }
+      ]
+    },
+    {
+      "id": "TPL_ROUTINE_DAY_START_MIN_12_MORNING",
+      "clusterKey": "ROUTINE_DAY_START",
+      "type": "process",
+      "title": "하루 시작 12분 빠른 체크인(집)",
+      "concepts": [
+        "ROUTINE.DAY_START"
+      ],
+      "contexts": [
+        "MORNING",
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 9,
+        "max": 18,
+        "default": 12
+      },
+      "missions": [
+        {
+          "action": "커튼 열기 + 물 한 모금(준비)",
+          "estMin": 2
+        },
+        {
+          "action": "세안/양치로 몸 깨우기",
+          "estMin": 4
+        },
+        {
+          "action": "오늘 해야 할 일 2개만 적고 범위 정하기",
+          "estMin": 3
+        },
+        {
+          "action": "현관/책상 3분 정리하고 앱에서 완료",
+          "estMin": 3
+        }
+      ]
+    },
+    {
+      "id": "TPL_ROUTINE_DAY_START_STD_15_HOME",
+      "clusterKey": "ROUTINE_DAY_START",
+      "type": "process",
+      "title": "집에서 하루 시작 15분 기본 세팅",
+      "concepts": [
+        "ROUTINE.DAY_START"
+      ],
+      "contexts": [
+        "HOME",
+        "MORNING"
+      ],
+      "states": [],
+      "time": {
+        "min": 12,
+        "max": 22,
+        "default": 15
+      },
+      "missions": [
+        {
+          "action": "창문 30초 열기 + 물 한 컵 준비(준비)",
+          "estMin": 3
+        },
+        {
+          "action": "세안/양치로 몸 깨우기",
+          "estMin": 4
+        },
+        {
+          "action": "오늘 할 일 3개만 고르고 범위 정하기",
+          "estMin": 4
+        },
+        {
+          "action": "가방/책상 정리하고 앱에서 완료",
+          "estMin": 4
+        }
+      ]
+    },
+    {
+      "id": "TPL_ROUTINE_DAY_START_STD_16_MORNING",
+      "clusterKey": "ROUTINE_DAY_START",
+      "type": "process",
+      "title": "하루 시작 16분 리듬 맞추기(아침)",
+      "concepts": [
+        "ROUTINE.DAY_START"
+      ],
+      "contexts": [
+        "MORNING",
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 12,
+        "max": 22,
+        "default": 16
+      },
+      "missions": [
+        {
+          "action": "물 한 컵 준비 + 타이머 시작(세팅)",
+          "estMin": 2
+        },
+        {
+          "action": "세안/양치 + 간단 스트레칭 3동작",
+          "estMin": 6
+        },
+        {
+          "action": "오늘 일정 1분 훑고 TOP3 3개 적기",
+          "estMin": 5
+        },
+        {
+          "action": "책상/가방 3분 정리하고 앱에서 완료",
+          "estMin": 3
+        }
+      ]
+    },
+    {
+      "id": "TPL_ROUTINE_DAY_START_STD_18_HOME",
+      "clusterKey": "ROUTINE_DAY_START",
+      "type": "process",
+      "title": "집에서 하루 시작 18분 세팅(공간+마음)",
+      "concepts": [
+        "ROUTINE.DAY_START"
+      ],
+      "contexts": [
+        "HOME",
+        "MORNING"
+      ],
+      "states": [],
+      "time": {
+        "min": 14,
+        "max": 26,
+        "default": 18
+      },
+      "missions": [
+        {
+          "action": "침구 정리하고 창문 30초 열기(준비)",
+          "estMin": 3
+        },
+        {
+          "action": "물 한 컵 마시고 몸 상태 1줄 확인",
+          "estMin": 4
+        },
+        {
+          "action": "오늘 할 일 3개만 고르고 범위 정하기",
+          "estMin": 4
+        },
+        {
+          "action": "외출/업무에 필요한 물건 3개 꺼내기",
+          "estMin": 4
+        },
+        {
+          "action": "알람/캘린더 확인 후 앱에서 완료 누르기",
+          "estMin": 3
+        }
+      ]
+    },
+    {
+      "id": "TPL_ROUTINE_DAY_START_STD_20_WORKDAY",
+      "clusterKey": "ROUTINE_DAY_START",
+      "type": "process",
+      "title": "출근/업무 시작 전 20분 전환 루틴",
+      "concepts": [
+        "ROUTINE.DAY_START"
+      ],
+      "contexts": [
+        "WORKDAY",
+        "HOME",
+        "MORNING"
+      ],
+      "states": [],
+      "time": {
+        "min": 16,
+        "max": 30,
+        "default": 20
+      },
+      "missions": [
+        {
+          "action": "메일/메신저 알림 끄기 + 오늘 모드 켜기(세팅)",
+          "estMin": 4
+        },
+        {
+          "action": "세안/양치 + 물 한 컵",
+          "estMin": 6
+        },
+        {
+          "action": "캘린더 확인하고 오늘 회의/마감 2개 표시",
+          "estMin": 5
+        },
+        {
+          "action": "책상/가방 5분 정리하고 앱에서 완료",
+          "estMin": 5
+        }
+      ]
+    },
+    {
+      "id": "TPL_ROUTINE_DAY_START_STD_25_MORNING",
+      "clusterKey": "ROUTINE_DAY_START",
+      "type": "process",
+      "title": "하루 시작 25분 세팅(아침 루틴)",
+      "concepts": [
+        "ROUTINE.DAY_START"
+      ],
+      "contexts": [
+        "MORNING",
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 20,
+        "max": 35,
+        "default": 25
+      },
+      "missions": [
+        {
+          "action": "물 한 컵 준비 + 타이머 시작(세팅)",
+          "estMin": 2
+        },
+        {
+          "action": "세안/양치로 몸 깨우기",
+          "estMin": 6
+        },
+        {
+          "action": "옷 갈아입고 오늘 필요한 물건 꺼내기",
+          "estMin": 4
+        },
+        {
+          "action": "오늘 할 일 3개만 고르고 범위 정하기",
+          "estMin": 6
+        },
+        {
+          "action": "가방/책상 5분 정리하고 앱에서 완료",
+          "estMin": 7
+        }
+      ]
+    },
+    {
+      "id": "TPL_ROUTINE_DAY_START_STD_25_OUTSIDE",
+      "clusterKey": "ROUTINE_DAY_START",
+      "type": "process",
+      "title": "외출 전 하루 시작 25분 세팅(출발 루틴)",
+      "concepts": [
+        "ROUTINE.DAY_START"
+      ],
+      "contexts": [
+        "MORNING",
+        "OUTSIDE",
+        "WORKDAY"
+      ],
+      "states": [],
+      "time": {
+        "min": 20,
+        "max": 35,
+        "default": 25
+      },
+      "missions": [
+        {
+          "action": "외출 준비물 모으기(지갑/키/폰) + 문앞에 두기(준비)",
+          "estMin": 4
+        },
+        {
+          "action": "세안/양치 + 옷 갈아입기",
+          "estMin": 6
+        },
+        {
+          "action": "밖으로 나가기 전 3분 햇빛 받기",
+          "estMin": 5
+        },
+        {
+          "action": "오늘 TOP3 3개 적고 첫 1개 착수 기준 정하기",
+          "estMin": 6
+        },
+        {
+          "action": "현관 정리하고 문 닫기 + 앱에서 완료",
+          "estMin": 4
+        }
+      ]
+    },
+    {
+      "id": "TPL_ROUTINE_DAY_START_STD_30_HOME",
+      "clusterKey": "ROUTINE_DAY_START",
+      "type": "process",
+      "title": "하루 시작 30분 루틴(몸+계획+환경)",
+      "concepts": [
+        "ROUTINE.DAY_START"
+      ],
+      "contexts": [
+        "MORNING",
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 24,
+        "max": 40,
+        "default": 30
+      },
+      "missions": [
+        {
+          "action": "물 한 컵 준비 + 타이머 시작(세팅)",
+          "estMin": 3
+        },
+        {
+          "action": "세안/양치 + 옷 갈아입기",
+          "estMin": 6
+        },
+        {
+          "action": "가벼운 스트레칭 5분(목/어깨/허리)",
+          "estMin": 6
+        },
+        {
+          "action": "캘린더 열고 오늘 일정/마감 3개 확인",
+          "estMin": 5
+        },
+        {
+          "action": "오늘 TOP3 정하고 첫 미션 1개에 착수(2분만)",
+          "estMin": 5
+        },
+        {
+          "action": "책상/가방 정리하고 앱에서 완료",
+          "estMin": 5
+        }
+      ]
+    },
+    {
+      "id": "TPL_SOCIAL_MESSAGE_REPLY_BOUNDARY_STD_8_ANY",
+      "clusterKey": "SOCIAL_MESSAGE_REPLY",
+      "type": "narrative",
+      "title": "경계 세우기 8분 답장(가능 시간만 전달)",
+      "concepts": [
+        "SOCIAL.MESSAGE_REPLY"
+      ],
+      "contexts": [
+        "SOCIAL"
+      ],
+      "states": [],
+      "time": {
+        "min": 6,
+        "max": 12,
+        "default": 8
+      },
+      "missions": [
+        {
+          "action": "메시지 앱 열고 부담되는 요청 대화 1개 열기(열기)",
+          "estMin": 2
+        },
+        {
+          "action": "내가 가능한 범위를 한 줄로 정하기(언제/얼마나/어디까지)",
+          "estMin": 3
+        },
+        {
+          "action": "가능 범위 1문장 + 대안 1문장으로 답장 보내기",
+          "estMin": 2
+        },
+        {
+          "action": "전송 확인하고 앱에서 완료 누르기",
+          "estMin": 1
+        }
+      ]
+    },
+    {
+      "id": "TPL_SOCIAL_MESSAGE_REPLY_DECLINE_STD_8_ANY",
+      "clusterKey": "SOCIAL_MESSAGE_REPLY",
+      "type": "narrative",
+      "title": "약속 거절 8분 답장(감사+대안 1개)",
+      "concepts": [
+        "SOCIAL.MESSAGE_REPLY"
+      ],
+      "contexts": [
+        "SOCIAL"
+      ],
+      "states": [],
+      "time": {
+        "min": 6,
+        "max": 12,
+        "default": 8
+      },
+      "missions": [
+        {
+          "action": "메시지 앱 열고 초대/약속 메시지 대화 열기(열기)",
+          "estMin": 2
+        },
+        {
+          "action": "가능 여부를 10초만 확인하고 ‘거절+대안’으로 방향 정하기",
+          "estMin": 2
+        },
+        {
+          "action": "감사 1문장 + 거절 1문장 + 대안 1문장으로 보내기",
+          "estMin": 3
+        },
+        {
+          "action": "전송 확인하고 앱에서 완료 누르기",
+          "estMin": 1
+        }
+      ]
+    },
+    {
+      "id": "TPL_SOCIAL_MESSAGE_REPLY_FOLLOWUP_STD_9_ANY",
+      "clusterKey": "SOCIAL_MESSAGE_REPLY",
+      "type": "narrative",
+      "title": "팔로업 9분 답장(감사+다음 한 걸음)",
+      "concepts": [
+        "SOCIAL.MESSAGE_REPLY"
+      ],
+      "contexts": [
+        "SOCIAL"
+      ],
+      "states": [],
+      "time": {
+        "min": 7,
+        "max": 14,
+        "default": 9
+      },
+      "missions": [
+        {
+          "action": "메시지 앱 열고 팔로업 보낼 대화 1개 선택하기(열기)",
+          "estMin": 2
+        },
+        {
+          "action": "대화/만남에서 기억나는 포인트 1개만 적어두기",
+          "estMin": 3
+        },
+        {
+          "action": "감사 1문장 + 다음 액션 1문장으로 답장 보내기(예: ‘자료는 내일 오전에 공유할게’)",
+          "estMin": 3
+        },
+        {
+          "action": "전송 확인하고 앱에서 완료 누르기",
+          "estMin": 1
+        }
+      ]
+    },
+    {
+      "id": "TPL_SOCIAL_MESSAGE_REPLY_GROUPCHAT_STD_9_ANY",
+      "clusterKey": "SOCIAL_MESSAGE_REPLY",
+      "type": "narrative",
+      "title": "단톡방 9분 복귀(요약 읽고 한 번 참여)",
+      "concepts": [
+        "SOCIAL.MESSAGE_REPLY"
+      ],
+      "contexts": [
+        "SOCIAL"
+      ],
+      "states": [],
+      "time": {
+        "min": 7,
+        "max": 15,
+        "default": 9
+      },
+      "missions": [
+        {
+          "action": "메시지 앱 열고 단톡방 1개 들어가기(열기)",
+          "estMin": 2
+        },
+        {
+          "action": "최근 메시지 20개만 빠르게 훑기(주제 파악)",
+          "estMin": 3
+        },
+        {
+          "action": "이모지 반응 1개 + 필요한 답장 1문장 보내기",
+          "estMin": 3
+        },
+        {
+          "action": "단톡방 닫고 앱에서 완료 누르기",
+          "estMin": 1
+        }
+      ]
+    },
+    {
+      "id": "TPL_SOCIAL_MESSAGE_REPLY_INBOX_CLEAR_STD_11_ANY",
+      "clusterKey": "SOCIAL_MESSAGE_REPLY",
+      "type": "narrative",
+      "title": "메시지함 11분 정리(미답 5개만 처리)",
+      "concepts": [
+        "SOCIAL.MESSAGE_REPLY"
+      ],
+      "contexts": [
+        "SOCIAL"
+      ],
+      "states": [],
+      "time": {
+        "min": 8,
+        "max": 18,
+        "default": 11
+      },
+      "missions": [
+        {
+          "action": "메시지 앱 열고 미답 대화 5개만 위에서부터 고르기(준비)",
+          "estMin": 2
+        },
+        {
+          "action": "바로 답장 가능한 3개에 한 문장씩 보내기",
+          "estMin": 5
+        },
+        {
+          "action": "당장 답 못 하는 2개는 ‘언제 답할지’만 정해 한 줄로 보내기",
+          "estMin": 3
+        },
+        {
+          "action": "알림 정리하고 앱에서 완료 누르기",
+          "estMin": 1
+        }
+      ]
+    },
+    {
+      "id": "TPL_SOCIAL_MESSAGE_REPLY_LATE_STD_8_ANY",
+      "clusterKey": "SOCIAL_MESSAGE_REPLY",
+      "type": "narrative",
+      "title": "늦은 답장 8분 처리(사과+핵심 1개)",
+      "concepts": [
+        "SOCIAL.MESSAGE_REPLY"
+      ],
+      "contexts": [
+        "SOCIAL"
+      ],
+      "states": [],
+      "time": {
+        "min": 6,
+        "max": 12,
+        "default": 8
+      },
+      "missions": [
+        {
+          "action": "메시지 앱 열고 밀린 대화 1개 선택하기(열기)",
+          "estMin": 2
+        },
+        {
+          "action": "마지막 메시지 2줄만 다시 읽고 핵심을 한 단어로 적기",
+          "estMin": 2
+        },
+        {
+          "action": "짧은 사과 1문장 + 답/질문 1문장으로 보내기",
+          "estMin": 3
+        },
+        {
+          "action": "대화 닫고 앱에서 완료 누르기",
+          "estMin": 1
+        }
+      ]
+    },
+    {
+      "id": "TPL_SOCIAL_MESSAGE_REPLY_READ_ANXIETY_STD_7_ANY",
+      "clusterKey": "SOCIAL_MESSAGE_REPLY",
+      "type": "narrative",
+      "title": "읽씹 불안 7분 답장(부담 낮춘 한 줄)",
+      "concepts": [
+        "SOCIAL.MESSAGE_REPLY"
+      ],
+      "contexts": [
+        "SOCIAL"
+      ],
+      "states": [],
+      "time": {
+        "min": 5,
+        "max": 10,
+        "default": 7
+      },
+      "missions": [
+        {
+          "action": "1분 타이머 시작하고 숨 5번 고르기(준비)",
+          "estMin": 1
+        },
+        {
+          "action": "메시지 앱 열고 답장할 대화 1개 열기",
+          "estMin": 2
+        },
+        {
+          "action": "부담 없는 한 줄로 답장 보내기(예: ‘지금 확인했어! 조금 뒤에 자세히 답할게’)",
+          "estMin": 3
+        },
+        {
+          "action": "메시지 전송 확인하고 앱에서 완료 누르기",
+          "estMin": 1
+        }
+      ]
+    },
+    {
+      "id": "TPL_SOCIAL_MESSAGE_REPLY_SCHEDULE_STD_10_ANY",
+      "clusterKey": "SOCIAL_MESSAGE_REPLY",
+      "type": "narrative",
+      "title": "일정 조율 10분 답장(가능 시간 2개 제안)",
+      "concepts": [
+        "SOCIAL.MESSAGE_REPLY"
+      ],
+      "contexts": [
+        "SOCIAL"
+      ],
+      "states": [],
+      "time": {
+        "min": 7,
+        "max": 15,
+        "default": 10
+      },
+      "missions": [
+        {
+          "action": "메시지 앱 열고 일정 조율할 대화 1개 고르기(열기)",
+          "estMin": 2
+        },
+        {
+          "action": "내가 가능한 시간 2개만 적어두기(오늘/내일 중)",
+          "estMin": 2
+        },
+        {
+          "action": "한 문장+시간 2개로 제안 보내기(예: ‘내일 7시/목 12시 가능해’)",
+          "estMin": 5
+        },
+        {
+          "action": "보낸 메시지 확인하고 앱에서 완료 누르기",
+          "estMin": 1
+        }
+      ]
+    },
+    {
+      "id": "TPL_SOCIAL_MESSAGE_REPLY_SHORT_STD_6_ANY",
+      "clusterKey": "SOCIAL_MESSAGE_REPLY",
+      "type": "narrative",
+      "title": "짧은 답장 6분(에너지 낮을 때 3개만)",
+      "concepts": [
+        "SOCIAL.MESSAGE_REPLY"
+      ],
+      "contexts": [
+        "SOCIAL"
+      ],
+      "states": [],
+      "time": {
+        "min": 4,
+        "max": 10,
+        "default": 6
+      },
+      "missions": [
+        {
+          "action": "메시지 앱 열고 답장 필요한 대화 3개만 골라두기(준비)",
+          "estMin": 2
+        },
+        {
+          "action": "각 대화에 한 문장 답장 1개씩 보내기(짧게 OK)",
+          "estMin": 3
+        },
+        {
+          "action": "알림 정리하고 앱에서 완료 누르기",
+          "estMin": 1
+        }
+      ]
+    },
+    {
+      "id": "TPL_SOCIAL_MESSAGE_REPLY_STD_12_ANY",
+      "clusterKey": "SOCIAL_MESSAGE_REPLY",
+      "type": "narrative",
+      "title": "메시지 12분 답장(밀린 대화 정리)",
+      "concepts": [
+        "SOCIAL.MESSAGE_REPLY"
+      ],
+      "contexts": [
+        "SOCIAL"
+      ],
+      "states": [],
+      "time": {
+        "min": 8,
+        "max": 18,
+        "default": 12
+      },
+      "missions": [
+        {
+          "action": "메시지 앱 열고 답장할 대화 3개 모으기(준비)",
+          "estMin": 2
+        },
+        {
+          "action": "짧게 답장 2~3개 보내기(한 문장으로도 OK)",
+          "estMin": 4
+        },
+        {
+          "action": "바로 답 못할 건 ‘언제/무엇’만 메모하기",
+          "estMin": 4
+        },
+        {
+          "action": "알림 정리하고 앱에서 완료 누르기",
+          "estMin": 2
+        }
+      ]
+    },
+    {
+      "id": "TPL_STATE_OVERWHELM_RESET_AB_DECISION_STD_9_ANY",
+      "clusterKey": "STATE_OVERWHELM_RESET",
+      "type": "friction",
+      "title": "압도감 9분(선택 1개를 A/B로 단순화)",
+      "concepts": [
+        "STATE.OVERWHELM"
+      ],
+      "contexts": [],
+      "states": [
+        "STATE.OVERWHELM"
+      ],
+      "time": {
+        "min": 7,
+        "max": 13,
+        "default": 9
+      },
+      "missions": [
+        {
+          "action": "1분 타이머 시작하고 눈을 감고 어깨 내리기(준비)",
+          "estMin": 1
+        },
+        {
+          "action": "해야 할 선택 1개를 A/B 두 줄로만 적기",
+          "estMin": 3
+        },
+        {
+          "action": "A를 4분 실행(예: 결제 버튼 누르기/예약 완료하기)",
+          "estMin": 4
+        },
+        {
+          "action": "앱에서 완료 누르기",
+          "estMin": 1
+        }
+      ]
+    },
+    {
+      "id": "TPL_STATE_OVERWHELM_RESET_BRAINDUMP_PICKONE_STD_12_ANY",
+      "clusterKey": "STATE_OVERWHELM_RESET",
+      "type": "friction",
+      "title": "압도감 12분 리셋(머릿속 비우고 1개만)",
+      "concepts": [
+        "STATE.OVERWHELM"
+      ],
+      "contexts": [],
+      "states": [
+        "STATE.OVERWHELM"
+      ],
+      "time": {
+        "min": 8,
+        "max": 20,
+        "default": 12
+      },
+      "missions": [
+        {
+          "action": "1분 타이머 시작하고 숨 5번 고르기(준비)",
+          "estMin": 1
+        },
+        {
+          "action": "종이에 떠오르는 할 일을 10개까지 적기(머릿속 비우기)",
+          "estMin": 3
+        },
+        {
+          "action": "적은 것 중 3개만 골라 ‘지금/나중’으로 나누기",
+          "estMin": 3
+        },
+        {
+          "action": "‘지금’ 1개의 첫 4분만 진행(예: 파일 열고 제목 쓰기)",
+          "estMin": 4
+        },
+        {
+          "action": "앱에서 완료 누르기",
+          "estMin": 1
+        }
+      ]
+    },
+    {
+      "id": "TPL_STATE_OVERWHELM_RESET_DOOR_EXIT_STD_8_ANY",
+      "clusterKey": "STATE_OVERWHELM_RESET",
+      "type": "friction",
+      "title": "압도감 8분(현관에서 출발 준비만)",
+      "concepts": [
+        "STATE.OVERWHELM"
+      ],
+      "contexts": [],
+      "states": [
+        "STATE.OVERWHELM"
+      ],
+      "time": {
+        "min": 6,
+        "max": 12,
+        "default": 8
+      },
+      "missions": [
+        {
+          "action": "1분 타이머 시작하고 가방/외투를 현관으로 가져오기(준비)",
+          "estMin": 1
+        },
+        {
+          "action": "지갑/열쇠/폰만 확인해서 가방에 넣기",
+          "estMin": 2
+        },
+        {
+          "action": "출발 전에 해야 할 1가지만 3분 처리(예: 물병 채우기)",
+          "estMin": 3
+        },
+        {
+          "action": "신발 신고 앱에서 완료 누르기",
+          "estMin": 2
+        }
+      ]
+    },
+    {
+      "id": "TPL_STATE_OVERWHELM_RESET_MICROSTART_STD_8_ANY",
+      "clusterKey": "STATE_OVERWHELM_RESET",
+      "type": "friction",
+      "title": "압도감 8분 리셋(첫 2분만 착수)",
+      "concepts": [
+        "STATE.OVERWHELM"
+      ],
+      "contexts": [],
+      "states": [
+        "STATE.OVERWHELM"
+      ],
+      "time": {
+        "min": 6,
+        "max": 12,
+        "default": 8
+      },
+      "missions": [
+        {
+          "action": "1분 타이머 시작하고 4-4 호흡 5번(준비)",
+          "estMin": 1
+        },
+        {
+          "action": "물 한 모금 + 턱/어깨 30초 풀기",
+          "estMin": 1
+        },
+        {
+          "action": "주변을 10초 훑고 ‘지금 할 일 1개’만 고르기",
+          "estMin": 2
+        },
+        {
+          "action": "그 1개의 ‘첫 2분’만 실행(예: 문서 열기/세탁기 켜기)",
+          "estMin": 3
+        },
+        {
+          "action": "잠깐 멈추고 앱에서 완료 누르기",
+          "estMin": 1
+        }
+      ]
+    },
+    {
+      "id": "TPL_STATE_OVERWHELM_RESET_NOTIF_OFF_STD_7_ANY",
+      "clusterKey": "STATE_OVERWHELM_RESET",
+      "type": "friction",
+      "title": "압도감 7분 진정(알림 끄고 1개만)",
+      "concepts": [
+        "STATE.OVERWHELM"
+      ],
+      "contexts": [],
+      "states": [
+        "STATE.OVERWHELM"
+      ],
+      "time": {
+        "min": 5,
+        "max": 10,
+        "default": 7
+      },
+      "missions": [
+        {
+          "action": "1분 타이머 시작하고 알림 소리/진동 끄기(세팅)",
+          "estMin": 1
+        },
+        {
+          "action": "지금 해야 하는 것 3개를 종이에 적기",
+          "estMin": 2
+        },
+        {
+          "action": "가장 작은 1개를 3분만 착수(첫 단추만)",
+          "estMin": 3
+        },
+        {
+          "action": "손을 놓고 앱에서 완료 누르기",
+          "estMin": 1
+        }
+      ]
+    },
+    {
+      "id": "TPL_STATE_OVERWHELM_RESET_ONE_EMAIL_STD_10_ANY",
+      "clusterKey": "STATE_OVERWHELM_RESET",
+      "type": "friction",
+      "title": "압도감 10분 정리(메일 1개만 처리)",
+      "concepts": [
+        "STATE.OVERWHELM"
+      ],
+      "contexts": [],
+      "states": [
+        "STATE.OVERWHELM"
+      ],
+      "time": {
+        "min": 7,
+        "max": 15,
+        "default": 10
+      },
+      "missions": [
+        {
+          "action": "2분 타이머 시작하고 메일함/메신저를 1곳만 열기(열기)",
+          "estMin": 2
+        },
+        {
+          "action": "‘지금 답장할 1개’만 선택하고 나머지는 닫기",
+          "estMin": 2
+        },
+        {
+          "action": "3문장 답장 초안 작성→전송(또는 임시저장)",
+          "estMin": 5
+        },
+        {
+          "action": "앱에서 완료 누르기",
+          "estMin": 1
+        }
+      ]
+    },
+    {
+      "id": "TPL_STATE_OVERWHELM_RESET_SOCIAL_ONE_MESSAGE_STD_7_ANY",
+      "clusterKey": "STATE_OVERWHELM_RESET",
+      "type": "friction",
+      "title": "압도감 7분(답장 1개로 부담 줄이기)",
+      "concepts": [
+        "STATE.OVERWHELM"
+      ],
+      "contexts": [],
+      "states": [
+        "STATE.OVERWHELM"
+      ],
+      "time": {
+        "min": 5,
+        "max": 10,
+        "default": 7
+      },
+      "missions": [
+        {
+          "action": "1분 타이머 시작하고 숨 5번 고르기(준비)",
+          "estMin": 1
+        },
+        {
+          "action": "답장해야 하는 대화 1개만 골라 열기",
+          "estMin": 2
+        },
+        {
+          "action": "부담 줄이는 한 줄 답장 보내기(예: ‘오늘은 정신없어, 내일 다시 답할게’)",
+          "estMin": 3
+        },
+        {
+          "action": "앱에서 완료 누르기",
+          "estMin": 1
+        }
+      ]
+    },
+    {
+      "id": "TPL_STATE_OVERWHELM_RESET_STD_12_ANY",
+      "clusterKey": "STATE_OVERWHELM_RESET",
+      "type": "friction",
+      "title": "압도감 12분 리셋(숨고르기+다음 1개)",
+      "concepts": [
+        "STATE.OVERWHELM"
+      ],
+      "contexts": [],
+      "states": [
+        "STATE.OVERWHELM"
+      ],
+      "time": {
+        "min": 8,
+        "max": 20,
+        "default": 12
+      },
+      "missions": [
+        {
+          "action": "1분 타이머 시작하고 숨 고르기(준비)",
+          "estMin": 1
+        },
+        {
+          "action": "물 한 모금 + 목/어깨 1분 풀기",
+          "estMin": 2
+        },
+        {
+          "action": "해야 할 일을 3개만 적고 ‘지금/나중’으로 분류",
+          "estMin": 3
+        },
+        {
+          "action": "가장 쉬운 1개에 4분 착수(첫 단추만 끼우기)",
+          "estMin": 4
+        },
+        {
+          "action": "남은 건 닫고 주변 정리한 뒤 앱에서 완료",
+          "estMin": 2
+        }
+      ]
+    },
+    {
+      "id": "TPL_STATE_OVERWHELM_RESET_STUDY_TAB_CLOSE_STD_10_ANY",
+      "clusterKey": "STATE_OVERWHELM_RESET",
+      "type": "friction",
+      "title": "압도감 10분(탭 닫고 첫 문단만)",
+      "concepts": [
+        "STATE.OVERWHELM"
+      ],
+      "contexts": [],
+      "states": [
+        "STATE.OVERWHELM"
+      ],
+      "time": {
+        "min": 7,
+        "max": 15,
+        "default": 10
+      },
+      "missions": [
+        {
+          "action": "1분 타이머 시작하고 탭 5개만 닫기(세팅)",
+          "estMin": 1
+        },
+        {
+          "action": "할 일 1줄만 적고 문서/교재 1개만 펼치기",
+          "estMin": 2
+        },
+        {
+          "action": "6분 집중: 첫 문제/첫 문단만 진행",
+          "estMin": 6
+        },
+        {
+          "action": "앱에서 완료 누르기",
+          "estMin": 1
+        }
+      ]
+    },
+    {
+      "id": "TPL_STATE_OVERWHELM_RESET_TRASH_SINK_STD_11_ANY",
+      "clusterKey": "STATE_OVERWHELM_RESET",
+      "type": "friction",
+      "title": "압도감 11분 정리(쓰레기+싱크대만)",
+      "concepts": [
+        "STATE.OVERWHELM"
+      ],
+      "contexts": [],
+      "states": [
+        "STATE.OVERWHELM"
+      ],
+      "time": {
+        "min": 8,
+        "max": 18,
+        "default": 11
+      },
+      "missions": [
+        {
+          "action": "1분 타이머 시작하고 쓰레기봉투/휴지통을 가까이 두기(준비)",
+          "estMin": 1
+        },
+        {
+          "action": "쓰레기/포장지/영수증 20개만 주워 버리기",
+          "estMin": 4
+        },
+        {
+          "action": "접시/컵 10개만 싱크대로 옮기기",
+          "estMin": 4
+        },
+        {
+          "action": "창문 30초 열고 숨 한 번 고르기",
+          "estMin": 1
+        },
+        {
+          "action": "앱에서 완료 누르기",
+          "estMin": 1
+        }
+      ]
+    },
+    {
+      "id": "TPL_STUDY_SESSION_START_FULL_45_OUTSIDE",
+      "clusterKey": "STUDY_SESSION_START",
+      "type": "process",
+      "title": "공부 세션 45분 시작(시험 대비·집중 문제풀이·밖)",
+      "concepts": [
+        "STUDY.SESSION_START"
+      ],
+      "contexts": [
+        "OUTSIDE"
+      ],
+      "states": [],
+      "time": {
+        "min": 35,
+        "max": 65,
+        "default": 45
+      },
+      "missions": [
+        {
+          "action": "교재/계산기/필기구 세팅 + 타이머 45분(준비)",
+          "estMin": 4
+        },
+        {
+          "action": "범위 정하기(파트 1개) + 목표 점수/문제 수 1줄",
+          "estMin": 6
+        },
+        {
+          "action": "28분 집중 풀이/암기 진행(중간 검색 1회만)",
+          "estMin": 28
+        },
+        {
+          "action": "5분 정리: 모르는 개념 2개를 질문 형태로 바꾸기",
+          "estMin": 5
+        },
+        {
+          "action": "정리하고 앱에서 완료",
+          "estMin": 2
+        }
+      ]
+    },
+    {
+      "id": "TPL_STUDY_SESSION_START_FULL_50_HOME",
+      "clusterKey": "STUDY_SESSION_START",
+      "type": "process",
+      "title": "공부 세션 50분 시작(코딩/실습·집)",
+      "concepts": [
+        "STUDY.SESSION_START"
+      ],
+      "contexts": [
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 40,
+        "max": 70,
+        "default": 50
+      },
+      "missions": [
+        {
+          "action": "개발 환경 켜기(IDE/레포) + 실행 확인(준비)",
+          "estMin": 6
+        },
+	        {
+	          "action": "오늘 목표 1개 정하기(문제 1개/기능 1개)",
+	          "estMin": 6
+	        },
+	        {
+	          "action": "20분 구현/풀이 진행(막히면 TODO로 남기고 계속)",
+	          "estMin": 20
+	        },
+	        {
+	          "action": "12분 구현/풀이 진행(막히면 TODO로 남기고 계속)",
+	          "estMin": 12
+	        },
+	        {
+	          "action": "4분 테스트/실행: 실패 1개만 고치기",
+	          "estMin": 4
+	        },
+        {
+          "action": "학습노트 3줄 쓰고 앱에서 완료",
+          "estMin": 2
+        }
+      ]
+    },
+    {
+      "id": "TPL_STUDY_SESSION_START_FULL_55_OUTSIDE",
+      "clusterKey": "STUDY_SESSION_START",
+      "type": "process",
+      "title": "공부 세션 55분 시작(논문/자료 읽기+노트·밖)",
+      "concepts": [
+        "STUDY.SESSION_START"
+      ],
+      "contexts": [
+        "OUTSIDE"
+      ],
+      "states": [],
+      "time": {
+        "min": 45,
+        "max": 80,
+        "default": 55
+      },
+      "missions": [
+        {
+          "action": "자료/논문 열기 + 읽을 섹션 1개 지정(준비)",
+          "estMin": 5
+        },
+	        {
+	          "action": "읽기 질문 2개 정하기(무엇을 확인할지)",
+	          "estMin": 5
+	        },
+	        {
+	          "action": "20분 읽기 집중(핵심만 표시, 멈추면 바로 복귀)",
+	          "estMin": 20
+	        },
+	        {
+	          "action": "15분 읽기 집중(핵심만 표시, 멈추면 바로 복귀)",
+	          "estMin": 15
+	        },
+	        {
+	          "action": "7분 요약 노트: 핵심 5줄 + 용어 2개 정리",
+	          "estMin": 7
+	        },
+        {
+          "action": "정리하고 앱에서 완료",
+          "estMin": 3
+        }
+      ]
+    },
+    {
+      "id": "TPL_STUDY_SESSION_START_FULL_60_HOME",
+      "clusterKey": "STUDY_SESSION_START",
+      "type": "process",
+      "title": "공부 세션 60분 시작(레포트/과제 초안·집)",
+      "concepts": [
+        "STUDY.SESSION_START"
+      ],
+      "contexts": [
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 50,
+        "max": 85,
+        "default": 60
+      },
+      "missions": [
+        {
+          "action": "요구사항/평가기준 읽고 핵심 3개 표시(준비)",
+          "estMin": 6
+        },
+	        {
+	          "action": "목차/구조 잡기(섹션 3~5개) + 자료 링크 3개 모으기",
+	          "estMin": 8
+	        },
+	        {
+	          "action": "20분 초안 작성(문장/표/코드 블록으로 일단 채우기)",
+	          "estMin": 20
+	        },
+	        {
+	          "action": "18분 초안 작성(문장/표/코드 블록으로 일단 채우기)",
+	          "estMin": 18
+	        },
+	        {
+	          "action": "6분 근거/출처 표시(인용/링크/페이지)",
+	          "estMin": 6
+	        },
+        {
+          "action": "저장/백업하고 앱에서 완료",
+          "estMin": 2
+        }
+      ]
+    },
+    {
+      "id": "TPL_STUDY_SESSION_START_MIN_20_HOME",
+      "clusterKey": "STUDY_SESSION_START",
+      "type": "process",
+      "title": "공부 세션 20분 시작(워밍업·집)",
+      "concepts": [
+        "STUDY.SESSION_START"
+      ],
+      "contexts": [
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 15,
+        "max": 28,
+        "default": 20
+      },
+      "missions": [
+        {
+          "action": "교재/노트 꺼내기 + 타이머 20분 시작(준비)",
+          "estMin": 3
+        },
+        {
+          "action": "오늘 범위 1개 정하기(페이지/문제 수/챕터)",
+          "estMin": 3
+        },
+        {
+          "action": "12분 집중 학습 진행(한 번만 멈춤)",
+          "estMin": 12
+        },
+        {
+          "action": "1분 점검: 이해 안 된 부분 1개 표시",
+          "estMin": 1
+        },
+        {
+          "action": "정리하고 앱에서 완료",
+          "estMin": 1
+        }
+      ]
+    },
+    {
+      "id": "TPL_STUDY_SESSION_START_STD_25_OUTSIDE",
+      "clusterKey": "STUDY_SESSION_START",
+      "type": "process",
+      "title": "공부 세션 25분 시작(읽기·밖)",
+      "concepts": [
+        "STUDY.SESSION_START"
+      ],
+      "contexts": [
+        "OUTSIDE"
+      ],
+      "states": [],
+      "time": {
+        "min": 20,
+        "max": 35,
+        "default": 25
+      },
+      "missions": [
+        {
+          "action": "자료/책 펼치기 + 읽을 파트 1개 지정(준비)",
+          "estMin": 3
+        },
+        {
+          "action": "읽기 목표 1줄 정하기(이해할 것/찾을 것)",
+          "estMin": 3
+        },
+        {
+          "action": "16분 읽기 집중(표시할 곳만 밑줄, 멈추지 않기)",
+          "estMin": 16
+        },
+        {
+          "action": "2분 표시/메모: 핵심 3줄 + 모르는 용어 1개",
+          "estMin": 2
+        },
+        {
+          "action": "정리하고 앱에서 완료",
+          "estMin": 1
+        }
+      ]
+    },
+    {
+      "id": "TPL_STUDY_SESSION_START_STD_30_HOME",
+      "clusterKey": "STUDY_SESSION_START",
+      "type": "process",
+      "title": "공부 세션 30분 시작(복습·오답·집)",
+      "concepts": [
+        "STUDY.SESSION_START"
+      ],
+      "contexts": [
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 24,
+        "max": 42,
+        "default": 30
+      },
+      "missions": [
+        {
+          "action": "복습할 범위 고르기(지난 노트/오답 1개)(준비)",
+          "estMin": 4
+        },
+        {
+          "action": "오늘 목표 정하기(오답 5개/핵심 3개 등)",
+          "estMin": 4
+        },
+        {
+          "action": "18분 복습 진행(모르면 표시만 하고 계속)",
+          "estMin": 18
+        },
+        {
+          "action": "3분 오답 처리: 틀린 이유 1줄 + 정답 근거 1줄",
+          "estMin": 3
+        },
+        {
+          "action": "정리하고 앱에서 완료",
+          "estMin": 1
+        }
+      ]
+    },
+    {
+      "id": "TPL_STUDY_SESSION_START_STD_35_OUTSIDE",
+      "clusterKey": "STUDY_SESSION_START",
+      "type": "process",
+      "title": "공부 세션 35분 시작(과제 착수·밖)",
+      "concepts": [
+        "STUDY.SESSION_START"
+      ],
+      "contexts": [
+        "OUTSIDE"
+      ],
+      "states": [],
+      "time": {
+        "min": 28,
+        "max": 50,
+        "default": 35
+      },
+      "missions": [
+        {
+          "action": "과제 요구사항/평가기준 읽고 핵심 3개 표시(준비)",
+          "estMin": 5
+        },
+        {
+          "action": "산출물 파일/문서 만들기 + 목차/구조 3개 잡기",
+          "estMin": 4
+        },
+        {
+          "action": "20분 1차 작성(문장/코드/풀이를 일단 채우기)",
+          "estMin": 20
+        },
+        {
+          "action": "체크리스트 4분: 빠진 항목 2개만 표시",
+          "estMin": 4
+        },
+        {
+          "action": "저장/백업하고 앱에서 완료",
+          "estMin": 2
+        }
+      ]
+    },
+    {
+      "id": "TPL_STUDY_SESSION_START_STD_40_HOME",
+      "clusterKey": "STUDY_SESSION_START",
+      "type": "process",
+      "title": "공부 세션 40분 시작(시험 대비·집)",
+      "concepts": [
+        "STUDY.SESSION_START"
+      ],
+      "contexts": [
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 30,
+        "max": 55,
+        "default": 40
+      },
+      "missions": [
+        {
+          "action": "기출/문제집 펼치기 + 타이머 시작(준비)",
+          "estMin": 3
+        },
+        {
+          "action": "목표 설정(문제 10개/파트 1개 등) + 쉬는 기준 정하기",
+          "estMin": 5
+        },
+        {
+          "action": "25분 문제풀이/서술 진행(멈추면 체크만 하고 계속)",
+          "estMin": 25
+        },
+        {
+          "action": "5분 채점/오답 표시(틀린 번호만 체크)",
+          "estMin": 5
+        },
+        {
+          "action": "정리하고 앱에서 완료",
+          "estMin": 2
+        }
+      ]
+    },
+    {
+      "id": "TPL_STUDY_SESSION_START_STD_40_STUDY",
+      "clusterKey": "STUDY_SESSION_START",
+      "type": "process",
+      "title": "공부 세션 40분 시작(집중+복습)",
+      "concepts": [
+        "STUDY.SESSION_START"
+      ],
+      "contexts": [
+        "STUDY"
+      ],
+      "states": [],
+      "time": {
+        "min": 30,
+        "max": 55,
+        "default": 40
+      },
+      "missions": [
+        {
+          "action": "교재/노트 꺼내기 + 타이머 시작(준비)",
+          "estMin": 3
+        },
+        {
+          "action": "오늘 공부 범위 정하기(페이지/문제 수)",
+          "estMin": 5
+        },
+        {
+          "action": "집중 학습 25분 진행(한 번만 멈춤)",
+          "estMin": 25
+        },
+        {
+          "action": "핵심 3줄 요약 + 예제/문제 1~2개 풀기",
+          "estMin": 5
+        },
+        {
+          "action": "책상 정리하고 앱에서 완료",
+          "estMin": 2
+        }
+      ]
+    },
+    {
+      "id": "TPL_WORK_EMAIL_TRIAGE_FULL_25_WORK",
+      "clusterKey": "WORK_EMAIL_TRIAGE",
+      "type": "process",
+      "title": "업무 메일 25분 정리(답장+일정 반영)",
+      "concepts": [
+        "WORK.EMAIL_TRIAGE"
+      ],
+      "contexts": [
+        "WORK",
+        "WORKDAY"
+      ],
+      "states": [],
+      "time": {
+        "min": 20,
+        "max": 35,
+        "default": 25
+      },
+      "missions": [
+        {
+          "action": "메일함 열기 + 타이머 시작(준비)",
+          "estMin": 3
+        },
+        {
+          "action": "중요 발신자/프로젝트 메일 5개만 먼저 모으기",
+          "estMin": 4
+        },
+        {
+          "action": "바로 답장할 메일 2개 작성해 전송",
+          "estMin": 5
+        },
+        {
+          "action": "일정/미팅 관련 메일 1개를 캘린더에 반영",
+          "estMin": 5
+        },
+        {
+          "action": "남은 메일을 ‘대기/이번주’로 이동",
+          "estMin": 4
+        },
+        {
+          "action": "인박스 상단만 남기고 닫기 + 앱에서 완료",
+          "estMin": 4
+        }
+      ]
+    },
+    {
+      "id": "TPL_WORK_EMAIL_TRIAGE_MIN_10_WORK",
+      "clusterKey": "WORK_EMAIL_TRIAGE",
+      "type": "process",
+      "title": "업무 메일 10분 미니 트리아지(상단만)",
+      "concepts": [
+        "WORK.EMAIL_TRIAGE"
+      ],
+      "contexts": [
+        "WORK",
+        "MORNING"
+      ],
+      "states": [],
+      "time": {
+        "min": 8,
+        "max": 15,
+        "default": 10
+      },
+      "missions": [
+        {
+          "action": "메일함 열기 + 처리 기준 2가지 세팅(준비)",
+          "estMin": 2
+        },
+        {
+          "action": "제목만 보고 ‘삭제/보관’ 10개 처리",
+          "estMin": 4
+        },
+        {
+          "action": "남은 건 ‘오늘/이번주/대기’로 이동하고 닫기 + 앱에서 완료",
+          "estMin": 4
+        }
+      ]
+    },
+    {
+      "id": "TPL_WORK_EMAIL_TRIAGE_MIN_8_WORK",
+      "clusterKey": "WORK_EMAIL_TRIAGE",
+      "type": "process",
+      "title": "업무 메일 8분 초간단 트리아지(삭제/보관 중심)",
+      "concepts": [
+        "WORK.EMAIL_TRIAGE"
+      ],
+      "contexts": [
+        "WORK",
+        "MORNING"
+      ],
+      "states": [],
+      "time": {
+        "min": 6,
+        "max": 12,
+        "default": 8
+      },
+      "missions": [
+        {
+          "action": "메일함 열기 + 상단 15개만 보기(준비)",
+          "estMin": 2
+        },
+        {
+          "action": "불필요 메일 10개 삭제/보관",
+          "estMin": 3
+        },
+        {
+          "action": "남은 건 폴더 이동하고 닫기 + 앱에서 완료",
+          "estMin": 3
+        }
+      ]
+    },
+    {
+      "id": "TPL_WORK_EMAIL_TRIAGE_STD_12_WORK",
+      "clusterKey": "WORK_EMAIL_TRIAGE",
+      "type": "process",
+      "title": "업무 메일 12분 상단 정리(삭제→답장 1개)",
+      "concepts": [
+        "WORK.EMAIL_TRIAGE"
+      ],
+      "contexts": [
+        "WORK"
+      ],
+      "states": [],
+      "time": {
+        "min": 10,
+        "max": 18,
+        "default": 12
+      },
+      "missions": [
+        {
+          "action": "메일함 열기 + 처리 기준 세팅(준비)",
+          "estMin": 2
+        },
+        {
+          "action": "불필요 메일 8개 삭제/보관",
+          "estMin": 4
+        },
+        {
+          "action": "짧은 답장 1개 작성해 전송",
+          "estMin": 3
+        },
+        {
+          "action": "남은 건 폴더로 이동하고 앱에서 완료",
+          "estMin": 3
+        }
+      ]
+    },
+    {
+      "id": "TPL_WORK_EMAIL_TRIAGE_STD_15_WORK",
+      "clusterKey": "WORK_EMAIL_TRIAGE",
+      "type": "process",
+      "title": "업무 메일 15분 빠른 분류(폴더 3개)",
+      "concepts": [
+        "WORK.EMAIL_TRIAGE"
+      ],
+      "contexts": [
+        "WORK",
+        "WORKDAY"
+      ],
+      "states": [],
+      "time": {
+        "min": 12,
+        "max": 22,
+        "default": 15
+      },
+      "missions": [
+        {
+          "action": "메일함 열기 + 폴더(오늘/이번주/대기) 준비(준비)",
+          "estMin": 2
+        },
+        {
+          "action": "뉴스레터/알림 메일 8개 삭제/보관",
+          "estMin": 4
+        },
+        {
+          "action": "2분 내 답장 가능한 메일 2개 전송하기",
+          "estMin": 5
+        },
+        {
+          "action": "남은 메일 상단만 남기고 정리 + 앱에서 완료",
+          "estMin": 4
+        }
+      ]
+    },
+    {
+      "id": "TPL_WORK_EMAIL_TRIAGE_STD_16_WORK",
+      "clusterKey": "WORK_EMAIL_TRIAGE",
+      "type": "process",
+      "title": "업무 메일 16분 필터로 빠르게 처리(찾기→답장)",
+      "concepts": [
+        "WORK.EMAIL_TRIAGE"
+      ],
+      "contexts": [
+        "WORK",
+        "WORKDAY"
+      ],
+      "states": [],
+      "time": {
+        "min": 12,
+        "max": 24,
+        "default": 16
+      },
+      "missions": [
+        {
+          "action": "메일함 열기 + 검색/필터 1개 켜기(준비)",
+          "estMin": 2
+        },
+        {
+          "action": "‘오늘’ 키워드로 급한 메일 3개만 찾기",
+          "estMin": 4
+        },
+        {
+          "action": "급한 메일 1개 답장 작성해 전송",
+          "estMin": 5
+        },
+        {
+          "action": "나머지 메일 5개 삭제/보관으로 정리",
+          "estMin": 3
+        },
+        {
+          "action": "필터 끄고 인박스 닫기 + 앱에서 완료",
+          "estMin": 2
+        }
+      ]
+    },
+    {
+      "id": "TPL_WORK_EMAIL_TRIAGE_STD_18_MORNING",
+      "clusterKey": "WORK_EMAIL_TRIAGE",
+      "type": "process",
+      "title": "아침 업무 메일 18분 정리(인박스 가볍게)",
+      "concepts": [
+        "WORK.EMAIL_TRIAGE"
+      ],
+      "contexts": [
+        "WORK",
+        "MORNING",
+        "WORKDAY"
+      ],
+      "states": [],
+      "time": {
+        "min": 14,
+        "max": 26,
+        "default": 18
+      },
+      "missions": [
+        {
+          "action": "메일함 열기 + 오늘 처리 기준 1줄 적기(세팅)",
+          "estMin": 2
+        },
+        {
+          "action": "뉴스레터/홍보 메일 6개 삭제/보관",
+          "estMin": 3
+        },
+        {
+          "action": "2분 내 답장 가능한 메일 2개 전송하기",
+          "estMin": 5
+        },
+        {
+          "action": "오늘 처리할 메일 3개에 별표/태그 붙이기",
+          "estMin": 4
+        },
+        {
+          "action": "남은 메일을 폴더 이동하고 닫기 + 앱에서 완료",
+          "estMin": 4
+        }
+      ]
+    },
+    {
+      "id": "TPL_WORK_EMAIL_TRIAGE_STD_18_WORK",
+      "clusterKey": "WORK_EMAIL_TRIAGE",
+      "type": "process",
+      "title": "업무 메일 18분 분류(트리아지)",
+      "concepts": [
+        "WORK.EMAIL_TRIAGE"
+      ],
+      "contexts": [
+        "WORK"
+      ],
+      "states": [],
+      "time": {
+        "min": 12,
+        "max": 25,
+        "default": 18
+      },
+      "missions": [
+        {
+          "action": "메일함 열기 + 처리 기준 세팅(준비)",
+          "estMin": 2
+        },
+        {
+          "action": "뉴스레터/알림 메일 한 번에 정리(삭제/보관)",
+          "estMin": 3
+        },
+        {
+          "action": "2분 내 답장 가능한 메일 3개 전송하기",
+          "estMin": 6
+        },
+        {
+          "action": "남은 메일을 ‘오늘/이번주/대기’로 폴더 이동",
+          "estMin": 4
+        },
+        {
+          "action": "인박스 상단만 남기고 닫기 + 앱에서 완료",
+          "estMin": 3
+        }
+      ]
+    },
+    {
+      "id": "TPL_WORK_EMAIL_TRIAGE_STD_19_WORK",
+      "clusterKey": "WORK_EMAIL_TRIAGE",
+      "type": "process",
+      "title": "업무 메일 19분 정리(상단→답장→분류)",
+      "concepts": [
+        "WORK.EMAIL_TRIAGE"
+      ],
+      "contexts": [
+        "WORK",
+        "WORKDAY"
+      ],
+      "states": [],
+      "time": {
+        "min": 15,
+        "max": 28,
+        "default": 19
+      },
+      "missions": [
+        {
+          "action": "메일함 열기 + 오늘 처리 범위 정하기(예: 상단 20개)(준비)",
+          "estMin": 2
+        },
+        {
+          "action": "즉시 삭제/보관할 메일 12개 정리",
+          "estMin": 4
+        },
+        {
+          "action": "답장 필요 메일 2개 작성해 전송",
+          "estMin": 6
+        },
+        {
+          "action": "남은 메일을 ‘오늘/이번주/대기’로 폴더 이동",
+          "estMin": 4
+        },
+        {
+          "action": "인박스 닫기 + 앱에서 완료",
+          "estMin": 3
+        }
+      ]
+    },
+    {
+      "id": "TPL_WORK_EMAIL_TRIAGE_STD_20_WORKDAY",
+      "clusterKey": "WORK_EMAIL_TRIAGE",
+      "type": "process",
+      "title": "업무 메일 20분 트리아지(답장+위임)",
+      "concepts": [
+        "WORK.EMAIL_TRIAGE"
+      ],
+      "contexts": [
+        "WORK",
+        "WORKDAY"
+      ],
+      "states": [],
+      "time": {
+        "min": 16,
+        "max": 30,
+        "default": 20
+      },
+      "missions": [
+        {
+          "action": "메일함 열기 + 처리 순서 세팅(준비)",
+          "estMin": 2
+        },
+        {
+          "action": "중복 알림/구독 메일 10개 정리(삭제/보관)",
+          "estMin": 4
+        },
+        {
+          "action": "바로 답장할 메일 2개 작성해 전송",
+          "estMin": 5
+        },
+        {
+          "action": "위임/질문 필요한 메일 1개를 담당자에게 전달 메일 보내기",
+          "estMin": 5
+        },
+        {
+          "action": "나머지 메일을 폴더로 이동하고 닫기 + 앱에서 완료",
+          "estMin": 4
+        }
+      ]
+    },
+    {
+      "id": "TPL_WORK_FOCUS_BLOCK_START_FULL_35_WORK",
+      "clusterKey": "WORK_FOCUS_BLOCK_START",
+      "type": "process",
+      "title": "집중 블록 35분 시작(딥워크 준비 포함·업무)",
+      "concepts": [
+        "WORK.FOCUS_BLOCK_START"
+      ],
+      "contexts": [
+        "WORK"
+      ],
+      "states": [],
+      "time": {
+        "min": 28,
+        "max": 50,
+        "default": 35
+      },
+      "missions": [
+        {
+          "action": "작업 문서/티켓 열기 + ‘완료 기준’ 2줄 쓰기",
+          "estMin": 5
+        },
+        {
+          "action": "방해 차단 세팅(알림/회의실 예약/방해금지)",
+          "estMin": 5
+        },
+        {
+          "action": "20분 집중 진행(한 번만 멈추고 즉시 복귀)",
+          "estMin": 20
+        },
+        {
+          "action": "4분 점검: 다음 10분을 위한 미니 플랜 3개",
+          "estMin": 4
+        },
+        {
+          "action": "저장하고 앱에서 완료",
+          "estMin": 1
+        }
+      ]
+    },
+    {
+      "id": "TPL_WORK_FOCUS_BLOCK_START_FULL_45_WORK",
+      "clusterKey": "WORK_FOCUS_BLOCK_START",
+      "type": "process",
+      "title": "집중 블록 45분 시작(성과 1개 만들기·업무)",
+      "concepts": [
+        "WORK.FOCUS_BLOCK_START"
+      ],
+      "contexts": [
+        "WORK"
+      ],
+      "states": [],
+      "time": {
+        "min": 35,
+        "max": 60,
+        "default": 45
+      },
+      "missions": [
+        {
+          "action": "이번 블록 산출물 1개 정의(파일/PR/메모 등)(준비)",
+          "estMin": 5
+        },
+        {
+          "action": "방해 제거(알림 끄기/탭 정리/회의 알림 끄기)",
+          "estMin": 6
+        },
+        {
+          "action": "28분 집중 진행(산출물 형태로 계속 남기기)",
+          "estMin": 28
+        },
+        {
+          "action": "4분 점검: 다음 막힘 1개를 해결 질문으로 바꾸기",
+          "estMin": 4
+        },
+        {
+          "action": "저장/업로드 + 앱에서 완료",
+          "estMin": 2
+        }
+      ]
+    },
+    {
+      "id": "TPL_WORK_FOCUS_BLOCK_START_FULL_50_WORK",
+      "clusterKey": "WORK_FOCUS_BLOCK_START",
+      "type": "process",
+      "title": "집중 블록 50분 시작(딥워크·업무)",
+      "concepts": [
+        "WORK.FOCUS_BLOCK_START"
+      ],
+      "contexts": [
+        "WORK"
+      ],
+      "states": [],
+      "time": {
+        "min": 40,
+        "max": 70,
+        "default": 50
+      },
+      "missions": [
+        {
+          "action": "작업 범위/우선순위 고정(해야 할 것 1개, 안 할 것 1개)(준비)",
+          "estMin": 6
+        },
+	        {
+	          "action": "방해 차단 세팅(알림/메일 닫기/메신저 상태 변경)",
+	          "estMin": 7
+	        },
+	        {
+	          "action": "20분 집중 진행(타이머 유지, 검색은 1회만)",
+	          "estMin": 20
+	        },
+	        {
+	          "action": "12분 집중 진행(타이머 유지, 검색은 1회만)",
+	          "estMin": 12
+	        },
+	        {
+	          "action": "3분 점검: 결과물 상태 확인 + 다음 액션 1개 정하기",
+	          "estMin": 3
+	        },
+        {
+          "action": "저장하고 앱에서 완료",
+          "estMin": 2
+        }
+      ]
+    },
+    {
+      "id": "TPL_WORK_FOCUS_BLOCK_START_FULL_60_WORK",
+      "clusterKey": "WORK_FOCUS_BLOCK_START",
+      "type": "process",
+      "title": "집중 블록 60분 시작(긴 호흡·업무)",
+      "concepts": [
+        "WORK.FOCUS_BLOCK_START"
+      ],
+      "contexts": [
+        "WORK"
+      ],
+      "states": [],
+      "time": {
+        "min": 50,
+        "max": 80,
+        "default": 60
+      },
+      "missions": [
+        {
+          "action": "이번 60분 목표 1개 + 완료 기준 2줄 쓰기(준비)",
+          "estMin": 6
+        },
+	        {
+	          "action": "방해 요소 제거(알림 끄기/메신저 닫기/탭 정리)",
+	          "estMin": 8
+	        },
+	        {
+	          "action": "20분 집중 진행(산출물 중심, 멈추면 즉시 재개)",
+	          "estMin": 20
+	        },
+	        {
+	          "action": "20분 집중 진행(산출물 중심, 멈추면 즉시 재개)",
+	          "estMin": 20
+	        },
+	        {
+	          "action": "4분 리뷰: 다음 15분 계획 3개로 쪼개기",
+	          "estMin": 4
+	        },
+        {
+          "action": "저장/공유 준비 + 앱에서 완료",
+          "estMin": 2
+        }
+      ]
+    },
+    {
+      "id": "TPL_WORK_FOCUS_BLOCK_START_MIN_15_WORK",
+      "clusterKey": "WORK_FOCUS_BLOCK_START",
+      "type": "process",
+      "title": "집중 블록 15분 시작(초단기 착수·업무)",
+      "concepts": [
+        "WORK.FOCUS_BLOCK_START"
+      ],
+      "contexts": [
+        "WORK"
+      ],
+      "states": [],
+      "time": {
+        "min": 12,
+        "max": 20,
+        "default": 15
+      },
+      "missions": [
+        {
+          "action": "지금 할 작업 1개 고르기(완료 조건 1줄)(준비)",
+          "estMin": 2
+        },
+        {
+          "action": "알림 끄기 + 메신저/탭 3개만 남기기",
+          "estMin": 2
+        },
+        {
+          "action": "8분만 바로 착수(타이머 유지, 멈추면 즉시 재개)",
+          "estMin": 8
+        },
+        {
+          "action": "막힌 지점 1개를 ‘다음 1분 행동’으로 쪼개기",
+          "estMin": 2
+        },
+        {
+          "action": "파일 저장 + 앱에서 완료 누르기",
+          "estMin": 1
+        }
+      ]
+    },
+    {
+      "id": "TPL_WORK_FOCUS_BLOCK_START_STD_20_HOME",
+      "clusterKey": "WORK_FOCUS_BLOCK_START",
+      "type": "process",
+      "title": "집중 블록 20분 시작(재택·산만 차단)",
+      "concepts": [
+        "WORK.FOCUS_BLOCK_START"
+      ],
+      "contexts": [
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 15,
+        "max": 30,
+        "default": 20
+      },
+      "missions": [
+        {
+          "action": "책상 위 3가지만 남기고 치우기(물/노트/노트북)(준비)",
+          "estMin": 3
+        },
+        {
+          "action": "타이머 20분 + 휴대폰 멀리 두기/집중모드 켜기",
+          "estMin": 3
+        },
+        {
+          "action": "핵심 작업에 12분 착수(중간에 앱/메신저 금지)",
+          "estMin": 12
+        },
+        {
+          "action": "1분 점검: 다음 1단계가 뭔지 한 문장으로 정리",
+          "estMin": 1
+        },
+        {
+          "action": "저장하고 앱에서 완료",
+          "estMin": 1
+        }
+      ]
+    },
+    {
+      "id": "TPL_WORK_FOCUS_BLOCK_START_STD_25_WORK",
+      "clusterKey": "WORK_FOCUS_BLOCK_START",
+      "type": "process",
+      "title": "집중 블록 25분 시작(포모도로·업무)",
+      "concepts": [
+        "WORK.FOCUS_BLOCK_START"
+      ],
+      "contexts": [
+        "WORK"
+      ],
+      "states": [],
+      "time": {
+        "min": 20,
+        "max": 35,
+        "default": 25
+      },
+      "missions": [
+        {
+          "action": "이번 25분 목표 1개 정하기(완료 조건 1줄)(준비)",
+          "estMin": 3
+        },
+        {
+          "action": "알림/슬랙/메일 잠금 + 필요한 문서 1개만 열기",
+          "estMin": 4
+        },
+        {
+          "action": "15분 집중 진행(타이머 유지, 멈추면 즉시 재개)",
+          "estMin": 15
+        },
+        {
+          "action": "막힌 지점 1개를 다음 액션 2단계로 쪼개기",
+          "estMin": 2
+        },
+        {
+          "action": "결과 저장 + 앱에서 완료",
+          "estMin": 1
+        }
+      ]
+    },
+    {
+      "id": "TPL_WORK_FOCUS_BLOCK_START_STD_30_WORK",
+      "clusterKey": "WORK_FOCUS_BLOCK_START",
+      "type": "process",
+      "title": "집중 블록 30분 시작(범위 고정·업무)",
+      "concepts": [
+        "WORK.FOCUS_BLOCK_START"
+      ],
+      "contexts": [
+        "WORK"
+      ],
+      "states": [],
+      "time": {
+        "min": 24,
+        "max": 40,
+        "default": 30
+      },
+      "missions": [
+        {
+          "action": "할 일 범위 고정(시작점/끝점 1줄로 쓰기)",
+          "estMin": 4
+        },
+        {
+          "action": "방해 요소 제거(알림 끄기/탭 정리/물만 두기)",
+          "estMin": 4
+        },
+        {
+          "action": "18분 착수(‘첫 결과물’이 나오게 진행)",
+          "estMin": 18
+        },
+        {
+          "action": "체크포인트 3분: 막힌 이유 1개와 우회안 1개 적기",
+          "estMin": 3
+        },
+        {
+          "action": "저장하고 앱에서 완료",
+          "estMin": 1
+        }
+      ]
+    },
+    {
+      "id": "TPL_WORK_FOCUS_BLOCK_START_STD_40_HOME",
+      "clusterKey": "WORK_FOCUS_BLOCK_START",
+      "type": "process",
+      "title": "집중 블록 40분 시작(재택·방해요소 제거)",
+      "concepts": [
+        "WORK.FOCUS_BLOCK_START"
+      ],
+      "contexts": [
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 32,
+        "max": 55,
+        "default": 40
+      },
+      "missions": [
+        {
+          "action": "오늘 목표 1개 정하기 + 필요한 파일/링크 3개만 열기",
+          "estMin": 4
+        },
+        {
+          "action": "환경 세팅(이어폰/음악/알림 끄기/휴대폰 멀리)",
+          "estMin": 6
+        },
+        {
+          "action": "핵심 작업 25분 착수(타이머 유지)",
+          "estMin": 25
+        },
+        {
+          "action": "3분 점검: 막힌 지점 1개를 다음 액션으로 쪼개기",
+          "estMin": 3
+        },
+        {
+          "action": "저장 + 앱에서 완료",
+          "estMin": 2
+        }
+      ]
+    },
+    {
+      "id": "TPL_WORK_FOCUS_BLOCK_START_STD_45_WORK",
+      "clusterKey": "WORK_FOCUS_BLOCK_START",
+      "type": "process",
+      "title": "집중 블록 45분 시작(업무)",
+      "concepts": [
+        "WORK.FOCUS_BLOCK_START"
+      ],
+      "contexts": [
+        "WORK"
+      ],
+      "states": [],
+      "time": {
+        "min": 35,
+        "max": 60,
+        "default": 45
+      },
+      "missions": [
+        {
+          "action": "작업 문서/툴 열기 + 오늘 목표 1개 범위 정하기(준비)",
+          "estMin": 3
+        },
+        {
+          "action": "방해 요소 치우기(알림 끄기/탭 정리)",
+          "estMin": 5
+        },
+        {
+          "action": "핵심 작업에 30분 착수(타이머 유지)",
+          "estMin": 30
+        },
+        {
+          "action": "5분 점검: 막힌 지점 1개를 다음 액션으로 쪼개기",
+          "estMin": 5
+        },
+        {
+          "action": "결과 저장하고 앱에서 완료 누르기",
+          "estMin": 2
+        }
+      ]
+    },
+    {
+      "id": "TPL_HOME_TRASH_OUT_MIN_6_HOME",
+      "clusterKey": "HOME_TRASH_OUT",
+      "type": "process",
+      "title": "쓰레기 6분 배출(봉투 묶고 밖으로)",
+      "concepts": [
+        "HOME.TRASH_OUT"
+      ],
+      "contexts": [
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 5,
+        "max": 10,
+        "default": 6
+      },
+      "missions": [
+        {
+          "action": "집안 쓰레기(주방/화장실) 한곳에 모으기(모으기)",
+          "estMin": 1
+        },
+        {
+          "action": "쓰레기봉투 입구 묶고 새는지 확인(준비)",
+          "estMin": 1
+        },
+        {
+          "action": "현관 밖으로 들고 나가 지정된 쓰레기통에 버리기",
+          "estMin": 3
+        },
+        {
+          "action": "손 씻고 쓰레기통 주변 정리 + 앱에서 완료 누르기",
+          "estMin": 1
+        }
+      ],
+      "meta": {
+        "intensity": "MIN",
+        "contextVariant": "HOME"
+      }
+    },
+    {
+      "id": "TPL_HOME_TRASH_OUT_MIN_7_MORNING_HOME",
+      "clusterKey": "HOME_TRASH_OUT",
+      "type": "process",
+      "title": "아침 7분 쓰레기 버리기(외출 전 한 번에)",
+      "concepts": [
+        "HOME.TRASH_OUT"
+      ],
+      "contexts": [
+        "MORNING",
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 5,
+        "max": 12,
+        "default": 7
+      },
+      "missions": [
+        {
+          "action": "현관에 봉투/장갑 꺼내고 동선 준비(꺼내기)",
+          "estMin": 2
+        },
+        {
+          "action": "주방·화장실 봉투만 교체할지 범위 정하기(범위 정하기)",
+          "estMin": 1
+        },
+        {
+          "action": "쓰레기봉투 묶어 들고 나가 배출하기",
+          "estMin": 3
+        },
+        {
+          "action": "장갑 벗고 손 씻기 + 앱에서 완료 누르기",
+          "estMin": 1
+        }
+      ],
+      "meta": {
+        "intensity": "MIN",
+        "contextVariant": "MORNING_HOME"
+      }
+    },
+    {
+      "id": "TPL_HOME_TRASH_OUT_STD_8_AFTER_WORK_HOME",
+      "clusterKey": "HOME_TRASH_OUT",
+      "type": "process",
+      "title": "퇴근 후 8분 쓰레기 처리(냄새 나기 전)",
+      "concepts": [
+        "HOME.TRASH_OUT"
+      ],
+      "contexts": [
+        "AFTER_WORK",
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 6,
+        "max": 14,
+        "default": 8
+      },
+      "missions": [
+        {
+          "action": "현관 앞에 봉투를 세워두고 바로 할 준비(준비)",
+          "estMin": 1
+        },
+        {
+          "action": "주방 싱크대 주변 쓰레기만 빠르게 모으기(모으기)",
+          "estMin": 2
+        },
+        {
+          "action": "봉투 묶고 배출한 뒤 쓰레기통에 새 봉투 끼우기",
+          "estMin": 4
+        },
+        {
+          "action": "손 씻고 냄새 나는 곳 한 번 환기 + 앱에서 완료",
+          "estMin": 1
+        }
+      ],
+      "meta": {
+        "intensity": "STD",
+        "contextVariant": "AFTER_WORK_HOME"
+      }
+    },
+    {
+      "id": "TPL_HOME_TRASH_OUT_STD_10_HOME",
+      "clusterKey": "HOME_TRASH_OUT",
+      "type": "process",
+      "title": "쓰레기 10분 정리(주방+거실 한 번에)",
+      "concepts": [
+        "HOME.TRASH_OUT"
+      ],
+      "contexts": [
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 8,
+        "max": 16,
+        "default": 10
+      },
+      "missions": [
+        {
+          "action": "오늘 버릴 쓰레기 범위 정하기(주방+거실)(범위 정하기)",
+          "estMin": 2
+        },
+        {
+          "action": "거실/책상 주변 작은 쓰레기 주워 한 봉투에 모으기(모으기)",
+          "estMin": 2
+        },
+        {
+          "action": "봉투 묶고 밖에 배출한 뒤 쓰레기통 뚜껑 닫기",
+          "estMin": 5
+        },
+        {
+          "action": "손 씻고 쓰레기통 주변 정리 + 앱에서 완료 누르기",
+          "estMin": 1
+        }
+      ],
+      "meta": {
+        "intensity": "STD",
+        "contextVariant": "HOME"
+      }
+    },
+    {
+      "id": "TPL_HOME_TRASH_OUT_STD_12_WEEKEND_HOME",
+      "clusterKey": "HOME_TRASH_OUT",
+      "type": "process",
+      "title": "주말 12분 쓰레기 버리기(봉투 교체까지)",
+      "concepts": [
+        "HOME.TRASH_OUT"
+      ],
+      "contexts": [
+        "WEEKEND",
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 10,
+        "max": 20,
+        "default": 12
+      },
+      "missions": [
+        {
+          "action": "쓰레기봉투·여분 봉투·물티슈 꺼내기(꺼내기)",
+          "estMin": 2
+        },
+        {
+          "action": "주방/화장실 봉투를 한곳에 모으고 묶기(모으기)",
+          "estMin": 3
+        },
+        {
+          "action": "밖에 배출하고 각 쓰레기통에 새 봉투 끼우기",
+          "estMin": 5
+        },
+        {
+          "action": "손 씻고 바닥에 떨어진 조각 줍기 + 주변 정리",
+          "estMin": 2
+        }
+      ],
+      "meta": {
+        "intensity": "STD",
+        "contextVariant": "WEEKEND_HOME"
+      }
+    },
+    {
+      "id": "TPL_HOME_TRASH_OUT_FULL_15_AFTER_WORK_HOME",
+      "clusterKey": "HOME_TRASH_OUT",
+      "type": "process",
+      "title": "퇴근 후 15분 쓰레기 배출(냄새/누수 방지)",
+      "concepts": [
+        "HOME.TRASH_OUT"
+      ],
+      "contexts": [
+        "AFTER_WORK",
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 12,
+        "max": 25,
+        "default": 15
+      },
+      "missions": [
+        {
+          "action": "타이머 15분 맞추고 쓰레기 처리 시작(타이머 시작)",
+          "estMin": 2
+        },
+        {
+          "action": "주방·화장실·현관 작은 쓰레기까지 모으기(모으기)",
+          "estMin": 3
+        },
+        {
+          "action": "봉투를 두 겹으로 묶고 누수 나는지 확인하기",
+          "estMin": 6
+        },
+        {
+          "action": "밖에 배출하고 쓰레기통 테두리 한 번 닦기",
+          "estMin": 3
+        },
+        {
+          "action": "손 씻고 문 닫기 + 앱에서 완료 누르기",
+          "estMin": 1
+        }
+      ],
+      "meta": {
+        "intensity": "FULL",
+        "contextVariant": "AFTER_WORK_HOME"
+      }
+    },
+    {
+      "id": "TPL_HOME_TRASH_OUT_MIN_5_HOME",
+      "clusterKey": "HOME_TRASH_OUT",
+      "type": "process",
+      "title": "쓰레기 5분 초간단 배출(한 봉투만)",
+      "concepts": [
+        "HOME.TRASH_OUT"
+      ],
+      "contexts": [
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 4,
+        "max": 9,
+        "default": 5
+      },
+      "missions": [
+        {
+          "action": "쓰레기봉투 한 개만 묶을 준비(준비)",
+          "estMin": 1
+        },
+        {
+          "action": "봉투 묶고 바로 밖에 나가 배출하기",
+          "estMin": 3
+        },
+        {
+          "action": "손 씻고 현관 문 닫기 + 앱에서 완료",
+          "estMin": 1
+        }
+      ],
+      "meta": {
+        "intensity": "MIN",
+        "contextVariant": "HOME"
+      }
+    },
+    {
+      "id": "TPL_HOME_TRASH_OUT_STD_9_WORKDAY_HOME",
+      "clusterKey": "HOME_TRASH_OUT",
+      "type": "process",
+      "title": "평일 9분 쓰레기 버리기(냄새 나는 것 우선)",
+      "concepts": [
+        "HOME.TRASH_OUT"
+      ],
+      "contexts": [
+        "WORKDAY",
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 7,
+        "max": 15,
+        "default": 9
+      },
+      "missions": [
+        {
+          "action": "주방 쓰레기통 뚜껑 열고 냄새 나는 것부터 확인(열기)",
+          "estMin": 2
+        },
+        {
+          "action": "젖은 쓰레기/음식물 묻은 것만 한 봉투로 모으기(모으기)",
+          "estMin": 2
+        },
+        {
+          "action": "봉투 묶어 배출하고 쓰레기통에 새 봉투 끼우기",
+          "estMin": 4
+        },
+        {
+          "action": "손 씻고 환기 1분 + 앱에서 완료 누르기",
+          "estMin": 1
+        }
+      ],
+      "meta": {
+        "intensity": "STD",
+        "contextVariant": "WORKDAY_HOME"
+      }
+    },
+    {
+      "id": "TPL_HOME_TRASH_OUT_FULL_18_WEEKEND_HOME",
+      "clusterKey": "HOME_TRASH_OUT",
+      "type": "process",
+      "title": "주말 18분 쓰레기 배출(집 전체 모아서 한 번에)",
+      "concepts": [
+        "HOME.TRASH_OUT"
+      ],
+      "contexts": [
+        "WEEKEND",
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 15,
+        "max": 28,
+        "default": 18
+      },
+      "missions": [
+        {
+          "action": "버릴 쓰레기 범위 정하기(방/거실/주방)(범위 정하기)",
+          "estMin": 3
+        },
+        {
+          "action": "각 방의 작은 쓰레기통을 들고 나와 한곳에 모으기(모으기)",
+          "estMin": 4
+        },
+        {
+          "action": "봉투 묶고 테이프로 한 번 더 감아 새는 것 방지",
+          "estMin": 7
+        },
+        {
+          "action": "밖에 배출하고 빈 쓰레기통을 제자리로 두기",
+          "estMin": 3
+        },
+        {
+          "action": "손 씻고 동선 정리 + 앱에서 완료",
+          "estMin": 1
+        }
+      ],
+      "meta": {
+        "intensity": "FULL",
+        "contextVariant": "WEEKEND_HOME"
+      }
+    },
+    {
+      "id": "TPL_HOME_TRASH_OUT_STD_11_MORNING_HOME",
+      "clusterKey": "HOME_TRASH_OUT",
+      "type": "process",
+      "title": "아침 11분 쓰레기 버리기(봉투 교체+환기)",
+      "concepts": [
+        "HOME.TRASH_OUT"
+      ],
+      "contexts": [
+        "MORNING",
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 9,
+        "max": 18,
+        "default": 11
+      },
+      "missions": [
+        {
+          "action": "현관에 여분 봉투를 꺼내두고 시작 준비(준비)",
+          "estMin": 2
+        },
+        {
+          "action": "주방/화장실 쓰레기봉투를 모으고 묶기(모으기)",
+          "estMin": 3
+        },
+        {
+          "action": "밖에 배출한 뒤 쓰레기통에 새 봉투 끼우기",
+          "estMin": 4
+        },
+        {
+          "action": "창문 열고 공기 순환 1분(환기)",
+          "estMin": 1
+        },
+        {
+          "action": "손 씻고 창문 닫기 + 앱에서 완료 누르기",
+          "estMin": 1
+        }
+      ],
+      "meta": {
+        "intensity": "STD",
+        "contextVariant": "MORNING_HOME"
+      }
+    },
+    {
+      "id": "TPL_HOME_RECYCLE_SORT_MIN_6_HOME",
+      "clusterKey": "HOME_RECYCLE_SORT",
+      "type": "process",
+      "title": "분리수거 6분 미니(플라스틱/캔만)",
+      "concepts": [
+        "HOME.RECYCLE_SORT"
+      ],
+      "contexts": [
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 5,
+        "max": 10,
+        "default": 6
+      },
+      "missions": [
+        {
+          "action": "플라스틱/캔만 한곳에 모으기(모으기)",
+          "estMin": 1
+        },
+        {
+          "action": "뚜껑/라벨/이물질을 빠르게 분리하기",
+          "estMin": 3
+        },
+        {
+          "action": "종류별로 봉투/함에 넣고 뚜껑 닫기(닫기)",
+          "estMin": 1
+        },
+        {
+          "action": "손 씻고 주변 정리 + 앱에서 완료",
+          "estMin": 1
+        }
+      ],
+      "meta": {
+        "intensity": "MIN",
+        "contextVariant": "HOME"
+      }
+    },
+    {
+      "id": "TPL_HOME_RECYCLE_SORT_MIN_7_MORNING_HOME",
+      "clusterKey": "HOME_RECYCLE_SORT",
+      "type": "process",
+      "title": "아침 7분 분리수거 분류(외출 전 박스 정리)",
+      "concepts": [
+        "HOME.RECYCLE_SORT"
+      ],
+      "contexts": [
+        "MORNING",
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 6,
+        "max": 12,
+        "default": 7
+      },
+      "missions": [
+        {
+          "action": "칼/가위와 분리수거 봉투 꺼내기(꺼내기)",
+          "estMin": 2
+        },
+        {
+          "action": "종이박스 테이프만 떼고 평평하게 접기",
+          "estMin": 2
+        },
+        {
+          "action": "종이/비닐/플라스틱으로 나눠 담기",
+          "estMin": 2
+        },
+        {
+          "action": "도구 제자리 두고 주변 정리 + 앱에서 완료",
+          "estMin": 1
+        }
+      ],
+      "meta": {
+        "intensity": "MIN",
+        "contextVariant": "MORNING_HOME"
+      }
+    },
+    {
+      "id": "TPL_HOME_RECYCLE_SORT_STD_9_HOME",
+      "clusterKey": "HOME_RECYCLE_SORT",
+      "type": "process",
+      "title": "분리수거 9분 기본 분류(종이/플라스틱/캔)",
+      "concepts": [
+        "HOME.RECYCLE_SORT"
+      ],
+      "contexts": [
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 7,
+        "max": 14,
+        "default": 9
+      },
+      "missions": [
+        {
+          "action": "오늘 분류할 재활용품 범위 정하기(종이/플라스틱/캔)(범위 정하기)",
+          "estMin": 2
+        },
+        {
+          "action": "재활용품을 바닥/식탁에 펼쳐 한줄로 모으기(모으기)",
+          "estMin": 3
+        },
+        {
+          "action": "종류별로 분류하고 이물질은 제거하기",
+          "estMin": 3
+        },
+        {
+          "action": "분리수거함 뚜껑 닫고 주변 정리 + 앱에서 완료",
+          "estMin": 1
+        }
+      ],
+      "meta": {
+        "intensity": "STD",
+        "contextVariant": "HOME"
+      }
+    },
+    {
+      "id": "TPL_HOME_RECYCLE_SORT_STD_10_AFTER_WORK_HOME",
+      "clusterKey": "HOME_RECYCLE_SORT",
+      "type": "process",
+      "title": "퇴근 후 10분 분리수거(배달 용기 우선)",
+      "concepts": [
+        "HOME.RECYCLE_SORT"
+      ],
+      "contexts": [
+        "AFTER_WORK",
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 8,
+        "max": 16,
+        "default": 10
+      },
+      "missions": [
+        {
+          "action": "배달 용기/비닐/캔을 한곳에 모으기(모으기)",
+          "estMin": 2
+        },
+        {
+          "action": "비닐은 내용물 털고 묶을 준비(준비)",
+          "estMin": 2
+        },
+        {
+          "action": "플라스틱/캔/비닐로 분리해 각각 담기",
+          "estMin": 5
+        },
+        {
+          "action": "손 씻고 주변 정리 + 앱에서 완료 누르기",
+          "estMin": 1
+        }
+      ],
+      "meta": {
+        "intensity": "STD",
+        "contextVariant": "AFTER_WORK_HOME"
+      }
+    },
+    {
+      "id": "TPL_HOME_RECYCLE_SORT_STD_11_WORKDAY_HOME",
+      "clusterKey": "HOME_RECYCLE_SORT",
+      "type": "process",
+      "title": "평일 11분 분리수거 정리(라벨/뚜껑 분리 포함)",
+      "concepts": [
+        "HOME.RECYCLE_SORT"
+      ],
+      "contexts": [
+        "WORKDAY",
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 9,
+        "max": 18,
+        "default": 11
+      },
+      "missions": [
+        {
+          "action": "물티슈/가위를 꺼내고 분류할 자리 세팅(세팅)",
+          "estMin": 2
+        },
+        {
+          "action": "플라스틱 병/용기에서 라벨과 뚜껑 분리하기",
+          "estMin": 3
+        },
+        {
+          "action": "캔/유리/플라스틱을 종류별로 분류해 담기",
+          "estMin": 4
+        },
+        {
+          "action": "도구 제자리 두고 바닥에 떨어진 것 주워 정리",
+          "estMin": 1
+        },
+        {
+          "action": "손 씻고 앱에서 완료 누르기",
+          "estMin": 1
+        }
+      ],
+      "meta": {
+        "intensity": "STD",
+        "contextVariant": "WORKDAY_HOME"
+      }
+    },
+    {
+      "id": "TPL_HOME_RECYCLE_SORT_STD_12_WEEKEND_HOME",
+      "clusterKey": "HOME_RECYCLE_SORT",
+      "type": "process",
+      "title": "주말 12분 분리수거(주간 모아둔 것 분류)",
+      "concepts": [
+        "HOME.RECYCLE_SORT"
+      ],
+      "contexts": [
+        "WEEKEND",
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 10,
+        "max": 20,
+        "default": 12
+      },
+      "missions": [
+        {
+          "action": "분리수거 봉투 3종(종이/플라스틱/비닐) 세팅(세팅)",
+          "estMin": 2
+        },
+        {
+          "action": "모아둔 재활용품을 한 번에 꺼내서 모으기(모으기)",
+          "estMin": 3
+        },
+        {
+          "action": "종이 접고 비닐/플라스틱 이물질 제거 후 분류하기",
+          "estMin": 5
+        },
+        {
+          "action": "분리수거함 닫기 + 주변 정리 + 앱에서 완료",
+          "estMin": 2
+        }
+      ],
+      "meta": {
+        "intensity": "STD",
+        "contextVariant": "WEEKEND_HOME"
+      }
+    },
+    {
+      "id": "TPL_HOME_RECYCLE_SORT_FULL_15_HOME",
+      "clusterKey": "HOME_RECYCLE_SORT",
+      "type": "process",
+      "title": "분리수거 15분 꼼꼼 분류(세척 가능한 건 분리)",
+      "concepts": [
+        "HOME.RECYCLE_SORT"
+      ],
+      "contexts": [
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 12,
+        "max": 24,
+        "default": 15
+      },
+      "missions": [
+        {
+          "action": "타이머 15분 맞추고 분리수거 분류 시작(타이머 시작)",
+          "estMin": 3
+        },
+        {
+          "action": "세척 필요한 용기/병을 따로 빼서 모으기(모으기)",
+          "estMin": 4
+        },
+        {
+          "action": "종이/플라스틱/캔/유리로 분류하고 라벨 제거하기",
+          "estMin": 5
+        },
+        {
+          "action": "세척 필요한 건 싱크대 옆에 모아두고 주변 정리",
+          "estMin": 2
+        },
+        {
+          "action": "손 씻고 앱에서 완료 누르기",
+          "estMin": 1
+        }
+      ],
+      "meta": {
+        "intensity": "FULL",
+        "contextVariant": "HOME"
+      }
+    },
+    {
+      "id": "TPL_HOME_RECYCLE_SORT_FULL_18_WEEKEND_HOME",
+      "clusterKey": "HOME_RECYCLE_SORT",
+      "type": "process",
+      "title": "주말 18분 분리수거(쌓인 것 한 번에 정리)",
+      "concepts": [
+        "HOME.RECYCLE_SORT"
+      ],
+      "contexts": [
+        "WEEKEND",
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 15,
+        "max": 28,
+        "default": 18
+      },
+      "missions": [
+        {
+          "action": "거실/주방 재활용품을 한곳에 모으기(모으기)",
+          "estMin": 3
+        },
+        {
+          "action": "종이박스 접고 테이프/스티커 제거하기",
+          "estMin": 5
+        },
+        {
+          "action": "플라스틱/캔/유리를 분류하고 라벨을 떼기",
+          "estMin": 6
+        },
+        {
+          "action": "분류한 것들을 봉투/함에 담고 입구 묶기",
+          "estMin": 3
+        },
+        {
+          "action": "바닥 쓸어 정리 + 앱에서 완료",
+          "estMin": 1
+        }
+      ],
+      "meta": {
+        "intensity": "FULL",
+        "contextVariant": "WEEKEND_HOME"
+      }
+    },
+    {
+      "id": "TPL_HOME_RECYCLE_SORT_FULL_20_AFTER_WORK_HOME",
+      "clusterKey": "HOME_RECYCLE_SORT",
+      "type": "process",
+      "title": "퇴근 후 20분 분리수거(배출 전 완성도 있게)",
+      "concepts": [
+        "HOME.RECYCLE_SORT"
+      ],
+      "contexts": [
+        "AFTER_WORK",
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 16,
+        "max": 32,
+        "default": 20
+      },
+      "missions": [
+        {
+          "action": "오늘 분류할 재활용 범위 정하기(종이/플라스틱/비닐/캔)(범위 정하기)",
+          "estMin": 3
+        },
+        {
+          "action": "재활용품을 꺼내 한곳에 모으고 종류별로 줄 세우기(모으기)",
+          "estMin": 5
+        },
+        {
+          "action": "뚜껑/라벨 제거하고 내용물 비우기(오염 제거)",
+          "estMin": 7
+        },
+        {
+          "action": "종류별로 봉투에 담아 입구 묶고 제자리 두기",
+          "estMin": 4
+        },
+        {
+          "action": "손 씻고 주변 정리 + 앱에서 완료 누르기",
+          "estMin": 1
+        }
+      ],
+      "meta": {
+        "intensity": "FULL",
+        "contextVariant": "AFTER_WORK_HOME"
+      }
+    },
+    {
+      "id": "TPL_HOME_RECYCLE_SORT_MIN_5_HOME",
+      "clusterKey": "HOME_RECYCLE_SORT",
+      "type": "process",
+      "title": "분리수거 5분 초간단(한 종류만)",
+      "concepts": [
+        "HOME.RECYCLE_SORT"
+      ],
+      "contexts": [
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 4,
+        "max": 9,
+        "default": 5
+      },
+      "missions": [
+        {
+          "action": "분류할 재활용품 한 종류만 꺼내기(꺼내기)",
+          "estMin": 1
+        },
+        {
+          "action": "이물질/라벨만 제거하고 해당 봉투에 담기",
+          "estMin": 3
+        },
+        {
+          "action": "봉투 입구 묶고 주변 정리 + 앱에서 완료",
+          "estMin": 1
+        }
+      ],
+      "meta": {
+        "intensity": "MIN",
+        "contextVariant": "HOME"
+      }
+    },
+    {
+      "id": "TPL_HOME_LAUNDRY_WASH_MIN_5_HOME",
+      "clusterKey": "HOME_LAUNDRY_WASH",
+      "type": "process",
+      "title": "세탁 5분 미니 스타트(한 바구니만)",
+      "concepts": [
+        "HOME.LAUNDRY_WASH"
+      ],
+      "contexts": [
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 4,
+        "max": 8,
+        "default": 5
+      },
+      "missions": [
+        {
+          "action": "세탁 바구니 세탁기 앞에 두고 타이머 시작(준비)",
+          "estMin": 1
+        },
+        {
+          "action": "주머니/휴지/동전 빠르게 확인하기",
+          "estMin": 1
+        },
+        {
+          "action": "빨래 넣고 세제(또는 캡슐) 1회분 넣기",
+          "estMin": 2
+        },
+        {
+          "action": "표준 코스 눌러 시작 + 앱에서 완료",
+          "estMin": 1
+        }
+      ],
+      "meta": {
+        "intensity": "MIN",
+        "goalFocus": "START_WASH",
+        "contextVariant": "HOME",
+        "stateMode": "NORMAL"
+      }
+    },
+    {
+      "id": "TPL_HOME_LAUNDRY_WASH_MIN_6_MORNING_HOME",
+      "clusterKey": "HOME_LAUNDRY_WASH",
+      "type": "process",
+      "title": "세탁 6분 아침 빠른 시작(주머니만 체크)",
+      "concepts": [
+        "HOME.LAUNDRY_WASH"
+      ],
+      "contexts": [
+        "MORNING",
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 5,
+        "max": 10,
+        "default": 6
+      },
+      "missions": [
+        {
+          "action": "세탁물(바구니/봉투) 가져오고 타이머 시작(준비)",
+          "estMin": 1
+        },
+        {
+          "action": "주머니/양말 뒤집힘만 1분 정리하기",
+          "estMin": 1
+        },
+        {
+          "action": "세탁기 투입 + 문 닫기",
+          "estMin": 2
+        },
+        {
+          "action": "세제 넣고 시작 버튼 누르기",
+          "estMin": 1
+        },
+        {
+          "action": "세제/바구니 제자리 + 앱에서 완료",
+          "estMin": 1
+        }
+      ],
+      "meta": {
+        "intensity": "MIN",
+        "goalFocus": "START_WASH",
+        "contextVariant": "HOME",
+        "stateMode": "NORMAL"
+      }
+    },
+    {
+      "id": "TPL_HOME_LAUNDRY_WASH_MIN_7_AFTER_WORK_HOME",
+      "clusterKey": "HOME_LAUNDRY_WASH",
+      "type": "process",
+      "title": "세탁 7분 퇴근 후 빠른 분류+시작(검정/흰색)",
+      "concepts": [
+        "HOME.LAUNDRY_WASH"
+      ],
+      "contexts": [
+        "AFTER_WORK",
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 6,
+        "max": 12,
+        "default": 7
+      },
+      "missions": [
+        {
+          "action": "바구니 2개(밝은/어두운) 꺼내고 타이머 시작(준비)",
+          "estMin": 1
+        },
+        {
+          "action": "주머니 비우기 + 지퍼/후드끈만 정리하기",
+          "estMin": 2
+        },
+        {
+          "action": "밝은/어두운 2분류로 나누기",
+          "estMin": 1
+        },
+        {
+          "action": "오늘 돌릴 1바구니만 세탁기에 넣기",
+          "estMin": 2
+        },
+        {
+          "action": "세제 넣고 시작 + 앱에서 완료",
+          "estMin": 1
+        }
+      ],
+      "meta": {
+        "intensity": "MIN",
+        "goalFocus": "SORT_LAUNDRY",
+        "contextVariant": "HOME",
+        "stateMode": "LOW_ENERGY"
+      }
+    },
+    {
+      "id": "TPL_HOME_LAUNDRY_WASH_MIN_8_BEFORE_SLEEP_HOME",
+      "clusterKey": "HOME_LAUNDRY_WASH",
+      "type": "process",
+      "title": "세탁 8분 자기 전 저자극 스타트(내일을 위한)",
+      "concepts": [
+        "HOME.LAUNDRY_WASH"
+      ],
+      "contexts": [
+        "BEFORE_SLEEP",
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 6,
+        "max": 14,
+        "default": 8
+      },
+      "missions": [
+        {
+          "action": "세탁기 앞 바닥만 비우고 타이머 시작(준비)",
+          "estMin": 2
+        },
+        {
+          "action": "주머니 비우고 뒤집힌 옷 2개만 바로잡기",
+          "estMin": 1
+        },
+        {
+          "action": "수건/속옷/티셔츠 위주로 1바구니 넣기",
+          "estMin": 2
+        },
+        {
+          "action": "세제 넣고 예약(또는 표준) 코스 세팅하기",
+          "estMin": 2
+        },
+        {
+          "action": "시작 버튼 누르고 앱에서 완료",
+          "estMin": 1
+        }
+      ],
+      "meta": {
+        "intensity": "MIN",
+        "goalFocus": "START_WASH",
+        "contextVariant": "HOME",
+        "stateMode": "LOW_ENERGY"
+      }
+    },
+    {
+      "id": "TPL_HOME_LAUNDRY_WASH_STD_10_HOME",
+      "clusterKey": "HOME_LAUNDRY_WASH",
+      "type": "process",
+      "title": "세탁 10분 기본 세팅(분류+오염 체크)",
+      "concepts": [
+        "HOME.LAUNDRY_WASH"
+      ],
+      "contexts": [
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 8,
+        "max": 15,
+        "default": 10
+      },
+      "missions": [
+        {
+          "action": "바구니/세제 꺼내고 타이머 시작(준비)",
+          "estMin": 1
+        },
+        {
+          "action": "밝은색/어두운색/수건 3분류로 나누기",
+          "estMin": 3
+        },
+        {
+          "action": "오염(목/소매) 1~2개만 물로 적셔두기",
+          "estMin": 2
+        },
+        {
+          "action": "1회분만 세탁기에 넣고 세제 넣기",
+          "estMin": 2
+        },
+        {
+          "action": "코스/온도/탈수 확인하고 시작",
+          "estMin": 1
+        },
+        {
+          "action": "바구니 정리 + 앱에서 완료",
+          "estMin": 1
+        }
+      ],
+      "meta": {
+        "intensity": "STD",
+        "goalFocus": "SORT_LAUNDRY",
+        "contextVariant": "HOME",
+        "stateMode": "NORMAL"
+      }
+    },
+    {
+      "id": "TPL_HOME_LAUNDRY_WASH_STD_12_WEEKEND_HOME",
+      "clusterKey": "HOME_LAUNDRY_WASH",
+      "type": "process",
+      "title": "세탁 12분 주말 한 번에 시작(라벨/망 포함)",
+      "concepts": [
+        "HOME.LAUNDRY_WASH"
+      ],
+      "contexts": [
+        "WEEKEND",
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 10,
+        "max": 18,
+        "default": 12
+      },
+      "missions": [
+        {
+          "action": "집 안 세탁물 모으고 타이머 시작(준비)",
+          "estMin": 2
+        },
+        {
+          "action": "수건/일반/섬세 3종으로 분류하기",
+          "estMin": 3
+        },
+        {
+          "action": "주머니 비우기 + 지퍼/단추 잠그기",
+          "estMin": 2
+        },
+        {
+          "action": "오늘 돌릴 것만 세탁기에 넣기",
+          "estMin": 2
+        },
+        {
+          "action": "세제/유연제 세팅하고 코스 선택하기",
+          "estMin": 1
+        },
+        {
+          "action": "시작 누르고 건조 계획 1줄 적기 + 앱에서 완료",
+          "estMin": 2
+        }
+      ],
+      "meta": {
+        "intensity": "STD",
+        "goalFocus": "SORT_LAUNDRY",
+        "contextVariant": "HOME",
+        "stateMode": "NORMAL"
+      }
+    },
+    {
+      "id": "TPL_HOME_LAUNDRY_WASH_STD_14_WORKDAY_HOME",
+      "clusterKey": "HOME_LAUNDRY_WASH",
+      "type": "process",
+      "title": "세탁 14분 평일 루틴(분류→세팅→시작)",
+      "concepts": [
+        "HOME.LAUNDRY_WASH"
+      ],
+      "contexts": [
+        "WORKDAY",
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 11,
+        "max": 20,
+        "default": 14
+      },
+      "missions": [
+        {
+          "action": "바구니 가져오고 타이머 시작(준비)",
+          "estMin": 2
+        },
+        {
+          "action": "밝은/어두운/수건 3분류로 정리하기",
+          "estMin": 3
+        },
+        {
+          "action": "오염 있는 것 2개만 비누로 살짝 문지르기",
+          "estMin": 2
+        },
+        {
+          "action": "세탁기 투입 + 세제 계량해서 넣기",
+          "estMin": 4
+        },
+        {
+          "action": "코스/탈수 확인하고 시작 버튼 누르기",
+          "estMin": 2
+        },
+        {
+          "action": "세제/바구니 정리 + 앱에서 완료",
+          "estMin": 1
+        }
+      ],
+      "meta": {
+        "intensity": "STD",
+        "goalFocus": "START_WASH",
+        "contextVariant": "HOME",
+        "stateMode": "LOW_ENERGY"
+      }
+    },
+    {
+      "id": "TPL_HOME_LAUNDRY_WASH_STD_16_AFTER_LUNCH_HOME",
+      "clusterKey": "HOME_LAUNDRY_WASH",
+      "type": "process",
+      "title": "세탁 16분 점심 후 세팅(수건/침구 포함)",
+      "concepts": [
+        "HOME.LAUNDRY_WASH"
+      ],
+      "contexts": [
+        "AFTER_LUNCH",
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 12,
+        "max": 24,
+        "default": 16
+      },
+      "missions": [
+        {
+          "action": "세탁물 모으고 타이머 시작(준비)",
+          "estMin": 2
+        },
+        {
+          "action": "주머니 비우고 수건/의류 분리하기",
+          "estMin": 4
+        },
+        {
+          "action": "세탁기 넣고 세제/유연제 세팅하기",
+          "estMin": 4
+        },
+        {
+          "action": "침구/수건이면 코스(온도/헹굼) 맞추기",
+          "estMin": 3
+        },
+        {
+          "action": "시작 누르고 끝나는 시간 알림 설정하기",
+          "estMin": 2
+        },
+        {
+          "action": "주변 정리 + 앱에서 완료",
+          "estMin": 1
+        }
+      ],
+      "meta": {
+        "intensity": "STD",
+        "goalFocus": "START_WASH",
+        "contextVariant": "HOME",
+        "stateMode": "NORMAL"
+      }
+    },
+    {
+      "id": "TPL_HOME_LAUNDRY_WASH_FULL_18_WEEKEND_HOME",
+      "clusterKey": "HOME_LAUNDRY_WASH",
+      "type": "process",
+      "title": "세탁 18분 주말 정리형(분류 먼저, 한 번에 시작)",
+      "concepts": [
+        "HOME.LAUNDRY_WASH"
+      ],
+      "contexts": [
+        "WEEKEND",
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 14,
+        "max": 28,
+        "default": 18
+      },
+      "missions": [
+        {
+          "action": "집안 세탁물(방/욕실) 모으고 타이머 시작(준비)",
+          "estMin": 3
+        },
+        {
+          "action": "밝은/어두운/수건/섬세 4분류로 나누기",
+          "estMin": 5
+        },
+        {
+          "action": "오염 있는 것 3개만 부분세탁/애벌하기",
+          "estMin": 3
+        },
+        {
+          "action": "첫 배치 세탁기 투입 + 세제/유연제 넣기",
+          "estMin": 3
+        },
+        {
+          "action": "코스/온도/탈수 확정하고 시작",
+          "estMin": 2
+        },
+        {
+          "action": "남은 분류는 한쪽에 모아두고 앱에서 완료",
+          "estMin": 2
+        }
+      ],
+      "meta": {
+        "intensity": "FULL",
+        "goalFocus": "SORT_LAUNDRY",
+        "contextVariant": "HOME",
+        "stateMode": "NORMAL"
+      }
+    },
+    {
+      "id": "TPL_HOME_LAUNDRY_WASH_FULL_20_HOME",
+      "clusterKey": "HOME_LAUNDRY_WASH",
+      "type": "process",
+      "title": "세탁 20분 풀 세팅(전체 수거→분류→시작)",
+      "concepts": [
+        "HOME.LAUNDRY_WASH"
+      ],
+      "contexts": [
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 16,
+        "max": 30,
+        "default": 20
+      },
+      "missions": [
+        {
+          "action": "방/욕실/현관 세탁물 모두 모으고 타이머 시작(준비)",
+          "estMin": 4
+        },
+        {
+          "action": "색/소재(수건/청바지/섬세) 기준으로 분류하기",
+          "estMin": 5
+        },
+        {
+          "action": "주머니 비우기 + 지퍼/단추 정리하기",
+          "estMin": 3
+        },
+        {
+          "action": "첫 배치 투입 + 세제 계량(유연제 포함)",
+          "estMin": 4
+        },
+        {
+          "action": "코스/온도/헹굼/탈수 확인 후 시작",
+          "estMin": 2
+        },
+        {
+          "action": "끝나는 시간 메모/알림 설정 + 앱에서 완료",
+          "estMin": 2
+        }
+      ],
+      "meta": {
+        "intensity": "FULL",
+        "goalFocus": "START_WASH",
+        "contextVariant": "HOME",
+        "stateMode": "NORMAL"
+      }
+    },
+    {
+      "id": "TPL_HOME_LAUNDRY_FOLD_MIN_8_HOME",
+      "clusterKey": "HOME_LAUNDRY_FOLD",
+      "type": "process",
+      "title": "빨래 개기 8분 미니(바구니 1개만)",
+      "concepts": [
+        "HOME.LAUNDRY_FOLD"
+      ],
+      "contexts": [
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 6,
+        "max": 12,
+        "default": 8
+      },
+      "missions": [
+        {
+          "action": "마른 빨래 바구니 옆으로 가져오고 타이머 시작(준비)",
+          "estMin": 1
+        },
+        {
+          "action": "테이블/침대 위 1구역만 비우기(세팅)",
+          "estMin": 1
+        },
+        {
+          "action": "큰 것(바지/후드/수건) 먼저 접기",
+          "estMin": 3
+        },
+        {
+          "action": "티셔츠/속옷/양말 접어 한 더미로 만들기",
+          "estMin": 2
+        },
+        {
+          "action": "바구니 정리하고 앱에서 완료",
+          "estMin": 1
+        }
+      ],
+      "meta": {
+        "intensity": "MIN",
+        "goalFocus": "FOLD_FAST",
+        "contextVariant": "HOME",
+        "stateMode": "NORMAL"
+      }
+    },
+    {
+      "id": "TPL_HOME_LAUNDRY_FOLD_MIN_9_MORNING_HOME",
+      "clusterKey": "HOME_LAUNDRY_FOLD",
+      "type": "process",
+      "title": "빨래 개기 9분 아침 한 더미 만들기(서랍은 나중에)",
+      "concepts": [
+        "HOME.LAUNDRY_FOLD"
+      ],
+      "contexts": [
+        "MORNING",
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 7,
+        "max": 14,
+        "default": 9
+      },
+      "missions": [
+        {
+          "action": "바구니 가져오고 타이머 시작(준비)",
+          "estMin": 1
+        },
+        {
+          "action": "양말/속옷/티셔츠 3그룹으로만 나누기",
+          "estMin": 2
+        },
+        {
+          "action": "티셔츠 5장(또는 1묶음)만 빠르게 접기",
+          "estMin": 3
+        },
+        {
+          "action": "양말 짝 맞추고 속옷 접기",
+          "estMin": 2
+        },
+        {
+          "action": "한 더미로 모아두고 앱에서 완료",
+          "estMin": 1
+        }
+      ],
+      "meta": {
+        "intensity": "MIN",
+        "goalFocus": "FOLD_FAST",
+        "contextVariant": "HOME",
+        "stateMode": "NORMAL"
+      }
+    },
+    {
+      "id": "TPL_HOME_LAUNDRY_FOLD_MIN_10_AFTER_WORK_HOME",
+      "clusterKey": "HOME_LAUNDRY_FOLD",
+      "type": "process",
+      "title": "빨래 개기 10분 퇴근 후 최소치(양말+상의만)",
+      "concepts": [
+        "HOME.LAUNDRY_FOLD"
+      ],
+      "contexts": [
+        "AFTER_WORK",
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 8,
+        "max": 16,
+        "default": 10
+      },
+      "missions": [
+        {
+          "action": "바구니를 소파 옆에 두고 타이머 시작(준비)",
+          "estMin": 2
+        },
+        {
+          "action": "구겨진 것만 털어 펴기(세팅)",
+          "estMin": 2
+        },
+        {
+          "action": "티셔츠/맨투맨 1묶음 접기",
+          "estMin": 4
+        },
+        {
+          "action": "양말 짝 맞추고 한 봉투(또는 칸)에 넣기",
+          "estMin": 1
+        },
+        {
+          "action": "바구니 치우고 앱에서 완료",
+          "estMin": 1
+        }
+      ],
+      "meta": {
+        "intensity": "MIN",
+        "goalFocus": "FOLD_FAST",
+        "contextVariant": "HOME",
+        "stateMode": "LOW_ENERGY"
+      }
+    },
+    {
+      "id": "TPL_HOME_LAUNDRY_FOLD_MIN_12_BEFORE_SLEEP_HOME",
+      "clusterKey": "HOME_LAUNDRY_FOLD",
+      "type": "process",
+      "title": "빨래 개기 12분 자기 전 정리(침대 위 1구역)",
+      "concepts": [
+        "HOME.LAUNDRY_FOLD"
+      ],
+      "contexts": [
+        "BEFORE_SLEEP",
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 10,
+        "max": 18,
+        "default": 12
+      },
+      "missions": [
+        {
+          "action": "침대 한쪽 비우고 바구니 가져오며 타이머 시작(준비)",
+          "estMin": 2
+        },
+        {
+          "action": "걸 것/접을 것 2분류로 나누기",
+          "estMin": 2
+        },
+        {
+          "action": "접을 것(티/속옷/수건) 위주로 접기",
+          "estMin": 4
+        },
+        {
+          "action": "걸 옷은 옷걸이에 걸어 문고리에 걸어두기",
+          "estMin": 3
+        },
+        {
+          "action": "바구니 치우고 앱에서 완료",
+          "estMin": 1
+        }
+      ],
+      "meta": {
+        "intensity": "MIN",
+        "goalFocus": "PUT_AWAY",
+        "contextVariant": "HOME",
+        "stateMode": "LOW_ENERGY"
+      }
+    },
+    {
+      "id": "TPL_HOME_LAUNDRY_FOLD_STD_14_HOME",
+      "clusterKey": "HOME_LAUNDRY_FOLD",
+      "type": "process",
+      "title": "빨래 개기 14분 기본(그룹별 접기+정리 1단계)",
+      "concepts": [
+        "HOME.LAUNDRY_FOLD"
+      ],
+      "contexts": [
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 11,
+        "max": 20,
+        "default": 14
+      },
+      "missions": [
+        {
+          "action": "바구니/옷걸이 준비하고 타이머 시작(준비)",
+          "estMin": 2
+        },
+        {
+          "action": "상의/하의/수건/속옷 4그룹으로 분류하기",
+          "estMin": 3
+        },
+        {
+          "action": "상의/하의 접어 2더미 만들기",
+          "estMin": 5
+        },
+        {
+          "action": "수건/속옷/양말 접고 짝 맞추기",
+          "estMin": 2
+        },
+        {
+          "action": "한 더미를 서랍 앞에 두고 앱에서 완료",
+          "estMin": 2
+        }
+      ],
+      "meta": {
+        "intensity": "STD",
+        "goalFocus": "FOLD_FAST",
+        "contextVariant": "HOME",
+        "stateMode": "NORMAL"
+      }
+    },
+    {
+      "id": "TPL_HOME_LAUNDRY_FOLD_STD_15_WEEKEND_HOME",
+      "clusterKey": "HOME_LAUNDRY_FOLD",
+      "type": "process",
+      "title": "빨래 개기 15분 주말 수납까지(서랍 1칸)",
+      "concepts": [
+        "HOME.LAUNDRY_FOLD"
+      ],
+      "contexts": [
+        "WEEKEND",
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 12,
+        "max": 22,
+        "default": 15
+      },
+      "missions": [
+        {
+          "action": "서랍 1칸 비우고 바구니 가져오며 타이머 시작(준비)",
+          "estMin": 2
+        },
+        {
+          "action": "접을 것/걸 것 분리하고 옷걸이 5개 준비",
+          "estMin": 3
+        },
+        {
+          "action": "접을 것(티/바지/수건) 접기",
+          "estMin": 6
+        },
+        {
+          "action": "접은 것 서랍 1칸에만 수납하기",
+          "estMin": 3
+        },
+        {
+          "action": "걸 옷은 옷장에 걸고 앱에서 완료",
+          "estMin": 1
+        }
+      ],
+      "meta": {
+        "intensity": "STD",
+        "goalFocus": "PUT_AWAY",
+        "contextVariant": "HOME",
+        "stateMode": "NORMAL"
+      }
+    },
+    {
+      "id": "TPL_HOME_LAUNDRY_FOLD_STD_16_WORKDAY_HOME",
+      "clusterKey": "HOME_LAUNDRY_FOLD",
+      "type": "process",
+      "title": "빨래 개기 16분 평일 리듬(접기→수납 2단계)",
+      "concepts": [
+        "HOME.LAUNDRY_FOLD"
+      ],
+      "contexts": [
+        "WORKDAY",
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 13,
+        "max": 24,
+        "default": 16
+      },
+      "missions": [
+        {
+          "action": "바구니 옆에 앉고 타이머 시작(준비)",
+          "estMin": 2
+        },
+        {
+          "action": "상의/하의/속옷/양말 4그룹으로 나누기",
+          "estMin": 4
+        },
+        {
+          "action": "상의/하의 접기(한 더미씩)",
+          "estMin": 6
+        },
+        {
+          "action": "속옷/양말 접어 수납 칸에만 넣기",
+          "estMin": 3
+        },
+        {
+          "action": "바구니 비우고 앱에서 완료",
+          "estMin": 1
+        }
+      ],
+      "meta": {
+        "intensity": "STD",
+        "goalFocus": "PUT_AWAY",
+        "contextVariant": "HOME",
+        "stateMode": "LOW_ENERGY"
+      }
+    },
+    {
+      "id": "TPL_HOME_LAUNDRY_FOLD_STD_18_HOME",
+      "clusterKey": "HOME_LAUNDRY_FOLD",
+      "type": "process",
+      "title": "빨래 개기 18분 정리형(접기+옷장 앞 정돈)",
+      "concepts": [
+        "HOME.LAUNDRY_FOLD"
+      ],
+      "contexts": [
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 14,
+        "max": 26,
+        "default": 18
+      },
+      "missions": [
+        {
+          "action": "수납 공간 앞 바닥 1구역 비우고 타이머 시작(준비)",
+          "estMin": 2
+        },
+        {
+          "action": "걸 것/접을 것/수건 3그룹으로 분리하기",
+          "estMin": 4
+        },
+        {
+          "action": "접을 것(상의/하의/속옷) 접기",
+          "estMin": 6
+        },
+        {
+          "action": "수건/양말 정리하고 수납 칸에 넣기",
+          "estMin": 4
+        },
+        {
+          "action": "걸 옷 옷장에 걸고 주변 정돈",
+          "estMin": 1
+        },
+        {
+          "action": "바구니 제자리 + 앱에서 완료",
+          "estMin": 1
+        }
+      ],
+      "meta": {
+        "intensity": "STD",
+        "goalFocus": "PUT_AWAY",
+        "contextVariant": "HOME",
+        "stateMode": "NORMAL"
+      }
+    },
+    {
+      "id": "TPL_HOME_LAUNDRY_FOLD_FULL_25_WEEKEND_HOME",
+      "clusterKey": "HOME_LAUNDRY_FOLD",
+      "type": "process",
+      "title": "빨래 개기 25분 주말 한 번에(수납까지)",
+      "concepts": [
+        "HOME.LAUNDRY_FOLD"
+      ],
+      "contexts": [
+        "WEEKEND",
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 20,
+        "max": 35,
+        "default": 25
+      },
+      "missions": [
+        {
+          "action": "수납 동선(서랍/옷장) 열어두고 타이머 시작(준비)",
+          "estMin": 4
+        },
+        {
+          "action": "걸 것/접을 것/수건/양말 4그룹으로 분류하기",
+          "estMin": 5
+        },
+        {
+          "action": "접을 것 전부 접기(상의→하의→수건)",
+          "estMin": 8
+        },
+        {
+          "action": "수납: 서랍 2칸에 넣고 넘치면 한 더미로 종료",
+          "estMin": 5
+        },
+        {
+          "action": "걸 옷 옷장에 걸고 옷걸이 정리",
+          "estMin": 2
+        },
+        {
+          "action": "바구니/공간 정리하고 앱에서 완료",
+          "estMin": 1
+        }
+      ],
+      "meta": {
+        "intensity": "FULL",
+        "goalFocus": "PUT_AWAY",
+        "contextVariant": "HOME",
+        "stateMode": "NORMAL"
+      }
+    },
+    {
+      "id": "TPL_HOME_LAUNDRY_FOLD_FULL_30_HOME",
+      "clusterKey": "HOME_LAUNDRY_FOLD",
+      "type": "process",
+      "title": "빨래 개기 30분 풀 정리(접기+수납+옷장 리셋)",
+      "concepts": [
+        "HOME.LAUNDRY_FOLD"
+      ],
+      "contexts": [
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 24,
+        "max": 42,
+        "default": 30
+      },
+      "missions": [
+        {
+          "action": "수납 공간 2곳(서랍/옷장) 열고 타이머 시작(준비)",
+          "estMin": 5
+        },
+        {
+          "action": "상의/하의/수건/속옷/양말로 세분 분류하기",
+          "estMin": 6
+        },
+        {
+          "action": "접을 것 전부 접고 크기 맞춰 쌓기",
+          "estMin": 10
+        },
+        {
+          "action": "수납: 서랍/선반에 카테고리별로 넣기",
+          "estMin": 5
+        },
+        {
+          "action": "걸 옷 옷장에 걸고 옷걸이 간격 정리",
+          "estMin": 3
+        },
+        {
+          "action": "바구니 치우고 앱에서 완료",
+          "estMin": 1
+        }
+      ],
+      "meta": {
+        "intensity": "FULL",
+        "goalFocus": "PUT_AWAY",
+        "contextVariant": "HOME",
+        "stateMode": "NORMAL"
+      }
+    },
+    {
+      "id": "TPL_WORK_CHAT_REPLY_ACK_MIN_3_WORK",
+      "clusterKey": "WORK_CHAT_REPLY",
+      "type": "process",
+      "title": "업무 메신저 3분 즉시 확인 답장(받음+ETA 한 줄)",
+      "concepts": [
+        "WORK.CHAT_REPLY"
+      ],
+      "contexts": [
+        "WORK"
+      ],
+      "states": [],
+      "time": {
+        "min": 2,
+        "max": 6,
+        "default": 3
+      },
+      "missions": [
+        {
+          "action": "메신저 열고 답장할 대화 1개 선택하기(열기)",
+          "estMin": 1
+        },
+        {
+          "action": "요청/질문 핵심을 한 줄로 다시 읽고 메모하기",
+          "estMin": 1
+        },
+        {
+          "action": "‘확인했어 + 언제까지 답할지(ETA)’ 한 줄 보내고 앱에서 완료 누르기",
+          "estMin": 1
+        }
+      ]
+    },
+    {
+      "id": "TPL_WORK_CHAT_REPLY_CLARIFY_STD_6_WORKDAY",
+      "clusterKey": "WORK_CHAT_REPLY",
+      "type": "process",
+      "title": "업무 메신저 6분 명확화 답장(질문 2개로 범위 고정)",
+      "concepts": [
+        "WORK.CHAT_REPLY"
+      ],
+      "contexts": [
+        "WORKDAY",
+        "WORK"
+      ],
+      "states": [],
+      "time": {
+        "min": 4,
+        "max": 10,
+        "default": 6
+      },
+      "missions": [
+        {
+          "action": "메신저 열고 해당 스레드/DM 열기(열기)",
+          "estMin": 1
+        },
+        {
+          "action": "상대 요청을 한 문장으로 바꿔 써서 오해 가능성 체크",
+          "estMin": 1
+        },
+        {
+          "action": "결정에 필요한 질문 2개만 만들기(예: 범위/기한)",
+          "estMin": 2
+        },
+        {
+          "action": "요약 1문장 + 질문 2개로 답장 보내기",
+          "estMin": 1
+        },
+        {
+          "action": "전송 확인하고 앱에서 완료 누르기",
+          "estMin": 1
+        }
+      ]
+    },
+    {
+      "id": "TPL_WORK_CHAT_REPLY_THREAD_SUMMARY_STD_6_AFTER_LUNCH",
+      "clusterKey": "WORK_CHAT_REPLY",
+      "type": "process",
+      "title": "점심 후 6분 스레드 정리 답장(요약 3줄+다음 액션)",
+      "concepts": [
+        "WORK.CHAT_REPLY"
+      ],
+      "contexts": [
+        "AFTER_LUNCH",
+        "WORK"
+      ],
+      "states": [],
+      "time": {
+        "min": 4,
+        "max": 10,
+        "default": 6
+      },
+      "missions": [
+        {
+          "action": "6분 타이머 켜고 스레드 맨 아래로 이동하기(준비)",
+          "estMin": 1
+        },
+        {
+          "action": "최근 메시지 8~12개만 훑고 결정/요청 포인트 표시하기",
+          "estMin": 2
+        },
+        {
+          "action": "요약 3줄(결정/해야할 일/담당)로 초안 쓰기",
+          "estMin": 2
+        },
+        {
+          "action": "요약+다음 액션 1개를 답장으로 보내고 앱에서 완료 누르기",
+          "estMin": 1
+        }
+      ]
+    },
+    {
+      "id": "TPL_WORK_CHAT_REPLY_TASK_CAPTURE_STD_8_WORK",
+      "clusterKey": "WORK_CHAT_REPLY",
+      "type": "process",
+      "title": "업무 메신저 8분 요청→할 일로 변환(티켓/메모 생성 후 답장)",
+      "concepts": [
+        "WORK.CHAT_REPLY"
+      ],
+      "contexts": [
+        "WORK"
+      ],
+      "states": [],
+      "time": {
+        "min": 6,
+        "max": 14,
+        "default": 8
+      },
+      "missions": [
+        {
+          "action": "메신저 열고 요청 메시지 1개 고르기(열기)",
+          "estMin": 1
+        },
+        {
+          "action": "요청을 ‘완료 기준 1줄’로 바꿔 적기(무엇이 끝인가)",
+          "estMin": 2
+        },
+        {
+          "action": "할 일/티켓/노트에 제목+완료 기준+기한(없으면 ‘미정’) 기록",
+          "estMin": 2
+        },
+        {
+          "action": "답장: ‘받음 + 내가 할 일 1줄 + 예상 ETA’ 보내기",
+          "estMin": 2
+        },
+        {
+          "action": "전송 확인하고 앱에서 완료 누르기",
+          "estMin": 1
+        }
+      ]
+    },
+    {
+      "id": "TPL_WORK_CHAT_REPLY_BLOCK_TIME_FULL_10_WORKDAY",
+      "clusterKey": "WORK_CHAT_REPLY",
+      "type": "process",
+      "title": "업무 메신저 10분 시간 확보 답장(캘린더 확인+시간 제안)",
+      "concepts": [
+        "WORK.CHAT_REPLY"
+      ],
+      "contexts": [
+        "WORKDAY",
+        "WORK"
+      ],
+      "states": [],
+      "time": {
+        "min": 8,
+        "max": 16,
+        "default": 10
+      },
+      "missions": [
+        {
+          "action": "대화 열고 요청의 ‘기한/긴급도’ 키워드만 확인하기(열기)",
+          "estMin": 1
+        },
+        {
+          "action": "내가 줄 수 있는 답의 형태를 결정하기(1)바로 처리 (2)시간 잡기",
+          "estMin": 1
+        },
+        {
+          "action": "캘린더에서 오늘/내일 15~30분 빈칸 2개 찾기",
+          "estMin": 2
+        },
+        {
+          "action": "답장 초안: ‘지금은 ○○중, ○○시/○○시에 처리 가능’ 2옵션 쓰기",
+          "estMin": 2
+        },
+        {
+          "action": "캘린더 홀드/알림(또는 할 일) 1개 만들어 놓기",
+          "estMin": 3
+        },
+        {
+          "action": "답장 전송 확인하고 앱에서 완료 누르기",
+          "estMin": 1
+        }
+      ]
+    },
+    {
+      "id": "TPL_WORK_CHAT_REPLY_DECLINE_STD_6_WORK",
+      "clusterKey": "WORK_CHAT_REPLY",
+      "type": "process",
+      "title": "업무 메신저 6분 거절/불가 답장(대안 1개 포함)",
+      "concepts": [
+        "WORK.CHAT_REPLY"
+      ],
+      "contexts": [
+        "WORK"
+      ],
+      "states": [],
+      "time": {
+        "min": 4,
+        "max": 10,
+        "default": 6
+      },
+      "missions": [
+        {
+          "action": "대화 열고 요청 문장 1개만 다시 읽기(열기)",
+          "estMin": 1
+        },
+        {
+          "action": "내 현재 우선순위/기한을 10초만 확인해 ‘불가’ 여부 확정",
+          "estMin": 1
+        },
+        {
+          "action": "대안 1개 만들기(예: 다른 담당자/다음 주/범위 축소)",
+          "estMin": 2
+        },
+        {
+          "action": "답장: ‘지금은 어려워 + 이유 1줄 + 대안 1개’로 보내기",
+          "estMin": 1
+        },
+        {
+          "action": "전송 확인하고 앱에서 완료 누르기",
+          "estMin": 1
+        }
+      ]
+    },
+    {
+      "id": "TPL_WORK_CHAT_REPLY_HANDOFF_STD_6_WORKDAY",
+      "clusterKey": "WORK_CHAT_REPLY",
+      "type": "process",
+      "title": "업무 메신저 6분 담당자 연결 답장(컨텍스트 2개+멘션)",
+      "concepts": [
+        "WORK.CHAT_REPLY"
+      ],
+      "contexts": [
+        "WORKDAY",
+        "WORK"
+      ],
+      "states": [],
+      "time": {
+        "min": 4,
+        "max": 10,
+        "default": 6
+      },
+      "missions": [
+        {
+          "action": "대화/스레드 열기(열기)",
+          "estMin": 1
+        },
+        {
+          "action": "누가 가장 적절한 담당자인지 1명만 선택하기",
+          "estMin": 1
+        },
+        {
+          "action": "필수 컨텍스트 2개만 정리(링크/티켓번호/요약 문장)",
+          "estMin": 2
+        },
+        {
+          "action": "담당자 멘션 + 컨텍스트 2개 + 요청 1줄로 답장 보내기",
+          "estMin": 1
+        },
+        {
+          "action": "전송 확인하고 앱에서 완료 누르기",
+          "estMin": 1
+        }
+      ]
+    },
+    {
+      "id": "TPL_WORK_CHAT_REPLY_MISSING_INFO_STD_6_WORK",
+      "clusterKey": "WORK_CHAT_REPLY",
+      "type": "process",
+      "title": "업무 메신저 6분 추가정보 요청 답장(필수 3개만)",
+      "concepts": [
+        "WORK.CHAT_REPLY"
+      ],
+      "contexts": [
+        "WORK"
+      ],
+      "states": [],
+      "time": {
+        "min": 4,
+        "max": 10,
+        "default": 6
+      },
+      "missions": [
+        {
+          "action": "대화 열고 요청이 뭔지 한 줄로 적기(열기)",
+          "estMin": 1
+        },
+        {
+          "action": "지금 당장 필요한 정보 3개만 고르기(예: 범위/기한/예시)",
+          "estMin": 2
+        },
+        {
+          "action": "상대가 바로 답할 수 있게 질문을 ‘선택지/예시’ 형태로 바꾸기",
+          "estMin": 2
+        },
+        {
+          "action": "질문 3개로 답장 보내고 앱에서 완료 누르기",
+          "estMin": 1
+        }
+      ]
+    },
+    {
+      "id": "TPL_WORK_CHAT_REPLY_QUICK_REVIEW_STD_8_AFTER_LUNCH",
+      "clusterKey": "WORK_CHAT_REPLY",
+      "type": "process",
+      "title": "점심 후 8분 링크/문서 빠른 확인 답장(한 줄 판단+다음 액션)",
+      "concepts": [
+        "WORK.CHAT_REPLY"
+      ],
+      "contexts": [
+        "AFTER_LUNCH",
+        "WORK"
+      ],
+      "states": [],
+      "time": {
+        "min": 6,
+        "max": 14,
+        "default": 8
+      },
+      "missions": [
+        {
+          "action": "대화 열고 공유된 링크 1개 열기(열기)",
+          "estMin": 1
+        },
+        {
+          "action": "문서/PR/티켓을 3분만 훑고 ‘승인/보류/질문’ 중 1개 선택",
+          "estMin": 3
+        },
+        {
+          "action": "필요하면 코멘트 1개만 남기기(한 문장 + 근거 1개)",
+          "estMin": 2
+        },
+        {
+          "action": "메신저 답장: 판단 1줄 + 다음 액션 1줄 보내기",
+          "estMin": 1
+        },
+        {
+          "action": "전송 확인하고 앱에서 완료 누르기",
+          "estMin": 1
+        }
+      ]
+    },
+    {
+      "id": "TPL_WORK_CHAT_REPLY_BACKLOG_CLEAR_FULL_10_AFTER_WORK",
+      "clusterKey": "WORK_CHAT_REPLY",
+      "type": "process",
+      "title": "퇴근 전 10분 미답장 정리(상위 3개만 처리)",
+      "concepts": [
+        "WORK.CHAT_REPLY"
+      ],
+      "contexts": [
+        "AFTER_WORK",
+        "WORK"
+      ],
+      "states": [],
+      "time": {
+        "min": 8,
+        "max": 16,
+        "default": 10
+      },
+      "missions": [
+        {
+          "action": "10분 타이머 켜고 ‘미답/멘션’만 보이게 필터하기(준비)",
+          "estMin": 1
+        },
+        {
+          "action": "오늘 반드시 답할 대화 3개만 고르기(나머지는 내일)",
+          "estMin": 2
+        },
+        {
+          "action": "각 대화에 ‘받음/진행/다음’ 중 하나로 1줄씩 답장 보내기(3개)",
+          "estMin": 4
+        },
+        {
+          "action": "필요한 건 할 일/캘린더로 2개까지만 옮기기(메모/티켓)",
+          "estMin": 2
+        },
+        {
+          "action": "전송 확인하고 앱에서 완료 누르기",
+          "estMin": 1
+        }
+      ]
+    },
+    {
+      "id": "TPL_WORK_TEAM_UPDATE_STANDUP_MIN_5_WORKDAY",
+      "clusterKey": "WORK_TEAM_UPDATE",
+      "type": "process",
+      "title": "팀 업데이트 5분 스탠드업(완료/오늘/막힘 3줄)",
+      "concepts": [
+        "WORK.TEAM_UPDATE"
+      ],
+      "contexts": [
+        "WORKDAY",
+        "WORK"
+      ],
+      "states": [],
+      "time": {
+        "min": 4,
+        "max": 8,
+        "default": 5
+      },
+      "missions": [
+        {
+          "action": "팀 채널/스탠드업 스레드 열기(열기)",
+          "estMin": 1
+        },
+        {
+          "action": "3줄 템플릿으로 초안 쓰기(완료/오늘/막힘)",
+          "estMin": 2
+        },
+        {
+          "action": "관련 링크/티켓 1개만 붙여 넣기(있으면)",
+          "estMin": 1
+        },
+        {
+          "action": "전송 확인하고 앱에서 완료 누르기",
+          "estMin": 1
+        }
+      ]
+    },
+    {
+      "id": "TPL_WORK_TEAM_UPDATE_MIDDAY_MIN_5_AFTER_LUNCH",
+      "clusterKey": "WORK_TEAM_UPDATE",
+      "type": "process",
+      "title": "점심 후 5분 중간 공유(진행 1줄+다음 1줄+ETA)",
+      "concepts": [
+        "WORK.TEAM_UPDATE"
+      ],
+      "contexts": [
+        "AFTER_LUNCH",
+        "WORK"
+      ],
+      "states": [],
+      "time": {
+        "min": 4,
+        "max": 8,
+        "default": 5
+      },
+      "missions": [
+        {
+          "action": "5분 타이머 켜고 오늘 작업 카드/티켓 1개 열기(준비)",
+          "estMin": 1
+        },
+        {
+          "action": "지금까지 진행 상황을 한 문장으로 적기(무엇이 됐나)",
+          "estMin": 1
+        },
+        {
+          "action": "다음 액션 1개 + 예상 완료 시간(ETA) 한 줄 작성",
+          "estMin": 2
+        },
+        {
+          "action": "팀 채널에 공유하고 앱에서 완료 누르기",
+          "estMin": 1
+        }
+      ]
+    },
+    {
+      "id": "TPL_WORK_TEAM_UPDATE_EOD_STD_8_WORK",
+      "clusterKey": "WORK_TEAM_UPDATE",
+      "type": "process",
+      "title": "팀 업데이트 8분 퇴근 전 정리(성과/막힘/내일 계획)",
+      "concepts": [
+        "WORK.TEAM_UPDATE"
+      ],
+      "contexts": [
+        "WORK"
+      ],
+      "states": [],
+      "time": {
+        "min": 6,
+        "max": 12,
+        "default": 8
+      },
+      "missions": [
+        {
+          "action": "오늘 변경/완료한 항목 2개만 메모로 뽑기(준비)",
+          "estMin": 2
+        },
+        {
+          "action": "막힌 점이 있으면 1개만 적고 필요한 도움을 한 줄로 쓰기",
+          "estMin": 1
+        },
+        {
+          "action": "내일 첫 액션 1개를 한 줄로 적기(시작점)",
+          "estMin": 2
+        },
+        {
+          "action": "위 3개를 4~6줄 메시지로 다듬기(불릿)",
+          "estMin": 2
+        },
+        {
+          "action": "팀 채널에 전송 확인하고 앱에서 완료 누르기",
+          "estMin": 1
+        }
+      ]
+    },
+    {
+      "id": "TPL_WORK_TEAM_UPDATE_KICKOFF_STD_8_MORNING",
+      "clusterKey": "WORK_TEAM_UPDATE",
+      "type": "process",
+      "title": "아침 8분 오늘 계획 공유(우선순위 2개+미팅 리스크)",
+      "concepts": [
+        "WORK.TEAM_UPDATE"
+      ],
+      "contexts": [
+        "MORNING",
+        "WORKDAY",
+        "WORK"
+      ],
+      "states": [],
+      "time": {
+        "min": 6,
+        "max": 12,
+        "default": 8
+      },
+      "missions": [
+        {
+          "action": "팀 채널 열고 오늘 일정(미팅)만 10초 확인하기(열기)",
+          "estMin": 1
+        },
+        {
+          "action": "오늘 끝내야 할 우선순위 2개를 한 줄씩 쓰기",
+          "estMin": 2
+        },
+        {
+          "action": "리스크/의존성(리뷰 필요/대기중) 1개가 있으면 적기",
+          "estMin": 1
+        },
+        {
+          "action": "공유 메시지로 4~6줄로 다듬기(불릿)",
+          "estMin": 3
+        },
+        {
+          "action": "전송 확인하고 앱에서 완료 누르기",
+          "estMin": 1
+        }
+      ]
+    },
+    {
+      "id": "TPL_WORK_TEAM_UPDATE_BLOCKER_ESCALATE_FULL_12_WORK",
+      "clusterKey": "WORK_TEAM_UPDATE",
+      "type": "process",
+      "title": "팀 업데이트 12분 막힘 공유(영향/요청/대안 포함)",
+      "concepts": [
+        "WORK.TEAM_UPDATE"
+      ],
+      "contexts": [
+        "WORK"
+      ],
+      "states": [],
+      "time": {
+        "min": 10,
+        "max": 18,
+        "default": 12
+      },
+      "missions": [
+        {
+          "action": "막힘 상황을 한 문장으로 정의하고 관련 링크/로그 1개 찾기(준비)",
+          "estMin": 3
+        },
+        {
+          "action": "영향 범위 1줄(무엇이 지연/위험인지) 적기",
+          "estMin": 2
+        },
+        {
+          "action": "팀에 요청할 것 1개를 구체적으로 쓰기(누가/무엇을)",
+          "estMin": 2
+        },
+        {
+          "action": "대안/우회안 2개 중 1개를 제안으로 정리하기",
+          "estMin": 3
+        },
+        {
+          "action": "메시지(현황/영향/요청/제안/ETA)로 전송하고 앱에서 완료",
+          "estMin": 2
+        }
+      ]
+    },
+    {
+      "id": "TPL_WORK_TEAM_UPDATE_PROGRESS_SNAPSHOT_STD_8_AFTER_LUNCH",
+      "clusterKey": "WORK_TEAM_UPDATE",
+      "type": "process",
+      "title": "점심 후 8분 진행 스냅샷 공유(링크 2개+요약 3줄)",
+      "concepts": [
+        "WORK.TEAM_UPDATE"
+      ],
+      "contexts": [
+        "AFTER_LUNCH",
+        "WORK"
+      ],
+      "states": [],
+      "time": {
+        "min": 6,
+        "max": 12,
+        "default": 8
+      },
+      "missions": [
+        {
+          "action": "공유할 산출물/티켓 1개 열기(열기)",
+          "estMin": 1
+        },
+        {
+          "action": "팀이 봐야 할 링크 2개만 준비하기(티켓/문서/PR 중)",
+          "estMin": 2
+        },
+        {
+          "action": "요약 3줄 작성(무엇/현재 상태/다음 액션)",
+          "estMin": 3
+        },
+        {
+          "action": "팀 채널에 링크 2개+요약 3줄로 전송하기",
+          "estMin": 1
+        },
+        {
+          "action": "전송 확인하고 앱에서 완료 누르기",
+          "estMin": 1
+        }
+      ]
+    },
+    {
+      "id": "TPL_WORK_TEAM_UPDATE_MEETING_NOTES_MIN_6_WORK",
+      "clusterKey": "WORK_TEAM_UPDATE",
+      "type": "process",
+      "title": "팀 업데이트 6분 미팅 후 공유(결정 1개+액션 2개)",
+      "concepts": [
+        "WORK.TEAM_UPDATE"
+      ],
+      "contexts": [
+        "WORK"
+      ],
+      "states": [],
+      "time": {
+        "min": 5,
+        "max": 10,
+        "default": 6
+      },
+      "missions": [
+        {
+          "action": "미팅 노트/캘린더 메모를 열고 결정 1개 찾기(열기)",
+          "estMin": 2
+        },
+        {
+          "action": "액션 아이템 2개를 ‘담당/기한’ 형태로 적기",
+          "estMin": 2
+        },
+        {
+          "action": "팀 채널에 결정 1줄+액션 2줄로 공유하기",
+          "estMin": 1
+        },
+        {
+          "action": "전송 확인하고 앱에서 완료 누르기",
+          "estMin": 1
+        }
+      ]
+    },
+    {
+      "id": "TPL_WORK_TEAM_UPDATE_MANAGER_STD_12_WORKDAY",
+      "clusterKey": "WORK_TEAM_UPDATE",
+      "type": "process",
+      "title": "업무일 12분 매니저/팀 업데이트(완료/진행/다음/리스크)",
+      "concepts": [
+        "WORK.TEAM_UPDATE"
+      ],
+      "contexts": [
+        "WORKDAY",
+        "WORK"
+      ],
+      "states": [],
+      "time": {
+        "min": 10,
+        "max": 18,
+        "default": 12
+      },
+      "missions": [
+        {
+          "action": "완료한 것 2개만 뽑아 한 줄씩 적기(준비)",
+          "estMin": 2
+        },
+        {
+          "action": "진행중인 것 1개와 현재 상태를 한 줄로 적기",
+          "estMin": 2
+        },
+        {
+          "action": "다음 액션 1개와 예상 일정(ETA)을 한 줄로 적기",
+          "estMin": 2
+        },
+        {
+          "action": "리스크/막힘 1개가 있으면 영향+필요 지원을 한 줄로 적기",
+          "estMin": 2
+        },
+        {
+          "action": "위 내용을 6~9줄 메시지로 다듬기(불릿)",
+          "estMin": 3
+        },
+        {
+          "action": "전송 확인하고 앱에서 완료 누르기",
+          "estMin": 1
+        }
+      ]
+    },
+    {
+      "id": "TPL_WORK_TEAM_UPDATE_WEEKLY_WRAP_STD_10_AFTER_WORK",
+      "clusterKey": "WORK_TEAM_UPDATE",
+      "type": "process",
+      "title": "퇴근 후 10분 주간 마무리 공유(하이라이트/리스크/다음 주)",
+      "concepts": [
+        "WORK.TEAM_UPDATE"
+      ],
+      "contexts": [
+        "AFTER_WORK",
+        "WEEKDAY",
+        "WORK"
+      ],
+      "states": [],
+      "time": {
+        "min": 8,
+        "max": 16,
+        "default": 10
+      },
+      "missions": [
+        {
+          "action": "이번 주 하이라이트 2개를 한 줄씩 적기(준비)",
+          "estMin": 3
+        },
+        {
+          "action": "이번 주 리스크/부채 1개를 한 줄로 적기",
+          "estMin": 2
+        },
+        {
+          "action": "다음 주 첫 우선순위 1개를 한 줄로 적기",
+          "estMin": 2
+        },
+        {
+          "action": "위 내용을 5~7줄로 다듬어 팀 채널에 공유하기",
+          "estMin": 2
+        },
+        {
+          "action": "전송 확인하고 앱에서 완료 누르기",
+          "estMin": 1
+        }
+      ]
+    },
+    {
+      "id": "TPL_WORK_TEAM_UPDATE_REQUEST_REVIEW_STD_8_WEEKDAY",
+      "clusterKey": "WORK_TEAM_UPDATE",
+      "type": "process",
+      "title": "평일 8분 도움/리뷰 요청 업데이트(요청 1개+컨텍스트 2개)",
+      "concepts": [
+        "WORK.TEAM_UPDATE"
+      ],
+      "contexts": [
+        "WEEKDAY",
+        "WORK"
+      ],
+      "states": [],
+      "time": {
+        "min": 6,
+        "max": 12,
+        "default": 8
+      },
+      "missions": [
+        {
+          "action": "내가 필요한 도움/리뷰 1개를 한 문장으로 정의하기(준비)",
+          "estMin": 2
+        },
+        {
+          "action": "팀이 참고할 컨텍스트 2개 준비(링크/티켓/스크린샷 중)",
+          "estMin": 3
+        },
+        {
+          "action": "요청 메시지로 다듬기(요청/배경/기한/원하는 형태)",
+          "estMin": 2
+        },
+        {
+          "action": "팀 채널에 전송 확인하고 앱에서 완료 누르기",
+          "estMin": 1
+        }
+      ]
+    },
+    {
+      "id": "TPL_WORK_TASK_PRIORITIZE_MIN_8_WORK",
+      "clusterKey": "WORK_TASK_PRIORITIZE",
+      "type": "process",
+      "title": "업무 우선순위 8분 초간단 선정(지금 1개만)",
+      "concepts": [
+        "WORK.TASK_PRIORITIZE"
+      ],
+      "contexts": [
+        "WORK"
+      ],
+      "states": [],
+      "time": {
+        "min": 6,
+        "max": 12,
+        "default": 8
+      },
+      "missions": [
+        {
+          "action": "업무 목록/메모 열고 오늘 해야 할 것 5개만 적기(준비)",
+          "estMin": 2
+        },
+        {
+          "action": "긴급/중요 4분류로 훑고 TOP1에 표시하기",
+          "estMin": 2
+        },
+        {
+          "action": "TOP1의 ‘다음 2분 행동’ 1줄 쓰기(예: 문서 열기/초안 3줄)",
+          "estMin": 2
+        },
+        {
+          "action": "캘린더/타이머 2분 잡고 바로 시작 + 앱에서 완료",
+          "estMin": 2
+        }
+      ],
+      "meta": {
+        "intensity": "MIN",
+        "contextVariant": "WORK"
+      }
+    },
+    {
+      "id": "TPL_WORK_TASK_PRIORITIZE_MIN_10_MORNING",
+      "clusterKey": "WORK_TASK_PRIORITIZE",
+      "type": "process",
+      "title": "아침 업무 우선순위 10분 세팅(오늘 3개)",
+      "concepts": [
+        "WORK.TASK_PRIORITIZE"
+      ],
+      "contexts": [
+        "WORK",
+        "MORNING"
+      ],
+      "states": [],
+      "time": {
+        "min": 8,
+        "max": 15,
+        "default": 10
+      },
+      "missions": [
+        {
+          "action": "캘린더/메신저 확인하고 오늘 미팅만 3줄로 적기(준비)",
+          "estMin": 2
+        },
+        {
+          "action": "오늘 결과물 1개를 한 문장으로 정의(완료 조건 1줄)",
+          "estMin": 2
+        },
+        {
+          "action": "해야 할 일 3개만 골라 1/2/3으로 번호 매기기",
+          "estMin": 3
+        },
+        {
+          "action": "1번을 캘린더에 먼저 블록 잡고 앱에서 완료",
+          "estMin": 3
+        }
+      ],
+      "meta": {
+        "intensity": "MIN",
+        "contextVariant": "MORNING"
+      }
+    },
+    {
+      "id": "TPL_WORK_TASK_PRIORITIZE_STD_12_AFTER_LUNCH",
+      "clusterKey": "WORK_TASK_PRIORITIZE",
+      "type": "process",
+      "title": "점심 후 12분 재우선순위(남은 일정 정리)",
+      "concepts": [
+        "WORK.TASK_PRIORITIZE"
+      ],
+      "contexts": [
+        "WORK",
+        "AFTER_LUNCH"
+      ],
+      "states": [],
+      "time": {
+        "min": 10,
+        "max": 18,
+        "default": 12
+      },
+      "missions": [
+        {
+          "action": "점심 후 에너지(1~5) 체크 + 물 한 모금(준비)",
+          "estMin": 2
+        },
+        {
+          "action": "메신저/이메일 3분 스캔하고 방해 요소 1개 끄기(알림/탭)",
+          "estMin": 3
+        },
+        {
+          "action": "남은 작업을 ‘오늘/이번주/나중’으로 3분 분류",
+          "estMin": 3
+        },
+        {
+          "action": "‘오늘’에서 1개 선택 + 다음 행동 1줄 적기",
+          "estMin": 2
+        },
+        {
+          "action": "2분 타이머 시작하고 착수 + 앱에서 완료",
+          "estMin": 2
+        }
+      ],
+      "meta": {
+        "intensity": "STD",
+        "contextVariant": "AFTER_LUNCH"
+      }
+    },
+    {
+      "id": "TPL_WORK_TASK_PRIORITIZE_STD_15_WORKDAY",
+      "clusterKey": "WORK_TASK_PRIORITIZE",
+      "type": "process",
+      "title": "업무 우선순위 15분 트리아지(이번주 TOP3)",
+      "concepts": [
+        "WORK.TASK_PRIORITIZE"
+      ],
+      "contexts": [
+        "WORK",
+        "WORKDAY"
+      ],
+      "states": [],
+      "time": {
+        "min": 12,
+        "max": 22,
+        "default": 15
+      },
+      "missions": [
+        {
+          "action": "업무 보드/리스트 열고 ‘이번주 3개’ 제목만 적기(준비)",
+          "estMin": 3
+        },
+        {
+          "action": "후보 3개에 예상 소요/난이도 1줄씩 적기",
+          "estMin": 4
+        },
+        {
+          "action": "대기/의존 있는 건 ‘BLOCK’ 표시 + 물어볼 질문 1개 적기",
+          "estMin": 3
+        },
+        {
+          "action": "우선순위 1~3 확정하고 캘린더에 블록 2개 넣기",
+          "estMin": 4
+        },
+        {
+          "action": "TOP1에 표시(⭐/✅)하고 앱에서 완료",
+          "estMin": 1
+        }
+      ],
+      "meta": {
+        "intensity": "STD",
+        "contextVariant": "WORKDAY"
+      }
+    },
+    {
+      "id": "TPL_WORK_TASK_PRIORITIZE_STD_18_WEEKDAY",
+      "clusterKey": "WORK_TASK_PRIORITIZE",
+      "type": "process",
+      "title": "마감 중심 18분 우선순위 정리(리스크 줄이기)",
+      "concepts": [
+        "WORK.TASK_PRIORITIZE"
+      ],
+      "contexts": [
+        "WORK",
+        "WEEKDAY"
+      ],
+      "states": [],
+      "time": {
+        "min": 14,
+        "max": 26,
+        "default": 18
+      },
+      "missions": [
+        {
+          "action": "오늘/내일 마감만 필터링해서 3개 추리기(준비)",
+          "estMin": 3
+        },
+        {
+          "action": "각 항목의 승인/확인 필요 여부 체크하고 체크포인트 적기",
+          "estMin": 3
+        },
+        {
+          "action": "리스크 큰 1개를 3단계로 쪼개서 체크리스트 만들기",
+          "estMin": 5
+        },
+        {
+          "action": "필요한 질문/요청 1개를 메신저/메일로 보내기(짧게)",
+          "estMin": 3
+        },
+        {
+          "action": "캘린더에 작업 블록 설정하고 앱에서 완료",
+          "estMin": 4
+        }
+      ],
+      "meta": {
+        "intensity": "STD",
+        "contextVariant": "WEEKDAY"
+      }
+    },
+    {
+      "id": "TPL_WORK_TASK_PRIORITIZE_FULL_20_WORK",
+      "clusterKey": "WORK_TASK_PRIORITIZE",
+      "type": "process",
+      "title": "업무 우선순위 20분 정렬(인박스→TOP3)",
+      "concepts": [
+        "WORK.TASK_PRIORITIZE"
+      ],
+      "contexts": [
+        "WORK"
+      ],
+      "states": [],
+      "time": {
+        "min": 16,
+        "max": 30,
+        "default": 20
+      },
+      "missions": [
+        {
+          "action": "인박스/노트/메일 플래그를 2분만 수집해서 한곳에 모으기(준비)",
+          "estMin": 2
+        },
+        {
+          "action": "할 일 10개를 훑으며 임팩트/긴급(1~3)으로 빠르게 점수 매기기",
+          "estMin": 5
+        },
+        {
+          "action": "상위 3개만 남기고 나머지는 ‘나중/보류’로 이동",
+          "estMin": 4
+        },
+        {
+          "action": "상위 1개를 3개의 하위 행동으로 쪼개기(각 10분 이하)",
+          "estMin": 5
+        },
+        {
+          "action": "첫 하위 행동 2분 착수 + 진행상태 한 줄 기록 + 앱에서 완료",
+          "estMin": 4
+        }
+      ],
+      "meta": {
+        "intensity": "FULL",
+        "contextVariant": "WORK"
+      }
+    },
+    {
+      "id": "TPL_WORK_TASK_PRIORITIZE_MIN_9_WORK",
+      "clusterKey": "WORK_TASK_PRIORITIZE",
+      "type": "process",
+      "title": "회의 전 9분 우선순위(준비 1개만)",
+      "concepts": [
+        "WORK.TASK_PRIORITIZE"
+      ],
+      "contexts": [
+        "WORK"
+      ],
+      "states": [],
+      "time": {
+        "min": 7,
+        "max": 14,
+        "default": 9
+      },
+      "missions": [
+        {
+          "action": "다음 2시간 일정 확인 + 준비할 것 3개만 적기(준비)",
+          "estMin": 2
+        },
+        {
+          "action": "미팅 관련 산출물 1개를 한 문장으로 정의",
+          "estMin": 2
+        },
+        {
+          "action": "가장 중요한 준비 1개를 3분만 실행(문서 열기/자료 1장)",
+          "estMin": 3
+        },
+        {
+          "action": "미팅 링크/자료 핀 고정하고 앱에서 완료",
+          "estMin": 2
+        }
+      ],
+      "meta": {
+        "intensity": "MIN",
+        "contextVariant": "WORK"
+      }
+    },
+    {
+      "id": "TPL_WORK_TASK_PRIORITIZE_STD_14_AFTER_WORK",
+      "clusterKey": "WORK_TASK_PRIORITIZE",
+      "type": "process",
+      "title": "퇴근 전 14분 내일 우선순위 정리(마감 대비)",
+      "concepts": [
+        "WORK.TASK_PRIORITIZE"
+      ],
+      "contexts": [
+        "WORK",
+        "AFTER_WORK"
+      ],
+      "states": [],
+      "time": {
+        "min": 11,
+        "max": 20,
+        "default": 14
+      },
+      "missions": [
+        {
+          "action": "오늘 완료/미완료 2분 체크하고 미완료 3개만 적기(준비)",
+          "estMin": 2
+        },
+        {
+          "action": "내일 꼭 해야 할 1개 선택 + 완료 조건 1줄 쓰기",
+          "estMin": 3
+        },
+        {
+          "action": "내일 첫 15분 행동을 2개로 쪼개서 순서 정하기",
+          "estMin": 4
+        },
+        {
+          "action": "캘린더에 내일 아침 시작 블록 넣기(시작 시간만 고정)",
+          "estMin": 3
+        },
+        {
+          "action": "알림/탭 정리 2분 + 앱에서 완료",
+          "estMin": 2
+        }
+      ],
+      "meta": {
+        "intensity": "STD",
+        "contextVariant": "AFTER_WORK"
+      }
+    },
+    {
+      "id": "TPL_WORK_TASK_PRIORITIZE_FULL_25_WORKDAY",
+      "clusterKey": "WORK_TASK_PRIORITIZE",
+      "type": "process",
+      "title": "업무 우선순위+캘린더 25분 재배치(오늘 3개 고정)",
+      "concepts": [
+        "WORK.TASK_PRIORITIZE"
+      ],
+      "contexts": [
+        "WORK",
+        "WORKDAY"
+      ],
+      "states": [],
+      "time": {
+        "min": 20,
+        "max": 38,
+        "default": 25
+      },
+      "missions": [
+        {
+          "action": "캘린더+업무보드 동시에 열고 남은 시간 블록 확인(준비)",
+          "estMin": 3
+        },
+        {
+          "action": "해야 할 8개를 ‘오늘/이번주/보류’로 이동",
+          "estMin": 6
+        },
+        {
+          "action": "‘오늘’에 남긴 3개를 예상 소요로 정렬하고 1~3번 지정",
+          "estMin": 5
+        },
+        {
+          "action": "1번/2번에 집중 블록 2개 예약(가능하면 중간 회의 피하기)",
+          "estMin": 6
+        },
+        {
+          "action": "방해요소 1개 제거(알림/불필요 미팅/탭) + 앱에서 완료",
+          "estMin": 5
+        }
+      ],
+      "meta": {
+        "intensity": "FULL",
+        "contextVariant": "WORKDAY"
+      }
+    },
+    {
+      "id": "TPL_WORK_TASK_PRIORITIZE_STD_16_MORNING_WORKDAY",
+      "clusterKey": "WORK_TASK_PRIORITIZE",
+      "type": "process",
+      "title": "업무 시작 16분 우선순위(읽지않음 스캔→TOP1 착수)",
+      "concepts": [
+        "WORK.TASK_PRIORITIZE"
+      ],
+      "contexts": [
+        "WORK",
+        "MORNING",
+        "WORKDAY"
+      ],
+      "states": [],
+      "time": {
+        "min": 13,
+        "max": 24,
+        "default": 16
+      },
+      "missions": [
+        {
+          "action": "업무 시작 후 1분 호흡 + 물 한 모금(준비)",
+          "estMin": 2
+        },
+        {
+          "action": "이메일/메신저 ‘읽지 않음’ 3분 스캔하고 중요한 것만 표시",
+          "estMin": 3
+        },
+        {
+          "action": "오늘 할 일 5개를 적고 2개는 과감히 내일로 미루기",
+          "estMin": 4
+        },
+        {
+          "action": "TOP1의 첫 10분 행동을 2개로 분해(딱 지금 할 1개 선택)",
+          "estMin": 4
+        },
+        {
+          "action": "타이머 3분 설정하고 바로 시작 + 앱에서 완료",
+          "estMin": 3
+        }
+      ],
+      "meta": {
+        "intensity": "STD",
+        "contextVariant": "MORNING_WORKDAY"
+      }
+    },
+    {
+      "id": "TPL_WORK_BACKLOG_GROOM_MIN_10_WORK",
+      "clusterKey": "WORK_BACKLOG_GROOM",
+      "type": "process",
+      "title": "백로그 10분 미니 그루밍(중복/모호함 제거)",
+      "concepts": [
+        "WORK.BACKLOG_GROOM"
+      ],
+      "contexts": [
+        "WORK"
+      ],
+      "states": [],
+      "time": {
+        "min": 8,
+        "max": 15,
+        "default": 10
+      },
+      "missions": [
+        {
+          "action": "백로그/할일 리스트 열고 중복 2개 찾기(준비)",
+          "estMin": 2
+        },
+        {
+          "action": "끝난/의미 없는 항목 3개 삭제 또는 아카이브",
+          "estMin": 3
+        },
+        {
+          "action": "모호한 항목 1개를 ‘결과물’ 중심 한 문장으로 다시 쓰기",
+          "estMin": 2
+        },
+        {
+          "action": "다음 행동 1줄 추가하고 앱에서 완료",
+          "estMin": 3
+        }
+      ],
+      "meta": {
+        "intensity": "MIN",
+        "contextVariant": "WORK"
+      }
+    },
+    {
+      "id": "TPL_WORK_BACKLOG_GROOM_MIN_12_MORNING",
+      "clusterKey": "WORK_BACKLOG_GROOM",
+      "type": "process",
+      "title": "아침 12분 백로그 정리(인박스→라벨)",
+      "concepts": [
+        "WORK.BACKLOG_GROOM"
+      ],
+      "contexts": [
+        "WORK",
+        "MORNING"
+      ],
+      "states": [],
+      "time": {
+        "min": 10,
+        "max": 18,
+        "default": 12
+      },
+      "missions": [
+        {
+          "action": "인박스/메모에서 백로그로 옮길 것 3개만 고르기(준비)",
+          "estMin": 3
+        },
+        {
+          "action": "각 항목에 라벨 1개씩 달기(프로젝트/사람/기한 중 택1)",
+          "estMin": 4
+        },
+        {
+          "action": "우선순위 낮은 것 2개를 ‘보류’로 이동",
+          "estMin": 2
+        },
+        {
+          "action": "오늘 볼 1개를 상단 고정하고 앱에서 완료",
+          "estMin": 3
+        }
+      ],
+      "meta": {
+        "intensity": "MIN",
+        "contextVariant": "MORNING"
+      }
+    },
+    {
+      "id": "TPL_WORK_BACKLOG_GROOM_STD_15_AFTER_LUNCH",
+      "clusterKey": "WORK_BACKLOG_GROOM",
+      "type": "process",
+      "title": "점심 후 15분 백로그 분류(NEXT/WAIT/IDEA)",
+      "concepts": [
+        "WORK.BACKLOG_GROOM"
+      ],
+      "contexts": [
+        "WORK",
+        "AFTER_LUNCH"
+      ],
+      "states": [],
+      "time": {
+        "min": 12,
+        "max": 22,
+        "default": 15
+      },
+      "missions": [
+        {
+          "action": "백로그를 상단 10개만 보이도록 필터/정렬(준비)",
+          "estMin": 2
+        },
+        {
+          "action": "상단 10개를 NEXT/WAIT/IDEA로 빠르게 분류",
+          "estMin": 5
+        },
+        {
+          "action": "WAIT 1개에 요청/메모 1줄 추가(누구/언제)",
+          "estMin": 3
+        },
+        {
+          "action": "NEXT 1개를 3단계 체크리스트로 쪼개기",
+          "estMin": 4
+        },
+        {
+          "action": "저장/스냅샷 남기고 앱에서 완료",
+          "estMin": 1
+        }
+      ],
+      "meta": {
+        "intensity": "STD",
+        "contextVariant": "AFTER_LUNCH"
+      }
+    },
+    {
+      "id": "TPL_WORK_BACKLOG_GROOM_FULL_20_WORKDAY",
+      "clusterKey": "WORK_BACKLOG_GROOM",
+      "type": "process",
+      "title": "업무일 20분 백로그 그루밍(보류 정리+쪼개기)",
+      "concepts": [
+        "WORK.BACKLOG_GROOM"
+      ],
+      "contexts": [
+        "WORK",
+        "WORKDAY"
+      ],
+      "states": [],
+      "time": {
+        "min": 16,
+        "max": 30,
+        "default": 20
+      },
+      "missions": [
+        {
+          "action": "프로젝트 보드 열고 ‘이번주/다음주/언젠가’ 컬럼 확인(준비)",
+          "estMin": 3
+        },
+        {
+          "action": "‘언젠가’ 항목 5개 중 2개를 아카이브/삭제",
+          "estMin": 4
+        },
+        {
+          "action": "‘이번주 후보’ 3개에 예상 소요(분/시간) 적기",
+          "estMin": 5
+        },
+        {
+          "action": "가장 큰 항목 1개를 작은 티켓 3개로 쪼개기",
+          "estMin": 6
+        },
+        {
+          "action": "첫 티켓에 담당/기한 설정하고 앱에서 완료",
+          "estMin": 2
+        }
+      ],
+      "meta": {
+        "intensity": "FULL",
+        "contextVariant": "WORKDAY"
+      }
+    },
+    {
+      "id": "TPL_WORK_BACKLOG_GROOM_STD_18_WEEKDAY",
+      "clusterKey": "WORK_BACKLOG_GROOM",
+      "type": "process",
+      "title": "평일 18분 대기 작업 정리(WAIT→다음 체크)",
+      "concepts": [
+        "WORK.BACKLOG_GROOM"
+      ],
+      "contexts": [
+        "WORK",
+        "WEEKDAY"
+      ],
+      "states": [],
+      "time": {
+        "min": 14,
+        "max": 26,
+        "default": 18
+      },
+      "missions": [
+        {
+          "action": "대기중(WAIT) 항목만 모아서 5개 확인(준비)",
+          "estMin": 3
+        },
+        {
+          "action": "각 항목에 다음 체크 날짜/사람을 1줄씩 추가",
+          "estMin": 5
+        },
+        {
+          "action": "막힌 항목 1개를 ‘질문 1개’로 바꿔 적기",
+          "estMin": 4
+        },
+        {
+          "action": "질문 메시지/메일 초안 작성(짧게 3문장)",
+          "estMin": 4
+        },
+        {
+          "action": "정리 결과 저장하고 앱에서 완료",
+          "estMin": 2
+        }
+      ],
+      "meta": {
+        "intensity": "STD",
+        "contextVariant": "WEEKDAY"
+      }
+    },
+    {
+      "id": "TPL_WORK_BACKLOG_GROOM_MIN_8_WORK",
+      "clusterKey": "WORK_BACKLOG_GROOM",
+      "type": "process",
+      "title": "백로그 8분 마이크로 정리(1개만 선명하게)",
+      "concepts": [
+        "WORK.BACKLOG_GROOM"
+      ],
+      "contexts": [
+        "WORK"
+      ],
+      "states": [],
+      "time": {
+        "min": 6,
+        "max": 12,
+        "default": 8
+      },
+      "missions": [
+        {
+          "action": "백로그 5개만 훑고 오래된 1개 선택(준비)",
+          "estMin": 2
+        },
+        {
+          "action": "제목을 ‘결과물’ 중심으로 한 줄 수정",
+          "estMin": 2
+        },
+        {
+          "action": "다음 행동 1줄 추가(2분 안에 할 수 있게)",
+          "estMin": 2
+        },
+        {
+          "action": "우선순위/라벨 저장하고 앱에서 완료",
+          "estMin": 2
+        }
+      ],
+      "meta": {
+        "intensity": "MIN",
+        "contextVariant": "WORK"
+      }
+    },
+    {
+      "id": "TPL_WORK_BACKLOG_GROOM_STD_16_AFTER_WORK",
+      "clusterKey": "WORK_BACKLOG_GROOM",
+      "type": "process",
+      "title": "퇴근 전 16분 백로그 수집+정리(메모 정돈)",
+      "concepts": [
+        "WORK.BACKLOG_GROOM"
+      ],
+      "contexts": [
+        "WORK",
+        "AFTER_WORK"
+      ],
+      "states": [],
+      "time": {
+        "min": 13,
+        "max": 24,
+        "default": 16
+      },
+      "missions": [
+        {
+          "action": "오늘 생긴 메모/슬랙 저장 항목 3개를 백로그로 수집(준비)",
+          "estMin": 4
+        },
+        {
+          "action": "각 항목에 프로젝트/상태 태그 붙이기",
+          "estMin": 4
+        },
+        {
+          "action": "내일 볼 1개를 NEXT로 이동 + 2단계로 쪼개기",
+          "estMin": 5
+        },
+        {
+          "action": "정리 결과를 1줄 회고로 남기고 앱에서 완료",
+          "estMin": 3
+        }
+      ],
+      "meta": {
+        "intensity": "STD",
+        "contextVariant": "AFTER_WORK"
+      }
+    },
+    {
+      "id": "TPL_WORK_BACKLOG_GROOM_FULL_25_WORK",
+      "clusterKey": "WORK_BACKLOG_GROOM",
+      "type": "process",
+      "title": "백로그 25분 딥 클린(삭제+재작성+쪼개기)",
+      "concepts": [
+        "WORK.BACKLOG_GROOM"
+      ],
+      "contexts": [
+        "WORK"
+      ],
+      "states": [],
+      "time": {
+        "min": 20,
+        "max": 40,
+        "default": 25
+      },
+      "missions": [
+        {
+          "action": "백로그 상위 30개를 한 번 스크롤하며 ‘삭제 후보’ 표시(준비)",
+          "estMin": 4
+        },
+        {
+          "action": "삭제 후보 5개를 실제 삭제/아카이브",
+          "estMin": 5
+        },
+        {
+          "action": "모호한 항목 2개를 SMART 문장으로 재작성",
+          "estMin": 6
+        },
+        {
+          "action": "큰 항목 1개를 작은 행동 4개로 쪼개고 체크박스 추가",
+          "estMin": 7
+        },
+        {
+          "action": "상단 3개 우선순위 재정렬하고 앱에서 완료",
+          "estMin": 3
+        }
+      ],
+      "meta": {
+        "intensity": "FULL",
+        "contextVariant": "WORK"
+      }
+    },
+    {
+      "id": "TPL_WORK_BACKLOG_GROOM_STD_14_MORNING",
+      "clusterKey": "WORK_BACKLOG_GROOM",
+      "type": "process",
+      "title": "아침 14분 백로그 트리아지(막힘 제거)",
+      "concepts": [
+        "WORK.BACKLOG_GROOM"
+      ],
+      "contexts": [
+        "WORK",
+        "MORNING"
+      ],
+      "states": [],
+      "time": {
+        "min": 11,
+        "max": 20,
+        "default": 14
+      },
+      "missions": [
+        {
+          "action": "백로그 상단 10개 중 막힌 것 2개 표시(준비)",
+          "estMin": 2
+        },
+        {
+          "action": "막힌 것 각각에 필요한 사람/질문을 한 줄씩 적기",
+          "estMin": 4
+        },
+        {
+          "action": "바로 할 수 있는 NEXT 2개를 위로 올리기",
+          "estMin": 3
+        },
+        {
+          "action": "NEXT 1개에 5분 서브태스크 2개 추가",
+          "estMin": 3
+        },
+        {
+          "action": "저장하고 앱에서 완료",
+          "estMin": 2
+        }
+      ],
+      "meta": {
+        "intensity": "STD",
+        "contextVariant": "MORNING"
+      }
+    },
+    {
+      "id": "TPL_WORK_BACKLOG_GROOM_FULL_30_WORKDAY",
+      "clusterKey": "WORK_BACKLOG_GROOM",
+      "type": "process",
+      "title": "업무일 30분 백로그 정교화(후보 선정+완료 정의)",
+      "concepts": [
+        "WORK.BACKLOG_GROOM"
+      ],
+      "contexts": [
+        "WORK",
+        "WORKDAY"
+      ],
+      "states": [],
+      "time": {
+        "min": 24,
+        "max": 45,
+        "default": 30
+      },
+      "missions": [
+        {
+          "action": "프로젝트 백로그 열고 ‘이번 스프린트 후보’만 필터(준비)",
+          "estMin": 4
+        },
+        {
+          "action": "후보 6개에 노력(1~5) 점수 매기기(대략)",
+          "estMin": 8
+        },
+        {
+          "action": "가치 높은 3개를 선택하고 나머지는 보류로 이동",
+          "estMin": 6
+        },
+        {
+          "action": "선택 3개 각각에 ‘완료 정의’ 한 줄씩 추가",
+          "estMin": 6
+        },
+        {
+          "action": "첫 항목을 다음 행동 3개로 쪼개고 담당/기한 설정 + 앱에서 완료",
+          "estMin": 6
+        }
+      ],
+      "meta": {
+        "intensity": "FULL",
+        "contextVariant": "WORKDAY"
+      }
+    },
+    {
+      "id": "TPL_STUDY_READING_BLOCK_MIN_10_MORNING_HOME",
+      "clusterKey": "STUDY_READING_BLOCK",
+      "type": "process",
+      "title": "읽기 집중 10분 미니(아침·집)",
+      "concepts": [
+        "STUDY.READING_BLOCK"
+      ],
+      "contexts": [
+        "MORNING",
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 8,
+        "max": 15,
+        "default": 10
+      },
+      "missions": [
+        {
+          "action": "자료/책 펼치기 + 타이머 10분 시작(준비)",
+          "estMin": 2
+        },
+        {
+          "action": "6분 정독(한 문단씩 읽고 핵심 단어 1개만 표시)",
+          "estMin": 6
+        },
+        {
+          "action": "1분 메모: 오늘 읽은 핵심 1줄",
+          "estMin": 1
+        },
+        {
+          "action": "정리하고 앱에서 완료",
+          "estMin": 1
+        }
+      ]
+    },
+    {
+      "id": "TPL_STUDY_READING_BLOCK_MIN_12_OUTSIDE",
+      "clusterKey": "STUDY_READING_BLOCK",
+      "type": "process",
+      "title": "읽기 집중 12분 착수(밖)",
+      "concepts": [
+        "STUDY.READING_BLOCK"
+      ],
+      "contexts": [
+        "OUTSIDE"
+      ],
+      "states": [],
+      "time": {
+        "min": 10,
+        "max": 18,
+        "default": 12
+      },
+      "missions": [
+        {
+          "action": "자료/책 열고 읽을 파트 1개 지정(준비)",
+          "estMin": 2
+        },
+        {
+          "action": "7분 읽기 집중(모르는 용어는 표시만 하고 계속)",
+          "estMin": 7
+        },
+        {
+          "action": "2분 표시/메모: 핵심 2줄 + 용어 1개",
+          "estMin": 2
+        },
+        {
+          "action": "정리하고 앱에서 완료",
+          "estMin": 1
+        }
+      ]
+    },
+    {
+      "id": "TPL_STUDY_READING_BLOCK_STD_16_HOME",
+      "clusterKey": "STUDY_READING_BLOCK",
+      "type": "process",
+      "title": "읽기 집중 16분 기본(집)",
+      "concepts": [
+        "STUDY.READING_BLOCK"
+      ],
+      "contexts": [
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 12,
+        "max": 24,
+        "default": 16
+      },
+      "missions": [
+        {
+          "action": "책/자료 펼치고 목표 1줄 정하기(준비)",
+          "estMin": 3
+        },
+        {
+          "action": "9분 정독(핵심 주장/정의만 표시)",
+          "estMin": 9
+        },
+        {
+          "action": "3분 요약: 핵심 3줄을 노트에 적기",
+          "estMin": 3
+        },
+        {
+          "action": "정리하고 앱에서 완료",
+          "estMin": 1
+        }
+      ]
+    },
+    {
+      "id": "TPL_STUDY_READING_BLOCK_STD_18_AFTER_LUNCH_HOME",
+      "clusterKey": "STUDY_READING_BLOCK",
+      "type": "process",
+      "title": "읽기 집중 18분(점심 후·집)",
+      "concepts": [
+        "STUDY.READING_BLOCK"
+      ],
+      "contexts": [
+        "AFTER_LUNCH",
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 14,
+        "max": 28,
+        "default": 18
+      },
+      "missions": [
+        {
+          "action": "자료 열기 + 타이머 18분 세팅(준비)",
+          "estMin": 3
+        },
+        {
+          "action": "10분 읽기(문장 단위로 읽고 중요한 곳만 밑줄)",
+          "estMin": 10
+        },
+        {
+          "action": "3분 요약: 핵심 3줄 + 질문 1개",
+          "estMin": 3
+        },
+        {
+          "action": "정리하고 앱에서 완료",
+          "estMin": 2
+        }
+      ]
+    },
+    {
+      "id": "TPL_STUDY_READING_BLOCK_STD_20_OUTSIDE",
+      "clusterKey": "STUDY_READING_BLOCK",
+      "type": "process",
+      "title": "읽기 집중 20분(밖)",
+      "concepts": [
+        "STUDY.READING_BLOCK"
+      ],
+      "contexts": [
+        "OUTSIDE"
+      ],
+      "states": [],
+      "time": {
+        "min": 15,
+        "max": 30,
+        "default": 20
+      },
+      "missions": [
+        {
+          "action": "자료/책 펼치기 + 읽을 섹션 1개 지정(준비)",
+          "estMin": 3
+        },
+        {
+          "action": "12분 읽기 집중(핵심 문장만 표시, 멈추지 않기)",
+          "estMin": 12
+        },
+        {
+          "action": "3분 표시/메모: 핵심 3줄 + 모르는 용어 1개",
+          "estMin": 3
+        },
+        {
+          "action": "정리하고 앱에서 완료",
+          "estMin": 2
+        }
+      ]
+    },
+    {
+      "id": "TPL_STUDY_READING_BLOCK_STD_22_HOME",
+      "clusterKey": "STUDY_READING_BLOCK",
+      "type": "process",
+      "title": "읽기 집중 22분(집·핵심 잡기)",
+      "concepts": [
+        "STUDY.READING_BLOCK"
+      ],
+      "contexts": [
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 18,
+        "max": 34,
+        "default": 22
+      },
+      "missions": [
+        {
+          "action": "자료 열고 오늘 읽을 범위 1개 정하기(준비)",
+          "estMin": 4
+        },
+        {
+          "action": "13분 정독(정의/주장/근거만 표시)",
+          "estMin": 13
+        },
+        {
+          "action": "3분 요약: 핵심 3줄 + 근거 위치(페이지/문단) 1개",
+          "estMin": 3
+        },
+        {
+          "action": "1분 질문 만들기: 헷갈린 부분을 질문 1개로 바꾸기",
+          "estMin": 1
+        },
+        {
+          "action": "정리하고 앱에서 완료",
+          "estMin": 1
+        }
+      ]
+    },
+    {
+      "id": "TPL_STUDY_READING_BLOCK_FULL_30_WORKDAY_HOME",
+      "clusterKey": "STUDY_READING_BLOCK",
+      "type": "process",
+      "title": "읽기 집중 30분(평일·집·요약까지)",
+      "concepts": [
+        "STUDY.READING_BLOCK"
+      ],
+      "contexts": [
+        "WORKDAY",
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 24,
+        "max": 45,
+        "default": 30
+      },
+      "missions": [
+        {
+          "action": "자료/노트 열고 목표 1줄 + 타이머 30분(준비)",
+          "estMin": 4
+        },
+        {
+          "action": "18분 읽기 집중(핵심 문장만 표시, 검색은 1회만)",
+          "estMin": 18
+        },
+        {
+          "action": "4분 요약: 핵심 5줄로 정리",
+          "estMin": 4
+        },
+        {
+          "action": "3분 적용: ‘이걸로 뭘 할 수 있지?’ 예시 1개 적기",
+          "estMin": 3
+        },
+        {
+          "action": "정리하고 앱에서 완료",
+          "estMin": 1
+        }
+      ]
+    },
+    {
+      "id": "TPL_STUDY_READING_BLOCK_FULL_35_OUTSIDE",
+      "clusterKey": "STUDY_READING_BLOCK",
+      "type": "process",
+      "title": "읽기 집중 35분(밖·깊게 읽기)",
+      "concepts": [
+        "STUDY.READING_BLOCK"
+      ],
+      "contexts": [
+        "OUTSIDE"
+      ],
+      "states": [],
+      "time": {
+        "min": 28,
+        "max": 52,
+        "default": 35
+      },
+      "missions": [
+        {
+          "action": "자료/논문 열고 읽을 섹션 1개 지정(준비)",
+          "estMin": 5
+        },
+        {
+          "action": "22분 정독(핵심 주장/근거를 표시하며 읽기)",
+          "estMin": 22
+        },
+        {
+          "action": "5분 요약 노트: 핵심 5줄 + 모르는 용어 1개",
+          "estMin": 5
+        },
+        {
+          "action": "2분 용어 정리: 용어 1개를 내 말로 1줄",
+          "estMin": 2
+        },
+        {
+          "action": "정리하고 앱에서 완료",
+          "estMin": 1
+        }
+      ]
+    },
+    {
+      "id": "TPL_STUDY_READING_BLOCK_FULL_35_BEFORE_SLEEP_HOME",
+      "clusterKey": "STUDY_READING_BLOCK",
+      "type": "process",
+      "title": "읽기 집중 35분(취침 전·집)",
+      "concepts": [
+        "STUDY.READING_BLOCK"
+      ],
+      "contexts": [
+        "BEFORE_SLEEP",
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 28,
+        "max": 52,
+        "default": 35
+      },
+      "missions": [
+        {
+          "action": "책/자료 펼치고 조명/자세 세팅 + 타이머 35분(준비)",
+          "estMin": 4
+        },
+        {
+          "action": "22분 읽기(딴생각 나면 문장 1개 다시 읽고 복귀)",
+          "estMin": 22
+        },
+        {
+          "action": "4분 요약: 핵심 4줄",
+          "estMin": 4
+        },
+        {
+          "action": "4분 표시: 내일 다시 볼 페이지/문단 2곳 체크",
+          "estMin": 4
+        },
+        {
+          "action": "정리하고 앱에서 완료",
+          "estMin": 1
+        }
+      ]
+    },
+    {
+      "id": "TPL_STUDY_READING_BLOCK_FULL_40_WEEKEND_OUTSIDE",
+      "clusterKey": "STUDY_READING_BLOCK",
+      "type": "process",
+      "title": "읽기 집중 40분(주말·밖·메모 포함)",
+      "concepts": [
+        "STUDY.READING_BLOCK"
+      ],
+      "contexts": [
+        "WEEKEND",
+        "OUTSIDE"
+      ],
+      "states": [],
+      "time": {
+        "min": 32,
+        "max": 60,
+        "default": 40
+      },
+      "missions": [
+        {
+          "action": "자료/노트 열고 오늘 읽을 범위 1개 고르기(준비)",
+          "estMin": 5
+        },
+        {
+          "action": "26분 정독(핵심 주장/반례/예시를 표시)",
+          "estMin": 26
+        },
+        {
+          "action": "6분 요약: 핵심 6줄 + 질문 1개",
+          "estMin": 6
+        },
+        {
+          "action": "2분 근거 표시: 중요한 페이지/문단 위치 2개 적기",
+          "estMin": 2
+        },
+        {
+          "action": "정리하고 앱에서 완료",
+          "estMin": 1
+        }
+      ]
+    },
+    {
+      "id": "TPL_STUDY_PRACTICE_PROBLEMS_MIN_15_HOME",
+      "clusterKey": "STUDY_PRACTICE_PROBLEMS",
+      "type": "process",
+      "title": "문제 풀이 15분 미니(집)",
+      "concepts": [
+        "STUDY.PRACTICE_PROBLEMS"
+      ],
+      "contexts": [
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 12,
+        "max": 22,
+        "default": 15
+      },
+      "missions": [
+        {
+          "action": "문제집/노트 펼치고 오늘 풀 문제 3개 고르기(준비)",
+          "estMin": 3
+        },
+        {
+          "action": "10분 풀이 진행(막히면 체크만 하고 다음으로)",
+          "estMin": 10
+        },
+        {
+          "action": "1분 채점/확인: 맞은/틀린 번호만 표시",
+          "estMin": 1
+        },
+        {
+          "action": "1분 오답 표시 후 정리하고 앱에서 완료",
+          "estMin": 1
+        }
+      ]
+    },
+    {
+      "id": "TPL_STUDY_PRACTICE_PROBLEMS_MIN_15_OUTSIDE",
+      "clusterKey": "STUDY_PRACTICE_PROBLEMS",
+      "type": "process",
+      "title": "문제 풀이 15분 빠른 세트(밖)",
+      "concepts": [
+        "STUDY.PRACTICE_PROBLEMS"
+      ],
+      "contexts": [
+        "OUTSIDE"
+      ],
+      "states": [],
+      "time": {
+        "min": 12,
+        "max": 22,
+        "default": 15
+      },
+      "missions": [
+        {
+          "action": "문제 세트 열고 1~2문제만 고르기 + 타이머 15분(준비)",
+          "estMin": 3
+        },
+        {
+          "action": "10분 풀이(답지/검색 금지, 막히면 표시만)",
+          "estMin": 10
+        },
+        {
+          "action": "1분 채점/오답 표시(틀린 번호만 체크)",
+          "estMin": 1
+        },
+        {
+          "action": "정리하고 앱에서 완료",
+          "estMin": 1
+        }
+      ]
+    },
+    {
+      "id": "TPL_STUDY_PRACTICE_PROBLEMS_MIN_18_BEFORE_SLEEP_HOME",
+      "clusterKey": "STUDY_PRACTICE_PROBLEMS",
+      "type": "process",
+      "title": "문제 풀이 18분(취침 전·집)",
+      "concepts": [
+        "STUDY.PRACTICE_PROBLEMS"
+      ],
+      "contexts": [
+        "BEFORE_SLEEP",
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 14,
+        "max": 26,
+        "default": 18
+      },
+      "missions": [
+        {
+          "action": "문제집 펼치고 오늘 풀 문제 2~3개 고르기(준비)",
+          "estMin": 3
+        },
+        {
+          "action": "11분 풀이(풀이 과정은 키워드로만 적기)",
+          "estMin": 11
+        },
+        {
+          "action": "2분 채점/확인: 틀린 번호만 체크",
+          "estMin": 2
+        },
+        {
+          "action": "1분 오답 1줄 적기 + 정리하고 앱에서 완료",
+          "estMin": 1
+        },
+        {
+          "action": "불 끄기 전에 정리 확인하고 앱에서 완료",
+          "estMin": 1
+        }
+      ]
+    },
+    {
+      "id": "TPL_STUDY_PRACTICE_PROBLEMS_STD_20_OUTSIDE",
+      "clusterKey": "STUDY_PRACTICE_PROBLEMS",
+      "type": "process",
+      "title": "문제 풀이 20분(밖·한 세트)",
+      "concepts": [
+        "STUDY.PRACTICE_PROBLEMS"
+      ],
+      "contexts": [
+        "OUTSIDE"
+      ],
+      "states": [],
+      "time": {
+        "min": 16,
+        "max": 30,
+        "default": 20
+      },
+      "missions": [
+        {
+          "action": "문제 세트 열고 목표 정하기(문제 4개 등)(준비)",
+          "estMin": 3
+        },
+        {
+          "action": "12분 풀이(막히면 표시만 하고 다음)",
+          "estMin": 12
+        },
+        {
+          "action": "3분 채점/오답 표시(틀린 이유는 키워드 1개만)",
+          "estMin": 3
+        },
+        {
+          "action": "정리하고 앱에서 완료",
+          "estMin": 2
+        }
+      ]
+    },
+    {
+      "id": "TPL_STUDY_PRACTICE_PROBLEMS_STD_25_HOME",
+      "clusterKey": "STUDY_PRACTICE_PROBLEMS",
+      "type": "process",
+      "title": "문제 풀이 25분 기본(집)",
+      "concepts": [
+        "STUDY.PRACTICE_PROBLEMS"
+      ],
+      "contexts": [
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 20,
+        "max": 36,
+        "default": 25
+      },
+      "missions": [
+        {
+          "action": "문제집/노트 펼치고 오늘 목표(문제 6개 등) 1줄(준비)",
+          "estMin": 4
+        },
+        {
+          "action": "15분 풀이 진행(막히면 표시하고 다음 문제로)",
+          "estMin": 15
+        },
+        {
+          "action": "3분 채점: 맞/틀 체크 + 자신 없는 문제 표시",
+          "estMin": 3
+        },
+        {
+          "action": "2분 오답: 틀린 이유 1줄 + 다음에 볼 힌트 1줄",
+          "estMin": 2
+        },
+        {
+          "action": "정리하고 앱에서 완료",
+          "estMin": 1
+        }
+      ]
+    },
+    {
+      "id": "TPL_STUDY_PRACTICE_PROBLEMS_STD_25_AFTER_LUNCH_OUTSIDE",
+      "clusterKey": "STUDY_PRACTICE_PROBLEMS",
+      "type": "process",
+      "title": "문제 풀이 25분(점심 후·밖)",
+      "concepts": [
+        "STUDY.PRACTICE_PROBLEMS"
+      ],
+      "contexts": [
+        "AFTER_LUNCH",
+        "OUTSIDE"
+      ],
+      "states": [],
+      "time": {
+        "min": 20,
+        "max": 36,
+        "default": 25
+      },
+      "missions": [
+        {
+          "action": "문제 세트 열기 + 풀 문제 5개만 고르기(준비)",
+          "estMin": 3
+        },
+        {
+          "action": "16분 풀이(정답 확인은 끝까지 미루기)",
+          "estMin": 16
+        },
+        {
+          "action": "3분 채점/오답 표시(틀린 번호만 체크)",
+          "estMin": 3
+        },
+        {
+          "action": "2분 오답 정리: 가장 헷갈린 문제 1개에 힌트 1줄",
+          "estMin": 2
+        },
+        {
+          "action": "정리하고 앱에서 완료",
+          "estMin": 1
+        }
+      ]
+    },
+    {
+      "id": "TPL_STUDY_PRACTICE_PROBLEMS_STD_30_WORKDAY_HOME",
+      "clusterKey": "STUDY_PRACTICE_PROBLEMS",
+      "type": "process",
+      "title": "문제 풀이 30분(평일·집·오답까지)",
+      "concepts": [
+        "STUDY.PRACTICE_PROBLEMS"
+      ],
+      "contexts": [
+        "WORKDAY",
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 24,
+        "max": 45,
+        "default": 30
+      },
+      "missions": [
+        {
+          "action": "문제집 펼치고 목표(문제 8개/파트 1개) 정하기(준비)",
+          "estMin": 4
+        },
+        {
+          "action": "20분 풀이(모르면 체크만 하고 다음)",
+          "estMin": 20
+        },
+        {
+          "action": "3분 채점: 정답 확인 + 자신 없는 문제 1개 표시",
+          "estMin": 3
+        },
+        {
+          "action": "2분 오답 노트: 틀린 이유 1줄 + 정답 근거 1줄",
+          "estMin": 2
+        },
+        {
+          "action": "정리하고 앱에서 완료",
+          "estMin": 1
+        }
+      ]
+    },
+    {
+      "id": "TPL_STUDY_PRACTICE_PROBLEMS_FULL_45_HOME",
+      "clusterKey": "STUDY_PRACTICE_PROBLEMS",
+      "type": "process",
+      "title": "문제 풀이 45분 풀 세션(집)",
+      "concepts": [
+        "STUDY.PRACTICE_PROBLEMS"
+      ],
+      "contexts": [
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 35,
+        "max": 65,
+        "default": 45
+      },
+      "missions": [
+        {
+          "action": "문제집/필기구/계산기 세팅 + 타이머 45분(준비)",
+          "estMin": 6
+        },
+        {
+          "action": "28분 풀이(막히면 표시만 하고 계속, 검색 1회만)",
+          "estMin": 28
+        },
+        {
+          "action": "5분 채점: 맞/틀 체크 + 실수 유형 1개 표시",
+          "estMin": 5
+        },
+        {
+          "action": "4분 오답 정리: 틀린 문제 2개만 ‘왜’ 1줄씩",
+          "estMin": 4
+        },
+        {
+          "action": "정리하고 앱에서 완료",
+          "estMin": 2
+        }
+      ]
+    },
+    {
+      "id": "TPL_STUDY_PRACTICE_PROBLEMS_FULL_45_OUTSIDE",
+      "clusterKey": "STUDY_PRACTICE_PROBLEMS",
+      "type": "process",
+      "title": "문제 풀이 45분 집중(밖)",
+      "concepts": [
+        "STUDY.PRACTICE_PROBLEMS"
+      ],
+      "contexts": [
+        "OUTSIDE"
+      ],
+      "states": [],
+      "time": {
+        "min": 35,
+        "max": 65,
+        "default": 45
+      },
+      "missions": [
+        {
+          "action": "문제 세트 열고 목표(문제 12개 등) 1줄 + 타이머(준비)",
+          "estMin": 5
+        },
+        {
+          "action": "30분 풀이(답지/검색 금지, 막히면 표시만)",
+          "estMin": 30
+        },
+        {
+          "action": "5분 채점/오답 표시(틀린 번호만 체크)",
+          "estMin": 5
+        },
+        {
+          "action": "3분 오답 정리: 가장 중요한 실수 1개를 규칙으로 적기",
+          "estMin": 3
+        },
+        {
+          "action": "정리하고 앱에서 완료",
+          "estMin": 2
+        }
+      ]
+    },
+    {
+      "id": "TPL_STUDY_PRACTICE_PROBLEMS_FULL_50_WEEKEND_HOME",
+      "clusterKey": "STUDY_PRACTICE_PROBLEMS",
+      "type": "process",
+      "title": "문제 풀이 50분(주말·집·재풀이 포함)",
+      "concepts": [
+        "STUDY.PRACTICE_PROBLEMS"
+      ],
+      "contexts": [
+        "WEEKEND",
+        "HOME"
+      ],
+      "states": [],
+      "time": {
+        "min": 40,
+        "max": 75,
+        "default": 50
+      },
+      "missions": [
+	        {
+	          "action": "문제집/노트 세팅 + 오늘 풀 파트 1개 고르기(준비)",
+	          "estMin": 6
+	        },
+	        {
+	          "action": "20분 풀이 진행(막히면 표시만 하고 계속)",
+	          "estMin": 20
+	        },
+	        {
+	          "action": "12분 풀이 진행(막히면 표시만 하고 계속)",
+	          "estMin": 12
+	        },
+	        {
+	          "action": "6분 채점: 오답/실수 체크 + 자신 없는 문제 표시",
+	          "estMin": 6
+	        },
+        {
+          "action": "4분 재풀이: 오답 1개만 다시 풀어보기(힌트 없이)",
+          "estMin": 4
+        },
+        {
+          "action": "정리하고 앱에서 완료",
+          "estMin": 2
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,590 @@
+{
+  "version": 1,
+  "concepts": [
+    {
+      "conceptId": "HOME.AIRY_BRIGHT_HOME",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 4,
+      "label": "채광 좋은 집",
+      "description": "집 안이 밝고 통풍이 잘 되는 쾌적한 분위기 유지",
+      "tags": ["채광", "조명", "커튼", "환기", "쾌적"]
+    },
+    {
+      "conceptId": "HOME.ALLERGEN_REDUCED_HOME",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 7,
+      "label": "알레르기 유발요인 최소화",
+      "description": "먼지/진드기 등 알레르기 유발요인을 줄여 편한 생활 환경 만들기",
+      "tags": ["알레르기", "먼지", "진드기", "공기청정", "침구", "청소"]
+    },
+    {
+      "conceptId": "HOME.ALWAYS_READY_HOME",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 6,
+      "label": "언제든 정돈된 집",
+      "description": "갑자기 누가 와도 당황하지 않을 정도로 집을 정돈된 상태로 유지",
+      "tags": ["정돈", "리셋", "가시영역", "유지", "방문객"]
+    },
+    {
+      "conceptId": "HOME.BATHROOM_SPA_FEEL",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 5,
+      "label": "스파 같은 욕실",
+      "description": "욕실을 깔끔하고 향기롭게 유지해서 씻는 시간이 편안해지도록 만들기",
+      "tags": ["욕실", "위생", "향", "수건", "정돈", "청소", "샤워"]
+    },
+    {
+      "conceptId": "HOME.BEDROOM_SLEEP_SANCTUARY",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 6,
+      "label": "숙면을 돕는 침실",
+      "description": "침실을 조용하고 정돈된 상태로 만들어 숙면에 유리한 환경 유지",
+      "tags": ["침실", "수면", "조명", "침구", "정돈", "소음", "휴식"]
+    },
+    {
+      "conceptId": "HOME.CALM_CLUTTER_FREE_HOME",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 6,
+      "label": "잡동사니 없는 차분한 집",
+      "description": "불필요한 물건과 시각적 소음을 줄여 마음이 편해지는 공간 만들기",
+      "tags": ["미니멀", "정리", "잡동사니", "버리기", "수납", "시각적소음"]
+    },
+    {
+      "conceptId": "HOME.CLEAR_COUNTERTOPS",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 6,
+      "label": "상판 비우기",
+      "description": "조리대/식탁 등 상판을 비워 작업과 청소가 쉬운 상태 유지",
+      "tags": ["조리대", "식탁", "상판", "비우기", "정리", "동선"]
+    },
+    {
+      "conceptId": "HOME.CLEAR_FLOORS_SAFE_WALKWAYS",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 7,
+      "label": "안전한 동선 확보",
+      "description": "바닥을 깔끔하게 유지해 넘어짐/걸림을 줄이고 이동이 편한 집 만들기",
+      "tags": ["바닥", "동선", "안전", "걸림", "정리", "아이", "반려동물"]
+    },
+    {
+      "conceptId": "HOME.CLEANING_SUPPLIES_READY",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 6,
+      "label": "청소 준비가 항상 된 상태",
+      "description": "청소도구와 세제를 한 곳에 모아 두고 바로 꺼내 쓸 수 있게 유지",
+      "tags": ["청소도구", "세제", "수납", "동선", "리필", "바구니"]
+    },
+    {
+      "conceptId": "HOME.COZY_LIVING_SPACE",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 4,
+      "label": "아늑한 생활공간",
+      "description": "거실/방을 아늑하고 편안하게 유지해 쉬고 싶어지는 공간 만들기",
+      "tags": ["아늑함", "거실", "조명", "텍스타일", "휴식", "정돈"]
+    },
+    {
+      "conceptId": "HOME.CORD_CABLE_MANAGEMENT",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 5,
+      "label": "케이블 정리",
+      "description": "충전기/멀티탭/케이블을 안전하고 보기 좋게 정리된 상태로 유지",
+      "tags": ["케이블", "충전", "멀티탭", "정리", "안전", "책상"]
+    },
+    {
+      "conceptId": "HOME.DAILY_RESET_HABIT",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 6,
+      "label": "매일 리셋 습관",
+      "description": "하루에 짧게라도 정리/리셋하는 습관을 만들어 집이 쉽게 흐트러지지 않게 유지",
+      "tags": ["매일", "루틴", "리셋", "10분", "정리", "유지"]
+    },
+    {
+      "conceptId": "HOME.DECOR_REFRESHED_HOME",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 3,
+      "label": "기분 전환되는 집 분위기",
+      "description": "소품/배치/색감을 정리해 집 분위기를 산뜻하게 유지",
+      "tags": ["인테리어", "데코", "정리", "컬러", "소품", "기분전환"]
+    },
+    {
+      "conceptId": "HOME.DECLUTTERED_STORAGE",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 6,
+      "label": "수납공간 정리 완료",
+      "description": "수납공간을 분류/라벨링해서 물건이 넘치지 않게 유지",
+      "tags": ["수납", "정리", "분류", "라벨", "버리기", "기부", "공간"]
+    },
+    {
+      "conceptId": "HOME.DIGITAL_HOME_INVENTORY",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 4,
+      "label": "집안 재고를 한눈에",
+      "description": "생활용품/식재료 재고를 목록으로 관리해 중복 구매를 줄이기",
+      "tags": ["재고", "목록", "관리", "생활용품", "식재료", "중복구매"]
+    },
+    {
+      "conceptId": "HOME.DISH_FREE_SINK",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 6,
+      "label": "비어 있는 싱크대",
+      "description": "싱크대를 비워 두어 요리/청소/정리가 쉬운 상태 유지",
+      "tags": ["싱크대", "설거지", "주방", "비우기", "위생"]
+    },
+    {
+      "conceptId": "HOME.DISASTER_READY_HOME",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 7,
+      "label": "재난 대비가 된 집",
+      "description": "정전/지진/폭우 등 비상 상황에 대비한 물품과 계획을 갖춘 상태 유지",
+      "tags": ["비상", "재난", "응급키트", "물", "식량", "손전등", "대피"]
+    },
+    {
+      "conceptId": "HOME.DUST_CONTROL_SYSTEM",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 5,
+      "label": "먼지 관리 체계",
+      "description": "먼지가 쉽게 쌓이지 않도록 주기/도구/동선을 정해 관리",
+      "tags": ["먼지", "청소", "필터", "정전기", "주기", "도구"]
+    },
+    {
+      "conceptId": "HOME.EASY_LAUNDRY_FLOW",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 6,
+      "label": "빨래가 막히지 않는 동선",
+      "description": "세탁→건조→개기→수납 흐름이 끊기지 않도록 환경을 정리해 유지",
+      "tags": ["빨래", "세탁", "건조", "개기", "바구니", "동선"]
+    },
+    {
+      "conceptId": "HOME.EASY_MORNINGS_AT_HOME",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 5,
+      "label": "아침 준비가 쉬운 집",
+      "description": "출근/외출 아침이 덜 바쁘도록 준비물과 동선을 정돈해 유지",
+      "tags": ["아침", "준비", "동선", "전날준비", "가방", "시간절약"]
+    },
+    {
+      "conceptId": "HOME.EASY_WEEKDAY_MEALS",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 5,
+      "label": "평일 한 끼가 쉬운 상태",
+      "description": "평일에 쉽게 먹을 수 있도록 식재료/메뉴/보관을 미리 정돈해 유지",
+      "tags": ["식단", "한끼", "냉장고", "식재료", "간단요리", "미리준비"]
+    },
+    {
+      "conceptId": "HOME.ENERGY_EFFICIENT_HOME",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 5,
+      "label": "에너지 효율적인 집",
+      "description": "전기/난방 등 에너지 낭비를 줄이는 습관과 환경을 갖춘 상태 유지",
+      "tags": ["에너지", "전기", "대기전력", "단열", "절약", "습관"]
+    },
+    {
+      "conceptId": "HOME.ENTRYWAY_LAUNCHPAD_READY",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 6,
+      "label": "현관 런치패드 정착",
+      "description": "열쇠/가방/신발이 제자리에 있어 외출 준비가 빠른 현관 만들기",
+      "tags": ["현관", "열쇠", "가방", "신발", "동선", "분실방지", "정리"]
+    },
+    {
+      "conceptId": "HOME.FAMILY_COMMAND_CENTER",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 5,
+      "label": "가족 커맨드 센터",
+      "description": "가족 일정/메모/우편물 등 정보가 한 곳에 모여 관리되는 상태 만들기",
+      "tags": ["가족", "캘린더", "메모", "공유", "우편물", "할일", "소통"]
+    },
+    {
+      "conceptId": "HOME.FIRE_SAFETY_READY",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 7,
+      "label": "화재 안전 준비",
+      "description": "소화기/감지기/대피 동선 등 화재 대비 요소가 갖춰진 상태 유지",
+      "tags": ["화재", "안전", "소화기", "연기감지기", "대피", "점검"]
+    },
+    {
+      "conceptId": "HOME.FRIDGE_MEAL_READY",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 6,
+      "label": "냉장고 한 끼 준비",
+      "description": "냉장고가 정돈되어 ‘바로 먹을 것’이 잘 보이는 상태 유지",
+      "tags": ["냉장고", "식재료", "라벨", "소분", "남은음식", "한끼", "유통기한"]
+    },
+    {
+      "conceptId": "HOME.GREEN_PLANT_FILLED_HOME",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 3,
+      "label": "초록이 있는 집",
+      "description": "집 안에 식물을 잘 키우고 관리해 기분 좋은 분위기를 유지",
+      "tags": ["식물", "초록", "관리", "인테리어", "힐링", "공기"]
+    },
+    {
+      "conceptId": "HOME.GUEST_READY_HOME",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 5,
+      "label": "손님 맞이 가능한 집",
+      "description": "거실/욕실 등 주요 공간이 손님에게 불편하지 않게 유지",
+      "tags": ["손님", "정돈", "거실", "욕실", "향", "깔끔함"]
+    },
+    {
+      "conceptId": "HOME.HEALTHY_HOME_ENVIRONMENT",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 6,
+      "label": "건강한 집 환경",
+      "description": "위생/통풍/습도 등 기본 환경이 건강에 유리하도록 유지",
+      "tags": ["위생", "통풍", "습도", "먼지", "공기질", "청소"]
+    },
+    {
+      "conceptId": "HOME.HOME_FIND_ANYTHING_FAST",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 6,
+      "label": "바로 찾을 수 있는 집",
+      "description": "자주 쓰는 물건은 ‘정해진 자리’가 있어 금방 찾을 수 있는 상태 유지",
+      "tags": ["정리", "정해진자리", "라벨", "분류", "찾기", "스트레스감소"]
+    },
+    {
+      "conceptId": "HOME.HOME_MAINTENANCE_ON_TRACK",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 6,
+      "label": "집 유지보수 추적",
+      "description": "필터/소모품/점검 등을 놓치지 않도록 일정과 기록이 유지되는 상태 만들기",
+      "tags": ["유지보수", "점검", "필터교체", "소모품", "일정", "기록"]
+    },
+    {
+      "conceptId": "HOME.HOUSEHOLD_STOCK_UNDER_CONTROL",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 6,
+      "label": "생활용품 재고 관리",
+      "description": "세제/휴지 등 생활용품이 떨어지기 전에 보충되는 상태 유지",
+      "tags": ["재고", "소모품", "보충", "구매", "정리", "팬트리"]
+    },
+    {
+      "conceptId": "HOME.KITCHEN_COOK_READY",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 6,
+      "label": "요리하기 좋은 주방",
+      "description": "주방 도구/재료/조리대가 정돈되어 바로 요리할 수 있는 상태 유지",
+      "tags": ["주방", "조리", "도구", "재료", "정리", "조리대"]
+    },
+    {
+      "conceptId": "HOME.KITCHEN_STRESS_FREE_FLOW",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 5,
+      "label": "스트레스 없는 주방 동선",
+      "description": "주방 동선을 정리해 요리와 정리가 덜 피곤한 상태 만들기",
+      "tags": ["주방", "동선", "정리", "작업공간", "청소", "시간절약"]
+    },
+    {
+      "conceptId": "HOME.LAUNDRY_STATION_OPTIMIZED",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 5,
+      "label": "세탁 스테이션 최적화",
+      "description": "세탁실(또는 세탁 구역)이 분류/세제/걸이/수납이 갖춰진 상태 유지",
+      "tags": ["세탁실", "바구니", "세제", "걸이", "분류", "동선", "수납"]
+    },
+    {
+      "conceptId": "HOME.LINEN_CLOSET_FUNCTIONAL",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 4,
+      "label": "리넨 수납이 잘 되는 상태",
+      "description": "수건/침구/리넨이 교체하기 쉽고 위생적으로 보관되는 상태 유지",
+      "tags": ["수건", "침구", "리넨", "교체", "수납", "라벨", "위생"]
+    },
+    {
+      "conceptId": "HOME.LIVINGROOM_RELAX_ZONE",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 4,
+      "label": "휴식이 되는 거실",
+      "description": "거실이 쉬고 싶은 공간이 되도록 정리와 배치를 유지",
+      "tags": ["거실", "휴식", "소파", "테이블", "정리", "조명", "동선"]
+    },
+    {
+      "conceptId": "HOME.MEAL_PREP_SYSTEM",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 5,
+      "label": "식사 준비 시스템",
+      "description": "소분/용기/냉동/반찬 등 식사 준비가 체계적으로 돌아가는 상태 만들기",
+      "tags": ["식사준비", "소분", "반찬", "냉동", "용기", "식단", "시간절약"]
+    },
+    {
+      "conceptId": "HOME.MINIMALIST_VISUAL_NOISE",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 5,
+      "label": "시각적 소음 줄이기",
+      "description": "눈에 보이는 잡동사니를 줄여 집이 더 넓고 정돈되어 보이게 유지",
+      "tags": ["미니멀", "시각적소음", "정리", "수납", "표면", "집중"]
+    },
+    {
+      "conceptId": "HOME.MOLD_FREE_HOME",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 7,
+      "label": "곰팡이 없는 집",
+      "description": "습기/통풍을 관리해 곰팡이가 생기지 않는 상태 유지",
+      "tags": ["곰팡이", "습기", "환기", "욕실", "창틀", "예방"]
+    },
+    {
+      "conceptId": "HOME.NIGHT_ROUTINE_SUPPORTIVE_HOME",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 5,
+      "label": "저녁 루틴이 쉬운 집",
+      "description": "저녁에 정리/내일 준비가 자연스럽게 되도록 환경을 세팅해 유지",
+      "tags": ["저녁", "내일준비", "정리", "조명", "수면", "루틴"]
+    },
+    {
+      "conceptId": "HOME.NO_BAD_ODORS",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 6,
+      "label": "냄새 없는 집",
+      "description": "주방/욕실/쓰레기 등 냄새 원인을 관리해 집 전체 냄새를 쾌적하게 유지",
+      "tags": ["냄새", "환기", "쓰레기", "탈취", "주방", "화장실"]
+    },
+    {
+      "conceptId": "HOME.ORGANIZED_PANTRY_SYSTEM",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 5,
+      "label": "팬트리 정리 시스템",
+      "description": "선입선출/라벨/재고 관리로 팬트리가 쉽게 유지되는 상태 만들기",
+      "tags": ["팬트리", "정리", "선입선출", "유통기한", "라벨", "재고", "간식"]
+    },
+    {
+      "conceptId": "HOME.PAPERWORK_CONTROLLED",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 6,
+      "label": "서류가 쌓이지 않는 상태",
+      "description": "우편물/고지서/서류가 제때 분류되고 보관/폐기되는 흐름 유지",
+      "tags": ["서류", "우편", "고지서", "정리", "보관", "폐기", "기한"]
+    },
+    {
+      "conceptId": "HOME.PET_FRIENDLY_CLEAN_HOME",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 6,
+      "label": "반려동물과 깨끗한 집",
+      "description": "털/냄새/위생을 관리해 사람과 반려동물 모두 편한 집 상태 유지",
+      "tags": ["반려동물", "털", "청소", "냄새", "위생", "안전", "용품"]
+    },
+    {
+      "conceptId": "HOME.QUICK_CLEANUP_CAPABILITY",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 5,
+      "label": "빠른 정리 가능",
+      "description": "5분 안에 눈에 보이는 곳을 정리할 수 있는 도구/동선/규칙이 있는 상태",
+      "tags": ["5분정리", "청소", "도구", "루틴", "가시영역"]
+    },
+    {
+      "conceptId": "HOME.RECYCLE_READY_STATION",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 5,
+      "label": "분리수거 스테이션",
+      "description": "재활용/일반/음식물 분류가 편하게 되도록 스테이션을 갖춘 상태 유지",
+      "tags": ["분리수거", "재활용", "세척", "보관", "배출일", "동선"]
+    },
+    {
+      "conceptId": "HOME.REDUCED_WASTE_HOME",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 4,
+      "label": "쓰레기 줄이는 집",
+      "description": "재사용/보관/구매 습관을 정리해 생활 쓰레기를 줄이는 상태 만들기",
+      "tags": ["제로웨이스트", "재사용", "분리수거", "구매습관", "보관", "식재료"]
+    },
+    {
+      "conceptId": "HOME.REPAIRS_NOT_BACKLOGGED",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 5,
+      "label": "수리 미루지 않기",
+      "description": "작은 고장을 쌓아두지 않고 해결할 수 있는 체크/도구/흐름 유지",
+      "tags": ["수리", "고장", "체크리스트", "공구", "안전", "미루기"]
+    },
+    {
+      "conceptId": "HOME.SAFE_CHEMICAL_STORAGE",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 7,
+      "label": "세제/약품 안전 보관",
+      "description": "세제/약품을 아이/반려동물이 접근하기 어렵게 안전하게 보관하는 상태 유지",
+      "tags": ["세제", "약품", "보관", "안전", "아이", "반려동물", "라벨"]
+    },
+    {
+      "conceptId": "HOME.SEASONAL_TRANSITION_SMOOTH",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 4,
+      "label": "계절 전환이 쉬운 집",
+      "description": "계절 옷/침구/용품이 깔끔하게 교체되고 보관되는 상태 유지",
+      "tags": ["계절", "옷", "침구", "정리", "보관", "교체", "청소"]
+    },
+    {
+      "conceptId": "HOME.SECURE_VALUABLES_AT_HOME",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 6,
+      "label": "귀중품 보관 체계",
+      "description": "여권/현금/중요 서류 등 귀중품을 안전하고 찾기 쉬운 방식으로 보관하는 상태",
+      "tags": ["보안", "귀중품", "서류", "열쇠", "금고", "정리"]
+    },
+    {
+      "conceptId": "HOME.SHOES_BAGS_ALWAYS_STORED",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 5,
+      "label": "신발/가방 제자리",
+      "description": "신발과 가방이 현관에 흩어지지 않고 항상 제자리에 있는 상태 유지",
+      "tags": ["신발", "가방", "현관", "정리", "동선", "정돈"]
+    },
+    {
+      "conceptId": "HOME.SIMPLE_CLEANING_PLAN",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 5,
+      "label": "단순한 청소 계획",
+      "description": "주간/월간 단위로 부담 없이 반복 가능한 청소 계획을 가진 상태",
+      "tags": ["청소", "주간", "월간", "루틴", "구역", "계획"]
+    },
+    {
+      "conceptId": "HOME.SMOOTH_EVENING_WINDDOWN",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 5,
+      "label": "저녁이 편해지는 집",
+      "description": "저녁에 쉴 수 있도록 정리/조명/환경이 안정적으로 유지되는 상태",
+      "tags": ["저녁", "정리", "리셋", "조명", "휴식", "수면"]
+    },
+    {
+      "conceptId": "HOME.STORAGE_LABEL_SYSTEM",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 5,
+      "label": "라벨로 유지되는 수납",
+      "description": "수납 박스/서랍이 라벨과 카테고리로 유지되는 상태 만들기",
+      "tags": ["라벨", "수납", "박스", "카테고리", "찾기", "유지"]
+    },
+    {
+      "conceptId": "HOME.SUPPORTED_FOCUS_WORKSPACE",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 5,
+      "label": "집중이 되는 작업공간",
+      "description": "집에서 집중하기 좋은 조명/정리/소음 관리가 된 작업공간 유지",
+      "tags": ["집중", "작업공간", "책상", "조명", "소음", "정리"]
+    },
+    {
+      "conceptId": "HOME.TIDY_TOY_SYSTEM",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 5,
+      "label": "장난감 정리 시스템",
+      "description": "아이 장난감이 쉽게 정리되고 유지되는 수납과 규칙을 만든 상태",
+      "tags": ["장난감", "아이", "수납", "라벨", "정리", "루틴", "바구니"]
+    },
+    {
+      "conceptId": "HOME.TIME_SAVING_HOME_SETUP",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 4,
+      "label": "시간 절약되는 집 세팅",
+      "description": "자주 쓰는 물건/동선을 정리해 집에서의 시간 낭비를 줄이는 상태",
+      "tags": ["시간절약", "동선", "정리", "자주쓰는것", "세팅"]
+    },
+    {
+      "conceptId": "HOME.TRASH_NEVER_OVERFLOWS",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 6,
+      "label": "쓰레기 넘치지 않기",
+      "description": "쓰레기통/봉투/배출 루틴이 갖춰져 집에 쓰레기가 쌓이지 않는 상태",
+      "tags": ["쓰레기", "봉투", "교체", "배출", "루틴"]
+    },
+    {
+      "conceptId": "HOME.WATER_SAVING_HOME",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 4,
+      "label": "물 절약하는 집",
+      "description": "샤워/세탁/설거지 등에서 물 사용을 줄이는 습관과 환경 유지",
+      "tags": ["물절약", "수도", "샤워", "세탁", "습관", "비용"]
+    },
+    {
+      "conceptId": "HOME.WELL_VENTILATED_HOME",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 5,
+      "label": "잘 환기되는 집",
+      "description": "공기 순환이 잘 되어 냄새/습기가 덜 쌓이는 상태 유지",
+      "tags": ["환기", "공기", "창문", "공기질", "냄새", "습기"]
+    },
+    {
+      "conceptId": "HOME.WINDOWS_SPOTLESS_VIEW",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 3,
+      "label": "깨끗한 창문",
+      "description": "창문이 깨끗해 채광과 시야가 좋아지는 상태 유지",
+      "tags": ["창문", "채광", "전망", "유리", "먼지"]
+    },
+    {
+      "conceptId": "HOME.WORK_FROM_HOME_READY_SPACE",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 5,
+      "label": "재택에 적합한 공간",
+      "description": "재택 업무/공부가 가능한 작업공간이 갖춰지고 유지되는 상태",
+      "tags": ["재택", "작업공간", "의자", "책상", "정리", "집중", "회의"]
+    },
+    {
+      "conceptId": "HOME.ZERO_CLUTTER_TABLETOPS",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 6,
+      "label": "테이블 위 잡동사니 제로",
+      "description": "테이블/협탁 등 상판이 물건으로 덮이지 않도록 비우는 상태 유지",
+      "tags": ["테이블", "상판", "비우기", "정리", "가시영역", "리셋"]
+    }
+  ]
+}

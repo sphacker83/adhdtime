@@ -1,0 +1,554 @@
+{
+  "version": 1,
+  "concepts": [
+    {
+      "conceptId": "HOME.AIR_QUALITY_IMPROVE",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 6,
+      "label": "실내 공기질 개선",
+      "description": "환기/공기청정/청소 습관을 조합해 집 안 공기질을 체감 개선",
+      "tags": ["공기질", "환기", "공기청정기", "먼지", "알레르기", "쾌적"]
+    },
+    {
+      "conceptId": "HOME.APPLIANCE_MAINTENANCE_SYSTEM",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 5,
+      "label": "가전 관리 시스템 만들기",
+      "description": "필터/소모품/점검 주기를 한눈에 관리해 가전 고장과 불편을 줄이기",
+      "tags": ["가전", "유지보수", "필터", "점검", "정기관리", "수리", "매뉴얼"]
+    },
+    {
+      "conceptId": "HOME.BATHROOM_ALWAYS_READY",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 6,
+      "label": "욕실 항상 정돈된 상태",
+      "description": "샤워/세면 후에도 바로 다음 사람이 쓰기 편한 욕실 상태 유지",
+      "tags": ["욕실", "정돈", "청결", "동선", "리셋", "소모품"]
+    },
+    {
+      "conceptId": "HOME.BATHROOM_HYGIENE_STANDARD",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 6,
+      "label": "욕실 위생 기준 세우기",
+      "description": "물때/곰팡이/냄새가 쌓이기 전에 주기적으로 관리하는 기준 확립",
+      "tags": ["욕실", "위생", "소독", "곰팡이", "물때", "환기", "세정제"]
+    },
+    {
+      "conceptId": "HOME.BATHROOM_SUPPLIES_STABLE",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 5,
+      "label": "욕실 소모품 상시 확보",
+      "description": "휴지/치약/샴푸 등 욕실 소모품이 끊기지 않게 재고를 안정화",
+      "tags": ["욕실", "소모품", "휴지", "치약", "샴푸", "재고", "보충"]
+    },
+    {
+      "conceptId": "HOME.BATCH_COOKING_SYSTEM",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 5,
+      "label": "대량 조리/소분 시스템",
+      "description": "여러 끼니를 한 번에 준비해 평일 조리 부담을 줄이는 체계 만들기",
+      "tags": ["대량조리", "소분", "냉장", "냉동", "식단", "시간절약", "용기", "라벨"]
+    },
+    {
+      "conceptId": "HOME.BEDROOM_SLEEP_READY",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 6,
+      "label": "수면에 좋은 침실 만들기",
+      "description": "침구/조명/정돈 상태를 맞춰 잠들기 쉬운 침실 환경을 만들기",
+      "tags": ["침실", "수면", "침구", "정돈", "조명", "소음", "쾌적"]
+    },
+    {
+      "conceptId": "HOME.CLEAN_HOME_BASELINE",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 7,
+      "label": "집 기본 청결 기준 만들기",
+      "description": "최소 기준(바닥/싱크대/욕실 등)을 정해 집이 무너지지 않게 유지",
+      "tags": ["집청소", "기준", "정리", "정돈", "루틴", "가시영역"]
+    },
+    {
+      "conceptId": "HOME.CLEAN_ROUTINE_ESTABLISHED",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 7,
+      "label": "청소 루틴 정착",
+      "description": "일일/주간 단위의 청소 습관을 만들어 재정리 비용을 줄이기",
+      "tags": ["청소루틴", "일일", "주간", "지속", "체크리스트", "습관"]
+    },
+    {
+      "conceptId": "HOME.CLEANING_SUPPLIES_STOCKED",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 5,
+      "label": "청소용품 한 세트 완비",
+      "description": "청소 시작 장벽을 낮추기 위해 필요한 도구/세제를 한곳에 모아두기",
+      "tags": ["청소도구", "세정제", "장갑", "솔", "천", "한세트", "준비"]
+    },
+    {
+      "conceptId": "HOME.CLOSET_SYSTEM_READY",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 6,
+      "label": "옷장 수납 체계 만들기",
+      "description": "자주 입는 옷이 쉽게 보이고 꺼내지는 옷장 정리 시스템 구축",
+      "tags": ["옷장", "수납", "분류", "계절옷", "정돈", "라벨", "찾기"]
+    },
+    {
+      "conceptId": "HOME.DECLUTTER_MOMENTUM_BUILT",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 6,
+      "label": "정리/비움 흐름 만들기",
+      "description": "버리기/기부/재활용의 흐름을 만들어 잡동사니가 다시 쌓이지 않게",
+      "tags": ["비우기", "정리", "버리기", "기부", "정돈", "유지", "습관"]
+    },
+    {
+      "conceptId": "HOME.DELIVERY_STAGING_SYSTEM",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 5,
+      "label": "택배 임시 보관/정리 존",
+      "description": "받은 물건을 바로 정리하거나 반품할 수 있게 택배 처리 구역을 만들기",
+      "tags": ["택배", "현관", "개봉", "분류", "보관", "포장재", "반품"]
+    },
+    {
+      "conceptId": "HOME.DIGITAL_HOME_INVENTORY_READY",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 4,
+      "label": "집 물품 목록화",
+      "description": "가구/가전/귀중품 등을 사진/목록으로 정리해 분실/보험/수리에 대비",
+      "tags": ["물품목록", "재고", "사진", "보험", "보관", "분실방지"]
+    },
+    {
+      "conceptId": "HOME.DONATION_DECLUTTER_SYSTEM",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 5,
+      "label": "기부/버림 시스템 구축",
+      "description": "기부 박스/버림 박스를 운영해 불필요한 물건이 자연스럽게 빠지게",
+      "tags": ["기부", "정리", "비우기", "박스", "재활용", "루틴"]
+    },
+    {
+      "conceptId": "HOME.DROP_ZONES_ESTABLISHED",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 5,
+      "label": "드롭존(가방/열쇠 자리) 만들기",
+      "description": "출입 동선에 맞춰 열쇠/지갑/가방의 고정 자리를 만들어 분실을 줄이기",
+      "tags": ["드롭존", "열쇠", "가방", "현관", "분실방지", "자리고정"]
+    },
+    {
+      "conceptId": "HOME.DUST_FREE_HOME",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 6,
+      "label": "먼지 관리가 쉬운 집",
+      "description": "먼지가 쌓이는 지점을 줄이고 닦기 쉬운 상태를 유지",
+      "tags": ["먼지", "청소", "표면", "알레르기", "가구", "루틴"]
+    },
+    {
+      "conceptId": "HOME.EMERGENCY_SUPPLIES_READY",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 7,
+      "label": "비상물품 비축 완료",
+      "description": "정전/재난/응급 상황에 대비한 필수 물품을 준비하고 위치를 고정",
+      "tags": ["비상키트", "비축", "손전등", "건전지", "구급", "물", "비상식량"]
+    },
+    {
+      "conceptId": "HOME.ENERGY_SAVING_HOME",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 5,
+      "label": "에너지 절약 세팅",
+      "description": "대기전력/난방·냉방 설정을 최적화해 불필요한 에너지 낭비를 줄이기",
+      "tags": ["전기", "가스", "절약", "대기전력", "난방", "냉방", "요금"]
+    },
+    {
+      "conceptId": "HOME.ENTRYWAY_FLOW_CLEAR",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 5,
+      "label": "현관 동선 깔끔하게",
+      "description": "신발/우편물/가방이 쌓이지 않게 현관을 항상 통과하기 쉬운 상태로 유지",
+      "tags": ["현관", "동선", "신발", "정리", "정돈", "드롭존"]
+    },
+    {
+      "conceptId": "HOME.FIRE_SAFETY_READY",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 7,
+      "label": "화재 안전 준비 완료",
+      "description": "감지기/소화기/대피 동선을 점검해 화재 대응 준비를 끝내기",
+      "tags": ["화재", "감지기", "소화기", "대피", "점검", "안전"]
+    },
+    {
+      "conceptId": "HOME.FLOOR_CLUTTER_FREE",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 6,
+      "label": "바닥 물건 없는 집",
+      "description": "바닥에 쌓이는 잡동사니를 없애 청소와 이동이 쉬운 집 상태 만들기",
+      "tags": ["바닥", "잡동사니", "정리", "수납", "청소", "동선"]
+    },
+    {
+      "conceptId": "HOME.FREEZER_SYSTEM_READY",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 5,
+      "label": "냉동실 정리 체계",
+      "description": "소분/라벨/유통기한 관리로 냉동실을 효율적으로 유지",
+      "tags": ["냉동실", "소분", "라벨", "재고", "유통기한", "성에"]
+    },
+    {
+      "conceptId": "HOME.FRIDGE_SYSTEM_READY",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 5,
+      "label": "냉장고 정리 체계",
+      "description": "유통기한과 재고를 한눈에 보이게 정리해 음식물 낭비를 줄이기",
+      "tags": ["냉장고", "정리", "유통기한", "재고", "라벨", "식재료"]
+    },
+    {
+      "conceptId": "HOME.GUEST_READY_ANYTIME",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 4,
+      "label": "언제든 손님 맞이 가능한 집",
+      "description": "거실/욕실 등 핵심 구역이 짧은 시간 내 정돈될 수 있게 상태를 유지",
+      "tags": ["손님", "정리", "거실", "욕실", "가시영역", "빠른리셋"]
+    },
+    {
+      "conceptId": "HOME.HOME_DOCS_EASY_FIND",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 4,
+      "label": "집 관련 서류 찾기 쉽게",
+      "description": "계약서/보증서/매뉴얼 등 집 관련 서류를 한곳에 모아 쉽게 찾게 만들기",
+      "tags": ["서류", "계약서", "보증서", "매뉴얼", "보관", "스캔", "찾기"]
+    },
+    {
+      "conceptId": "HOME.HOME_ORGANIZATION_SYSTEM",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 7,
+      "label": "집 전체 정리 시스템",
+      "description": "구역/카테고리/수납 규칙을 정해 집을 유지 가능한 구조로 만들기",
+      "tags": ["집정리", "수납", "구역", "라벨", "동선", "유지", "시스템"]
+    },
+    {
+      "conceptId": "HOME.HOME_SAFETY_READY",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 7,
+      "label": "집 안전 점검/대응 준비",
+      "description": "가스/누전/미끄럼 등 위험 요소를 점검하고 대응 절차를 정리",
+      "tags": ["안전", "점검", "가스", "누전", "응급", "체크리스트", "정기점검"]
+    },
+    {
+      "conceptId": "HOME.HOME_SECURITY_BASELINE",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 6,
+      "label": "집 보안 기본 세팅",
+      "description": "도어락/창문/비밀번호 등 기본 보안을 점검해 안전감을 높이기",
+      "tags": ["보안", "도어락", "비밀번호", "창문", "CCTV", "알림", "안전"]
+    },
+    {
+      "conceptId": "HOME.HOUSEHOLD_SUPPLIES_STABLE",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 5,
+      "label": "생활용품 재고 안정화",
+      "description": "휴지/세제/쓰레기봉투 등 필수 생활용품이 끊기지 않게 유지",
+      "tags": ["생활용품", "재고", "휴지", "세제", "쓰레기봉투", "정기구매"]
+    },
+    {
+      "conceptId": "HOME.KITCHEN_ALWAYS_READY",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 6,
+      "label": "주방 항상 준비된 상태",
+      "description": "싱크대/조리대가 비어 있어 바로 요리할 수 있는 주방 상태 만들기",
+      "tags": ["주방", "정리", "조리대", "싱크대", "위생", "리셋", "다음요리"]
+    },
+    {
+      "conceptId": "HOME.KITCHEN_HYGIENE_STANDARD",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 6,
+      "label": "주방 위생 기준 세우기",
+      "description": "행주/도마/싱크대 등 오염 지점을 기준화해 안전한 조리 환경 유지",
+      "tags": ["주방", "위생", "교차오염", "소독", "행주", "세척", "기름때"]
+    },
+    {
+      "conceptId": "HOME.KITCHEN_STAPLES_STABLE",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 5,
+      "label": "기본 식재료/양념 상시 확보",
+      "description": "자주 쓰는 식재료와 양념을 끊기지 않게 관리해 식사 준비를 쉽게",
+      "tags": ["식재료", "양념", "재고", "팬트리", "장보기", "필수품"]
+    },
+    {
+      "conceptId": "HOME.KITCHEN_WORKFLOW_OPTIMIZE",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 5,
+      "label": "주방 동선/작업 흐름 개선",
+      "description": "자주 쓰는 도구/식재료 배치를 바꿔 조리 시간을 줄이고 스트레스를 낮추기",
+      "tags": ["주방", "동선", "정리", "배치", "조리", "작업공간", "시간절약"]
+    },
+    {
+      "conceptId": "HOME.LABELING_SYSTEM_READY",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 5,
+      "label": "라벨링 시스템 구축",
+      "description": "수납 위치/유통기한/카테고리를 라벨로 표준화해 찾기 쉽게 만들기",
+      "tags": ["라벨", "수납", "정리", "분류", "찾기", "선입선출"]
+    },
+    {
+      "conceptId": "HOME.LAUNDRY_SYSTEM_READY",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 6,
+      "label": "세탁 루틴/동선 정착",
+      "description": "분류→세탁→건조→수납 흐름이 끊기지 않게 세탁 시스템을 정리",
+      "tags": ["세탁", "빨래", "분류", "바구니", "루틴", "건조", "수납"]
+    },
+    {
+      "conceptId": "HOME.LEFTOVERS_WASTE_REDUCED",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 5,
+      "label": "남은 음식 낭비 줄이기",
+      "description": "라벨/보관/소비 순서를 정해 남은 음식이 버려지는 일을 최소화",
+      "tags": ["남은음식", "보관", "라벨", "소비", "유통기한", "낭비줄이기", "재가열"]
+    },
+    {
+      "conceptId": "HOME.LIGHTING_COMFORT_SETUP",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 4,
+      "label": "조명 쾌적하게 세팅",
+      "description": "방마다 밝기/색온도를 맞춰 눈 피로를 줄이고 생활 만족도를 높이기",
+      "tags": ["조명", "전구", "밝기", "색온도", "분위기", "수면", "작업"]
+    },
+    {
+      "conceptId": "HOME.LINEN_SYSTEM_READY",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 5,
+      "label": "침구/수건 관리 체계",
+      "description": "교체 주기와 예비 수량을 정해 침구/수건이 항상 깨끗하게 돌아가게",
+      "tags": ["침구", "수건", "교체", "세탁", "수납", "예비", "위생"]
+    },
+    {
+      "conceptId": "HOME.LIVINGROOM_RELAX_READY",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 4,
+      "label": "편하게 쉬는 거실 만들기",
+      "description": "거실이 휴식에 방해되지 않도록 표면/바닥/소품을 간결하게 유지",
+      "tags": ["거실", "정돈", "테이블", "소파", "리모컨", "휴식", "분위기"]
+    },
+    {
+      "conceptId": "HOME.MAIL_PAPER_SYSTEM",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 5,
+      "label": "우편/서류 처리 시스템",
+      "description": "들어오는 우편/종이를 분류하고 기한 내 처리하는 인박스 시스템 구축",
+      "tags": ["우편", "서류", "고지서", "인박스", "분류", "기한", "처리"]
+    },
+    {
+      "conceptId": "HOME.MAINTENANCE_CALENDAR_READY",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 5,
+      "label": "집 유지보수 캘린더 만들기",
+      "description": "필터 교체/점검/청소 주기를 캘린더로 관리해 돌발 고장을 줄이기",
+      "tags": ["유지보수", "캘린더", "정기점검", "필터", "교체", "체크리스트"]
+    },
+    {
+      "conceptId": "HOME.MEAL_PLANNING_SYSTEM",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 6,
+      "label": "식단 계획 시스템",
+      "description": "주간 식단과 장보기 목록을 연동해 식사 결정 피로를 줄이기",
+      "tags": ["식단", "계획", "장보기", "냉장고", "팬트리", "반복메뉴", "루틴"]
+    },
+    {
+      "conceptId": "HOME.MOLD_FREE_HOME",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 6,
+      "label": "곰팡이 없는 집",
+      "description": "습도/환기/청소를 조합해 곰팡이 발생을 줄이고 재발을 막기",
+      "tags": ["곰팡이", "습기", "환기", "제습", "욕실", "예방", "재발방지"]
+    },
+    {
+      "conceptId": "HOME.ODOR_FREE_HOME",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 5,
+      "label": "냄새 걱정 없는 집",
+      "description": "원인(쓰레기/배수구/섬유 등)을 관리해 집 냄새를 줄이고 유지",
+      "tags": ["냄새", "탈취", "환기", "배수구", "쓰레기", "반려동물", "원인제거"]
+    },
+    {
+      "conceptId": "HOME.PACKAGE_RETURN_SYSTEM",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 4,
+      "label": "반품/교환 처리 루틴",
+      "description": "영수증/포장/기한을 정리해 반품·교환을 놓치지 않게 처리",
+      "tags": ["반품", "교환", "영수증", "포장", "택배", "보관", "기한"]
+    },
+    {
+      "conceptId": "HOME.PANTRY_SYSTEM_READY",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 5,
+      "label": "팬트리 정리 체계",
+      "description": "재고/유통기한/선입선출 규칙을 정해 팬트리를 유지 가능한 상태로",
+      "tags": ["팬트리", "정리", "재고", "유통기한", "라벨", "선입선출", "장보기"]
+    },
+    {
+      "conceptId": "HOME.PEST_FREE_HOME",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 6,
+      "label": "해충 걱정 없는 집",
+      "description": "유입 경로를 차단하고 청결/습기 관리를 해 해충 발생을 줄이기",
+      "tags": ["해충", "예방", "방충망", "틈새", "배수구", "트랩", "청결"]
+    },
+    {
+      "conceptId": "HOME.PET_ROUTINE_STABLE",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 5,
+      "label": "반려동물 루틴 안정화",
+      "description": "먹이/물/배변/산책/위생 루틴을 안정화해 반려동물 케어가 끊기지 않게",
+      "tags": ["반려동물", "루틴", "먹이", "물", "배변", "산책", "위생"]
+    },
+    {
+      "conceptId": "HOME.PLANT_ROUTINE_STABLE",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 4,
+      "label": "식물 관리 루틴 안정화",
+      "description": "물주기/햇빛/통풍 등 관리 루틴을 만들고 상태 변화를 놓치지 않기",
+      "tags": ["식물", "물주기", "햇빛", "통풍", "비료", "병충해", "관리"]
+    },
+    {
+      "conceptId": "HOME.POWER_OUTAGE_READY",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 6,
+      "label": "정전 대비 완료",
+      "description": "랜턴/보조배터리/연락망을 준비해 정전 시에도 생활이 끊기지 않게",
+      "tags": ["정전", "보조배터리", "랜턴", "건전지", "비상연락", "체크리스트"]
+    },
+    {
+      "conceptId": "HOME.REDECORATE_PLAN_READY",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 4,
+      "label": "가구 배치/인테리어 계획",
+      "description": "치수/동선/수납을 기준으로 가구 배치와 인테리어 변경 계획을 세우기",
+      "tags": ["인테리어", "가구배치", "치수", "동선", "수납", "분위기", "계획"]
+    },
+    {
+      "conceptId": "HOME.REPAIR_BACKLOG_CLEARED",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 5,
+      "label": "미뤄둔 집수리 정리",
+      "description": "전구/문고리/나사 등 소소한 수리 backlog를 없애 집 상태를 안정화",
+      "tags": ["수리", "유지보수", "공구", "전구", "나사", "문고리", "미루기해소"]
+    },
+    {
+      "conceptId": "HOME.SEASONAL_ROTATION_COMPLETE",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 4,
+      "label": "계절 교체/정리 완료",
+      "description": "계절 옷/침구를 교체하고 보관 체계를 맞춰 다음 시즌 준비를 끝내기",
+      "tags": ["계절교체", "정리", "보관", "옷", "침구", "수납", "라벨"]
+    },
+    {
+      "conceptId": "HOME.SHARED_CHORES_SYSTEM",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 5,
+      "label": "가사 분담 시스템",
+      "description": "구성원 역할/빈도를 합의하고 체크리스트로 운영해 가사가 한쪽에 쏠리지 않게",
+      "tags": ["가사", "분담", "가족", "역할", "스케줄", "체크리스트", "합의"]
+    },
+    {
+      "conceptId": "HOME.STORAGE_SPACE_CREATED",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 6,
+      "label": "수납 공간 확보",
+      "description": "물건 양을 줄이거나 수납을 재배치해 ‘비어 있는 공간’을 만들기",
+      "tags": ["수납", "공간확보", "정리", "비우기", "박스", "선반", "정돈"]
+    },
+    {
+      "conceptId": "HOME.TEMPERATURE_COMFORT_SETUP",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 5,
+      "label": "온도/난방·냉방 쾌적 세팅",
+      "description": "계절별로 쾌적한 온도를 유지하도록 난방·냉방과 단열 습관을 정리",
+      "tags": ["온도", "난방", "냉방", "단열", "쾌적", "에너지", "계절"]
+    },
+    {
+      "conceptId": "HOME.TRASH_RECYCLE_SYSTEM_READY",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 6,
+      "label": "쓰레기/분리수거 시스템",
+      "description": "분류/보관/배출 동선을 정해 쓰레기가 쌓이지 않게 운영",
+      "tags": ["쓰레기", "분리수거", "배출", "수거일", "보관", "동선"]
+    },
+    {
+      "conceptId": "HOME.WATER_LEAK_RESPONSE_READY",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 6,
+      "label": "누수 대응 준비",
+      "description": "수도 밸브 위치와 연락처/절차를 정해 누수 상황에 빠르게 대응",
+      "tags": ["누수", "수도밸브", "차단", "대응", "점검", "연락처"]
+    },
+    {
+      "conceptId": "HOME.WEEKLY_HOME_REVIEW_HABIT",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 5,
+      "label": "주간 집 상태 점검 습관",
+      "description": "주 1회 집 상태를 점검해 우선순위를 정하고 작은 리셋을 반복",
+      "tags": ["주간점검", "리셋", "체크리스트", "우선순위", "루틴", "유지"]
+    },
+    {
+      "conceptId": "HOME.WORKSPACE_AT_HOME_READY",
+      "type": "goal",
+      "domain": "HOME",
+      "priority": 5,
+      "label": "집에서 집중 가능한 작업공간",
+      "description": "책상/의자/조명/케이블을 정리해 바로 앉아 시작할 수 있는 작업공간 만들기",
+      "tags": ["작업공간", "책상", "정리", "조명", "집중", "의자", "케이블"]
+    }
+  ]
+}

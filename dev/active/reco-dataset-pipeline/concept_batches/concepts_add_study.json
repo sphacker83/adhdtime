@@ -1,0 +1,815 @@
+{
+  "version": 1,
+  "concepts": [
+    {
+      "conceptId": "STUDY.SEMESTER_PLAN_COMPLETE",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 7,
+      "label": "학기 운영 계획",
+      "description": "강의계획서/마감/시험을 반영해 학기 전체 계획을 완성한다.",
+      "tags": ["학기계획", "강의일정", "마감", "시험", "과제", "주간루틴", "시간표"]
+    },
+    {
+      "conceptId": "STUDY.TIMETABLE_OPTIMIZED",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 6,
+      "label": "시간표 최적화",
+      "description": "이동/공강/집중 시간을 고려해 무리 없는 시간표를 확정한다.",
+      "tags": ["시간표", "수강신청", "공강", "이동시간", "집중시간", "블록", "최적화"]
+    },
+    {
+      "conceptId": "STUDY.CREDIT_REQUIREMENTS_MET",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 7,
+      "label": "학점/요건 충족",
+      "description": "졸업/전공 요건에 맞춰 필요한 학점 이수를 완료한다.",
+      "tags": ["학점", "졸업요건", "필수과목", "이수", "요건", "수강"]
+    },
+    {
+      "conceptId": "STUDY.COURSE_GRADE_TARGET",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 8,
+      "label": "목표 성적 달성",
+      "description": "과제/시험/참여 점수를 관리해 목표 성적을 달성한다.",
+      "tags": ["성적", "목표", "평가", "가중치", "출석", "과제", "시험", "상향"]
+    },
+    {
+      "conceptId": "STUDY.GPA_IMPROVE",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 7,
+      "label": "평점 올리기",
+      "description": "이번 학기 성적을 개선해 평균 평점(GPA)을 올린다.",
+      "tags": ["GPA", "평점", "성적", "학점", "향상", "평균"]
+    },
+    {
+      "conceptId": "STUDY.SCHOLARSHIP_APPLICATION_SUBMIT",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 6,
+      "label": "장학금 지원 완료",
+      "description": "요건 확인 후 서류를 준비해 장학금 신청을 마친다.",
+      "tags": ["장학금", "지원", "서류", "추천서", "기한", "신청"]
+    },
+    {
+      "conceptId": "STUDY.ACADEMIC_WARNING_RESOLVE",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 8,
+      "label": "학사경고 해소",
+      "description": "재수강/보완 계획을 실행해 학사경고 상태를 해소한다.",
+      "tags": ["학사경고", "성적", "상담", "재수강", "개선", "학업"]
+    },
+    {
+      "conceptId": "STUDY.ATTENDANCE_PERFECT",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 7,
+      "label": "출석률 100%",
+      "description": "지각/결석 없이 출석을 유지해 출석 점수를 확보한다.",
+      "tags": ["출석", "지각", "결석", "출석률", "수업", "관리"]
+    },
+    {
+      "conceptId": "STUDY.PARTICIPATION_SCORE_TARGET",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 6,
+      "label": "참여 점수 확보",
+      "description": "질문/발언/토론 참여로 참여 점수 목표를 달성한다.",
+      "tags": ["참여", "발언", "질문", "토론", "참여점수", "수업"]
+    },
+    {
+      "conceptId": "STUDY.MIDTERM_SCORE_TARGET",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 8,
+      "label": "중간고사 목표점수",
+      "description": "범위/기출/오답을 반영해 중간고사 목표 점수를 달성한다.",
+      "tags": ["중간고사", "목표점수", "범위", "기출", "오답", "시간관리"]
+    },
+    {
+      "conceptId": "STUDY.FINAL_SCORE_TARGET",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 8,
+      "label": "기말고사 목표점수",
+      "description": "총정리와 실전 연습으로 기말고사 목표 점수를 달성한다.",
+      "tags": ["기말고사", "목표점수", "총정리", "기출", "오답", "실전"]
+    },
+    {
+      "conceptId": "STUDY.QUIZ_SCORE_TARGET",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 7,
+      "label": "퀴즈 목표점수",
+      "description": "짧은 범위를 빠르게 복습해 퀴즈 목표 점수를 달성한다.",
+      "tags": ["퀴즈", "단원평가", "목표", "빠른복습", "범위"]
+    },
+    {
+      "conceptId": "STUDY.RETAKE_PLAN_COMPLETE",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 6,
+      "label": "재수강 전략 완성",
+      "description": "재수강 과목의 개선 포인트를 정리해 실행 계획을 확정한다.",
+      "tags": ["재수강", "보완", "전략", "학점", "성적개선"]
+    },
+    {
+      "conceptId": "STUDY.CERTIFICATION_EXAM_PASS",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 8,
+      "label": "자격증 합격",
+      "description": "필기/실기 요구사항을 충족해 자격증 시험에 합격한다.",
+      "tags": ["자격증", "합격", "시험", "실기", "필기", "응시"]
+    },
+    {
+      "conceptId": "STUDY.LICENSE_EXAM_PASS",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 8,
+      "label": "면허 시험 합격",
+      "description": "국가시험/면허 시험 합격 기준을 충족해 합격한다.",
+      "tags": ["면허", "국가시험", "합격", "준비", "실전"]
+    },
+    {
+      "conceptId": "STUDY.TOEIC_SCORE_TARGET",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 7,
+      "label": "토익 목표점수",
+      "description": "LC/RC 약점을 보완해 토익 목표 점수를 달성한다.",
+      "tags": ["토익", "점수", "LC", "RC", "목표", "모의고사", "단어"]
+    },
+    {
+      "conceptId": "STUDY.TOEFL_SCORE_TARGET",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 7,
+      "label": "토플 목표점수",
+      "description": "리딩/리스닝/스피킹/라이팅을 균형 있게 올려 목표 점수를 달성한다.",
+      "tags": ["토플", "점수", "리딩", "리스닝", "스피킹", "라이팅", "목표"]
+    },
+    {
+      "conceptId": "STUDY.IELTS_SCORE_TARGET",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 7,
+      "label": "IELTS 목표밴드",
+      "description": "밴드 점수 기준에 맞춰 영역별 목표를 달성한다.",
+      "tags": ["아이엘츠", "점수", "밴드", "스피킹", "라이팅", "목표"]
+    },
+    {
+      "conceptId": "STUDY.TOPIK_LEVEL_UP",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 7,
+      "label": "TOPIK 급수 올리기",
+      "description": "어휘/문법/쓰기/듣기 실력을 올려 목표 급수에 도달한다.",
+      "tags": ["TOPIK", "한국어", "급수", "어휘", "문법", "쓰기", "듣기"]
+    },
+    {
+      "conceptId": "STUDY.JLPT_LEVEL_UP",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 7,
+      "label": "JLPT 레벨 올리기",
+      "description": "단어/문법/독해/청해를 강화해 목표 레벨에 도달한다.",
+      "tags": ["JLPT", "일본어", "레벨", "단어", "문법", "독해", "청해"]
+    },
+    {
+      "conceptId": "STUDY.HSK_LEVEL_UP",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 7,
+      "label": "HSK 급수 올리기",
+      "description": "단어/독해/문법을 강화해 HSK 목표 급수에 도달한다.",
+      "tags": ["HSK", "중국어", "급수", "단어", "문법", "독해"]
+    },
+    {
+      "conceptId": "STUDY.LANGUAGE_CONVERSATION_CONFIDENCE",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 6,
+      "label": "회화 자신감",
+      "description": "자주 쓰는 상황에서 막힘 없이 대화할 수 있는 자신감을 만든다.",
+      "tags": ["회화", "자신감", "즉답", "표현", "스피킹", "상황연습"]
+    },
+    {
+      "conceptId": "STUDY.LANGUAGE_PRONUNCIATION_CLEAR",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 6,
+      "label": "발음 명료도 향상",
+      "description": "녹음/피드백을 통해 발음과 억양을 교정해 명료하게 말한다.",
+      "tags": ["발음", "억양", "명료도", "교정", "녹음", "피드백"]
+    },
+    {
+      "conceptId": "STUDY.LANGUAGE_VOCAB_TARGET",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 7,
+      "label": "어휘 목표 달성",
+      "description": "필수 어휘를 누적해 목표 어휘량을 달성한다.",
+      "tags": ["단어", "어휘", "목표", "SRS", "암기", "복습"]
+    },
+    {
+      "conceptId": "STUDY.LANGUAGE_WRITING_PORTFOLIO",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 6,
+      "label": "외국어 작문 포트폴리오",
+      "description": "교정된 글을 모아 작문 포트폴리오를 완성한다.",
+      "tags": ["작문", "에세이", "일기", "교정", "포트폴리오", "표현"]
+    },
+    {
+      "conceptId": "STUDY.LISTENING_COMPREHENSION_UP",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 7,
+      "label": "듣기 이해도 향상",
+      "description": "반복 청취와 스크립트 활용으로 듣기 이해도를 끌어올린다.",
+      "tags": ["청해", "듣기", "이해도", "쉐도잉", "반복", "스크립트"]
+    },
+    {
+      "conceptId": "STUDY.READING_SPEED_UP",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 6,
+      "label": "독해 속도 올리기",
+      "description": "스키밍/스캐닝을 익혀 제한 시간 내에 더 빨리 읽는다.",
+      "tags": ["독해", "읽기속도", "스캐닝", "스키밍", "타이머"]
+    },
+    {
+      "conceptId": "STUDY.READING_COMPREHENSION_UP",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 7,
+      "label": "독해 이해도 향상",
+      "description": "핵심/근거를 잡아 읽고 요약해 이해도를 높인다.",
+      "tags": ["독해", "이해", "추론", "요약", "질문"]
+    },
+    {
+      "conceptId": "STUDY.WRITING_CLARITY_UP",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 7,
+      "label": "글의 명확성 향상",
+      "description": "문장/문단 구조를 다듬어 더 명확하고 읽기 쉽게 쓴다.",
+      "tags": ["글쓰기", "명확성", "문장", "구조", "논리", "수정"]
+    },
+    {
+      "conceptId": "STUDY.WRITING_STYLE_IMPROVE",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 6,
+      "label": "문체 개선",
+      "description": "톤/표현을 정리해 가독성이 좋은 문체로 개선한다.",
+      "tags": ["문체", "톤", "표현", "가독성", "문장다듬기"]
+    },
+    {
+      "conceptId": "STUDY.MATH_SCORE_IMPROVE",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 7,
+      "label": "수학 점수 향상",
+      "description": "개념과 유형을 정리해 수학 시험/평가 점수를 올린다.",
+      "tags": ["수학", "점수", "기출", "오답", "개념", "유형"]
+    },
+    {
+      "conceptId": "STUDY.STATISTICS_CONFIDENCE_UP",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 6,
+      "label": "통계 자신감",
+      "description": "확률/추정/가설검정의 핵심을 이해해 문제를 자신 있게 푼다.",
+      "tags": ["통계", "확률", "분포", "추정", "가설검정", "문제풀이"]
+    },
+    {
+      "conceptId": "STUDY.TEXTBOOK_COMPLETE",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 6,
+      "label": "교재 완독",
+      "description": "계획한 챕터를 끝까지 읽고 진도를 완료한다.",
+      "tags": ["교재", "완독", "진도", "챕터", "계획", "완료"]
+    },
+    {
+      "conceptId": "STUDY.READING_LIST_COMPLETE",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 6,
+      "label": "리딩 리스트 완주",
+      "description": "정해둔 읽을거리(책/논문) 목록을 끝까지 완료한다.",
+      "tags": ["리딩리스트", "논문", "책", "완독", "진도", "정리"]
+    },
+    {
+      "conceptId": "STUDY.CHAPTERS_FINISH",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 6,
+      "label": "단원 진도 완료",
+      "description": "이번 주/이번 단원 목표 진도를 끝까지 완료한다.",
+      "tags": ["챕터", "진도", "단원", "완료", "체크"]
+    },
+    {
+      "conceptId": "STUDY.PRACTICE_SET_COMPLETE",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 7,
+      "label": "연습문제 세트 완료",
+      "description": "연습문제 세트를 풀고 오답까지 정리해 완료한다.",
+      "tags": ["연습문제", "세트", "완료", "풀이", "오답"]
+    },
+    {
+      "conceptId": "STUDY.PROBLEM_SOLVING_ACCURACY_UP",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 7,
+      "label": "풀이 정확도 향상",
+      "description": "실수 패턴을 줄여 정답률/정확도를 높인다.",
+      "tags": ["정확도", "오답", "풀이", "검산", "실수"]
+    },
+    {
+      "conceptId": "STUDY.ALL_ASSIGNMENTS_ON_TIME",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 9,
+      "label": "과제 마감 준수",
+      "description": "모든 과제를 마감 전에 제출해 누락/지각 제출을 없앤다.",
+      "tags": ["과제", "마감", "제출", "일정", "미루기방지"]
+    },
+    {
+      "conceptId": "STUDY.ASSIGNMENT_AVERAGE_TARGET",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 7,
+      "label": "과제 평균 점수",
+      "description": "루브릭과 피드백을 반영해 과제 평균 점수 목표를 달성한다.",
+      "tags": ["과제점수", "평균", "루브릭", "퀄리티", "피드백"]
+    },
+    {
+      "conceptId": "STUDY.HOMEWORK_STREAK",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 6,
+      "label": "숙제 루틴 유지",
+      "description": "숙제를 꾸준히 처리해 학습 루틴을 안정적으로 유지한다.",
+      "tags": ["숙제", "연속", "루틴", "매일", "관리"]
+    },
+    {
+      "conceptId": "STUDY.REPORT_SUBMIT",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 8,
+      "label": "리포트 제출",
+      "description": "형식/인용/검수까지 마쳐 리포트를 제출한다.",
+      "tags": ["리포트", "제출", "형식", "인용", "검수"]
+    },
+    {
+      "conceptId": "STUDY.ESSAY_FINAL_SUBMIT",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 8,
+      "label": "에세이 최종본 제출",
+      "description": "구성/논리/문장을 다듬어 에세이 최종본을 제출한다.",
+      "tags": ["에세이", "최종본", "제출", "교정", "구성"]
+    },
+    {
+      "conceptId": "STUDY.LAB_REPORT_SUBMIT",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 8,
+      "label": "실험보고서 제출",
+      "description": "결과/그래프/논의를 정리해 실험보고서를 제출한다.",
+      "tags": ["실험보고서", "결과", "그래프", "논의", "제출"]
+    },
+    {
+      "conceptId": "STUDY.PROJECT_PROPOSAL_COMPLETE",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 7,
+      "label": "프로젝트 제안서 완성",
+      "description": "범위/목표/요구사항을 정리해 제안서를 완성한다.",
+      "tags": ["프로젝트", "제안서", "범위", "목표", "일정", "요구사항"]
+    },
+    {
+      "conceptId": "STUDY.PROJECT_MVP_COMPLETE",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 7,
+      "label": "프로젝트 MVP 완성",
+      "description": "핵심 기능을 구현해 데모 가능한 MVP를 완성한다.",
+      "tags": ["MVP", "프로토타입", "구현", "데모", "기능", "완성"]
+    },
+    {
+      "conceptId": "STUDY.GROUP_PROJECT_DELIVERABLE_COMPLETE",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 7,
+      "label": "팀프로젝트 산출물 완료",
+      "description": "역할분담/통합을 마쳐 팀 프로젝트 산출물을 마감까지 완성한다.",
+      "tags": ["팀프로젝트", "산출물", "역할분담", "마감", "통합"]
+    },
+    {
+      "conceptId": "STUDY.CAPSTONE_PRESENTATION_READY",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 7,
+      "label": "캡스톤 발표 준비",
+      "description": "데모/슬라이드/QnA를 준비해 캡스톤 발표를 준비 완료한다.",
+      "tags": ["캡스톤", "발표", "데모", "슬라이드", "리허설", "QnA"]
+    },
+    {
+      "conceptId": "STUDY.PORTFOLIO_PROJECT_COMPLETE",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 7,
+      "label": "포트폴리오 프로젝트 완성",
+      "description": "프로젝트를 마무리하고 데모/설명을 포함해 완성본을 만든다.",
+      "tags": ["포트폴리오", "프로젝트", "완성", "정리", "README", "데모"]
+    },
+    {
+      "conceptId": "STUDY.OPEN_SOURCE_CONTRIBUTION",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 6,
+      "label": "오픈소스 기여",
+      "description": "이슈를 해결해 PR을 올리고 리뷰를 반영해 병합까지 완료한다.",
+      "tags": ["오픈소스", "PR", "기여", "리뷰", "이슈"]
+    },
+    {
+      "conceptId": "STUDY.APP_DEPLOYED",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 6,
+      "label": "앱 배포 완료",
+      "description": "빌드/릴리즈 과정을 거쳐 서비스가 동작하는 배포를 완료한다.",
+      "tags": ["배포", "도메인", "호스팅", "CI", "릴리즈"]
+    },
+    {
+      "conceptId": "STUDY.CODING_INTERVIEW_READY",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 7,
+      "label": "코딩면접 준비 완료",
+      "description": "대표 패턴을 설명하며 제한 시간 내에 문제를 풀 수 있는 상태가 된다.",
+      "tags": ["코딩면접", "문제풀이", "설명", "시간복잡도", "패턴", "실전"]
+    },
+    {
+      "conceptId": "STUDY.RESUME_PROJECT_SECTION_COMPLETE",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 6,
+      "label": "이력서 프로젝트 섹션",
+      "description": "프로젝트 경험을 성과 중심으로 정리해 이력서 섹션을 완성한다.",
+      "tags": ["이력서", "프로젝트", "경험", "성과", "정리"]
+    },
+    {
+      "conceptId": "STUDY.LINKEDIN_GITHUB_CLEAN",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 5,
+      "label": "프로필 정리",
+      "description": "깃허브/프로필을 정리해 외부에 공유 가능한 상태로 만든다.",
+      "tags": ["깃허브", "프로필", "포트폴리오", "정리", "링크드인"]
+    },
+    {
+      "conceptId": "STUDY.ALGORITHM_MILESTONE_COMPLETE",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 6,
+      "label": "알고리즘 목표 달성",
+      "description": "정한 난이도/문제 수 목표를 채워 알고리즘 마일스톤을 달성한다.",
+      "tags": ["알고리즘", "목표", "난이도", "문제수", "완료"]
+    },
+    {
+      "conceptId": "STUDY.DATA_STRUCTURES_MASTERY",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 6,
+      "label": "자료구조 숙달",
+      "description": "핵심 자료구조를 이해하고 문제에 적용할 수 있게 만든다.",
+      "tags": ["자료구조", "스택", "큐", "트리", "그래프", "이해"]
+    },
+    {
+      "conceptId": "STUDY.SYSTEM_DESIGN_PORTFOLIO",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 5,
+      "label": "시스템 설계 포트폴리오",
+      "description": "대표 문제에 대한 설계 노트를 정리해 포트폴리오로 만든다.",
+      "tags": ["시스템설계", "아키텍처", "다이어그램", "트레이드오프", "정리"]
+    },
+    {
+      "conceptId": "STUDY.TEST_SUITE_COMPLETE",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 6,
+      "label": "테스트 스위트 완성",
+      "description": "핵심 기능을 커버하는 테스트를 작성해 테스트 스위트를 완성한다.",
+      "tags": ["테스트", "단위테스트", "통합테스트", "커버리지", "품질"]
+    },
+    {
+      "conceptId": "STUDY.CODE_QUALITY_TARGET",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 5,
+      "label": "코드 품질 목표",
+      "description": "리팩터링과 정리로 코드 품질 기준을 충족한다.",
+      "tags": ["리팩터링", "린트", "가독성", "복잡도", "품질"]
+    },
+    {
+      "conceptId": "STUDY.DOCUMENTATION_COMPLETE",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 5,
+      "label": "문서화 완료",
+      "description": "사용법/설치/설명을 정리해 문서를 완성한다.",
+      "tags": ["문서", "README", "사용법", "설치", "기록"]
+    },
+    {
+      "conceptId": "STUDY.STUDY_GUIDE_COMPLETE",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 7,
+      "label": "시험 대비 가이드",
+      "description": "핵심 개념과 문제 유형을 묶어 스터디 가이드를 완성한다.",
+      "tags": ["스터디가이드", "요약", "핵심", "정리", "시험대비"]
+    },
+    {
+      "conceptId": "STUDY.FORMULA_SHEET_FINAL",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 7,
+      "label": "공식/요약지 최종본",
+      "description": "필수 공식과 예시를 정리해 최종 요약지를 완성한다.",
+      "tags": ["공식", "요약지", "치트시트", "정리", "암기", "시험"]
+    },
+    {
+      "conceptId": "STUDY.FLASHCARD_DECK_COMPLETE",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 6,
+      "label": "플래시카드 덱 완성",
+      "description": "핵심 개념/단어 카드를 만들어 복습 가능한 덱을 완성한다.",
+      "tags": ["플래시카드", "카드덱", "암기", "오답", "완성"]
+    },
+    {
+      "conceptId": "STUDY.ANKI_MATURE_CARDS_TARGET",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 6,
+      "label": "Anki 성숙카드 목표",
+      "description": "복습을 유지해 성숙 카드 수 목표를 달성한다.",
+      "tags": ["Anki", "성숙카드", "복습", "SRS", "유지"]
+    },
+    {
+      "conceptId": "STUDY.SUMMARY_PACK_COMPLETE",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 6,
+      "label": "요약 모음집 완성",
+      "description": "단원별 핵심 요약을 모아 요약 패키지를 완성한다.",
+      "tags": ["요약", "모음", "단원별", "핵심", "정리"]
+    },
+    {
+      "conceptId": "STUDY.NOTES_CLEAN_COMPLETE",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 5,
+      "label": "노트 정리 완료",
+      "description": "노트를 정돈하고 구조화해 다시 찾기 쉬운 상태로 만든다.",
+      "tags": ["노트", "정리", "정돈", "검색성", "구조화"]
+    },
+    {
+      "conceptId": "STUDY.LECTURE_NOTES_COMPLETE",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 6,
+      "label": "강의노트 완성",
+      "description": "슬라이드/필기를 묶어 강의노트를 완성한다.",
+      "tags": ["강의노트", "정리", "슬라이드", "필기", "완성"]
+    },
+    {
+      "conceptId": "STUDY.MIND_MAP_COLLECTION",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 5,
+      "label": "마인드맵 모음",
+      "description": "개념 연결을 보여주는 마인드맵을 모아 정리한다.",
+      "tags": ["마인드맵", "개념도", "구조", "연결", "모음"]
+    },
+    {
+      "conceptId": "STUDY.CONCEPTS_MASTERY_CHECK",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 7,
+      "label": "개념 숙달 확인",
+      "description": "셀프 테스트를 통과해 핵심 개념을 숙달했음을 확인한다.",
+      "tags": ["개념", "마스터", "셀프테스트", "확인", "체크"]
+    },
+    {
+      "conceptId": "STUDY.WEAK_AREAS_FIXED",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 8,
+      "label": "약점 보완 완료",
+      "description": "오답/약점을 반복 보완해 더 이상 막히지 않게 만든다.",
+      "tags": ["약점", "보완", "오답", "반복", "개선"]
+    },
+    {
+      "conceptId": "STUDY.ERROR_RATE_REDUCE",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 7,
+      "label": "실수 줄이기",
+      "description": "검토 루틴으로 실수/오답률을 눈에 띄게 줄인다.",
+      "tags": ["실수", "오답률", "감소", "검토", "체크"]
+    },
+    {
+      "conceptId": "STUDY.REVISION_COMPLETE",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 7,
+      "label": "최종 수정 완료",
+      "description": "제출 전 최종 교정과 버전 정리를 완료한다.",
+      "tags": ["최종수정", "교정", "버전업", "완료", "제출전"]
+    },
+    {
+      "conceptId": "STUDY.LITERATURE_REVIEW_COMPLETE",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 7,
+      "label": "문헌고찰 완성",
+      "description": "핵심 논문을 비교/정리해 문헌고찰 섹션을 완성한다.",
+      "tags": ["문헌고찰", "리뷰", "정리", "핵심논문", "비교"]
+    },
+    {
+      "conceptId": "STUDY.ANNOTATED_BIBLIOGRAPHY_COMPLETE",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 6,
+      "label": "주석 참고문헌 완성",
+      "description": "출처별 요약/메모를 붙여 주석 참고문헌을 완성한다.",
+      "tags": ["주석참고문헌", "요약", "출처", "인용", "정리"]
+    },
+    {
+      "conceptId": "STUDY.RESEARCH_PROPOSAL_SUBMIT",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 8,
+      "label": "연구계획서 제출",
+      "description": "목표/방법/일정을 정리해 연구계획서를 제출한다.",
+      "tags": ["연구계획서", "제출", "목표", "방법", "일정"]
+    },
+    {
+      "conceptId": "STUDY.RESEARCH_METHODS_SECTION_COMPLETE",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 6,
+      "label": "방법론 섹션 완성",
+      "description": "연구방법/절차/실험설계를 명확히 적어 방법론 섹션을 완성한다.",
+      "tags": ["방법론", "연구방법", "실험설계", "절차", "작성"]
+    },
+    {
+      "conceptId": "STUDY.DATASET_CLEAN_COMPLETE",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 6,
+      "label": "데이터 정제 완료",
+      "description": "결측/이상치를 처리해 분석 가능한 데이터셋을 만든다.",
+      "tags": ["데이터", "정제", "전처리", "결측", "정리"]
+    },
+    {
+      "conceptId": "STUDY.DATA_ANALYSIS_REPORT_COMPLETE",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 6,
+      "label": "분석 리포트 완성",
+      "description": "시각화와 해석을 포함해 분석 리포트를 완성한다.",
+      "tags": ["분석리포트", "시각화", "해석", "결론", "작성"]
+    },
+    {
+      "conceptId": "STUDY.PAPER_DRAFT_COMPLETE",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 7,
+      "label": "논문 초안 완성",
+      "description": "서론~논의까지 구조를 채워 논문 초안을 완성한다.",
+      "tags": ["논문초안", "구성", "서론", "방법", "결과", "논의"]
+    },
+    {
+      "conceptId": "STUDY.PAPER_SUBMISSION",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 8,
+      "label": "논문 제출",
+      "description": "형식과 제출 요건을 맞춰 저널/학회에 논문을 제출한다.",
+      "tags": ["논문제출", "저널", "형식", "커버레터", "기한"]
+    },
+    {
+      "conceptId": "STUDY.CONFERENCE_ABSTRACT_SUBMIT",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 7,
+      "label": "학회 초록 제출",
+      "description": "핵심 메시지를 정리해 학회 초록을 제출한다.",
+      "tags": ["학회", "초록", "제출", "기한", "요약"]
+    },
+    {
+      "conceptId": "STUDY.POSTER_SESSION_READY",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 6,
+      "label": "포스터 발표 준비",
+      "description": "핵심 내용과 시각 요소를 정리해 포스터 발표 준비를 끝낸다.",
+      "tags": ["포스터", "발표", "디자인", "핵심메시지", "인쇄"]
+    },
+    {
+      "conceptId": "STUDY.PRESENTATION_SCRIPT_COMPLETE",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 6,
+      "label": "발표 대본 완성",
+      "description": "타이밍을 고려해 발표 대본/흐름을 완성한다.",
+      "tags": ["발표대본", "구성", "타이밍", "스토리", "준비"]
+    },
+    {
+      "conceptId": "STUDY.PRESENTATION_DELIVERED",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 7,
+      "label": "발표 완료",
+      "description": "발표와 QnA까지 마쳐 발표를 끝낸다.",
+      "tags": ["발표", "실전", "QnA", "피드백", "완료"]
+    },
+    {
+      "conceptId": "STUDY.QUESTION_BANK_COMPLETE",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 6,
+      "label": "문제/질문 은행",
+      "description": "자기 테스트용 문제/질문을 모아 문제은행을 완성한다.",
+      "tags": ["질문", "문제은행", "자기테스트", "퀴즈", "모음"]
+    },
+    {
+      "conceptId": "STUDY.OFFICE_HOURS_VISIT",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 6,
+      "label": "오피스아워 다녀오기",
+      "description": "막힌 부분을 질문하고 피드백을 받아 오피스아워 방문을 완료한다.",
+      "tags": ["오피스아워", "질문", "교수", "상담", "방문"]
+    },
+    {
+      "conceptId": "STUDY.STUDY_GROUP_SESSION_HELD",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 5,
+      "label": "스터디 모임 진행",
+      "description": "진도/발표를 포함해 스터디 세션을 실제로 진행한다.",
+      "tags": ["스터디", "모임", "진도", "발표", "실행"]
+    },
+    {
+      "conceptId": "STUDY.PEER_FEEDBACK_COLLECTED",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 5,
+      "label": "피드백 수집",
+      "description": "동료/튜터에게 리뷰를 받아 개선점 피드백을 수집한다.",
+      "tags": ["피드백", "동료", "리뷰", "개선", "반영"]
+    },
+    {
+      "conceptId": "STUDY.STUDY_STREAK_SEVEN_DAYS",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 6,
+      "label": "7일 연속 공부",
+      "description": "하루도 빠짐없이 7일 연속 공부를 달성한다.",
+      "tags": ["연속공부", "7일", "습관", "루틴", "유지"]
+    },
+    {
+      "conceptId": "STUDY.STUDY_STREAK_THIRTY_DAYS",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 6,
+      "label": "30일 연속 공부",
+      "description": "하루도 빠짐없이 30일 연속 공부를 달성한다.",
+      "tags": ["연속공부", "30일", "습관", "루틴", "유지"]
+    },
+    {
+      "conceptId": "STUDY.FOCUS_HOURS_TARGET",
+      "type": "goal",
+      "domain": "STUDY",
+      "priority": 7,
+      "label": "집중시간 목표 달성",
+      "description": "주간/일간 목표 집중시간을 채워 학습 시간을 확보한다.",
+      "tags": ["집중시간", "목표", "딥워크", "시간", "달성", "타임블록"]
+    }
+  ]
+}

@@ -1,0 +1,793 @@
+[
+  {
+    "id": "TPL_WORK_CHAT_REPLY_ACK_MIN_3_WORK",
+    "clusterKey": "WORK_CHAT_REPLY",
+    "type": "process",
+    "title": "업무 메신저 3분 즉시 확인 답장(받음+ETA 한 줄)",
+    "concepts": [
+      "WORK.CHAT_REPLY"
+    ],
+    "contexts": [
+      "WORK"
+    ],
+    "states": [],
+    "time": {
+      "min": 2,
+      "max": 6,
+      "default": 3
+    },
+    "missions": [
+      {
+        "action": "메신저 열고 답장할 대화 1개 선택하기(열기)",
+        "estMin": 1
+      },
+      {
+        "action": "요청/질문 핵심을 한 줄로 다시 읽고 메모하기",
+        "estMin": 1
+      },
+      {
+        "action": "‘확인했어 + 언제까지 답할지(ETA)’ 한 줄 보내고 앱에서 완료 누르기",
+        "estMin": 1
+      }
+    ]
+  },
+  {
+    "id": "TPL_WORK_CHAT_REPLY_CLARIFY_STD_6_WORKDAY",
+    "clusterKey": "WORK_CHAT_REPLY",
+    "type": "process",
+    "title": "업무 메신저 6분 명확화 답장(질문 2개로 범위 고정)",
+    "concepts": [
+      "WORK.CHAT_REPLY"
+    ],
+    "contexts": [
+      "WORKDAY",
+      "WORK"
+    ],
+    "states": [],
+    "time": {
+      "min": 4,
+      "max": 10,
+      "default": 6
+    },
+    "missions": [
+      {
+        "action": "메신저 열고 해당 스레드/DM 열기(열기)",
+        "estMin": 1
+      },
+      {
+        "action": "상대 요청을 한 문장으로 바꿔 써서 오해 가능성 체크",
+        "estMin": 1
+      },
+      {
+        "action": "결정에 필요한 질문 2개만 만들기(예: 범위/기한)",
+        "estMin": 2
+      },
+      {
+        "action": "요약 1문장 + 질문 2개로 답장 보내기",
+        "estMin": 1
+      },
+      {
+        "action": "전송 확인하고 앱에서 완료 누르기",
+        "estMin": 1
+      }
+    ]
+  },
+  {
+    "id": "TPL_WORK_CHAT_REPLY_THREAD_SUMMARY_STD_6_AFTER_LUNCH",
+    "clusterKey": "WORK_CHAT_REPLY",
+    "type": "process",
+    "title": "점심 후 6분 스레드 정리 답장(요약 3줄+다음 액션)",
+    "concepts": [
+      "WORK.CHAT_REPLY"
+    ],
+    "contexts": [
+      "AFTER_LUNCH",
+      "WORK"
+    ],
+    "states": [],
+    "time": {
+      "min": 4,
+      "max": 10,
+      "default": 6
+    },
+    "missions": [
+      {
+        "action": "6분 타이머 켜고 스레드 맨 아래로 이동하기(준비)",
+        "estMin": 1
+      },
+      {
+        "action": "최근 메시지 8~12개만 훑고 결정/요청 포인트 표시하기",
+        "estMin": 2
+      },
+      {
+        "action": "요약 3줄(결정/해야할 일/담당)로 초안 쓰기",
+        "estMin": 2
+      },
+      {
+        "action": "요약+다음 액션 1개를 답장으로 보내고 앱에서 완료 누르기",
+        "estMin": 1
+      }
+    ]
+  },
+  {
+    "id": "TPL_WORK_CHAT_REPLY_TASK_CAPTURE_STD_8_WORK",
+    "clusterKey": "WORK_CHAT_REPLY",
+    "type": "process",
+    "title": "업무 메신저 8분 요청→할 일로 변환(티켓/메모 생성 후 답장)",
+    "concepts": [
+      "WORK.CHAT_REPLY"
+    ],
+    "contexts": [
+      "WORK"
+    ],
+    "states": [],
+    "time": {
+      "min": 6,
+      "max": 14,
+      "default": 8
+    },
+    "missions": [
+      {
+        "action": "메신저 열고 요청 메시지 1개 고르기(열기)",
+        "estMin": 1
+      },
+      {
+        "action": "요청을 ‘완료 기준 1줄’로 바꿔 적기(무엇이 끝인가)",
+        "estMin": 2
+      },
+      {
+        "action": "할 일/티켓/노트에 제목+완료 기준+기한(없으면 ‘미정’) 기록",
+        "estMin": 2
+      },
+      {
+        "action": "답장: ‘받음 + 내가 할 일 1줄 + 예상 ETA’ 보내기",
+        "estMin": 2
+      },
+      {
+        "action": "전송 확인하고 앱에서 완료 누르기",
+        "estMin": 1
+      }
+    ]
+  },
+  {
+    "id": "TPL_WORK_CHAT_REPLY_BLOCK_TIME_FULL_10_WORKDAY",
+    "clusterKey": "WORK_CHAT_REPLY",
+    "type": "process",
+    "title": "업무 메신저 10분 시간 확보 답장(캘린더 확인+시간 제안)",
+    "concepts": [
+      "WORK.CHAT_REPLY"
+    ],
+    "contexts": [
+      "WORKDAY",
+      "WORK"
+    ],
+    "states": [],
+    "time": {
+      "min": 8,
+      "max": 16,
+      "default": 10
+    },
+    "missions": [
+      {
+        "action": "대화 열고 요청의 ‘기한/긴급도’ 키워드만 확인하기(열기)",
+        "estMin": 1
+      },
+      {
+        "action": "내가 줄 수 있는 답의 형태를 결정하기(1)바로 처리 (2)시간 잡기",
+        "estMin": 1
+      },
+      {
+        "action": "캘린더에서 오늘/내일 15~30분 빈칸 2개 찾기",
+        "estMin": 2
+      },
+      {
+        "action": "답장 초안: ‘지금은 ○○중, ○○시/○○시에 처리 가능’ 2옵션 쓰기",
+        "estMin": 2
+      },
+      {
+        "action": "캘린더 홀드/알림(또는 할 일) 1개 만들어 놓기",
+        "estMin": 3
+      },
+      {
+        "action": "답장 전송 확인하고 앱에서 완료 누르기",
+        "estMin": 1
+      }
+    ]
+  },
+  {
+    "id": "TPL_WORK_CHAT_REPLY_DECLINE_STD_6_WORK",
+    "clusterKey": "WORK_CHAT_REPLY",
+    "type": "process",
+    "title": "업무 메신저 6분 거절/불가 답장(대안 1개 포함)",
+    "concepts": [
+      "WORK.CHAT_REPLY"
+    ],
+    "contexts": [
+      "WORK"
+    ],
+    "states": [],
+    "time": {
+      "min": 4,
+      "max": 10,
+      "default": 6
+    },
+    "missions": [
+      {
+        "action": "대화 열고 요청 문장 1개만 다시 읽기(열기)",
+        "estMin": 1
+      },
+      {
+        "action": "내 현재 우선순위/기한을 10초만 확인해 ‘불가’ 여부 확정",
+        "estMin": 1
+      },
+      {
+        "action": "대안 1개 만들기(예: 다른 담당자/다음 주/범위 축소)",
+        "estMin": 2
+      },
+      {
+        "action": "답장: ‘지금은 어려워 + 이유 1줄 + 대안 1개’로 보내기",
+        "estMin": 1
+      },
+      {
+        "action": "전송 확인하고 앱에서 완료 누르기",
+        "estMin": 1
+      }
+    ]
+  },
+  {
+    "id": "TPL_WORK_CHAT_REPLY_HANDOFF_STD_6_WORKDAY",
+    "clusterKey": "WORK_CHAT_REPLY",
+    "type": "process",
+    "title": "업무 메신저 6분 담당자 연결 답장(컨텍스트 2개+멘션)",
+    "concepts": [
+      "WORK.CHAT_REPLY"
+    ],
+    "contexts": [
+      "WORKDAY",
+      "WORK"
+    ],
+    "states": [],
+    "time": {
+      "min": 4,
+      "max": 10,
+      "default": 6
+    },
+    "missions": [
+      {
+        "action": "대화/스레드 열기(열기)",
+        "estMin": 1
+      },
+      {
+        "action": "누가 가장 적절한 담당자인지 1명만 선택하기",
+        "estMin": 1
+      },
+      {
+        "action": "필수 컨텍스트 2개만 정리(링크/티켓번호/요약 문장)",
+        "estMin": 2
+      },
+      {
+        "action": "담당자 멘션 + 컨텍스트 2개 + 요청 1줄로 답장 보내기",
+        "estMin": 1
+      },
+      {
+        "action": "전송 확인하고 앱에서 완료 누르기",
+        "estMin": 1
+      }
+    ]
+  },
+  {
+    "id": "TPL_WORK_CHAT_REPLY_MISSING_INFO_STD_6_WORK",
+    "clusterKey": "WORK_CHAT_REPLY",
+    "type": "process",
+    "title": "업무 메신저 6분 추가정보 요청 답장(필수 3개만)",
+    "concepts": [
+      "WORK.CHAT_REPLY"
+    ],
+    "contexts": [
+      "WORK"
+    ],
+    "states": [],
+    "time": {
+      "min": 4,
+      "max": 10,
+      "default": 6
+    },
+    "missions": [
+      {
+        "action": "대화 열고 요청이 뭔지 한 줄로 적기(열기)",
+        "estMin": 1
+      },
+      {
+        "action": "지금 당장 필요한 정보 3개만 고르기(예: 범위/기한/예시)",
+        "estMin": 2
+      },
+      {
+        "action": "상대가 바로 답할 수 있게 질문을 ‘선택지/예시’ 형태로 바꾸기",
+        "estMin": 2
+      },
+      {
+        "action": "질문 3개로 답장 보내고 앱에서 완료 누르기",
+        "estMin": 1
+      }
+    ]
+  },
+  {
+    "id": "TPL_WORK_CHAT_REPLY_QUICK_REVIEW_STD_8_AFTER_LUNCH",
+    "clusterKey": "WORK_CHAT_REPLY",
+    "type": "process",
+    "title": "점심 후 8분 링크/문서 빠른 확인 답장(한 줄 판단+다음 액션)",
+    "concepts": [
+      "WORK.CHAT_REPLY"
+    ],
+    "contexts": [
+      "AFTER_LUNCH",
+      "WORK"
+    ],
+    "states": [],
+    "time": {
+      "min": 6,
+      "max": 14,
+      "default": 8
+    },
+    "missions": [
+      {
+        "action": "대화 열고 공유된 링크 1개 열기(열기)",
+        "estMin": 1
+      },
+      {
+        "action": "문서/PR/티켓을 3분만 훑고 ‘승인/보류/질문’ 중 1개 선택",
+        "estMin": 3
+      },
+      {
+        "action": "필요하면 코멘트 1개만 남기기(한 문장 + 근거 1개)",
+        "estMin": 2
+      },
+      {
+        "action": "메신저 답장: 판단 1줄 + 다음 액션 1줄 보내기",
+        "estMin": 1
+      },
+      {
+        "action": "전송 확인하고 앱에서 완료 누르기",
+        "estMin": 1
+      }
+    ]
+  },
+  {
+    "id": "TPL_WORK_CHAT_REPLY_BACKLOG_CLEAR_FULL_10_AFTER_WORK",
+    "clusterKey": "WORK_CHAT_REPLY",
+    "type": "process",
+    "title": "퇴근 전 10분 미답장 정리(상위 3개만 처리)",
+    "concepts": [
+      "WORK.CHAT_REPLY"
+    ],
+    "contexts": [
+      "AFTER_WORK",
+      "WORK"
+    ],
+    "states": [],
+    "time": {
+      "min": 8,
+      "max": 16,
+      "default": 10
+    },
+    "missions": [
+      {
+        "action": "10분 타이머 켜고 ‘미답/멘션’만 보이게 필터하기(준비)",
+        "estMin": 1
+      },
+      {
+        "action": "오늘 반드시 답할 대화 3개만 고르기(나머지는 내일)",
+        "estMin": 2
+      },
+      {
+        "action": "각 대화에 ‘받음/진행/다음’ 중 하나로 1줄씩 답장 보내기(3개)",
+        "estMin": 4
+      },
+      {
+        "action": "필요한 건 할 일/캘린더로 2개까지만 옮기기(메모/티켓)",
+        "estMin": 2
+      },
+      {
+        "action": "전송 확인하고 앱에서 완료 누르기",
+        "estMin": 1
+      }
+    ]
+  },
+  {
+    "id": "TPL_WORK_TEAM_UPDATE_STANDUP_MIN_5_WORKDAY",
+    "clusterKey": "WORK_TEAM_UPDATE",
+    "type": "process",
+    "title": "팀 업데이트 5분 스탠드업(완료/오늘/막힘 3줄)",
+    "concepts": [
+      "WORK.TEAM_UPDATE"
+    ],
+    "contexts": [
+      "WORKDAY",
+      "WORK"
+    ],
+    "states": [],
+    "time": {
+      "min": 4,
+      "max": 8,
+      "default": 5
+    },
+    "missions": [
+      {
+        "action": "팀 채널/스탠드업 스레드 열기(열기)",
+        "estMin": 1
+      },
+      {
+        "action": "3줄 템플릿으로 초안 쓰기(완료/오늘/막힘)",
+        "estMin": 2
+      },
+      {
+        "action": "관련 링크/티켓 1개만 붙여 넣기(있으면)",
+        "estMin": 1
+      },
+      {
+        "action": "전송 확인하고 앱에서 완료 누르기",
+        "estMin": 1
+      }
+    ]
+  },
+  {
+    "id": "TPL_WORK_TEAM_UPDATE_MIDDAY_MIN_5_AFTER_LUNCH",
+    "clusterKey": "WORK_TEAM_UPDATE",
+    "type": "process",
+    "title": "점심 후 5분 중간 공유(진행 1줄+다음 1줄+ETA)",
+    "concepts": [
+      "WORK.TEAM_UPDATE"
+    ],
+    "contexts": [
+      "AFTER_LUNCH",
+      "WORK"
+    ],
+    "states": [],
+    "time": {
+      "min": 4,
+      "max": 8,
+      "default": 5
+    },
+    "missions": [
+      {
+        "action": "5분 타이머 켜고 오늘 작업 카드/티켓 1개 열기(준비)",
+        "estMin": 1
+      },
+      {
+        "action": "지금까지 진행 상황을 한 문장으로 적기(무엇이 됐나)",
+        "estMin": 1
+      },
+      {
+        "action": "다음 액션 1개 + 예상 완료 시간(ETA) 한 줄 작성",
+        "estMin": 2
+      },
+      {
+        "action": "팀 채널에 공유하고 앱에서 완료 누르기",
+        "estMin": 1
+      }
+    ]
+  },
+  {
+    "id": "TPL_WORK_TEAM_UPDATE_EOD_STD_8_WORK",
+    "clusterKey": "WORK_TEAM_UPDATE",
+    "type": "process",
+    "title": "팀 업데이트 8분 퇴근 전 정리(성과/막힘/내일 계획)",
+    "concepts": [
+      "WORK.TEAM_UPDATE"
+    ],
+    "contexts": [
+      "WORK"
+    ],
+    "states": [],
+    "time": {
+      "min": 6,
+      "max": 12,
+      "default": 8
+    },
+    "missions": [
+      {
+        "action": "오늘 변경/완료한 항목 2개만 메모로 뽑기(준비)",
+        "estMin": 2
+      },
+      {
+        "action": "막힌 점이 있으면 1개만 적고 필요한 도움을 한 줄로 쓰기",
+        "estMin": 1
+      },
+      {
+        "action": "내일 첫 액션 1개를 한 줄로 적기(시작점)",
+        "estMin": 2
+      },
+      {
+        "action": "위 3개를 4~6줄 메시지로 다듬기(불릿)",
+        "estMin": 2
+      },
+      {
+        "action": "팀 채널에 전송 확인하고 앱에서 완료 누르기",
+        "estMin": 1
+      }
+    ]
+  },
+  {
+    "id": "TPL_WORK_TEAM_UPDATE_KICKOFF_STD_8_MORNING",
+    "clusterKey": "WORK_TEAM_UPDATE",
+    "type": "process",
+    "title": "아침 8분 오늘 계획 공유(우선순위 2개+미팅 리스크)",
+    "concepts": [
+      "WORK.TEAM_UPDATE"
+    ],
+    "contexts": [
+      "MORNING",
+      "WORKDAY",
+      "WORK"
+    ],
+    "states": [],
+    "time": {
+      "min": 6,
+      "max": 12,
+      "default": 8
+    },
+    "missions": [
+      {
+        "action": "팀 채널 열고 오늘 일정(미팅)만 10초 확인하기(열기)",
+        "estMin": 1
+      },
+      {
+        "action": "오늘 끝내야 할 우선순위 2개를 한 줄씩 쓰기",
+        "estMin": 2
+      },
+      {
+        "action": "리스크/의존성(리뷰 필요/대기중) 1개가 있으면 적기",
+        "estMin": 1
+      },
+      {
+        "action": "공유 메시지로 4~6줄로 다듬기(불릿)",
+        "estMin": 3
+      },
+      {
+        "action": "전송 확인하고 앱에서 완료 누르기",
+        "estMin": 1
+      }
+    ]
+  },
+  {
+    "id": "TPL_WORK_TEAM_UPDATE_BLOCKER_ESCALATE_FULL_12_WORK",
+    "clusterKey": "WORK_TEAM_UPDATE",
+    "type": "process",
+    "title": "팀 업데이트 12분 막힘 공유(영향/요청/대안 포함)",
+    "concepts": [
+      "WORK.TEAM_UPDATE"
+    ],
+    "contexts": [
+      "WORK"
+    ],
+    "states": [],
+    "time": {
+      "min": 10,
+      "max": 18,
+      "default": 12
+    },
+    "missions": [
+      {
+        "action": "막힘 상황을 한 문장으로 정의하고 관련 링크/로그 1개 찾기(준비)",
+        "estMin": 3
+      },
+      {
+        "action": "영향 범위 1줄(무엇이 지연/위험인지) 적기",
+        "estMin": 2
+      },
+      {
+        "action": "팀에 요청할 것 1개를 구체적으로 쓰기(누가/무엇을)",
+        "estMin": 2
+      },
+      {
+        "action": "대안/우회안 2개 중 1개를 제안으로 정리하기",
+        "estMin": 3
+      },
+      {
+        "action": "메시지(현황/영향/요청/제안/ETA)로 전송하고 앱에서 완료",
+        "estMin": 2
+      }
+    ]
+  },
+  {
+    "id": "TPL_WORK_TEAM_UPDATE_PROGRESS_SNAPSHOT_STD_8_AFTER_LUNCH",
+    "clusterKey": "WORK_TEAM_UPDATE",
+    "type": "process",
+    "title": "점심 후 8분 진행 스냅샷 공유(링크 2개+요약 3줄)",
+    "concepts": [
+      "WORK.TEAM_UPDATE"
+    ],
+    "contexts": [
+      "AFTER_LUNCH",
+      "WORK"
+    ],
+    "states": [],
+    "time": {
+      "min": 6,
+      "max": 12,
+      "default": 8
+    },
+    "missions": [
+      {
+        "action": "공유할 산출물/티켓 1개 열기(열기)",
+        "estMin": 1
+      },
+      {
+        "action": "팀이 봐야 할 링크 2개만 준비하기(티켓/문서/PR 중)",
+        "estMin": 2
+      },
+      {
+        "action": "요약 3줄 작성(무엇/현재 상태/다음 액션)",
+        "estMin": 3
+      },
+      {
+        "action": "팀 채널에 링크 2개+요약 3줄로 전송하기",
+        "estMin": 1
+      },
+      {
+        "action": "전송 확인하고 앱에서 완료 누르기",
+        "estMin": 1
+      }
+    ]
+  },
+  {
+    "id": "TPL_WORK_TEAM_UPDATE_MEETING_NOTES_MIN_6_WORK",
+    "clusterKey": "WORK_TEAM_UPDATE",
+    "type": "process",
+    "title": "팀 업데이트 6분 미팅 후 공유(결정 1개+액션 2개)",
+    "concepts": [
+      "WORK.TEAM_UPDATE"
+    ],
+    "contexts": [
+      "WORK"
+    ],
+    "states": [],
+    "time": {
+      "min": 5,
+      "max": 10,
+      "default": 6
+    },
+    "missions": [
+      {
+        "action": "미팅 노트/캘린더 메모를 열고 결정 1개 찾기(열기)",
+        "estMin": 2
+      },
+      {
+        "action": "액션 아이템 2개를 ‘담당/기한’ 형태로 적기",
+        "estMin": 2
+      },
+      {
+        "action": "팀 채널에 결정 1줄+액션 2줄로 공유하기",
+        "estMin": 1
+      },
+      {
+        "action": "전송 확인하고 앱에서 완료 누르기",
+        "estMin": 1
+      }
+    ]
+  },
+  {
+    "id": "TPL_WORK_TEAM_UPDATE_MANAGER_STD_12_WORKDAY",
+    "clusterKey": "WORK_TEAM_UPDATE",
+    "type": "process",
+    "title": "업무일 12분 매니저/팀 업데이트(완료/진행/다음/리스크)",
+    "concepts": [
+      "WORK.TEAM_UPDATE"
+    ],
+    "contexts": [
+      "WORKDAY",
+      "WORK"
+    ],
+    "states": [],
+    "time": {
+      "min": 10,
+      "max": 18,
+      "default": 12
+    },
+    "missions": [
+      {
+        "action": "완료한 것 2개만 뽑아 한 줄씩 적기(준비)",
+        "estMin": 2
+      },
+      {
+        "action": "진행중인 것 1개와 현재 상태를 한 줄로 적기",
+        "estMin": 2
+      },
+      {
+        "action": "다음 액션 1개와 예상 일정(ETA)을 한 줄로 적기",
+        "estMin": 2
+      },
+      {
+        "action": "리스크/막힘 1개가 있으면 영향+필요 지원을 한 줄로 적기",
+        "estMin": 2
+      },
+      {
+        "action": "위 내용을 6~9줄 메시지로 다듬기(불릿)",
+        "estMin": 3
+      },
+      {
+        "action": "전송 확인하고 앱에서 완료 누르기",
+        "estMin": 1
+      }
+    ]
+  },
+  {
+    "id": "TPL_WORK_TEAM_UPDATE_WEEKLY_WRAP_STD_10_AFTER_WORK",
+    "clusterKey": "WORK_TEAM_UPDATE",
+    "type": "process",
+    "title": "퇴근 후 10분 주간 마무리 공유(하이라이트/리스크/다음 주)",
+    "concepts": [
+      "WORK.TEAM_UPDATE"
+    ],
+    "contexts": [
+      "AFTER_WORK",
+      "WEEKDAY",
+      "WORK"
+    ],
+    "states": [],
+    "time": {
+      "min": 8,
+      "max": 16,
+      "default": 10
+    },
+    "missions": [
+      {
+        "action": "이번 주 하이라이트 2개를 한 줄씩 적기(준비)",
+        "estMin": 3
+      },
+      {
+        "action": "이번 주 리스크/부채 1개를 한 줄로 적기",
+        "estMin": 2
+      },
+      {
+        "action": "다음 주 첫 우선순위 1개를 한 줄로 적기",
+        "estMin": 2
+      },
+      {
+        "action": "위 내용을 5~7줄로 다듬어 팀 채널에 공유하기",
+        "estMin": 2
+      },
+      {
+        "action": "전송 확인하고 앱에서 완료 누르기",
+        "estMin": 1
+      }
+    ]
+  },
+  {
+    "id": "TPL_WORK_TEAM_UPDATE_REQUEST_REVIEW_STD_8_WEEKDAY",
+    "clusterKey": "WORK_TEAM_UPDATE",
+    "type": "process",
+    "title": "평일 8분 도움/리뷰 요청 업데이트(요청 1개+컨텍스트 2개)",
+    "concepts": [
+      "WORK.TEAM_UPDATE"
+    ],
+    "contexts": [
+      "WEEKDAY",
+      "WORK"
+    ],
+    "states": [],
+    "time": {
+      "min": 6,
+      "max": 12,
+      "default": 8
+    },
+    "missions": [
+      {
+        "action": "내가 필요한 도움/리뷰 1개를 한 문장으로 정의하기(준비)",
+        "estMin": 2
+      },
+      {
+        "action": "팀이 참고할 컨텍스트 2개 준비(링크/티켓/스크린샷 중)",
+        "estMin": 3
+      },
+      {
+        "action": "요청 메시지로 다듬기(요청/배경/기한/원하는 형태)",
+        "estMin": 2
+      },
+      {
+        "action": "팀 채널에 전송 확인하고 앱에서 완료 누르기",
+        "estMin": 1
+      }
+    ]
+  }
+]

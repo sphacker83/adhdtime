@@ -1,0 +1,338 @@
+{
+  "version": 1,
+  "templates": [
+    {
+      "id": "TPL_STUDY_READING_BLOCK_MIN_10_MORNING_HOME",
+      "clusterKey": "STUDY_READING_BLOCK",
+      "type": "process",
+      "title": "읽기 집중 10분 미니(아침·집)",
+      "concepts": ["STUDY.READING_BLOCK"],
+      "contexts": ["MORNING", "HOME"],
+      "states": [],
+      "time": { "min": 8, "max": 15, "default": 10 },
+      "missions": [
+        { "action": "자료/책 펼치기 + 타이머 10분 시작(준비)", "estMin": 2 },
+        { "action": "6분 정독(한 문단씩 읽고 핵심 단어 1개만 표시)", "estMin": 6 },
+        { "action": "1분 메모: 오늘 읽은 핵심 1줄", "estMin": 1 },
+        { "action": "정리하고 앱에서 완료", "estMin": 1 }
+      ]
+    },
+    {
+      "id": "TPL_STUDY_READING_BLOCK_MIN_12_OUTSIDE",
+      "clusterKey": "STUDY_READING_BLOCK",
+      "type": "process",
+      "title": "읽기 집중 12분 착수(밖)",
+      "concepts": ["STUDY.READING_BLOCK"],
+      "contexts": ["OUTSIDE"],
+      "states": [],
+      "time": { "min": 10, "max": 18, "default": 12 },
+      "missions": [
+        { "action": "자료/책 열고 읽을 파트 1개 지정(준비)", "estMin": 2 },
+        { "action": "7분 읽기 집중(모르는 용어는 표시만 하고 계속)", "estMin": 7 },
+        { "action": "2분 표시/메모: 핵심 2줄 + 용어 1개", "estMin": 2 },
+        { "action": "정리하고 앱에서 완료", "estMin": 1 }
+      ]
+    },
+    {
+      "id": "TPL_STUDY_READING_BLOCK_STD_16_HOME",
+      "clusterKey": "STUDY_READING_BLOCK",
+      "type": "process",
+      "title": "읽기 집중 16분 기본(집)",
+      "concepts": ["STUDY.READING_BLOCK"],
+      "contexts": ["HOME"],
+      "states": [],
+      "time": { "min": 12, "max": 24, "default": 16 },
+      "missions": [
+        { "action": "책/자료 펼치고 목표 1줄 정하기(준비)", "estMin": 3 },
+        { "action": "9분 정독(핵심 주장/정의만 표시)", "estMin": 9 },
+        { "action": "3분 요약: 핵심 3줄을 노트에 적기", "estMin": 3 },
+        { "action": "정리하고 앱에서 완료", "estMin": 1 }
+      ]
+    },
+    {
+      "id": "TPL_STUDY_READING_BLOCK_STD_18_AFTER_LUNCH_HOME",
+      "clusterKey": "STUDY_READING_BLOCK",
+      "type": "process",
+      "title": "읽기 집중 18분(점심 후·집)",
+      "concepts": ["STUDY.READING_BLOCK"],
+      "contexts": ["AFTER_LUNCH", "HOME"],
+      "states": [],
+      "time": { "min": 14, "max": 28, "default": 18 },
+      "missions": [
+        { "action": "자료 열기 + 타이머 18분 세팅(준비)", "estMin": 3 },
+        { "action": "10분 읽기(문장 단위로 읽고 중요한 곳만 밑줄)", "estMin": 10 },
+        { "action": "3분 요약: 핵심 3줄 + 질문 1개", "estMin": 3 },
+        { "action": "정리하고 앱에서 완료", "estMin": 2 }
+      ]
+    },
+    {
+      "id": "TPL_STUDY_READING_BLOCK_STD_20_OUTSIDE",
+      "clusterKey": "STUDY_READING_BLOCK",
+      "type": "process",
+      "title": "읽기 집중 20분(밖)",
+      "concepts": ["STUDY.READING_BLOCK"],
+      "contexts": ["OUTSIDE"],
+      "states": [],
+      "time": { "min": 15, "max": 30, "default": 20 },
+      "missions": [
+        { "action": "자료/책 펼치기 + 읽을 섹션 1개 지정(준비)", "estMin": 3 },
+        { "action": "12분 읽기 집중(핵심 문장만 표시, 멈추지 않기)", "estMin": 12 },
+        { "action": "3분 표시/메모: 핵심 3줄 + 모르는 용어 1개", "estMin": 3 },
+        { "action": "정리하고 앱에서 완료", "estMin": 2 }
+      ]
+    },
+    {
+      "id": "TPL_STUDY_READING_BLOCK_STD_22_HOME",
+      "clusterKey": "STUDY_READING_BLOCK",
+      "type": "process",
+      "title": "읽기 집중 22분(집·핵심 잡기)",
+      "concepts": ["STUDY.READING_BLOCK"],
+      "contexts": ["HOME"],
+      "states": [],
+      "time": { "min": 18, "max": 34, "default": 22 },
+      "missions": [
+        { "action": "자료 열고 오늘 읽을 범위 1개 정하기(준비)", "estMin": 4 },
+        { "action": "13분 정독(정의/주장/근거만 표시)", "estMin": 13 },
+        { "action": "3분 요약: 핵심 3줄 + 근거 위치(페이지/문단) 1개", "estMin": 3 },
+        { "action": "1분 질문 만들기: 헷갈린 부분을 질문 1개로 바꾸기", "estMin": 1 },
+        { "action": "정리하고 앱에서 완료", "estMin": 1 }
+      ]
+    },
+    {
+      "id": "TPL_STUDY_READING_BLOCK_FULL_30_WORKDAY_HOME",
+      "clusterKey": "STUDY_READING_BLOCK",
+      "type": "process",
+      "title": "읽기 집중 30분(평일·집·요약까지)",
+      "concepts": ["STUDY.READING_BLOCK"],
+      "contexts": ["WORKDAY", "HOME"],
+      "states": [],
+      "time": { "min": 24, "max": 45, "default": 30 },
+      "missions": [
+        { "action": "자료/노트 열고 목표 1줄 + 타이머 30분(준비)", "estMin": 4 },
+        { "action": "18분 읽기 집중(핵심 문장만 표시, 검색은 1회만)", "estMin": 18 },
+        { "action": "4분 요약: 핵심 5줄로 정리", "estMin": 4 },
+        { "action": "3분 적용: ‘이걸로 뭘 할 수 있지?’ 예시 1개 적기", "estMin": 3 },
+        { "action": "정리하고 앱에서 완료", "estMin": 1 }
+      ]
+    },
+    {
+      "id": "TPL_STUDY_READING_BLOCK_FULL_35_OUTSIDE",
+      "clusterKey": "STUDY_READING_BLOCK",
+      "type": "process",
+      "title": "읽기 집중 35분(밖·깊게 읽기)",
+      "concepts": ["STUDY.READING_BLOCK"],
+      "contexts": ["OUTSIDE"],
+      "states": [],
+      "time": { "min": 28, "max": 52, "default": 35 },
+      "missions": [
+        { "action": "자료/논문 열고 읽을 섹션 1개 지정(준비)", "estMin": 5 },
+        { "action": "22분 정독(핵심 주장/근거를 표시하며 읽기)", "estMin": 22 },
+        { "action": "5분 요약 노트: 핵심 5줄 + 모르는 용어 1개", "estMin": 5 },
+        { "action": "2분 용어 정리: 용어 1개를 내 말로 1줄", "estMin": 2 },
+        { "action": "정리하고 앱에서 완료", "estMin": 1 }
+      ]
+    },
+    {
+      "id": "TPL_STUDY_READING_BLOCK_FULL_35_BEFORE_SLEEP_HOME",
+      "clusterKey": "STUDY_READING_BLOCK",
+      "type": "process",
+      "title": "읽기 집중 35분(취침 전·집)",
+      "concepts": ["STUDY.READING_BLOCK"],
+      "contexts": ["BEFORE_SLEEP", "HOME"],
+      "states": [],
+      "time": { "min": 28, "max": 52, "default": 35 },
+      "missions": [
+        { "action": "책/자료 펼치고 조명/자세 세팅 + 타이머 35분(준비)", "estMin": 4 },
+        { "action": "22분 읽기(딴생각 나면 문장 1개 다시 읽고 복귀)", "estMin": 22 },
+        { "action": "4분 요약: 핵심 4줄", "estMin": 4 },
+        { "action": "4분 표시: 내일 다시 볼 페이지/문단 2곳 체크", "estMin": 4 },
+        { "action": "정리하고 앱에서 완료", "estMin": 1 }
+      ]
+    },
+    {
+      "id": "TPL_STUDY_READING_BLOCK_FULL_40_WEEKEND_OUTSIDE",
+      "clusterKey": "STUDY_READING_BLOCK",
+      "type": "process",
+      "title": "읽기 집중 40분(주말·밖·메모 포함)",
+      "concepts": ["STUDY.READING_BLOCK"],
+      "contexts": ["WEEKEND", "OUTSIDE"],
+      "states": [],
+      "time": { "min": 32, "max": 60, "default": 40 },
+      "missions": [
+        { "action": "자료/노트 열고 오늘 읽을 범위 1개 고르기(준비)", "estMin": 5 },
+        { "action": "26분 정독(핵심 주장/반례/예시를 표시)", "estMin": 26 },
+        { "action": "6분 요약: 핵심 6줄 + 질문 1개", "estMin": 6 },
+        { "action": "2분 근거 표시: 중요한 페이지/문단 위치 2개 적기", "estMin": 2 },
+        { "action": "정리하고 앱에서 완료", "estMin": 1 }
+      ]
+    },
+
+    {
+      "id": "TPL_STUDY_PRACTICE_PROBLEMS_MIN_15_HOME",
+      "clusterKey": "STUDY_PRACTICE_PROBLEMS",
+      "type": "process",
+      "title": "문제 풀이 15분 미니(집)",
+      "concepts": ["STUDY.PRACTICE_PROBLEMS"],
+      "contexts": ["HOME"],
+      "states": [],
+      "time": { "min": 12, "max": 22, "default": 15 },
+      "missions": [
+        { "action": "문제집/노트 펼치고 오늘 풀 문제 3개 고르기(준비)", "estMin": 3 },
+        { "action": "10분 풀이 진행(막히면 체크만 하고 다음으로)", "estMin": 10 },
+        { "action": "1분 채점/확인: 맞은/틀린 번호만 표시", "estMin": 1 },
+        { "action": "1분 오답 표시 후 정리하고 앱에서 완료", "estMin": 1 }
+      ]
+    },
+    {
+      "id": "TPL_STUDY_PRACTICE_PROBLEMS_MIN_15_OUTSIDE",
+      "clusterKey": "STUDY_PRACTICE_PROBLEMS",
+      "type": "process",
+      "title": "문제 풀이 15분 빠른 세트(밖)",
+      "concepts": ["STUDY.PRACTICE_PROBLEMS"],
+      "contexts": ["OUTSIDE"],
+      "states": [],
+      "time": { "min": 12, "max": 22, "default": 15 },
+      "missions": [
+        { "action": "문제 세트 열고 1~2문제만 고르기 + 타이머 15분(준비)", "estMin": 3 },
+        { "action": "10분 풀이(답지/검색 금지, 막히면 표시만)", "estMin": 10 },
+        { "action": "1분 채점/오답 표시(틀린 번호만 체크)", "estMin": 1 },
+        { "action": "정리하고 앱에서 완료", "estMin": 1 }
+      ]
+    },
+    {
+      "id": "TPL_STUDY_PRACTICE_PROBLEMS_MIN_18_BEFORE_SLEEP_HOME",
+      "clusterKey": "STUDY_PRACTICE_PROBLEMS",
+      "type": "process",
+      "title": "문제 풀이 18분(취침 전·집)",
+      "concepts": ["STUDY.PRACTICE_PROBLEMS"],
+      "contexts": ["BEFORE_SLEEP", "HOME"],
+      "states": [],
+      "time": { "min": 14, "max": 26, "default": 18 },
+      "missions": [
+        { "action": "문제집 펼치고 오늘 풀 문제 2~3개 고르기(준비)", "estMin": 3 },
+        { "action": "11분 풀이(풀이 과정은 키워드로만 적기)", "estMin": 11 },
+        { "action": "2분 채점/확인: 틀린 번호만 체크", "estMin": 2 },
+        { "action": "1분 오답 1줄 적기 + 정리하고 앱에서 완료", "estMin": 1 },
+        { "action": "불 끄기 전에 정리 확인하고 앱에서 완료", "estMin": 1 }
+      ]
+    },
+    {
+      "id": "TPL_STUDY_PRACTICE_PROBLEMS_STD_20_OUTSIDE",
+      "clusterKey": "STUDY_PRACTICE_PROBLEMS",
+      "type": "process",
+      "title": "문제 풀이 20분(밖·한 세트)",
+      "concepts": ["STUDY.PRACTICE_PROBLEMS"],
+      "contexts": ["OUTSIDE"],
+      "states": [],
+      "time": { "min": 16, "max": 30, "default": 20 },
+      "missions": [
+        { "action": "문제 세트 열고 목표 정하기(문제 4개 등)(준비)", "estMin": 3 },
+        { "action": "12분 풀이(막히면 표시만 하고 다음)", "estMin": 12 },
+        { "action": "3분 채점/오답 표시(틀린 이유는 키워드 1개만)", "estMin": 3 },
+        { "action": "정리하고 앱에서 완료", "estMin": 2 }
+      ]
+    },
+    {
+      "id": "TPL_STUDY_PRACTICE_PROBLEMS_STD_25_HOME",
+      "clusterKey": "STUDY_PRACTICE_PROBLEMS",
+      "type": "process",
+      "title": "문제 풀이 25분 기본(집)",
+      "concepts": ["STUDY.PRACTICE_PROBLEMS"],
+      "contexts": ["HOME"],
+      "states": [],
+      "time": { "min": 20, "max": 36, "default": 25 },
+      "missions": [
+        { "action": "문제집/노트 펼치고 오늘 목표(문제 6개 등) 1줄(준비)", "estMin": 4 },
+        { "action": "15분 풀이 진행(막히면 표시하고 다음 문제로)", "estMin": 15 },
+        { "action": "3분 채점: 맞/틀 체크 + 자신 없는 문제 표시", "estMin": 3 },
+        { "action": "2분 오답: 틀린 이유 1줄 + 다음에 볼 힌트 1줄", "estMin": 2 },
+        { "action": "정리하고 앱에서 완료", "estMin": 1 }
+      ]
+    },
+    {
+      "id": "TPL_STUDY_PRACTICE_PROBLEMS_STD_25_AFTER_LUNCH_OUTSIDE",
+      "clusterKey": "STUDY_PRACTICE_PROBLEMS",
+      "type": "process",
+      "title": "문제 풀이 25분(점심 후·밖)",
+      "concepts": ["STUDY.PRACTICE_PROBLEMS"],
+      "contexts": ["AFTER_LUNCH", "OUTSIDE"],
+      "states": [],
+      "time": { "min": 20, "max": 36, "default": 25 },
+      "missions": [
+        { "action": "문제 세트 열기 + 풀 문제 5개만 고르기(준비)", "estMin": 3 },
+        { "action": "16분 풀이(정답 확인은 끝까지 미루기)", "estMin": 16 },
+        { "action": "3분 채점/오답 표시(틀린 번호만 체크)", "estMin": 3 },
+        { "action": "2분 오답 정리: 가장 헷갈린 문제 1개에 힌트 1줄", "estMin": 2 },
+        { "action": "정리하고 앱에서 완료", "estMin": 1 }
+      ]
+    },
+    {
+      "id": "TPL_STUDY_PRACTICE_PROBLEMS_STD_30_WORKDAY_HOME",
+      "clusterKey": "STUDY_PRACTICE_PROBLEMS",
+      "type": "process",
+      "title": "문제 풀이 30분(평일·집·오답까지)",
+      "concepts": ["STUDY.PRACTICE_PROBLEMS"],
+      "contexts": ["WORKDAY", "HOME"],
+      "states": [],
+      "time": { "min": 24, "max": 45, "default": 30 },
+      "missions": [
+        { "action": "문제집 펼치고 목표(문제 8개/파트 1개) 정하기(준비)", "estMin": 4 },
+        { "action": "20분 풀이(모르면 체크만 하고 다음)", "estMin": 20 },
+        { "action": "3분 채점: 정답 확인 + 자신 없는 문제 1개 표시", "estMin": 3 },
+        { "action": "2분 오답 노트: 틀린 이유 1줄 + 정답 근거 1줄", "estMin": 2 },
+        { "action": "정리하고 앱에서 완료", "estMin": 1 }
+      ]
+    },
+    {
+      "id": "TPL_STUDY_PRACTICE_PROBLEMS_FULL_45_HOME",
+      "clusterKey": "STUDY_PRACTICE_PROBLEMS",
+      "type": "process",
+      "title": "문제 풀이 45분 풀 세션(집)",
+      "concepts": ["STUDY.PRACTICE_PROBLEMS"],
+      "contexts": ["HOME"],
+      "states": [],
+      "time": { "min": 35, "max": 65, "default": 45 },
+      "missions": [
+        { "action": "문제집/필기구/계산기 세팅 + 타이머 45분(준비)", "estMin": 6 },
+        { "action": "28분 풀이(막히면 표시만 하고 계속, 검색 1회만)", "estMin": 28 },
+        { "action": "5분 채점: 맞/틀 체크 + 실수 유형 1개 표시", "estMin": 5 },
+        { "action": "4분 오답 정리: 틀린 문제 2개만 ‘왜’ 1줄씩", "estMin": 4 },
+        { "action": "정리하고 앱에서 완료", "estMin": 2 }
+      ]
+    },
+    {
+      "id": "TPL_STUDY_PRACTICE_PROBLEMS_FULL_45_OUTSIDE",
+      "clusterKey": "STUDY_PRACTICE_PROBLEMS",
+      "type": "process",
+      "title": "문제 풀이 45분 집중(밖)",
+      "concepts": ["STUDY.PRACTICE_PROBLEMS"],
+      "contexts": ["OUTSIDE"],
+      "states": [],
+      "time": { "min": 35, "max": 65, "default": 45 },
+      "missions": [
+        { "action": "문제 세트 열고 목표(문제 12개 등) 1줄 + 타이머(준비)", "estMin": 5 },
+        { "action": "30분 풀이(답지/검색 금지, 막히면 표시만)", "estMin": 30 },
+        { "action": "5분 채점/오답 표시(틀린 번호만 체크)", "estMin": 5 },
+        { "action": "3분 오답 정리: 가장 중요한 실수 1개를 규칙으로 적기", "estMin": 3 },
+        { "action": "정리하고 앱에서 완료", "estMin": 2 }
+      ]
+    },
+    {
+      "id": "TPL_STUDY_PRACTICE_PROBLEMS_FULL_50_WEEKEND_HOME",
+      "clusterKey": "STUDY_PRACTICE_PROBLEMS",
+      "type": "process",
+      "title": "문제 풀이 50분(주말·집·재풀이 포함)",
+      "concepts": ["STUDY.PRACTICE_PROBLEMS"],
+      "contexts": ["WEEKEND", "HOME"],
+      "states": [],
+      "time": { "min": 40, "max": 75, "default": 50 },
+      "missions": [
+        { "action": "문제집/노트 세팅 + 오늘 풀 파트 1개 고르기(준비)", "estMin": 6 },
+        { "action": "32분 풀이 진행(막히면 표시만 하고 계속)", "estMin": 32 },
+        { "action": "6분 채점: 오답/실수 체크 + 자신 없는 문제 표시", "estMin": 6 },
+        { "action": "4분 재풀이: 오답 1개만 다시 풀어보기(힌트 없이)", "estMin": 4 },
+        { "action": "정리하고 앱에서 완료", "estMin": 2 }
+      ]
+    }
+  ]
+}

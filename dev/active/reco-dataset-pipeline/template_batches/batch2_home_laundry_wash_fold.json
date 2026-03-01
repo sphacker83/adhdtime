@@ -1,0 +1,471 @@
+[
+  {
+    "id": "TPL_HOME_LAUNDRY_WASH_MIN_5_HOME",
+    "clusterKey": "HOME_LAUNDRY_WASH",
+    "type": "process",
+    "title": "세탁 5분 미니 스타트(한 바구니만)",
+    "concepts": ["HOME.LAUNDRY_WASH"],
+    "contexts": ["HOME"],
+    "states": [],
+    "time": { "min": 4, "max": 8, "default": 5 },
+    "missions": [
+      { "action": "세탁 바구니 세탁기 앞에 두고 타이머 시작(준비)", "estMin": 1 },
+      { "action": "주머니/휴지/동전 빠르게 확인하기", "estMin": 1 },
+      { "action": "빨래 넣고 세제(또는 캡슐) 1회분 넣기", "estMin": 2 },
+      { "action": "표준 코스 눌러 시작 + 앱에서 완료", "estMin": 1 }
+    ],
+    "meta": {
+      "intensity": "MIN",
+      "goalFocus": "START_WASH",
+      "contextVariant": "HOME",
+      "stateMode": "NORMAL"
+    }
+  },
+  {
+    "id": "TPL_HOME_LAUNDRY_WASH_MIN_6_MORNING_HOME",
+    "clusterKey": "HOME_LAUNDRY_WASH",
+    "type": "process",
+    "title": "세탁 6분 아침 빠른 시작(주머니만 체크)",
+    "concepts": ["HOME.LAUNDRY_WASH"],
+    "contexts": ["MORNING", "HOME"],
+    "states": [],
+    "time": { "min": 5, "max": 10, "default": 6 },
+    "missions": [
+      { "action": "세탁물(바구니/봉투) 가져오고 타이머 시작(준비)", "estMin": 1 },
+      { "action": "주머니/양말 뒤집힘만 1분 정리하기", "estMin": 1 },
+      { "action": "세탁기 투입 + 문 닫기", "estMin": 2 },
+      { "action": "세제 넣고 시작 버튼 누르기", "estMin": 1 },
+      { "action": "세제/바구니 제자리 + 앱에서 완료", "estMin": 1 }
+    ],
+    "meta": {
+      "intensity": "MIN",
+      "goalFocus": "START_WASH",
+      "contextVariant": "HOME",
+      "stateMode": "NORMAL"
+    }
+  },
+  {
+    "id": "TPL_HOME_LAUNDRY_WASH_MIN_7_AFTER_WORK_HOME",
+    "clusterKey": "HOME_LAUNDRY_WASH",
+    "type": "process",
+    "title": "세탁 7분 퇴근 후 빠른 분류+시작(검정/흰색)",
+    "concepts": ["HOME.LAUNDRY_WASH"],
+    "contexts": ["AFTER_WORK", "HOME"],
+    "states": [],
+    "time": { "min": 6, "max": 12, "default": 7 },
+    "missions": [
+      { "action": "바구니 2개(밝은/어두운) 꺼내고 타이머 시작(준비)", "estMin": 1 },
+      { "action": "주머니 비우기 + 지퍼/후드끈만 정리하기", "estMin": 2 },
+      { "action": "밝은/어두운 2분류로 나누기", "estMin": 1 },
+      { "action": "오늘 돌릴 1바구니만 세탁기에 넣기", "estMin": 2 },
+      { "action": "세제 넣고 시작 + 앱에서 완료", "estMin": 1 }
+    ],
+    "meta": {
+      "intensity": "MIN",
+      "goalFocus": "SORT_LAUNDRY",
+      "contextVariant": "HOME",
+      "stateMode": "LOW_ENERGY"
+    }
+  },
+  {
+    "id": "TPL_HOME_LAUNDRY_WASH_MIN_8_BEFORE_SLEEP_HOME",
+    "clusterKey": "HOME_LAUNDRY_WASH",
+    "type": "process",
+    "title": "세탁 8분 자기 전 저자극 스타트(내일을 위한)",
+    "concepts": ["HOME.LAUNDRY_WASH"],
+    "contexts": ["BEFORE_SLEEP", "HOME"],
+    "states": [],
+    "time": { "min": 6, "max": 14, "default": 8 },
+    "missions": [
+      { "action": "세탁기 앞 바닥만 비우고 타이머 시작(준비)", "estMin": 2 },
+      { "action": "주머니 비우고 뒤집힌 옷 2개만 바로잡기", "estMin": 1 },
+      { "action": "수건/속옷/티셔츠 위주로 1바구니 넣기", "estMin": 2 },
+      { "action": "세제 넣고 예약(또는 표준) 코스 세팅하기", "estMin": 2 },
+      { "action": "시작 버튼 누르고 앱에서 완료", "estMin": 1 }
+    ],
+    "meta": {
+      "intensity": "MIN",
+      "goalFocus": "START_WASH",
+      "contextVariant": "HOME",
+      "stateMode": "LOW_ENERGY"
+    }
+  },
+  {
+    "id": "TPL_HOME_LAUNDRY_WASH_STD_10_HOME",
+    "clusterKey": "HOME_LAUNDRY_WASH",
+    "type": "process",
+    "title": "세탁 10분 기본 세팅(분류+오염 체크)",
+    "concepts": ["HOME.LAUNDRY_WASH"],
+    "contexts": ["HOME"],
+    "states": [],
+    "time": { "min": 8, "max": 15, "default": 10 },
+    "missions": [
+      { "action": "바구니/세제 꺼내고 타이머 시작(준비)", "estMin": 1 },
+      { "action": "밝은색/어두운색/수건 3분류로 나누기", "estMin": 3 },
+      { "action": "오염(목/소매) 1~2개만 물로 적셔두기", "estMin": 2 },
+      { "action": "1회분만 세탁기에 넣고 세제 넣기", "estMin": 2 },
+      { "action": "코스/온도/탈수 확인하고 시작", "estMin": 1 },
+      { "action": "바구니 정리 + 앱에서 완료", "estMin": 1 }
+    ],
+    "meta": {
+      "intensity": "STD",
+      "goalFocus": "SORT_LAUNDRY",
+      "contextVariant": "HOME",
+      "stateMode": "NORMAL"
+    }
+  },
+  {
+    "id": "TPL_HOME_LAUNDRY_WASH_STD_12_WEEKEND_HOME",
+    "clusterKey": "HOME_LAUNDRY_WASH",
+    "type": "process",
+    "title": "세탁 12분 주말 한 번에 시작(라벨/망 포함)",
+    "concepts": ["HOME.LAUNDRY_WASH"],
+    "contexts": ["WEEKEND", "HOME"],
+    "states": [],
+    "time": { "min": 10, "max": 18, "default": 12 },
+    "missions": [
+      { "action": "집 안 세탁물 모으고 타이머 시작(준비)", "estMin": 2 },
+      { "action": "수건/일반/섬세 3종으로 분류하기", "estMin": 3 },
+      { "action": "주머니 비우기 + 지퍼/단추 잠그기", "estMin": 2 },
+      { "action": "오늘 돌릴 것만 세탁기에 넣기", "estMin": 2 },
+      { "action": "세제/유연제 세팅하고 코스 선택하기", "estMin": 1 },
+      { "action": "시작 누르고 건조 계획 1줄 적기 + 앱에서 완료", "estMin": 2 }
+    ],
+    "meta": {
+      "intensity": "STD",
+      "goalFocus": "SORT_LAUNDRY",
+      "contextVariant": "HOME",
+      "stateMode": "NORMAL"
+    }
+  },
+  {
+    "id": "TPL_HOME_LAUNDRY_WASH_STD_14_WORKDAY_HOME",
+    "clusterKey": "HOME_LAUNDRY_WASH",
+    "type": "process",
+    "title": "세탁 14분 평일 루틴(분류→세팅→시작)",
+    "concepts": ["HOME.LAUNDRY_WASH"],
+    "contexts": ["WORKDAY", "HOME"],
+    "states": [],
+    "time": { "min": 11, "max": 20, "default": 14 },
+    "missions": [
+      { "action": "바구니 가져오고 타이머 시작(준비)", "estMin": 2 },
+      { "action": "밝은/어두운/수건 3분류로 정리하기", "estMin": 3 },
+      { "action": "오염 있는 것 2개만 비누로 살짝 문지르기", "estMin": 2 },
+      { "action": "세탁기 투입 + 세제 계량해서 넣기", "estMin": 4 },
+      { "action": "코스/탈수 확인하고 시작 버튼 누르기", "estMin": 2 },
+      { "action": "세제/바구니 정리 + 앱에서 완료", "estMin": 1 }
+    ],
+    "meta": {
+      "intensity": "STD",
+      "goalFocus": "START_WASH",
+      "contextVariant": "HOME",
+      "stateMode": "LOW_ENERGY"
+    }
+  },
+  {
+    "id": "TPL_HOME_LAUNDRY_WASH_STD_16_AFTER_LUNCH_HOME",
+    "clusterKey": "HOME_LAUNDRY_WASH",
+    "type": "process",
+    "title": "세탁 16분 점심 후 세팅(수건/침구 포함)",
+    "concepts": ["HOME.LAUNDRY_WASH"],
+    "contexts": ["AFTER_LUNCH", "HOME"],
+    "states": [],
+    "time": { "min": 12, "max": 24, "default": 16 },
+    "missions": [
+      { "action": "세탁물 모으고 타이머 시작(준비)", "estMin": 2 },
+      { "action": "주머니 비우고 수건/의류 분리하기", "estMin": 4 },
+      { "action": "세탁기 넣고 세제/유연제 세팅하기", "estMin": 4 },
+      { "action": "침구/수건이면 코스(온도/헹굼) 맞추기", "estMin": 3 },
+      { "action": "시작 누르고 끝나는 시간 알림 설정하기", "estMin": 2 },
+      { "action": "주변 정리 + 앱에서 완료", "estMin": 1 }
+    ],
+    "meta": {
+      "intensity": "STD",
+      "goalFocus": "START_WASH",
+      "contextVariant": "HOME",
+      "stateMode": "NORMAL"
+    }
+  },
+  {
+    "id": "TPL_HOME_LAUNDRY_WASH_FULL_18_WEEKEND_HOME",
+    "clusterKey": "HOME_LAUNDRY_WASH",
+    "type": "process",
+    "title": "세탁 18분 주말 정리형(분류 먼저, 한 번에 시작)",
+    "concepts": ["HOME.LAUNDRY_WASH"],
+    "contexts": ["WEEKEND", "HOME"],
+    "states": [],
+    "time": { "min": 14, "max": 28, "default": 18 },
+    "missions": [
+      { "action": "집안 세탁물(방/욕실) 모으고 타이머 시작(준비)", "estMin": 3 },
+      { "action": "밝은/어두운/수건/섬세 4분류로 나누기", "estMin": 5 },
+      { "action": "오염 있는 것 3개만 부분세탁/애벌하기", "estMin": 3 },
+      { "action": "첫 배치 세탁기 투입 + 세제/유연제 넣기", "estMin": 3 },
+      { "action": "코스/온도/탈수 확정하고 시작", "estMin": 2 },
+      { "action": "남은 분류는 한쪽에 모아두고 앱에서 완료", "estMin": 2 }
+    ],
+    "meta": {
+      "intensity": "FULL",
+      "goalFocus": "SORT_LAUNDRY",
+      "contextVariant": "HOME",
+      "stateMode": "NORMAL"
+    }
+  },
+  {
+    "id": "TPL_HOME_LAUNDRY_WASH_FULL_20_HOME",
+    "clusterKey": "HOME_LAUNDRY_WASH",
+    "type": "process",
+    "title": "세탁 20분 풀 세팅(전체 수거→분류→시작)",
+    "concepts": ["HOME.LAUNDRY_WASH"],
+    "contexts": ["HOME"],
+    "states": [],
+    "time": { "min": 16, "max": 30, "default": 20 },
+    "missions": [
+      { "action": "방/욕실/현관 세탁물 모두 모으고 타이머 시작(준비)", "estMin": 4 },
+      { "action": "색/소재(수건/청바지/섬세) 기준으로 분류하기", "estMin": 5 },
+      { "action": "주머니 비우기 + 지퍼/단추 정리하기", "estMin": 3 },
+      { "action": "첫 배치 투입 + 세제 계량(유연제 포함)", "estMin": 4 },
+      { "action": "코스/온도/헹굼/탈수 확인 후 시작", "estMin": 2 },
+      { "action": "끝나는 시간 메모/알림 설정 + 앱에서 완료", "estMin": 2 }
+    ],
+    "meta": {
+      "intensity": "FULL",
+      "goalFocus": "START_WASH",
+      "contextVariant": "HOME",
+      "stateMode": "NORMAL"
+    }
+  },
+
+  {
+    "id": "TPL_HOME_LAUNDRY_FOLD_MIN_8_HOME",
+    "clusterKey": "HOME_LAUNDRY_FOLD",
+    "type": "process",
+    "title": "빨래 개기 8분 미니(바구니 1개만)",
+    "concepts": ["HOME.LAUNDRY_FOLD"],
+    "contexts": ["HOME"],
+    "states": [],
+    "time": { "min": 6, "max": 12, "default": 8 },
+    "missions": [
+      { "action": "마른 빨래 바구니 옆으로 가져오고 타이머 시작(준비)", "estMin": 1 },
+      { "action": "테이블/침대 위 1구역만 비우기(세팅)", "estMin": 1 },
+      { "action": "큰 것(바지/후드/수건) 먼저 접기", "estMin": 3 },
+      { "action": "티셔츠/속옷/양말 접어 한 더미로 만들기", "estMin": 2 },
+      { "action": "바구니 정리하고 앱에서 완료", "estMin": 1 }
+    ],
+    "meta": {
+      "intensity": "MIN",
+      "goalFocus": "FOLD_FAST",
+      "contextVariant": "HOME",
+      "stateMode": "NORMAL"
+    }
+  },
+  {
+    "id": "TPL_HOME_LAUNDRY_FOLD_MIN_9_MORNING_HOME",
+    "clusterKey": "HOME_LAUNDRY_FOLD",
+    "type": "process",
+    "title": "빨래 개기 9분 아침 한 더미 만들기(서랍은 나중에)",
+    "concepts": ["HOME.LAUNDRY_FOLD"],
+    "contexts": ["MORNING", "HOME"],
+    "states": [],
+    "time": { "min": 7, "max": 14, "default": 9 },
+    "missions": [
+      { "action": "바구니 가져오고 타이머 시작(준비)", "estMin": 1 },
+      { "action": "양말/속옷/티셔츠 3그룹으로만 나누기", "estMin": 2 },
+      { "action": "티셔츠 5장(또는 1묶음)만 빠르게 접기", "estMin": 3 },
+      { "action": "양말 짝 맞추고 속옷 접기", "estMin": 2 },
+      { "action": "한 더미로 모아두고 앱에서 완료", "estMin": 1 }
+    ],
+    "meta": {
+      "intensity": "MIN",
+      "goalFocus": "FOLD_FAST",
+      "contextVariant": "HOME",
+      "stateMode": "NORMAL"
+    }
+  },
+  {
+    "id": "TPL_HOME_LAUNDRY_FOLD_MIN_10_AFTER_WORK_HOME",
+    "clusterKey": "HOME_LAUNDRY_FOLD",
+    "type": "process",
+    "title": "빨래 개기 10분 퇴근 후 최소치(양말+상의만)",
+    "concepts": ["HOME.LAUNDRY_FOLD"],
+    "contexts": ["AFTER_WORK", "HOME"],
+    "states": [],
+    "time": { "min": 8, "max": 16, "default": 10 },
+    "missions": [
+      { "action": "바구니를 소파 옆에 두고 타이머 시작(준비)", "estMin": 2 },
+      { "action": "구겨진 것만 털어 펴기(세팅)", "estMin": 2 },
+      { "action": "티셔츠/맨투맨 1묶음 접기", "estMin": 4 },
+      { "action": "양말 짝 맞추고 한 봉투(또는 칸)에 넣기", "estMin": 1 },
+      { "action": "바구니 치우고 앱에서 완료", "estMin": 1 }
+    ],
+    "meta": {
+      "intensity": "MIN",
+      "goalFocus": "FOLD_FAST",
+      "contextVariant": "HOME",
+      "stateMode": "LOW_ENERGY"
+    }
+  },
+  {
+    "id": "TPL_HOME_LAUNDRY_FOLD_MIN_12_BEFORE_SLEEP_HOME",
+    "clusterKey": "HOME_LAUNDRY_FOLD",
+    "type": "process",
+    "title": "빨래 개기 12분 자기 전 정리(침대 위 1구역)",
+    "concepts": ["HOME.LAUNDRY_FOLD"],
+    "contexts": ["BEFORE_SLEEP", "HOME"],
+    "states": [],
+    "time": { "min": 10, "max": 18, "default": 12 },
+    "missions": [
+      { "action": "침대 한쪽 비우고 바구니 가져오며 타이머 시작(준비)", "estMin": 2 },
+      { "action": "걸 것/접을 것 2분류로 나누기", "estMin": 2 },
+      { "action": "접을 것(티/속옷/수건) 위주로 접기", "estMin": 4 },
+      { "action": "걸 옷은 옷걸이에 걸어 문고리에 걸어두기", "estMin": 3 },
+      { "action": "바구니 치우고 앱에서 완료", "estMin": 1 }
+    ],
+    "meta": {
+      "intensity": "MIN",
+      "goalFocus": "PUT_AWAY",
+      "contextVariant": "HOME",
+      "stateMode": "LOW_ENERGY"
+    }
+  },
+  {
+    "id": "TPL_HOME_LAUNDRY_FOLD_STD_14_HOME",
+    "clusterKey": "HOME_LAUNDRY_FOLD",
+    "type": "process",
+    "title": "빨래 개기 14분 기본(그룹별 접기+정리 1단계)",
+    "concepts": ["HOME.LAUNDRY_FOLD"],
+    "contexts": ["HOME"],
+    "states": [],
+    "time": { "min": 11, "max": 20, "default": 14 },
+    "missions": [
+      { "action": "바구니/옷걸이 준비하고 타이머 시작(준비)", "estMin": 2 },
+      { "action": "상의/하의/수건/속옷 4그룹으로 분류하기", "estMin": 3 },
+      { "action": "상의/하의 접어 2더미 만들기", "estMin": 5 },
+      { "action": "수건/속옷/양말 접고 짝 맞추기", "estMin": 2 },
+      { "action": "한 더미를 서랍 앞에 두고 앱에서 완료", "estMin": 2 }
+    ],
+    "meta": {
+      "intensity": "STD",
+      "goalFocus": "FOLD_FAST",
+      "contextVariant": "HOME",
+      "stateMode": "NORMAL"
+    }
+  },
+  {
+    "id": "TPL_HOME_LAUNDRY_FOLD_STD_15_WEEKEND_HOME",
+    "clusterKey": "HOME_LAUNDRY_FOLD",
+    "type": "process",
+    "title": "빨래 개기 15분 주말 수납까지(서랍 1칸)",
+    "concepts": ["HOME.LAUNDRY_FOLD"],
+    "contexts": ["WEEKEND", "HOME"],
+    "states": [],
+    "time": { "min": 12, "max": 22, "default": 15 },
+    "missions": [
+      { "action": "서랍 1칸 비우고 바구니 가져오며 타이머 시작(준비)", "estMin": 2 },
+      { "action": "접을 것/걸 것 분리하고 옷걸이 5개 준비", "estMin": 3 },
+      { "action": "접을 것(티/바지/수건) 접기", "estMin": 6 },
+      { "action": "접은 것 서랍 1칸에만 수납하기", "estMin": 3 },
+      { "action": "걸 옷은 옷장에 걸고 앱에서 완료", "estMin": 1 }
+    ],
+    "meta": {
+      "intensity": "STD",
+      "goalFocus": "PUT_AWAY",
+      "contextVariant": "HOME",
+      "stateMode": "NORMAL"
+    }
+  },
+  {
+    "id": "TPL_HOME_LAUNDRY_FOLD_STD_16_WORKDAY_HOME",
+    "clusterKey": "HOME_LAUNDRY_FOLD",
+    "type": "process",
+    "title": "빨래 개기 16분 평일 리듬(접기→수납 2단계)",
+    "concepts": ["HOME.LAUNDRY_FOLD"],
+    "contexts": ["WORKDAY", "HOME"],
+    "states": [],
+    "time": { "min": 13, "max": 24, "default": 16 },
+    "missions": [
+      { "action": "바구니 옆에 앉고 타이머 시작(준비)", "estMin": 2 },
+      { "action": "상의/하의/속옷/양말 4그룹으로 나누기", "estMin": 4 },
+      { "action": "상의/하의 접기(한 더미씩)", "estMin": 6 },
+      { "action": "속옷/양말 접어 수납 칸에만 넣기", "estMin": 3 },
+      { "action": "바구니 비우고 앱에서 완료", "estMin": 1 }
+    ],
+    "meta": {
+      "intensity": "STD",
+      "goalFocus": "PUT_AWAY",
+      "contextVariant": "HOME",
+      "stateMode": "LOW_ENERGY"
+    }
+  },
+  {
+    "id": "TPL_HOME_LAUNDRY_FOLD_STD_18_HOME",
+    "clusterKey": "HOME_LAUNDRY_FOLD",
+    "type": "process",
+    "title": "빨래 개기 18분 정리형(접기+옷장 앞 정돈)",
+    "concepts": ["HOME.LAUNDRY_FOLD"],
+    "contexts": ["HOME"],
+    "states": [],
+    "time": { "min": 14, "max": 26, "default": 18 },
+    "missions": [
+      { "action": "수납 공간 앞 바닥 1구역 비우고 타이머 시작(준비)", "estMin": 2 },
+      { "action": "걸 것/접을 것/수건 3그룹으로 분리하기", "estMin": 4 },
+      { "action": "접을 것(상의/하의/속옷) 접기", "estMin": 6 },
+      { "action": "수건/양말 정리하고 수납 칸에 넣기", "estMin": 4 },
+      { "action": "걸 옷 옷장에 걸고 주변 정돈", "estMin": 1 },
+      { "action": "바구니 제자리 + 앱에서 완료", "estMin": 1 }
+    ],
+    "meta": {
+      "intensity": "STD",
+      "goalFocus": "PUT_AWAY",
+      "contextVariant": "HOME",
+      "stateMode": "NORMAL"
+    }
+  },
+  {
+    "id": "TPL_HOME_LAUNDRY_FOLD_FULL_25_WEEKEND_HOME",
+    "clusterKey": "HOME_LAUNDRY_FOLD",
+    "type": "process",
+    "title": "빨래 개기 25분 주말 한 번에(수납까지)",
+    "concepts": ["HOME.LAUNDRY_FOLD"],
+    "contexts": ["WEEKEND", "HOME"],
+    "states": [],
+    "time": { "min": 20, "max": 35, "default": 25 },
+    "missions": [
+      { "action": "수납 동선(서랍/옷장) 열어두고 타이머 시작(준비)", "estMin": 4 },
+      { "action": "걸 것/접을 것/수건/양말 4그룹으로 분류하기", "estMin": 5 },
+      { "action": "접을 것 전부 접기(상의→하의→수건)", "estMin": 8 },
+      { "action": "수납: 서랍 2칸에 넣고 넘치면 한 더미로 종료", "estMin": 5 },
+      { "action": "걸 옷 옷장에 걸고 옷걸이 정리", "estMin": 2 },
+      { "action": "바구니/공간 정리하고 앱에서 완료", "estMin": 1 }
+    ],
+    "meta": {
+      "intensity": "FULL",
+      "goalFocus": "PUT_AWAY",
+      "contextVariant": "HOME",
+      "stateMode": "NORMAL"
+    }
+  },
+  {
+    "id": "TPL_HOME_LAUNDRY_FOLD_FULL_30_HOME",
+    "clusterKey": "HOME_LAUNDRY_FOLD",
+    "type": "process",
+    "title": "빨래 개기 30분 풀 정리(접기+수납+옷장 리셋)",
+    "concepts": ["HOME.LAUNDRY_FOLD"],
+    "contexts": ["HOME"],
+    "states": [],
+    "time": { "min": 24, "max": 42, "default": 30 },
+    "missions": [
+      { "action": "수납 공간 2곳(서랍/옷장) 열고 타이머 시작(준비)", "estMin": 5 },
+      { "action": "상의/하의/수건/속옷/양말로 세분 분류하기", "estMin": 6 },
+      { "action": "접을 것 전부 접고 크기 맞춰 쌓기", "estMin": 10 },
+      { "action": "수납: 서랍/선반에 카테고리별로 넣기", "estMin": 5 },
+      { "action": "걸 옷 옷장에 걸고 옷걸이 간격 정리", "estMin": 3 },
+      { "action": "바구니 치우고 앱에서 완료", "estMin": 1 }
+    ],
+    "meta": {
+      "intensity": "FULL",
+      "goalFocus": "PUT_AWAY",
+      "contextVariant": "HOME",
+      "stateMode": "NORMAL"
+    }
+  }
+]

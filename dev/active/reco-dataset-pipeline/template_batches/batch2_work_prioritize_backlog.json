@@ -1,0 +1,870 @@
+[
+  {
+    "id": "TPL_WORK_TASK_PRIORITIZE_MIN_8_WORK",
+    "clusterKey": "WORK_TASK_PRIORITIZE",
+    "type": "process",
+    "title": "업무 우선순위 8분 초간단 선정(지금 1개만)",
+    "concepts": [
+      "WORK.TASK_PRIORITIZE"
+    ],
+    "contexts": [
+      "WORK"
+    ],
+    "states": [],
+    "time": {
+      "min": 6,
+      "max": 12,
+      "default": 8
+    },
+    "missions": [
+      {
+        "action": "업무 목록/메모 열고 오늘 해야 할 것 5개만 적기(준비)",
+        "estMin": 2
+      },
+      {
+        "action": "긴급/중요 4분류로 훑고 TOP1에 표시하기",
+        "estMin": 2
+      },
+      {
+        "action": "TOP1의 ‘다음 2분 행동’ 1줄 쓰기(예: 문서 열기/초안 3줄)",
+        "estMin": 2
+      },
+      {
+        "action": "캘린더/타이머 2분 잡고 바로 시작 + 앱에서 완료",
+        "estMin": 2
+      }
+    ],
+    "meta": {
+      "intensity": "MIN",
+      "contextVariant": "WORK"
+    }
+  },
+  {
+    "id": "TPL_WORK_TASK_PRIORITIZE_MIN_10_MORNING",
+    "clusterKey": "WORK_TASK_PRIORITIZE",
+    "type": "process",
+    "title": "아침 업무 우선순위 10분 세팅(오늘 3개)",
+    "concepts": [
+      "WORK.TASK_PRIORITIZE"
+    ],
+    "contexts": [
+      "WORK",
+      "MORNING"
+    ],
+    "states": [],
+    "time": {
+      "min": 8,
+      "max": 15,
+      "default": 10
+    },
+    "missions": [
+      {
+        "action": "캘린더/메신저 확인하고 오늘 미팅만 3줄로 적기(준비)",
+        "estMin": 2
+      },
+      {
+        "action": "오늘 결과물 1개를 한 문장으로 정의(완료 조건 1줄)",
+        "estMin": 2
+      },
+      {
+        "action": "해야 할 일 3개만 골라 1/2/3으로 번호 매기기",
+        "estMin": 3
+      },
+      {
+        "action": "1번을 캘린더에 먼저 블록 잡고 앱에서 완료",
+        "estMin": 3
+      }
+    ],
+    "meta": {
+      "intensity": "MIN",
+      "contextVariant": "MORNING"
+    }
+  },
+  {
+    "id": "TPL_WORK_TASK_PRIORITIZE_STD_12_AFTER_LUNCH",
+    "clusterKey": "WORK_TASK_PRIORITIZE",
+    "type": "process",
+    "title": "점심 후 12분 재우선순위(남은 일정 정리)",
+    "concepts": [
+      "WORK.TASK_PRIORITIZE"
+    ],
+    "contexts": [
+      "WORK",
+      "AFTER_LUNCH"
+    ],
+    "states": [],
+    "time": {
+      "min": 10,
+      "max": 18,
+      "default": 12
+    },
+    "missions": [
+      {
+        "action": "점심 후 에너지(1~5) 체크 + 물 한 모금(준비)",
+        "estMin": 2
+      },
+      {
+        "action": "메신저/이메일 3분 스캔하고 방해 요소 1개 끄기(알림/탭)",
+        "estMin": 3
+      },
+      {
+        "action": "남은 작업을 ‘오늘/이번주/나중’으로 3분 분류",
+        "estMin": 3
+      },
+      {
+        "action": "‘오늘’에서 1개 선택 + 다음 행동 1줄 적기",
+        "estMin": 2
+      },
+      {
+        "action": "2분 타이머 시작하고 착수 + 앱에서 완료",
+        "estMin": 2
+      }
+    ],
+    "meta": {
+      "intensity": "STD",
+      "contextVariant": "AFTER_LUNCH"
+    }
+  },
+  {
+    "id": "TPL_WORK_TASK_PRIORITIZE_STD_15_WORKDAY",
+    "clusterKey": "WORK_TASK_PRIORITIZE",
+    "type": "process",
+    "title": "업무 우선순위 15분 트리아지(이번주 TOP3)",
+    "concepts": [
+      "WORK.TASK_PRIORITIZE"
+    ],
+    "contexts": [
+      "WORK",
+      "WORKDAY"
+    ],
+    "states": [],
+    "time": {
+      "min": 12,
+      "max": 22,
+      "default": 15
+    },
+    "missions": [
+      {
+        "action": "업무 보드/리스트 열고 ‘이번주 3개’ 제목만 적기(준비)",
+        "estMin": 3
+      },
+      {
+        "action": "후보 3개에 예상 소요/난이도 1줄씩 적기",
+        "estMin": 4
+      },
+      {
+        "action": "대기/의존 있는 건 ‘BLOCK’ 표시 + 물어볼 질문 1개 적기",
+        "estMin": 3
+      },
+      {
+        "action": "우선순위 1~3 확정하고 캘린더에 블록 2개 넣기",
+        "estMin": 4
+      },
+      {
+        "action": "TOP1에 표시(⭐/✅)하고 앱에서 완료",
+        "estMin": 1
+      }
+    ],
+    "meta": {
+      "intensity": "STD",
+      "contextVariant": "WORKDAY"
+    }
+  },
+  {
+    "id": "TPL_WORK_TASK_PRIORITIZE_STD_18_WEEKDAY",
+    "clusterKey": "WORK_TASK_PRIORITIZE",
+    "type": "process",
+    "title": "마감 중심 18분 우선순위 정리(리스크 줄이기)",
+    "concepts": [
+      "WORK.TASK_PRIORITIZE"
+    ],
+    "contexts": [
+      "WORK",
+      "WEEKDAY"
+    ],
+    "states": [],
+    "time": {
+      "min": 14,
+      "max": 26,
+      "default": 18
+    },
+    "missions": [
+      {
+        "action": "오늘/내일 마감만 필터링해서 3개 추리기(준비)",
+        "estMin": 3
+      },
+      {
+        "action": "각 항목의 승인/확인 필요 여부 체크하고 체크포인트 적기",
+        "estMin": 3
+      },
+      {
+        "action": "리스크 큰 1개를 3단계로 쪼개서 체크리스트 만들기",
+        "estMin": 5
+      },
+      {
+        "action": "필요한 질문/요청 1개를 메신저/메일로 보내기(짧게)",
+        "estMin": 3
+      },
+      {
+        "action": "캘린더에 작업 블록 설정하고 앱에서 완료",
+        "estMin": 4
+      }
+    ],
+    "meta": {
+      "intensity": "STD",
+      "contextVariant": "WEEKDAY"
+    }
+  },
+  {
+    "id": "TPL_WORK_TASK_PRIORITIZE_FULL_20_WORK",
+    "clusterKey": "WORK_TASK_PRIORITIZE",
+    "type": "process",
+    "title": "업무 우선순위 20분 정렬(인박스→TOP3)",
+    "concepts": [
+      "WORK.TASK_PRIORITIZE"
+    ],
+    "contexts": [
+      "WORK"
+    ],
+    "states": [],
+    "time": {
+      "min": 16,
+      "max": 30,
+      "default": 20
+    },
+    "missions": [
+      {
+        "action": "인박스/노트/메일 플래그를 2분만 수집해서 한곳에 모으기(준비)",
+        "estMin": 2
+      },
+      {
+        "action": "할 일 10개를 훑으며 임팩트/긴급(1~3)으로 빠르게 점수 매기기",
+        "estMin": 5
+      },
+      {
+        "action": "상위 3개만 남기고 나머지는 ‘나중/보류’로 이동",
+        "estMin": 4
+      },
+      {
+        "action": "상위 1개를 3개의 하위 행동으로 쪼개기(각 10분 이하)",
+        "estMin": 5
+      },
+      {
+        "action": "첫 하위 행동 2분 착수 + 진행상태 한 줄 기록 + 앱에서 완료",
+        "estMin": 4
+      }
+    ],
+    "meta": {
+      "intensity": "FULL",
+      "contextVariant": "WORK"
+    }
+  },
+  {
+    "id": "TPL_WORK_TASK_PRIORITIZE_MIN_9_WORK",
+    "clusterKey": "WORK_TASK_PRIORITIZE",
+    "type": "process",
+    "title": "회의 전 9분 우선순위(준비 1개만)",
+    "concepts": [
+      "WORK.TASK_PRIORITIZE"
+    ],
+    "contexts": [
+      "WORK"
+    ],
+    "states": [],
+    "time": {
+      "min": 7,
+      "max": 14,
+      "default": 9
+    },
+    "missions": [
+      {
+        "action": "다음 2시간 일정 확인 + 준비할 것 3개만 적기(준비)",
+        "estMin": 2
+      },
+      {
+        "action": "미팅 관련 산출물 1개를 한 문장으로 정의",
+        "estMin": 2
+      },
+      {
+        "action": "가장 중요한 준비 1개를 3분만 실행(문서 열기/자료 1장)",
+        "estMin": 3
+      },
+      {
+        "action": "미팅 링크/자료 핀 고정하고 앱에서 완료",
+        "estMin": 2
+      }
+    ],
+    "meta": {
+      "intensity": "MIN",
+      "contextVariant": "WORK"
+    }
+  },
+  {
+    "id": "TPL_WORK_TASK_PRIORITIZE_STD_14_AFTER_WORK",
+    "clusterKey": "WORK_TASK_PRIORITIZE",
+    "type": "process",
+    "title": "퇴근 전 14분 내일 우선순위 정리(마감 대비)",
+    "concepts": [
+      "WORK.TASK_PRIORITIZE"
+    ],
+    "contexts": [
+      "WORK",
+      "AFTER_WORK"
+    ],
+    "states": [],
+    "time": {
+      "min": 11,
+      "max": 20,
+      "default": 14
+    },
+    "missions": [
+      {
+        "action": "오늘 완료/미완료 2분 체크하고 미완료 3개만 적기(준비)",
+        "estMin": 2
+      },
+      {
+        "action": "내일 꼭 해야 할 1개 선택 + 완료 조건 1줄 쓰기",
+        "estMin": 3
+      },
+      {
+        "action": "내일 첫 15분 행동을 2개로 쪼개서 순서 정하기",
+        "estMin": 4
+      },
+      {
+        "action": "캘린더에 내일 아침 시작 블록 넣기(시작 시간만 고정)",
+        "estMin": 3
+      },
+      {
+        "action": "알림/탭 정리 2분 + 앱에서 완료",
+        "estMin": 2
+      }
+    ],
+    "meta": {
+      "intensity": "STD",
+      "contextVariant": "AFTER_WORK"
+    }
+  },
+  {
+    "id": "TPL_WORK_TASK_PRIORITIZE_FULL_25_WORKDAY",
+    "clusterKey": "WORK_TASK_PRIORITIZE",
+    "type": "process",
+    "title": "업무 우선순위+캘린더 25분 재배치(오늘 3개 고정)",
+    "concepts": [
+      "WORK.TASK_PRIORITIZE"
+    ],
+    "contexts": [
+      "WORK",
+      "WORKDAY"
+    ],
+    "states": [],
+    "time": {
+      "min": 20,
+      "max": 38,
+      "default": 25
+    },
+    "missions": [
+      {
+        "action": "캘린더+업무보드 동시에 열고 남은 시간 블록 확인(준비)",
+        "estMin": 3
+      },
+      {
+        "action": "해야 할 8개를 ‘오늘/이번주/보류’로 이동",
+        "estMin": 6
+      },
+      {
+        "action": "‘오늘’에 남긴 3개를 예상 소요로 정렬하고 1~3번 지정",
+        "estMin": 5
+      },
+      {
+        "action": "1번/2번에 집중 블록 2개 예약(가능하면 중간 회의 피하기)",
+        "estMin": 6
+      },
+      {
+        "action": "방해요소 1개 제거(알림/불필요 미팅/탭) + 앱에서 완료",
+        "estMin": 5
+      }
+    ],
+    "meta": {
+      "intensity": "FULL",
+      "contextVariant": "WORKDAY"
+    }
+  },
+  {
+    "id": "TPL_WORK_TASK_PRIORITIZE_STD_16_MORNING_WORKDAY",
+    "clusterKey": "WORK_TASK_PRIORITIZE",
+    "type": "process",
+    "title": "업무 시작 16분 우선순위(읽지않음 스캔→TOP1 착수)",
+    "concepts": [
+      "WORK.TASK_PRIORITIZE"
+    ],
+    "contexts": [
+      "WORK",
+      "MORNING",
+      "WORKDAY"
+    ],
+    "states": [],
+    "time": {
+      "min": 13,
+      "max": 24,
+      "default": 16
+    },
+    "missions": [
+      {
+        "action": "업무 시작 후 1분 호흡 + 물 한 모금(준비)",
+        "estMin": 2
+      },
+      {
+        "action": "이메일/메신저 ‘읽지 않음’ 3분 스캔하고 중요한 것만 표시",
+        "estMin": 3
+      },
+      {
+        "action": "오늘 할 일 5개를 적고 2개는 과감히 내일로 미루기",
+        "estMin": 4
+      },
+      {
+        "action": "TOP1의 첫 10분 행동을 2개로 분해(딱 지금 할 1개 선택)",
+        "estMin": 4
+      },
+      {
+        "action": "타이머 3분 설정하고 바로 시작 + 앱에서 완료",
+        "estMin": 3
+      }
+    ],
+    "meta": {
+      "intensity": "STD",
+      "contextVariant": "MORNING_WORKDAY"
+    }
+  },
+
+  {
+    "id": "TPL_WORK_BACKLOG_GROOM_MIN_10_WORK",
+    "clusterKey": "WORK_BACKLOG_GROOM",
+    "type": "process",
+    "title": "백로그 10분 미니 그루밍(중복/모호함 제거)",
+    "concepts": [
+      "WORK.BACKLOG_GROOM"
+    ],
+    "contexts": [
+      "WORK"
+    ],
+    "states": [],
+    "time": {
+      "min": 8,
+      "max": 15,
+      "default": 10
+    },
+    "missions": [
+      {
+        "action": "백로그/할일 리스트 열고 중복 2개 찾기(준비)",
+        "estMin": 2
+      },
+      {
+        "action": "끝난/의미 없는 항목 3개 삭제 또는 아카이브",
+        "estMin": 3
+      },
+      {
+        "action": "모호한 항목 1개를 ‘결과물’ 중심 한 문장으로 다시 쓰기",
+        "estMin": 2
+      },
+      {
+        "action": "다음 행동 1줄 추가하고 앱에서 완료",
+        "estMin": 3
+      }
+    ],
+    "meta": {
+      "intensity": "MIN",
+      "contextVariant": "WORK"
+    }
+  },
+  {
+    "id": "TPL_WORK_BACKLOG_GROOM_MIN_12_MORNING",
+    "clusterKey": "WORK_BACKLOG_GROOM",
+    "type": "process",
+    "title": "아침 12분 백로그 정리(인박스→라벨)",
+    "concepts": [
+      "WORK.BACKLOG_GROOM"
+    ],
+    "contexts": [
+      "WORK",
+      "MORNING"
+    ],
+    "states": [],
+    "time": {
+      "min": 10,
+      "max": 18,
+      "default": 12
+    },
+    "missions": [
+      {
+        "action": "인박스/메모에서 백로그로 옮길 것 3개만 고르기(준비)",
+        "estMin": 3
+      },
+      {
+        "action": "각 항목에 라벨 1개씩 달기(프로젝트/사람/기한 중 택1)",
+        "estMin": 4
+      },
+      {
+        "action": "우선순위 낮은 것 2개를 ‘보류’로 이동",
+        "estMin": 2
+      },
+      {
+        "action": "오늘 볼 1개를 상단 고정하고 앱에서 완료",
+        "estMin": 3
+      }
+    ],
+    "meta": {
+      "intensity": "MIN",
+      "contextVariant": "MORNING"
+    }
+  },
+  {
+    "id": "TPL_WORK_BACKLOG_GROOM_STD_15_AFTER_LUNCH",
+    "clusterKey": "WORK_BACKLOG_GROOM",
+    "type": "process",
+    "title": "점심 후 15분 백로그 분류(NEXT/WAIT/IDEA)",
+    "concepts": [
+      "WORK.BACKLOG_GROOM"
+    ],
+    "contexts": [
+      "WORK",
+      "AFTER_LUNCH"
+    ],
+    "states": [],
+    "time": {
+      "min": 12,
+      "max": 22,
+      "default": 15
+    },
+    "missions": [
+      {
+        "action": "백로그를 상단 10개만 보이도록 필터/정렬(준비)",
+        "estMin": 2
+      },
+      {
+        "action": "상단 10개를 NEXT/WAIT/IDEA로 빠르게 분류",
+        "estMin": 5
+      },
+      {
+        "action": "WAIT 1개에 요청/메모 1줄 추가(누구/언제)",
+        "estMin": 3
+      },
+      {
+        "action": "NEXT 1개를 3단계 체크리스트로 쪼개기",
+        "estMin": 4
+      },
+      {
+        "action": "저장/스냅샷 남기고 앱에서 완료",
+        "estMin": 1
+      }
+    ],
+    "meta": {
+      "intensity": "STD",
+      "contextVariant": "AFTER_LUNCH"
+    }
+  },
+  {
+    "id": "TPL_WORK_BACKLOG_GROOM_FULL_20_WORKDAY",
+    "clusterKey": "WORK_BACKLOG_GROOM",
+    "type": "process",
+    "title": "업무일 20분 백로그 그루밍(보류 정리+쪼개기)",
+    "concepts": [
+      "WORK.BACKLOG_GROOM"
+    ],
+    "contexts": [
+      "WORK",
+      "WORKDAY"
+    ],
+    "states": [],
+    "time": {
+      "min": 16,
+      "max": 30,
+      "default": 20
+    },
+    "missions": [
+      {
+        "action": "프로젝트 보드 열고 ‘이번주/다음주/언젠가’ 컬럼 확인(준비)",
+        "estMin": 3
+      },
+      {
+        "action": "‘언젠가’ 항목 5개 중 2개를 아카이브/삭제",
+        "estMin": 4
+      },
+      {
+        "action": "‘이번주 후보’ 3개에 예상 소요(분/시간) 적기",
+        "estMin": 5
+      },
+      {
+        "action": "가장 큰 항목 1개를 작은 티켓 3개로 쪼개기",
+        "estMin": 6
+      },
+      {
+        "action": "첫 티켓에 담당/기한 설정하고 앱에서 완료",
+        "estMin": 2
+      }
+    ],
+    "meta": {
+      "intensity": "FULL",
+      "contextVariant": "WORKDAY"
+    }
+  },
+  {
+    "id": "TPL_WORK_BACKLOG_GROOM_STD_18_WEEKDAY",
+    "clusterKey": "WORK_BACKLOG_GROOM",
+    "type": "process",
+    "title": "평일 18분 대기 작업 정리(WAIT→다음 체크)",
+    "concepts": [
+      "WORK.BACKLOG_GROOM"
+    ],
+    "contexts": [
+      "WORK",
+      "WEEKDAY"
+    ],
+    "states": [],
+    "time": {
+      "min": 14,
+      "max": 26,
+      "default": 18
+    },
+    "missions": [
+      {
+        "action": "대기중(WAIT) 항목만 모아서 5개 확인(준비)",
+        "estMin": 3
+      },
+      {
+        "action": "각 항목에 다음 체크 날짜/사람을 1줄씩 추가",
+        "estMin": 5
+      },
+      {
+        "action": "막힌 항목 1개를 ‘질문 1개’로 바꿔 적기",
+        "estMin": 4
+      },
+      {
+        "action": "질문 메시지/메일 초안 작성(짧게 3문장)",
+        "estMin": 4
+      },
+      {
+        "action": "정리 결과 저장하고 앱에서 완료",
+        "estMin": 2
+      }
+    ],
+    "meta": {
+      "intensity": "STD",
+      "contextVariant": "WEEKDAY"
+    }
+  },
+  {
+    "id": "TPL_WORK_BACKLOG_GROOM_MIN_8_WORK",
+    "clusterKey": "WORK_BACKLOG_GROOM",
+    "type": "process",
+    "title": "백로그 8분 마이크로 정리(1개만 선명하게)",
+    "concepts": [
+      "WORK.BACKLOG_GROOM"
+    ],
+    "contexts": [
+      "WORK"
+    ],
+    "states": [],
+    "time": {
+      "min": 6,
+      "max": 12,
+      "default": 8
+    },
+    "missions": [
+      {
+        "action": "백로그 5개만 훑고 오래된 1개 선택(준비)",
+        "estMin": 2
+      },
+      {
+        "action": "제목을 ‘결과물’ 중심으로 한 줄 수정",
+        "estMin": 2
+      },
+      {
+        "action": "다음 행동 1줄 추가(2분 안에 할 수 있게)",
+        "estMin": 2
+      },
+      {
+        "action": "우선순위/라벨 저장하고 앱에서 완료",
+        "estMin": 2
+      }
+    ],
+    "meta": {
+      "intensity": "MIN",
+      "contextVariant": "WORK"
+    }
+  },
+  {
+    "id": "TPL_WORK_BACKLOG_GROOM_STD_16_AFTER_WORK",
+    "clusterKey": "WORK_BACKLOG_GROOM",
+    "type": "process",
+    "title": "퇴근 전 16분 백로그 수집+정리(메모 정돈)",
+    "concepts": [
+      "WORK.BACKLOG_GROOM"
+    ],
+    "contexts": [
+      "WORK",
+      "AFTER_WORK"
+    ],
+    "states": [],
+    "time": {
+      "min": 13,
+      "max": 24,
+      "default": 16
+    },
+    "missions": [
+      {
+        "action": "오늘 생긴 메모/슬랙 저장 항목 3개를 백로그로 수집(준비)",
+        "estMin": 4
+      },
+      {
+        "action": "각 항목에 프로젝트/상태 태그 붙이기",
+        "estMin": 4
+      },
+      {
+        "action": "내일 볼 1개를 NEXT로 이동 + 2단계로 쪼개기",
+        "estMin": 5
+      },
+      {
+        "action": "정리 결과를 1줄 회고로 남기고 앱에서 완료",
+        "estMin": 3
+      }
+    ],
+    "meta": {
+      "intensity": "STD",
+      "contextVariant": "AFTER_WORK"
+    }
+  },
+  {
+    "id": "TPL_WORK_BACKLOG_GROOM_FULL_25_WORK",
+    "clusterKey": "WORK_BACKLOG_GROOM",
+    "type": "process",
+    "title": "백로그 25분 딥 클린(삭제+재작성+쪼개기)",
+    "concepts": [
+      "WORK.BACKLOG_GROOM"
+    ],
+    "contexts": [
+      "WORK"
+    ],
+    "states": [],
+    "time": {
+      "min": 20,
+      "max": 40,
+      "default": 25
+    },
+    "missions": [
+      {
+        "action": "백로그 상위 30개를 한 번 스크롤하며 ‘삭제 후보’ 표시(준비)",
+        "estMin": 4
+      },
+      {
+        "action": "삭제 후보 5개를 실제 삭제/아카이브",
+        "estMin": 5
+      },
+      {
+        "action": "모호한 항목 2개를 SMART 문장으로 재작성",
+        "estMin": 6
+      },
+      {
+        "action": "큰 항목 1개를 작은 행동 4개로 쪼개고 체크박스 추가",
+        "estMin": 7
+      },
+      {
+        "action": "상단 3개 우선순위 재정렬하고 앱에서 완료",
+        "estMin": 3
+      }
+    ],
+    "meta": {
+      "intensity": "FULL",
+      "contextVariant": "WORK"
+    }
+  },
+  {
+    "id": "TPL_WORK_BACKLOG_GROOM_STD_14_MORNING",
+    "clusterKey": "WORK_BACKLOG_GROOM",
+    "type": "process",
+    "title": "아침 14분 백로그 트리아지(막힘 제거)",
+    "concepts": [
+      "WORK.BACKLOG_GROOM"
+    ],
+    "contexts": [
+      "WORK",
+      "MORNING"
+    ],
+    "states": [],
+    "time": {
+      "min": 11,
+      "max": 20,
+      "default": 14
+    },
+    "missions": [
+      {
+        "action": "백로그 상단 10개 중 막힌 것 2개 표시(준비)",
+        "estMin": 2
+      },
+      {
+        "action": "막힌 것 각각에 필요한 사람/질문을 한 줄씩 적기",
+        "estMin": 4
+      },
+      {
+        "action": "바로 할 수 있는 NEXT 2개를 위로 올리기",
+        "estMin": 3
+      },
+      {
+        "action": "NEXT 1개에 5분 서브태스크 2개 추가",
+        "estMin": 3
+      },
+      {
+        "action": "저장하고 앱에서 완료",
+        "estMin": 2
+      }
+    ],
+    "meta": {
+      "intensity": "STD",
+      "contextVariant": "MORNING"
+    }
+  },
+  {
+    "id": "TPL_WORK_BACKLOG_GROOM_FULL_30_WORKDAY",
+    "clusterKey": "WORK_BACKLOG_GROOM",
+    "type": "process",
+    "title": "업무일 30분 백로그 정교화(후보 선정+완료 정의)",
+    "concepts": [
+      "WORK.BACKLOG_GROOM"
+    ],
+    "contexts": [
+      "WORK",
+      "WORKDAY"
+    ],
+    "states": [],
+    "time": {
+      "min": 24,
+      "max": 45,
+      "default": 30
+    },
+    "missions": [
+      {
+        "action": "프로젝트 백로그 열고 ‘이번 스프린트 후보’만 필터(준비)",
+        "estMin": 4
+      },
+      {
+        "action": "후보 6개에 노력(1~5) 점수 매기기(대략)",
+        "estMin": 8
+      },
+      {
+        "action": "가치 높은 3개를 선택하고 나머지는 보류로 이동",
+        "estMin": 6
+      },
+      {
+        "action": "선택 3개 각각에 ‘완료 정의’ 한 줄씩 추가",
+        "estMin": 6
+      },
+      {
+        "action": "첫 항목을 다음 행동 3개로 쪼개고 담당/기한 설정 + 앱에서 완료",
+        "estMin": 6
+      }
+    ],
+    "meta": {
+      "intensity": "FULL",
+      "contextVariant": "WORKDAY"
+    }
+  }
+]
