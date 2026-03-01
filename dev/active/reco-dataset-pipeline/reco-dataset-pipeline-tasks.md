@@ -16,12 +16,12 @@ Last Updated: 2026-03-01
 - [x] `data/lexicon.json` 생성(`conceptLexemes` 121, `stateHints` 125)
 - [x] lexicon 내 문자열 배열을 한 줄 배열로 포맷
 
-## Phase 3: User Pipeline Stage 3 - Templates (2400) 🟡 IN PROGRESS
+## Phase 3: User Pipeline Stage 3 - Templates (2400) ✅ COMPLETE
 - [x] `data/templates.json` 10개 샘플 생성(스키마/휴리스틱/time 합계 검증)
 - [x] `data/templates.json` 200개까지 확장(20 클러스터 × 10)
 - [x] `data/templates.json` 370개까지 확장(30 클러스터 커버, 일부 클러스터 20개 도달)
-- [ ] 기존 템플릿 전체 리라이트: 퀘스트/미션을 “사람이 말하듯” 부드러운 문장 + 존댓말 지시문 중심으로 개선(룰/휴리스틱과 정합)
-- [ ] `data/templates.json` 2400개까지 확장(클러스터 120 × 20)
+- [x] 기존 템플릿 전체 리라이트: 퀘스트/미션을 “사람이 말하듯” 부드러운 문장 + 존댓말 지시문 중심으로 개선(룰/휴리스틱과 정합)
+- [x] `data/templates.json` 2400개까지 확장(클러스터 120 × 20)
 
 ## Phase 4: Validate(검증) 도구 ✅ COMPLETE
 - [x] `scripts/validate-data.ts` 추가 + `npm run -s dataset:validate` 통과(errors/warnings 0)
@@ -38,5 +38,5 @@ Last Updated: 2026-03-01
 - [ ] 실패 대응/롤백 절차를 Quick Resume에 한 줄로 고정
 
 ## Session Close
-- [ ] `reco-dataset-pipeline-context.md`의 `SESSION PROGRESS` 갱신
-- [ ] 완료 체크박스 최신화
+- [x] `reco-dataset-pipeline-context.md`의 `SESSION PROGRESS` 갱신
+- [x] 완료 체크박스 최신화
