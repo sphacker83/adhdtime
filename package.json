@@ -13,6 +13,8 @@
     "dataset:build:full": "tsx scripts/dataset/build-data.ts full --force",
     "dataset:validate": "tsx scripts/validate-data.ts",
     "dataset:sample": "tsx scripts/sample-run.ts",
+    "dataset:quality": "tsx scripts/quality-chain-audit.ts",
+    "dataset:quality:gate": "tsx scripts/quality-chain-audit.ts --gate",
     "test:dataset": "vitest run scripts/dataset",
     "verify:gate": "node scripts/verify-release-gate.mjs",
     "verify:mvp": "npm run typecheck && npm run lint && npm run test:mvp && npm run build && npm run verify:gate"

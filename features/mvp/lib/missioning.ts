@@ -44,6 +44,7 @@ export interface LocalPresetRankCandidate {
   similarity: number;
   rerankConfidence: number;
   routeConfidence: number;
+  titleRelevanceConfidence: number;
   priority: number;
   difficulty: number;
   estimatedTimeMin: number;
@@ -57,11 +58,11 @@ export interface GenerateLocalMissioningOptions {
 const DEFAULT_MISSION_NOTE = "완료 조건 체크";
 
 const ACTION_START_VERB_PATTERN =
-  /^(시작|준비|정리|분류|작성|확인|검토|실행|제출|저장|기록|예약|마무리|요약|복습|정돈|선택|고르|읽|적|풀|버리|담|옮기|닦|체크|보내|완료|쪼개|정하|계획)/;
+  /^(시작|준비|정리|분류|작성|확인|검토|실행|제출|저장|기록|예약|마무리|요약|복습|정돈|선택|고르|읽|적|풀|버리|담|옮기|닦|체크|보내|완료|쪼개|정하|계획|이어가|유지하|진행하)/;
 const ACTION_END_VERB_PATTERN =
-  /(하기|해보기|작성|정리|확인|검토|실행|준비|제출|저장|기록|예약|마무리|요약|복습|정돈|정하기|적기|읽기|풀기|버리기|담기|옮기기|닦기|고르기|체크하기|보내기|꺼내기|모으기|비우기|완료|종료)$/;
+  /(하기|해보기|작성|정리|확인|검토|실행|준비|제출|저장|기록|예약|마무리|요약|복습|정돈|정하기|적기|읽기|풀기|버리기|담기|옮기기|닦기|고르기|체크하기|보내기|꺼내기|모으기|비우기|완료|종료|(이어가|유지하|진행하)(기|세요)?)$/;
 const ACTION_CONTAINS_VERB_PATTERN =
-  /(하기|해보기|작성|정리|확인|검토|실행|준비|제출|저장|기록|예약|마무리|요약|복습|정돈|정하|적기|읽기|풀기|버리기|담기|옮기기|닦기|고르기|체크|보내|꺼내|모으|비우|시작|종료)/;
+  /(하기|해보기|작성|정리|확인|검토|실행|준비|제출|저장|기록|예약|마무리|요약|복습|정돈|정하|적기|읽기|풀기|버리기|담기|옮기기|닦기|고르기|체크|보내|꺼내|모으|비우|시작|종료|이어가|유지하|진행하)/;
 const ACTION_KOREAN_DECLARATIVE_END_PATTERN = /[가-힣]+(다|요)(\([^)]*\))?$/;
 
 const EST_MINUTES_RANGE_LABEL = `${MIN_MISSION_EST_MINUTES}~${MAX_MISSION_EST_MINUTES}분`;
@@ -77,6 +78,118 @@ const MISSION_ICON_RULES: Array<{ iconKey: MissionIconKey; keywords: string[] }>
   { iconKey: "break", keywords: ["휴식", "스트레칭", "호흡", "산책", "쉬기", "회복"] },
   { iconKey: "execute", keywords: ["시작", "실행", "집중", "작업", "진행", "핵심", "처리", "착수"] }
 ];
+const TITLE_RELEVANCE_STOPWORDS = new Set<string>([
+  "그리고",
+  "그냥",
+  "근데",
+  "나는",
+  "내가",
+  "너무",
+  "다시",
+  "당장",
+  "또",
+  "뭔가",
+  "뭐",
+  "먼저",
+  "만",
+  "만좀",
+  "부터",
+  "부터는",
+  "좀",
+  "조금",
+  "지금",
+  "해서",
+  "해야",
+  "해야지",
+  "하기",
+  "할일",
+  "할일들",
+  "해",
+  "the",
+  "a",
+  "an",
+  "to",
+  "for",
+  "and",
+  "or",
+  "my",
+  "your",
+  "task"
+]);
+const TITLE_RELEVANCE_JOSA_SUFFIXES = [
+  "으로부터",
+  "으로는",
+  "으로도",
+  "에게서",
+  "한테서",
+  "에서는",
+  "에서만",
+  "에게",
+  "한테",
+  "보다",
+  "처럼",
+  "까지",
+  "부터",
+  "으로",
+  "에서",
+  "로는",
+  "로도",
+  "라도",
+  "이나",
+  "이랑",
+  "랑",
+  "으로",
+  "로",
+  "와",
+  "과",
+  "은",
+  "는",
+  "이",
+  "가",
+  "을",
+  "를",
+  "에",
+  "도",
+  "만"
+] as const;
+const TITLE_RELEVANCE_ENDING_SUFFIXES = [
+  "하기",
+  "하고",
+  "하면",
+  "하며",
+  "했다",
+  "했어",
+  "했던",
+  "하는",
+  "하게",
+  "하다",
+  "해요",
+  "해야",
+  "해서",
+  "한",
+  "할",
+  "된",
+  "되는",
+  "되다",
+  "되어",
+  "되",
+  "인"
+] as const;
+const TITLE_RELEVANCE_PHRASE_NORMALIZATIONS: Array<{ pattern: RegExp; replacement: string }> = [
+  { pattern: /받은\s*편지함/gi, replacement: "받은편지함" },
+  { pattern: /in\s*box/gi, replacement: "inbox" },
+  { pattern: /빨래\s*감/gi, replacement: "빨랫감" }
+];
+const TITLE_RELEVANCE_SYNONYM_GROUPS: readonly string[][] = [
+  ["빨래", "세탁", "세탁물", "빨랫감", "laundry"],
+  ["개기", "접기", "개다", "접다", "폴딩", "fold"],
+  ["널기", "널다", "말리기", "말리다", "건조", "건조기", "dry"],
+  ["메일", "이메일", "email", "mail", "전자우편", "지메일", "gmail"],
+  ["인박스", "받은편지함", "메일함", "inbox", "inboxzero", "인박스제로"],
+  ["회신", "답장", "reply", "respond"],
+  ["정리", "분류", "트리아지", "triage", "처리"]
+];
+const TITLE_RELEVANCE_SYNONYM_MAP = buildTitleRelevanceSynonymMap();
 
 function clamp01(value: number): number {
   if (!Number.isFinite(value)) {
@@ -96,6 +209,283 @@ function normalizeActionText(action: string): string {
 
 function normalizeTitle(title: string): string {
   return normalizeTaskSummary(title);
+}
+
+function normalizeTitleRelevanceText(input: string): string {
+  let normalized = normalizeScoreText(input);
+
+  for (const phraseNormalization of TITLE_RELEVANCE_PHRASE_NORMALIZATIONS) {
+    normalized = normalized.replace(phraseNormalization.pattern, phraseNormalization.replacement);
+  }
+
+  return normalized
+    .replace(/[^0-9a-zA-Z가-힣\s]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function compactTitleRelevanceText(input: string): string {
+  return normalizeTitleRelevanceText(input).replace(/\s+/g, "");
+}
+
+function isKoreanToken(token: string): boolean {
+  return /[가-힣]/.test(token);
+}
+
+function stripTokenSuffix(token: string, suffixes: readonly string[]): string {
+  for (const suffix of suffixes) {
+    if (token.length > suffix.length + 1 && token.endsWith(suffix)) {
+      return token.slice(0, -suffix.length);
+    }
+  }
+
+  return token;
+}
+
+function simplifyKoreanToken(token: string): string {
+  const withoutJosa = stripTokenSuffix(token, TITLE_RELEVANCE_JOSA_SUFFIXES);
+  const withoutEnding = stripTokenSuffix(withoutJosa, TITLE_RELEVANCE_ENDING_SUFFIXES);
+  return withoutEnding.length >= 2 ? withoutEnding : withoutJosa;
+}
+
+function normalizeTitleRelevanceToken(token: string): string {
+  const normalizedToken = token.toLowerCase().trim();
+  if (!normalizedToken) {
+    return "";
+  }
+
+  if (!isKoreanToken(normalizedToken)) {
+    return normalizedToken;
+  }
+
+  return simplifyKoreanToken(normalizedToken);
+}
+
+function tokenizeTitleRelevanceText(input: string): string[] {
+  const normalizedText = normalizeTitleRelevanceText(input);
+  if (!normalizedText) {
+    return [];
+  }
+
+  const tokens = normalizedText
+    .split(/[^0-9a-zA-Z가-힣]+/)
+    .map(normalizeTitleRelevanceToken)
+    .filter((token) => {
+      if (!token || TITLE_RELEVANCE_STOPWORDS.has(token)) {
+        return false;
+      }
+
+      if (token.length === 1 && !/^\d$/.test(token)) {
+        return false;
+      }
+
+      return true;
+    });
+
+  return Array.from(new Set(tokens));
+}
+
+function buildTitleRelevanceSynonymMap(): Map<string, string> {
+  const synonymMap = new Map<string, string>();
+
+  for (const synonymGroup of TITLE_RELEVANCE_SYNONYM_GROUPS) {
+    const normalizedTokens = synonymGroup
+      .map((token) => normalizeTitleRelevanceToken(token))
+      .filter((token) => token.length > 0);
+
+    const canonicalToken = normalizedTokens[0];
+    if (!canonicalToken) {
+      continue;
+    }
+
+    for (const token of normalizedTokens) {
+      synonymMap.set(token, canonicalToken);
+    }
+  }
+
+  return synonymMap;
+}
+
+function resolveTitleRelevanceCanonicalToken(token: string): string {
+  const normalizedToken = normalizeTitleRelevanceToken(token);
+  if (!normalizedToken) {
+    return "";
+  }
+
+  return TITLE_RELEVANCE_SYNONYM_MAP.get(normalizedToken) ?? normalizedToken;
+}
+
+function computeExactTokenMatchScore(queryToken: string, titleToken: string): number {
+  if (queryToken === titleToken) {
+    return 1;
+  }
+
+  if (queryToken.length >= 2 && titleToken.includes(queryToken)) {
+    return 0.74;
+  }
+
+  if (titleToken.length >= 2 && queryToken.includes(titleToken)) {
+    return 0.68;
+  }
+
+  return 0;
+}
+
+function computeSemanticTokenMatchScore(queryToken: string, titleToken: string): number {
+  const exactMatchScore = computeExactTokenMatchScore(queryToken, titleToken);
+  if (exactMatchScore > 0) {
+    return exactMatchScore;
+  }
+
+  const queryCanonical = resolveTitleRelevanceCanonicalToken(queryToken);
+  const titleCanonical = resolveTitleRelevanceCanonicalToken(titleToken);
+  if (!queryCanonical || !titleCanonical) {
+    return 0;
+  }
+
+  if (queryCanonical === titleCanonical) {
+    return 0.93;
+  }
+
+  if (queryCanonical.length >= 2 && titleCanonical.includes(queryCanonical)) {
+    return 0.72;
+  }
+
+  if (titleCanonical.length >= 2 && queryCanonical.includes(titleCanonical)) {
+    return 0.68;
+  }
+
+  return 0;
+}
+
+type TokenMatcher = (queryToken: string, titleToken: string) => number;
+
+function computeTokenCoverageScore(
+  queryTokens: readonly string[],
+  titleTokens: readonly string[],
+  tokenMatcher: TokenMatcher
+): number {
+  if (queryTokens.length === 0 || titleTokens.length === 0) {
+    return 0;
+  }
+
+  const matchTotal = queryTokens.reduce((sum, queryToken) => {
+    let bestMatch = 0;
+
+    for (const titleToken of titleTokens) {
+      const nextScore = tokenMatcher(queryToken, titleToken);
+      if (nextScore > bestMatch) {
+        bestMatch = nextScore;
+      }
+      if (bestMatch >= 1) {
+        break;
+      }
+    }
+
+    return sum + bestMatch;
+  }, 0);
+
+  return clamp01(matchTotal / queryTokens.length);
+}
+
+function computeOrderedTokenCoverageScore(queryTokens: readonly string[], titleTokens: readonly string[]): number {
+  if (queryTokens.length === 0 || titleTokens.length === 0) {
+    return 0;
+  }
+
+  let titleIndex = 0;
+  let matchedScore = 0;
+
+  for (const queryToken of queryTokens) {
+    while (titleIndex < titleTokens.length) {
+      const score = computeSemanticTokenMatchScore(queryToken, titleTokens[titleIndex]);
+      titleIndex += 1;
+      if (score >= 0.7) {
+        matchedScore += score;
+        break;
+      }
+    }
+  }
+
+  return clamp01(matchedScore / queryTokens.length);
+}
+
+function buildTitleRelevanceBigrams(input: string): string[] {
+  const compactText = compactTitleRelevanceText(input);
+  if (compactText.length < 2) {
+    return [];
+  }
+
+  const bigrams: string[] = [];
+  for (let index = 0; index <= compactText.length - 2; index += 1) {
+    bigrams.push(compactText.slice(index, index + 2));
+  }
+
+  return bigrams;
+}
+
+function computeTitleRelevanceDiceScore(source: string, target: string): number {
+  const sourceBigrams = buildTitleRelevanceBigrams(source);
+  const targetBigrams = buildTitleRelevanceBigrams(target);
+
+  if (sourceBigrams.length === 0 || targetBigrams.length === 0) {
+    return 0;
+  }
+
+  const sourceCountMap = new Map<string, number>();
+  sourceBigrams.forEach((bigram) => {
+    sourceCountMap.set(bigram, (sourceCountMap.get(bigram) ?? 0) + 1);
+  });
+
+  let overlapCount = 0;
+  targetBigrams.forEach((bigram) => {
+    const currentCount = sourceCountMap.get(bigram) ?? 0;
+    if (currentCount <= 0) {
+      return;
+    }
+
+    overlapCount += 1;
+    sourceCountMap.set(bigram, currentCount - 1);
+  });
+
+  return clamp01((2 * overlapCount) / (sourceBigrams.length + targetBigrams.length));
+}
+
+function computeTitleRelevanceConfidence(query: string, title: string): number {
+  const normalizedQuery = normalizeTitleRelevanceText(query);
+  const normalizedTitle = normalizeTitleRelevanceText(title);
+  if (!normalizedQuery || !normalizedTitle) {
+    return 0;
+  }
+
+  const queryTokens = tokenizeTitleRelevanceText(normalizedQuery);
+  const titleTokens = tokenizeTitleRelevanceText(normalizedTitle);
+
+  const exactCoverage = computeTokenCoverageScore(queryTokens, titleTokens, computeExactTokenMatchScore);
+  const semanticCoverage = computeTokenCoverageScore(queryTokens, titleTokens, computeSemanticTokenMatchScore);
+  const orderedCoverage = computeOrderedTokenCoverageScore(queryTokens, titleTokens);
+  const diceScore = computeTitleRelevanceDiceScore(normalizedQuery, normalizedTitle);
+
+  const compactQuery = compactTitleRelevanceText(normalizedQuery);
+  const compactTitle = compactTitleRelevanceText(normalizedTitle);
+  const hasDirectPhraseMatch = compactQuery.length >= 2 && compactTitle.includes(compactQuery);
+  if (hasDirectPhraseMatch) {
+    const directMatchBoostedScore = 0.85 + (semanticCoverage * 0.1) + (Math.max(diceScore, orderedCoverage) * 0.05);
+    return clamp01(directMatchBoostedScore);
+  }
+
+  let score = (semanticCoverage * 0.48)
+    + (exactCoverage * 0.24)
+    + (orderedCoverage * 0.12)
+    + (diceScore * 0.16);
+
+  if (semanticCoverage >= 0.85) {
+    score += 0.06;
+  } else if (semanticCoverage >= 0.65 && diceScore >= 0.45) {
+    score += 0.04;
+  }
+
+  return clamp01(score);
 }
 
 function isNonEmptyString(value: unknown): value is string {
@@ -298,6 +688,7 @@ export function rankLocalPresetCandidates(title: string, limit = 5): LocalPreset
     similarity: candidate.similarity,
     rerankConfidence: candidate.isExactTitleMatch ? 1 : clamp01(candidate.rerankConfidence),
     routeConfidence: candidate.isExactTitleMatch ? 1 : clamp01(candidate.routeConfidence),
+    titleRelevanceConfidence: candidate.isExactTitleMatch ? 1 : computeTitleRelevanceConfidence(title, candidate.title),
     priority: candidate.priority,
     difficulty: candidate.difficulty,
     estimatedTimeMin: candidate.estimatedTimeMin

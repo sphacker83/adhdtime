@@ -1317,8 +1317,8 @@
       "conceptId": "HEALTH.MINDFULNESS_BREATHING",
       "clusters": [
         "HEALTH_MINDFULNESS_BREATHING",
-        "HEALTH_WALK_OUTSIDE",
-        "HEALTH_WORKOUT_START"
+        "HEALTH_STRETCH_RECOVERY",
+        "HEALTH_WALK_OUTSIDE"
       ]
     },
     {
@@ -1573,8 +1573,8 @@
       "conceptId": "HEALTH.STRETCH_RECOVERY",
       "clusters": [
         "HEALTH_STRETCH_RECOVERY",
-        "HEALTH_WALK_OUTSIDE",
-        "HEALTH_WORKOUT_START"
+        "HEALTH_WORKOUT_START",
+        "HEALTH_WALK_OUTSIDE"
       ]
     },
     {
@@ -1677,8 +1677,8 @@
       "conceptId": "HEALTH.WALK_OUTSIDE",
       "clusters": [
         "HEALTH_WALK_OUTSIDE",
-        "HEALTH_WORKOUT_START",
-        "HEALTH_STRETCH_RECOVERY"
+        "HEALTH_STRETCH_RECOVERY",
+        "HEALTH_WORKOUT_START"
       ]
     },
     {
@@ -1701,8 +1701,8 @@
       "conceptId": "HEALTH.WORKOUT_START",
       "clusters": [
         "HEALTH_WORKOUT_START",
-        "HEALTH_WALK_OUTSIDE",
-        "HEALTH_STRETCH_RECOVERY"
+        "HEALTH_STRETCH_RECOVERY",
+        "HEALTH_WALK_OUTSIDE"
       ]
     },
     {
@@ -3725,7 +3725,7 @@
       "conceptId": "ROUTINE.DAY_START",
       "clusters": [
         "ROUTINE_DAY_START",
-        "ROUTINE_BEDTIME_PREP",
+        "ROUTINE_MOVE_BODY",
         "ROUTINE_MEAL_PLAN"
       ]
     },
@@ -4061,8 +4061,8 @@
       "conceptId": "ROUTINE.MOVE_BODY",
       "clusters": [
         "ROUTINE_MOVE_BODY",
-        "ROUTINE_DAY_START",
-        "ROUTINE_BEDTIME_PREP"
+        "ROUTINE_STRETCH_BREAK",
+        "ROUTINE_DAY_START"
       ]
     },
     {
@@ -5352,10 +5352,10 @@
       "conceptId": "STATE.ANXIOUS",
       "clusters": [
         "STATE_ANXIETY_GROUNDING",
-        "STATE_LOW_MOTIVATION_ACTIVATION",
-        "STATE_LOW_ENERGY_RECOVERY",
         "STATE_OVERWHELM_RESET",
         "STATE_DISTRACTION_REFRESH",
+        "STATE_LOW_MOTIVATION_ACTIVATION",
+        "STATE_LOW_ENERGY_RECOVERY",
         "STATE_PROCRASTINATION_BREAK"
       ]
     },
@@ -5539,11 +5539,11 @@
       "conceptId": "STATE.DISTRACTED",
       "clusters": [
         "STATE_DISTRACTION_REFRESH",
-        "STATE_LOW_MOTIVATION_ACTIVATION",
-        "STATE_LOW_ENERGY_RECOVERY",
+        "STATE_PROCRASTINATION_BREAK",
         "STATE_OVERWHELM_RESET",
+        "STATE_LOW_MOTIVATION_ACTIVATION",
         "STATE_ANXIETY_GROUNDING",
-        "STATE_PROCRASTINATION_BREAK"
+        "STATE_LOW_ENERGY_RECOVERY"
       ]
     },
     {
@@ -5637,12 +5637,12 @@
     {
       "conceptId": "STATE.FIRST_ACTION_STUCK",
       "clusters": [
-        "STATE_LOW_MOTIVATION_ACTIVATION",
-        "STATE_LOW_ENERGY_RECOVERY",
+        "STATE_PROCRASTINATION_BREAK",
         "STATE_OVERWHELM_RESET",
-        "STATE_ANXIETY_GROUNDING",
+        "STATE_LOW_MOTIVATION_ACTIVATION",
         "STATE_DISTRACTION_REFRESH",
-        "STATE_PROCRASTINATION_BREAK"
+        "STATE_LOW_ENERGY_RECOVERY",
+        "STATE_ANXIETY_GROUNDING"
       ]
     },
     {
@@ -5869,10 +5869,10 @@
       "conceptId": "STATE.LOW_ENERGY",
       "clusters": [
         "STATE_LOW_ENERGY_RECOVERY",
+        "STATE_DISTRACTION_REFRESH",
         "STATE_LOW_MOTIVATION_ACTIVATION",
         "STATE_OVERWHELM_RESET",
         "STATE_ANXIETY_GROUNDING",
-        "STATE_DISTRACTION_REFRESH",
         "STATE_PROCRASTINATION_BREAK"
       ]
     },
@@ -5880,11 +5880,11 @@
       "conceptId": "STATE.LOW_MOTIVATION",
       "clusters": [
         "STATE_LOW_MOTIVATION_ACTIVATION",
+        "STATE_PROCRASTINATION_BREAK",
+        "STATE_DISTRACTION_REFRESH",
         "STATE_LOW_ENERGY_RECOVERY",
         "STATE_OVERWHELM_RESET",
-        "STATE_ANXIETY_GROUNDING",
-        "STATE_DISTRACTION_REFRESH",
-        "STATE_PROCRASTINATION_BREAK"
+        "STATE_ANXIETY_GROUNDING"
       ]
     },
     {
@@ -5989,12 +5989,12 @@
     {
       "conceptId": "STATE.NEXT_STEP_UNCLEAR",
       "clusters": [
-        "STATE_LOW_MOTIVATION_ACTIVATION",
-        "STATE_LOW_ENERGY_RECOVERY",
         "STATE_OVERWHELM_RESET",
-        "STATE_ANXIETY_GROUNDING",
+        "STATE_PROCRASTINATION_BREAK",
+        "STATE_LOW_MOTIVATION_ACTIVATION",
         "STATE_DISTRACTION_REFRESH",
-        "STATE_PROCRASTINATION_BREAK"
+        "STATE_ANXIETY_GROUNDING",
+        "STATE_LOW_ENERGY_RECOVERY"
       ]
     },
     {
@@ -6078,11 +6078,11 @@
       "conceptId": "STATE.OVERWHELM",
       "clusters": [
         "STATE_OVERWHELM_RESET",
-        "STATE_LOW_MOTIVATION_ACTIVATION",
-        "STATE_LOW_ENERGY_RECOVERY",
         "STATE_ANXIETY_GROUNDING",
+        "STATE_PROCRASTINATION_BREAK",
+        "STATE_LOW_MOTIVATION_ACTIVATION",
         "STATE_DISTRACTION_REFRESH",
-        "STATE_PROCRASTINATION_BREAK"
+        "STATE_LOW_ENERGY_RECOVERY"
       ]
     },
     {
@@ -6211,10 +6211,10 @@
       "clusters": [
         "STATE_PROCRASTINATION_BREAK",
         "STATE_LOW_MOTIVATION_ACTIVATION",
-        "STATE_LOW_ENERGY_RECOVERY",
+        "STATE_DISTRACTION_REFRESH",
         "STATE_OVERWHELM_RESET",
         "STATE_ANXIETY_GROUNDING",
-        "STATE_DISTRACTION_REFRESH"
+        "STATE_LOW_ENERGY_RECOVERY"
       ]
     },
     {
@@ -6462,12 +6462,12 @@
     {
       "conceptId": "STATE.START_RESISTANCE",
       "clusters": [
+        "STATE_PROCRASTINATION_BREAK",
         "STATE_LOW_MOTIVATION_ACTIVATION",
-        "STATE_LOW_ENERGY_RECOVERY",
         "STATE_OVERWHELM_RESET",
-        "STATE_ANXIETY_GROUNDING",
         "STATE_DISTRACTION_REFRESH",
-        "STATE_PROCRASTINATION_BREAK"
+        "STATE_LOW_ENERGY_RECOVERY",
+        "STATE_ANXIETY_GROUNDING"
       ]
     },
     {
@@ -6682,12 +6682,12 @@
     {
       "conceptId": "STATE.WHERE_TO_START",
       "clusters": [
-        "STATE_LOW_MOTIVATION_ACTIVATION",
-        "STATE_LOW_ENERGY_RECOVERY",
         "STATE_OVERWHELM_RESET",
-        "STATE_ANXIETY_GROUNDING",
+        "STATE_PROCRASTINATION_BREAK",
+        "STATE_LOW_MOTIVATION_ACTIVATION",
         "STATE_DISTRACTION_REFRESH",
-        "STATE_PROCRASTINATION_BREAK"
+        "STATE_ANXIETY_GROUNDING",
+        "STATE_LOW_ENERGY_RECOVERY"
       ]
     },
     {
@@ -7844,8 +7844,8 @@
       "conceptId": "STUDY.SESSION_START",
       "clusters": [
         "STUDY_SESSION_START",
-        "STUDY_READING_BLOCK",
-        "STUDY_NOTE_TAKING"
+        "STUDY_ASSIGNMENT_PLAN",
+        "STUDY_READING_BLOCK"
       ]
     },
     {
@@ -8412,8 +8412,8 @@
       "conceptId": "WORK.CONTEXT_RESET",
       "clusters": [
         "WORK_CONTEXT_RESET",
-        "WORK_EMAIL_TRIAGE",
-        "WORK_INBOX_ZERO"
+        "WORK_FOCUS_BLOCK_START",
+        "WORK_DAY_PLAN"
       ]
     },
     {
@@ -8836,8 +8836,8 @@
       "conceptId": "WORK.FOCUS_BLOCK_START",
       "clusters": [
         "WORK_FOCUS_BLOCK_START",
-        "WORK_EMAIL_TRIAGE",
-        "WORK_INBOX_ZERO"
+        "WORK_CONTEXT_RESET",
+        "WORK_TASK_PRIORITIZE"
       ]
     },
     {

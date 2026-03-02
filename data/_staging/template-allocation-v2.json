@@ -1,0 +1,166 @@
+{
+  "version": 2,
+  "total": 2000,
+  "domains": {
+    "HOME": {
+      "target": 520,
+      "clusters": {
+        "HOME_DISHWASH": 24,
+        "HOME_LAUNDRY_WASH": 18,
+        "HOME_LAUNDRY_DRY": 16,
+        "HOME_LAUNDRY_FOLD": 23,
+        "HOME_TRASH_OUT": 13,
+        "HOME_RECYCLE_SORT": 16,
+        "HOME_SWEEP_MOP": 21,
+        "HOME_VACUUM": 27,
+        "HOME_BATHROOM_CLEAN": 22,
+        "HOME_TOILET_CLEAN": 15,
+        "HOME_KITCHEN_RESET": 22,
+        "HOME_FRIDGE_CHECK": 15,
+        "HOME_MEAL_PREP": 27,
+        "HOME_COOK_SIMPLE_MEAL": 25,
+        "HOME_GROCERY_LIST": 12,
+        "HOME_PANTRY_ORGANIZE": 24,
+        "HOME_DESK_CLEAR": 16,
+        "HOME_ROOM_TIDY": 27,
+        "HOME_BED_MAKE": 10,
+        "HOME_SHEETS_CHANGE": 22,
+        "HOME_DUST_WIPE": 16,
+        "HOME_VENTILATE": 11,
+        "HOME_PET_CARE": 18,
+        "HOME_PLANT_CARE": 14,
+        "HOME_MINOR_REPAIR": 23,
+        "HOME_DELIVERIES_SORT": 16,
+        "HOME_BATHROOM_RESTOCK": 12,
+        "HOME_ENTRYWAY_RESET": 15
+      }
+    },
+    "WORK": {
+      "target": 556,
+      "clusters": {
+        "WORK_EMAIL_TRIAGE": 15,
+        "WORK_INBOX_ZERO": 26,
+        "WORK_CALENDAR_REVIEW": 13,
+        "WORK_MEETING_PREP": 16,
+        "WORK_MEETING_NOTES": 10,
+        "WORK_MEETING_FOLLOWUP": 16,
+        "WORK_TASK_PRIORITIZE": 14,
+        "WORK_DAY_PLAN": 16,
+        "WORK_FOCUS_BLOCK_START": 11,
+        "WORK_CONTEXT_RESET": 11,
+        "WORK_DOC_WRITE": 32,
+        "WORK_DOC_EDIT": 21,
+        "WORK_REPORT_DRAFT": 30,
+        "WORK_SLIDE_DECK_PREP": 35,
+        "WORK_PRESENTATION_REHEARSE": 16,
+        "WORK_CODE_REVIEW": 23,
+        "WORK_BUGFIX": 32,
+        "WORK_DEBUG_TRACE": 21,
+        "WORK_DEPLOY_CHECKLIST": 16,
+        "WORK_PULL_REQUEST_SUBMIT": 18,
+        "WORK_TEAM_UPDATE": 12,
+        "WORK_CHAT_REPLY": 10,
+        "WORK_CUSTOMER_REPLY": 16,
+        "WORK_DATA_CHECK": 13,
+        "WORK_SPREADSHEET_CLEAN": 21,
+        "WORK_DECISION_LOG": 12,
+        "WORK_PROJECT_STATUS": 24,
+        "WORK_BACKLOG_GROOM": 19,
+        "WORK_REQUIREMENTS_CLARIFY": 16,
+        "WORK_ONBOARDING_TASKS": 21
+      }
+    },
+    "STUDY": {
+      "target": 300,
+      "clusters": {
+        "STUDY_SESSION_START": 8,
+        "STUDY_READING_BLOCK": 18,
+        "STUDY_NOTE_TAKING": 13,
+        "STUDY_SUMMARY_WRITE": 17,
+        "STUDY_FLASHCARDS_REVIEW": 10,
+        "STUDY_PRACTICE_PROBLEMS": 22,
+        "STUDY_PAST_EXAMS": 28,
+        "STUDY_ASSIGNMENT_PLAN": 11,
+        "STUDY_ESSAY_DRAFT": 22,
+        "STUDY_CODING_PRACTICE": 22,
+        "STUDY_LANGUAGE_SPEAKING": 11,
+        "STUDY_LANGUAGE_LISTENING": 13,
+        "STUDY_MATH_DRILL": 15,
+        "STUDY_MEMORIZATION": 11,
+        "STUDY_RESEARCH_GATHER": 15,
+        "STUDY_CITATION_FORMAT": 11,
+        "STUDY_PRESENTATION_BUILD": 24,
+        "STUDY_GROUP_STUDY_PLAN": 11,
+        "STUDY_CLASS_PREP": 9,
+        "STUDY_HOMEWORK_SUBMIT": 9
+      }
+    },
+    "ROUTINE": {
+      "target": 180,
+      "clusters": {
+        "ROUTINE_DAY_START": 14,
+        "ROUTINE_BEDTIME_PREP": 19,
+        "ROUTINE_MEAL_PLAN": 15,
+        "ROUTINE_HYDRATION_CHECK": 10,
+        "ROUTINE_STRETCH_BREAK": 13,
+        "ROUTINE_COMMUTE_PREP": 18,
+        "ROUTINE_LEAVE_HOME": 12,
+        "ROUTINE_RETURN_HOME": 14,
+        "ROUTINE_WEEK_PLAN": 20,
+        "ROUTINE_DAY_REVIEW": 17,
+        "ROUTINE_SCREEN_BREAK": 12,
+        "ROUTINE_MOVE_BODY": 16
+      }
+    },
+    "STATE": {
+      "target": 108,
+      "clusters": {
+        "STATE_LOW_MOTIVATION_ACTIVATION": 17,
+        "STATE_LOW_ENERGY_RECOVERY": 19,
+        "STATE_OVERWHELM_RESET": 19,
+        "STATE_ANXIETY_GROUNDING": 19,
+        "STATE_DISTRACTION_REFRESH": 17,
+        "STATE_PROCRASTINATION_BREAK": 17
+      }
+    },
+    "HEALTH": {
+      "target": 120,
+      "clusters": {
+        "HEALTH_WALK_OUTSIDE": 20,
+        "HEALTH_WORKOUT_START": 18,
+        "HEALTH_STRETCH_RECOVERY": 15,
+        "HEALTH_MEAL_BALANCE": 14,
+        "HEALTH_MEDICATION_CHECK": 10,
+        "HEALTH_DOCTOR_VISIT_PREP": 17,
+        "HEALTH_SLEEP_HYGIENE": 15,
+        "HEALTH_MINDFULNESS_BREATHING": 11
+      }
+    },
+    "ADMIN": {
+      "target": 120,
+      "clusters": {
+        "ADMIN_BILLS_PAY": 10,
+        "ADMIN_BANKING_REVIEW": 10,
+        "ADMIN_TAX_PREP": 27,
+        "ADMIN_DOCUMENT_SCAN": 13,
+        "ADMIN_APPOINTMENT_SCHEDULE": 10,
+        "ADMIN_INSURANCE_CHECK": 15,
+        "ADMIN_SUBSCRIPTIONS_MANAGE": 12,
+        "ADMIN_TRAVEL_PLAN": 23
+      }
+    },
+    "SOCIAL": {
+      "target": 96,
+      "clusters": {
+        "SOCIAL_MESSAGE_REPLY": 10,
+        "SOCIAL_CALL_FAMILY": 13,
+        "SOCIAL_PLAN_MEETUP": 11,
+        "SOCIAL_THANK_YOU_NOTE": 8,
+        "SOCIAL_CONFLICT_REPAIR": 18,
+        "SOCIAL_NETWORKING_REACHOUT": 11,
+        "SOCIAL_EVENT_PREP": 14,
+        "SOCIAL_RELATIONSHIP_CHECKIN": 11
+      }
+    }
+  }
+}

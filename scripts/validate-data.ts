@@ -9,23 +9,6 @@ type Issue = {
   message: string;
 };
 
-type ValidationRules = {
-  version: number;
-  templateRules: {
-    missionsMin: number;
-    missionsMax: number;
-    mustMatchTimeDefaultExactly: boolean;
-    mustSatisfyTimeOrder: boolean;
-    requireStartEndHeuristic: boolean;
-  };
-  bannedActionSubstrings: string[];
-  startActionTokens: string[];
-  endActionTokens: string[];
-  clusterKeyPattern: string;
-  clusterKeyForbiddenTokens: string[];
-  clusterKeyForbiddenSegmentPatterns: string[];
-};
-
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
@@ -36,10 +19,6 @@ function isNonEmptyString(value: unknown): value is string {
 
 function isPositiveInteger(value: unknown): value is number {
   return typeof value === "number" && Number.isInteger(value) && value > 0;
-}
-
-function includesAnyToken(text: string, tokens: readonly string[]): boolean {
-  return tokens.some((token) => text.includes(token));
 }
 
 function safeStringArray(value: unknown): string[] {
@@ -169,10 +148,12 @@ async function main(): Promise<void> {
     Number.isInteger(templateRules.missionsMin)
       ? templateRules.missionsMin
       : undefined;
+  const missionsMaxRaw = templateRules?.missionsMax;
   const missionsMax =
-    typeof templateRules?.missionsMax === "number" &&
-    Number.isInteger(templateRules.missionsMax)
-      ? templateRules.missionsMax
+    missionsMaxRaw === null
+      ? null
+      : typeof missionsMaxRaw === "number" && Number.isInteger(missionsMaxRaw)
+      ? missionsMaxRaw
       : undefined;
   const mustMatchTimeDefaultExactly =
     typeof templateRules?.mustMatchTimeDefaultExactly === "boolean"
@@ -182,46 +163,12 @@ async function main(): Promise<void> {
     typeof templateRules?.mustSatisfyTimeOrder === "boolean"
       ? templateRules.mustSatisfyTimeOrder
       : undefined;
-  const requireStartEndHeuristic =
-    typeof templateRules?.requireStartEndHeuristic === "boolean"
-      ? templateRules.requireStartEndHeuristic
-      : undefined;
-
-  const bannedActionSubstrings = safeStringArray(rulesRoot?.bannedActionSubstrings);
-  const startActionTokens = safeStringArray(rulesRoot?.startActionTokens);
-  const endActionTokens = safeStringArray(rulesRoot?.endActionTokens);
   const clusterKeyForbiddenTokens = safeStringArray(
     rulesRoot?.clusterKeyForbiddenTokens,
   );
   const clusterKeyForbiddenSegmentPatterns = safeStringArray(
     rulesRoot?.clusterKeyForbiddenSegmentPatterns,
   );
-
-  const styleRules = isRecord(rulesRoot?.styleRules) ? rulesRoot?.styleRules : undefined;
-  const enforcePoliteMissions =
-    typeof styleRules?.enforcePoliteMissions === "boolean"
-      ? styleRules.enforcePoliteMissions
-      : false;
-  const politeMissionMarkers = safeStringArray(styleRules?.politeMissionMarkers);
-  const discourageNominalizedMissions =
-    typeof styleRules?.discourageNominalizedMissions === "boolean"
-      ? styleRules.discourageNominalizedMissions
-      : false;
-  const nominalizedMissionEndingPatterns = safeStringArray(
-    styleRules?.nominalizedMissionEndingPatterns,
-  );
-  const nominalizedRegexes: RegExp[] = [];
-  for (const pat of nominalizedMissionEndingPatterns) {
-    try {
-      nominalizedRegexes.push(new RegExp(pat));
-    } catch {
-      issues.push({
-        level: "error",
-        code: "RULES_INVALID",
-        message: `data/validation_rules.json: styleRules.nominalizedMissionEndingPatterns 정규식이 유효하지 않습니다: ${JSON.stringify(pat)}`,
-      });
-    }
-  }
 
   const clusterKeyPattern =
     typeof rulesRoot?.clusterKeyPattern === "string"
@@ -235,24 +182,31 @@ async function main(): Promise<void> {
       message: "data/validation_rules.json: templateRules가 객체가 아닙니다.",
     });
   }
-  if (missionsMin === undefined || missionsMax === undefined) {
+  if (missionsMin === undefined) {
     issues.push({
       level: "error",
       code: "RULES_INVALID",
       message:
-        "data/validation_rules.json: templateRules.missionsMin/missionsMax가 정수가 아닙니다.",
+        "data/validation_rules.json: templateRules.missionsMin은 필수 정수여야 합니다.",
+    });
+  }
+  if (missionsMax === undefined) {
+    issues.push({
+      level: "error",
+      code: "RULES_INVALID",
+      message:
+        "data/validation_rules.json: templateRules.missionsMax는 정수 또는 null이어야 합니다.",
     });
   }
   if (
     mustMatchTimeDefaultExactly === undefined ||
-    mustSatisfyTimeOrder === undefined ||
-    requireStartEndHeuristic === undefined
+    mustSatisfyTimeOrder === undefined
   ) {
     issues.push({
       level: "error",
       code: "RULES_INVALID",
       message:
-        "data/validation_rules.json: templateRules.* 플래그가 boolean이 아닙니다.",
+        "data/validation_rules.json: templateRules.mustMatchTimeDefaultExactly/mustSatisfyTimeOrder가 boolean이 아닙니다.",
     });
   }
   if (!clusterKeyPattern) {
@@ -260,22 +214,6 @@ async function main(): Promise<void> {
       level: "error",
       code: "RULES_INVALID",
       message: "data/validation_rules.json: clusterKeyPattern이 문자열이 아닙니다.",
-    });
-  }
-  if (bannedActionSubstrings.length === 0) {
-    issues.push({
-      level: "error",
-      code: "RULES_INVALID",
-      message:
-        "data/validation_rules.json: bannedActionSubstrings가 비어 있거나 배열이 아닙니다.",
-    });
-  }
-  if (startActionTokens.length === 0 || endActionTokens.length === 0) {
-    issues.push({
-      level: "error",
-      code: "RULES_INVALID",
-      message:
-        "data/validation_rules.json: startActionTokens/endActionTokens가 비어 있거나 배열이 아닙니다.",
     });
   }
 
@@ -477,22 +415,26 @@ async function main(): Promise<void> {
     }
 
     const missions = safeArray(t.missions);
+    if (missionsMin !== undefined && missions.length < missionsMin) {
+      issues.push({
+        level: "error",
+        code: "TEMPLATE_MISSIONS_COUNT_MIN",
+        message: `template ${templateId}: missions 개수는 최소 ${missionsMin}개 이상이어야 합니다 (현재 ${missions.length}).`,
+      });
+    }
     if (
-      missionsMin !== undefined &&
       missionsMax !== undefined &&
-      (missions.length < missionsMin || missions.length > missionsMax)
+      missionsMax !== null &&
+      missions.length > missionsMax
     ) {
       issues.push({
         level: "error",
-        code: "TEMPLATE_MISSIONS_COUNT",
-        message: `template ${templateId}: missions 개수는 ${missionsMin}~${missionsMax}이어야 합니다 (현재 ${missions.length}).`,
+        code: "TEMPLATE_MISSIONS_COUNT_MAX",
+        message: `template ${templateId}: missions 개수는 최대 ${missionsMax}개 이하여야 합니다 (현재 ${missions.length}).`,
       });
     }
 
     let missionSum = 0;
-    const missionActionsByIndex: (string | undefined)[] = new Array(
-      missions.length,
-    );
     for (let i = 0; i < missions.length; i++) {
       const m = missions[i];
       if (!isRecord(m)) {
@@ -510,45 +452,6 @@ async function main(): Promise<void> {
           code: "MISSION_ACTION_INVALID",
           message: `template ${templateId}: missions[${i}].action이 유효하지 않습니다.`,
         });
-      } else {
-        const action = m.action;
-        missionActionsByIndex[i] = action;
-        for (const banned of bannedActionSubstrings) {
-          if (action.includes(banned)) {
-            issues.push({
-              level: "error",
-              code: "BANNED_ACTION_SUBSTRING",
-              message: `template ${templateId}: missions[${i}].action에 금지 substring 포함: ${JSON.stringify(banned)}`,
-            });
-          }
-        }
-
-        if (enforcePoliteMissions && politeMissionMarkers.length > 0) {
-          const hasPoliteMarker = politeMissionMarkers.some((marker) =>
-            action.includes(marker),
-          );
-          if (!hasPoliteMarker) {
-            issues.push({
-              level: "error",
-              code: "STYLE_POLITE_MISSION_REQUIRED",
-              message: `template ${templateId}: missions[${i}].action에 존댓말/지시문 표식이 부족합니다.`,
-            });
-          }
-        }
-
-        if (discourageNominalizedMissions && nominalizedRegexes.length > 0) {
-          const trimmed = action.trim();
-          for (const re of nominalizedRegexes) {
-            if (re.test(trimmed)) {
-              issues.push({
-                level: "warn",
-                code: "STYLE_NOMINALIZED_MISSION",
-                message: `template ${templateId}: missions[${i}].action이 명사형(…기/…하기)으로 끝나는 경향이 있습니다: ${JSON.stringify(trimmed)}`,
-              });
-              break;
-            }
-          }
-        }
       }
 
       if (!isPositiveInteger(m.estMin)) {
@@ -602,61 +505,6 @@ async function main(): Promise<void> {
           });
         }
       }
-    }
-
-    // 시작/종료 휴리스틱
-    if (requireStartEndHeuristic && missions.length >= 2) {
-      const firstAction = (missionActionsByIndex[0] ?? "").trim();
-      const lastAction = (
-        missionActionsByIndex[missionActionsByIndex.length - 1] ?? ""
-      ).trim();
-
-      const firstHasStart = includesAnyToken(firstAction, startActionTokens);
-      const firstHasEnd = includesAnyToken(firstAction, endActionTokens);
-      const lastHasStart = includesAnyToken(lastAction, startActionTokens);
-      const lastHasEnd = includesAnyToken(lastAction, endActionTokens);
-
-      if (!firstHasStart) {
-        issues.push({
-          level: "error",
-          code: "START_HEURISTIC",
-          message: `template ${templateId}: missions[0].action은 시작 토큰을 1개 이상 포함해야 합니다.`,
-        });
-      }
-      if (!lastHasEnd) {
-        issues.push({
-          level: "error",
-          code: "END_HEURISTIC",
-          message: `template ${templateId}: missions[last].action은 종료 토큰을 1개 이상 포함해야 합니다.`,
-        });
-      }
-      if (firstHasEnd && !firstHasStart) {
-        issues.push({
-          level: "error",
-          code: "START_END_INVERSION",
-          message: `template ${templateId}: 시작 미션이 종료 토큰만 포함합니다.`,
-        });
-      }
-      if (lastHasStart && !lastHasEnd) {
-        issues.push({
-          level: "error",
-          code: "START_END_INVERSION",
-          message: `template ${templateId}: 종료 미션이 시작 토큰만 포함합니다.`,
-        });
-      }
-      if (firstAction.length > 0 && firstAction === lastAction) {
-        issues.push({
-          level: "error",
-          code: "START_END_DUPLICATE",
-          message: `template ${templateId}: 첫 미션/마지막 미션 문장이 동일합니다.`,
-        });
-      }
-    } else if (requireStartEndHeuristic && missions.length > 0) {
-      issues.push({
-        level: "error",
-        code: "START_END_HEURISTIC_SKIPPED",
-        message: `template ${templateId}: missions가 2개 미만이라 시작/종료 휴리스틱을 적용할 수 없습니다.`,
-      });
     }
 
     const templateType = isNonEmptyString(t.type) ? t.type : "";

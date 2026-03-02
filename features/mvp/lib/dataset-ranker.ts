@@ -172,12 +172,74 @@ const CONTEXT_TO_TIME: Record<string, RouteTimeContext> = {
   HEALTH: "post_event"
 };
 
+const LEGACY_TEMPLATE_ID_ALIASES: Record<string, string> = {
+  TPL_HOME_KITCHEN_RESET_MIN_10_HOME_01: "TPL_HOME_KITCHEN_RESET_10"
+};
+
+const LEGACY_EXACT_TITLE_TO_TEMPLATE_ID: Record<string, string> = {
+  "부엌 리셋 10분 짧게 집": "TPL_HOME_KITCHEN_RESET_10"
+};
+
 function clamp01(value: number): number {
   if (!Number.isFinite(value)) {
     return 0;
   }
 
   return Math.max(0, Math.min(1, value));
+}
+
+function renormalizeRouteConfidence(rawRouteConfidence: number): number {
+  const safe = clamp01(rawRouteConfidence);
+  if (safe === 1) {
+    return 1;
+  }
+
+  const curved = safe ** 0.68;
+  const normalized = curved * 1.14 - 0.03;
+  return clamp01(normalized);
+}
+
+function normalizeLookupTitle(input: string): string {
+  return input.toLowerCase().trim().replace(/\s+/g, " ");
+}
+
+function buildCanonicalToLegacyTemplateIdMap(): Map<string, string> {
+  const canonicalToLegacyTemplateId = new Map<string, string>();
+  Object.entries(LEGACY_TEMPLATE_ID_ALIASES).forEach(([legacyTemplateId, canonicalTemplateId]) => {
+    if (!canonicalToLegacyTemplateId.has(canonicalTemplateId)) {
+      canonicalToLegacyTemplateId.set(canonicalTemplateId, legacyTemplateId);
+    }
+  });
+
+  return canonicalToLegacyTemplateId;
+}
+
+const CANONICAL_TO_LEGACY_TEMPLATE_ID = buildCanonicalToLegacyTemplateIdMap();
+
+function resolveCanonicalTemplateId(templateId: string): string {
+  return LEGACY_TEMPLATE_ID_ALIASES[templateId] ?? templateId;
+}
+
+function findLegacyExactMatches(input: string, normalizedInput: string): Map<string, string> {
+  const normalizedCandidates = new Set<string>([
+    normalizeLookupTitle(input),
+    normalizeLookupTitle(normalizedInput)
+  ]);
+  const matchedCanonicalToLegacy = new Map<string, string>();
+
+  Object.entries(LEGACY_EXACT_TITLE_TO_TEMPLATE_ID).forEach(([legacyTitle, canonicalTemplateId]) => {
+    const normalizedLegacyTitle = normalizeLookupTitle(legacyTitle);
+    if (!normalizedCandidates.has(normalizedLegacyTitle)) {
+      return;
+    }
+
+    const legacyTemplateId = CANONICAL_TO_LEGACY_TEMPLATE_ID.get(canonicalTemplateId);
+    if (legacyTemplateId) {
+      matchedCanonicalToLegacy.set(canonicalTemplateId, legacyTemplateId);
+    }
+  });
+
+  return matchedCanonicalToLegacy;
 }
 
 function normalizeScoreText(input: string): string {
@@ -394,118 +456,123 @@ function scoreConcepts(input: string): Map<string, number> {
   );
 }
 
-function scoreClusters(conceptScores: Map<string, number>, routeProfile: RouteProfile): Map<string, number> {
-  const source = getDatasetRuntimeSource();
-  const scores = new Map<string, number>();
+const DEFAULT_TOP_K_CLUSTERS = 8;
+const MAX_CLUSTER_PRIOR = 0.72;
 
-  conceptScores.forEach((conceptScore, conceptId) => {
-    const mappedClusters = source.conceptToClusters.get(conceptId) ?? [];
-    mappedClusters.forEach((clusterKey, index) => {
-      const weight = index === 0 ? 1 : index === 1 ? 0.8 : 0.6;
-      scores.set(clusterKey, Number(((scores.get(clusterKey) ?? 0) + conceptScore * weight).toFixed(4)));
-    });
-  });
-
-  if (scores.size === 0 && routeProfile.signalCount > 0) {
-    source.clusters.forEach((cluster) => {
-      if (mapClusterDomainToRouteDomain(cluster) === routeProfile.domain) {
-        const fallbackScore = routeProfile.quickMode ? 2.2 : 1.6;
-        scores.set(cluster.clusterKey, fallbackScore);
-      }
-    });
-  }
-
-  return scores;
+interface ConceptDistribution {
+  domainScores: Map<RouteDomain, number>;
+  stateScores: Map<RouteState, number>;
+  totalScore: number;
+  topConceptIds: string[];
 }
 
-function detectState(normalizedInput: string): { state: RouteState; explicit: boolean } {
-  if (/(회사\s*가기\s*싫|사무실\s*가기\s*싫|일\s*하기\s*싫|아무것도\s*하기\s*싫|하기\s*싫어)/.test(normalizedInput)) {
-    return { state: "avoidance_refusal", explicit: true };
+function addScore<K extends string>(map: Map<K, number>, key: K, delta: number): void {
+  if (!Number.isFinite(delta) || delta <= 0) {
+    return;
   }
 
-  if (/(시작이\s*안|미루|손이\s*안|착수\s*지연|못\s*하겠)/.test(normalizedInput)) {
-    return { state: "start_delay", explicit: true };
-  }
-
-  if (/(막혔|안\s*풀|막막|어려워|블로커)/.test(normalizedInput)) {
-    return { state: "blocked", explicit: true };
-  }
-
-  if (/(피곤|지쳤|무기력|힘들|기운\s*없)/.test(normalizedInput)) {
-    return { state: "fatigued", explicit: true };
-  }
-
-  if (/(마감|끝내|완료|제출|마무리|정리\s*완료)/.test(normalizedInput)) {
-    return { state: "completion_push", explicit: true };
-  }
-
-  if (/(리셋|정리\s*필요|재정비|초기화)/.test(normalizedInput)) {
-    return { state: "reset_needed", explicit: true };
-  }
-
-  return { state: "in_progress", explicit: false };
+  map.set(key, Number(((map.get(key) ?? 0) + delta).toFixed(4)));
 }
 
-function detectTimeContext(normalizedInput: string): { timeContext: RouteTimeContext; explicit: boolean } {
-  const rules: Array<{ pattern: RegExp; timeContext: RouteTimeContext }> = [
-    { pattern: /(출근길|통근|등교길|이동\s*중)/, timeContext: "commute" },
-    { pattern: /(아침|기상|출근\s*전|등교\s*전|오전\s*일찍)/, timeContext: "morning" },
-    { pattern: /(오전|1교시|오전\s*업무)/, timeContext: "work_am" },
-    { pattern: /(점심|공강|식사\s*후)/, timeContext: "lunch" },
-    { pattern: /(오후|업무\s*중|회의\s*전|집필\s*블록)/, timeContext: "work_pm" },
-    { pattern: /(저녁|퇴근|귀가)/, timeContext: "evening" },
-    { pattern: /(밤|야간|취침|자기\s*전)/, timeContext: "night" },
-    { pattern: /(주말\s*오전)/, timeContext: "weekend_am" },
-    { pattern: /(주말\s*오후)/, timeContext: "weekend_pm" },
-    { pattern: /(주말\s*밤)/, timeContext: "weekend_night" },
-    { pattern: /(출발\s*전|예약\s*전|이벤트\s*전)/, timeContext: "pre_event" },
-    { pattern: /(운동\s*후|여행\s*후|행사\s*후)/, timeContext: "post_event" }
-  ];
-
-  const matched = rules.find((rule) => rule.pattern.test(normalizedInput));
-  if (matched) {
-    return { timeContext: matched.timeContext, explicit: true };
-  }
-
-  return { timeContext: "work_pm", explicit: false };
+function mapConceptDomainToRouteDomain(domain: string): RouteDomain {
+  return DOMAIN_TO_ROUTE[domain] ?? "productivity_growth";
 }
 
-function detectDomain(normalizedInput: string): { domain: RouteDomain; explicit: boolean } {
-  if (/(수면|기상|양치|세안|샤워|운동|스트레칭|회복|피곤|휴식|호흡)/.test(normalizedInput)) {
-    return { domain: "recovery_health", explicit: true };
+function mapStateConceptToRouteState(conceptId: string, mappedClusterKeys: readonly string[]): RouteState {
+  const normalizedConceptId = conceptId.toUpperCase();
+
+  if (normalizedConceptId.includes("AVOIDANCE") || normalizedConceptId.includes("REFUSAL") || normalizedConceptId.includes("HOPELESS")) {
+    return "avoidance_refusal";
   }
 
-  if (/(공부|과제|시험|업무|출근|사무실|회의|집필|투고|답장|협업|마감|프로젝트)/.test(normalizedInput)) {
-    return { domain: "productivity_growth", explicit: true };
+  if (normalizedConceptId.includes("FINISH") || normalizedConceptId.includes("DEADLINE") || normalizedConceptId.includes("SUBMIT")) {
+    return "completion_push";
   }
 
-  if (/(청소|정리|빨래|세탁|장보기|공과금|납부|주방|식사|집안|정돈|행정)/.test(normalizedInput)) {
-    return { domain: "life_ops", explicit: true };
+  if (
+    normalizedConceptId.includes("DISTRACT")
+    || normalizedConceptId.includes("DOOMSCROLL")
+    || normalizedConceptId.includes("CHECKING")
+    || normalizedConceptId.includes("FORGETFUL")
+  ) {
+    return "reset_needed";
   }
 
-  if (/(여행|관람|공연|이벤트|콘텐츠|전시)/.test(normalizedInput)) {
-    return { domain: "non_routine", explicit: true };
+  if (
+    normalizedConceptId.includes("BURNOUT")
+    || normalizedConceptId.includes("FOGGY")
+    || normalizedConceptId.includes("GROGGY")
+    || normalizedConceptId.includes("HUNGRY")
+    || normalizedConceptId.includes("HEADACHE")
+    || normalizedConceptId.includes("BLOOD_SUGAR")
+    || normalizedConceptId.includes("CAFFEINE_CRASH")
+  ) {
+    return "fatigued";
   }
 
-  return { domain: "productivity_growth", explicit: false };
+  if (
+    normalizedConceptId.includes("ANX")
+    || normalizedConceptId.includes("OVERWHELM")
+    || normalizedConceptId.includes("FREEZE")
+    || normalizedConceptId.includes("DECISION")
+    || normalizedConceptId.includes("PANIC")
+  ) {
+    return "blocked";
+  }
+
+  if (normalizedConceptId.includes("FIRST_ACTION") || normalizedConceptId.includes("PROCRAST")) {
+    return "start_delay";
+  }
+
+  if (mappedClusterKeys.some((clusterKey) => clusterKey.includes("DISTRACTION"))) {
+    return "reset_needed";
+  }
+  if (mappedClusterKeys.some((clusterKey) => clusterKey.includes("LOW_ENERGY"))) {
+    return "fatigued";
+  }
+  if (mappedClusterKeys.some((clusterKey) => clusterKey.includes("OVERWHELM") || clusterKey.includes("ANXIETY"))) {
+    return "blocked";
+  }
+  if (mappedClusterKeys.some((clusterKey) => clusterKey.includes("LOW_MOTIVATION"))) {
+    return "start_delay";
+  }
+
+  return "in_progress";
 }
 
-function detectPersona(normalizedInput: string, domain: RouteDomain): { persona: PresetPersona; explicit: boolean } {
-  const rules: Array<{ pattern: RegExp; persona: PresetPersona }> = [
-    { pattern: /(학생|학교|수업|교시|공강|과제|시험|복습|공부)/, persona: "student" },
-    { pattern: /(개발|코딩|버그|pr|코드리뷰|배포|이슈|커밋)/, persona: "developer" },
-    { pattern: /(작가|집필|원고|퇴고|투고|챕터|자유쓰기)/, persona: "writer" },
-    { pattern: /(주부|가사|집안|하원|도시락|세탁|장보기)/, persona: "homemaker" },
-    { pattern: /(사무실|결재|보고서|부서|문서|회의 안건|메일함)/, persona: "office_worker" },
-    { pattern: /(콘텐츠|감상|관람|공연|전시|영화|드라마)/, persona: "entertainment" },
-    { pattern: /(여행|숙소|항공|기차|여권|출발|동선|체크리스트)/, persona: "travel" },
-    { pattern: /(운동|헬스|러닝|유산소|근력|워밍업|피로도)/, persona: "exercise" },
-    { pattern: /(회사|직장|출근|퇴근|업무|프로젝트|팀)/, persona: "worker" }
-  ];
+function pickTopScoreKey<K extends string>(scores: Map<K, number>, fallback: K): { key: K; confidence: number } {
+  const entries = Array.from(scores.entries()).sort((left, right) => right[1] - left[1]);
+  if (entries.length === 0) {
+    return {
+      key: fallback,
+      confidence: 0
+    };
+  }
 
-  const matched = rules.find((rule) => rule.pattern.test(normalizedInput));
-  if (matched) {
-    return { persona: matched.persona, explicit: true };
+  const total = entries.reduce((sum, [, score]) => sum + score, 0);
+  return {
+    key: entries[0][0],
+    confidence: total > 0 ? clamp01(entries[0][1] / total) : 0
+  };
+}
+
+function inferPersonaFromTopConcepts(topConceptIds: readonly string[], domain: RouteDomain): PresetPersona {
+  const mergedConceptText = topConceptIds.join(" ").toUpperCase();
+
+  if (/(CODE|DEBUG|DEPLOY|COMMIT|REVIEW)/.test(mergedConceptText)) {
+    return "developer";
+  }
+  if (/(WRITE|DRAFT|MANUSCRIPT|ESSAY|PUBLISH)/.test(mergedConceptText)) {
+    return "writer";
+  }
+  if (/(TRAVEL|ITINERARY|FLIGHT|HOTEL|PACK)/.test(mergedConceptText)) {
+    return "travel";
+  }
+  if (/(WORKOUT|RUN|STRETCH|CARDIO|EXERCISE)/.test(mergedConceptText)) {
+    return "exercise";
+  }
+  if (/(STUDY|EXAM|COURSE|HOMEWORK|LECTURE)/.test(mergedConceptText)) {
+    return "student";
   }
 
   const fallbackByDomain: Record<RouteDomain, PresetPersona> = {
@@ -515,22 +582,133 @@ function detectPersona(normalizedInput: string, domain: RouteDomain): { persona:
     non_routine: "entertainment"
   };
 
+  return fallbackByDomain[domain];
+}
+
+function inferTypeFromDistribution(domainScores: Map<RouteDomain, number>, persona: PresetPersona): PresetType {
+  const nonRoutineScore = domainScores.get("non_routine") ?? 0;
+  const routineScore = (domainScores.get("life_ops") ?? 0)
+    + (domainScores.get("productivity_growth") ?? 0)
+    + (domainScores.get("recovery_health") ?? 0);
+
+  if (["travel", "entertainment"].includes(persona)) {
+    return "non_routine";
+  }
+
+  if (nonRoutineScore > 0 && nonRoutineScore >= routineScore * 0.55) {
+    return "non_routine";
+  }
+
+  return "routine";
+}
+
+function inferTimeContextFromSignals(
+  contextSignals: Set<string>,
+  quickMode: boolean,
+  deepMode: boolean,
+  preferredMinutes: number | null
+): RouteTimeContext {
+  const timeScores = new Map<RouteTimeContext, number>();
+
+  contextSignals.forEach((contextKey) => {
+    const mappedTime = CONTEXT_TO_TIME[contextKey];
+    if (mappedTime) {
+      addScore(timeScores, mappedTime, 1);
+    }
+  });
+
+  if (quickMode) {
+    addScore(timeScores, "commute", 0.35);
+    addScore(timeScores, "work_pm", 0.25);
+  }
+
+  if (deepMode) {
+    addScore(timeScores, "work_pm", 0.3);
+    addScore(timeScores, "evening", 0.25);
+  }
+
+  if (preferredMinutes !== null) {
+    if (preferredMinutes <= 10) {
+      addScore(timeScores, "commute", 0.15);
+    } else if (preferredMinutes >= 20) {
+      addScore(timeScores, "evening", 0.15);
+    }
+  }
+
+  return pickTopScoreKey(timeScores, "work_pm").key;
+}
+
+function buildConceptDistribution(conceptScores: Map<string, number>): ConceptDistribution {
+  const source = getDatasetRuntimeSource();
+  const domainScores = new Map<RouteDomain, number>();
+  const stateScores = new Map<RouteState, number>();
+  let totalScore = 0;
+
+  conceptScores.forEach((rawScore, conceptId) => {
+    const concept = source.conceptById.get(conceptId);
+    if (!concept || rawScore <= 0) {
+      return;
+    }
+
+    const priorityBoost = 1 + Math.max(0, Math.min(0.35, (concept.priority - 5) * 0.03));
+    const weightedScore = rawScore * priorityBoost;
+    totalScore += weightedScore;
+
+    const routeDomain = mapConceptDomainToRouteDomain(concept.domain);
+    addScore(domainScores, routeDomain, weightedScore);
+
+    if (concept.domain === "STATE") {
+      const mappedClusters = source.conceptToClusters.get(conceptId) ?? [];
+      const routeState = mapStateConceptToRouteState(conceptId, mappedClusters);
+      addScore(stateScores, routeState, weightedScore * 1.12);
+      addScore(domainScores, "recovery_health", weightedScore * 0.2);
+    }
+  });
+
+  const topConceptIds = Array.from(conceptScores.entries())
+    .sort((left, right) => right[1] - left[1])
+    .slice(0, 8)
+    .map(([conceptId]) => conceptId);
+
   return {
-    persona: fallbackByDomain[domain],
-    explicit: false
+    domainScores,
+    stateScores,
+    totalScore,
+    topConceptIds
   };
 }
 
-function inferType(normalizedInput: string, persona: PresetPersona, domain: RouteDomain): { type: PresetType; explicit: boolean } {
-  if (domain === "non_routine" || ["travel", "entertainment"].includes(persona)) {
-    return { type: "non_routine", explicit: true };
+function scoreClusters(conceptScores: Map<string, number>): Map<string, number> {
+  const source = getDatasetRuntimeSource();
+  const scores = new Map<string, number>();
+
+  conceptScores.forEach((conceptScore, conceptId) => {
+    const concept = source.conceptById.get(conceptId);
+    if (!concept || conceptScore <= 0) {
+      return;
+    }
+
+    const mappedClusters = source.conceptToClusters.get(conceptId) ?? [];
+    const conceptWeight = concept.domain === "STATE" ? 0.92 : 1;
+
+    mappedClusters.forEach((clusterKey, index) => {
+      const rankWeight = index === 0 ? 1 : index === 1 ? 0.76 : 0.58;
+      addScore(scores, clusterKey, conceptScore * conceptWeight * rankWeight);
+    });
+  });
+
+  return scores;
+}
+
+function selectTopClusterKeys(clusterScores: Map<string, number>, topK: number): string[] {
+  if (clusterScores.size === 0) {
+    return [];
   }
 
-  if (/(여행|관람|공연|이벤트|챌린지|레저)/.test(normalizedInput)) {
-    return { type: "non_routine", explicit: true };
-  }
-
-  return { type: "routine", explicit: false };
+  return Array.from(clusterScores.entries())
+    .sort((left, right) => right[1] - left[1])
+    .slice(0, Math.max(1, topK))
+    .map(([clusterKey]) => clusterKey);
 }
 
 function extractPreferredMinutes(normalizedInput: string, lexicon: DatasetLexicon): number | null {
@@ -572,32 +750,34 @@ function extractPreferredMinutes(normalizedInput: string, lexicon: DatasetLexico
   return null;
 }
 
-function buildRouteProfile(normalizedInput: string): RouteProfile {
+function buildRouteProfile(normalizedInput: string, conceptScores: Map<string, number>, contextSignals: Set<string>): RouteProfile {
   const source = getDatasetRuntimeSource();
-  const state = detectState(normalizedInput);
-  const time = detectTimeContext(normalizedInput);
-  const domain = detectDomain(normalizedInput);
-  const persona = detectPersona(normalizedInput, domain.domain);
-  const type = inferType(normalizedInput, persona.persona, domain.domain);
+  const conceptDistribution = buildConceptDistribution(conceptScores);
+  const domain = pickTopScoreKey(conceptDistribution.domainScores, "productivity_growth");
+  const state = pickTopScoreKey(conceptDistribution.stateScores, "in_progress");
+  const persona = inferPersonaFromTopConcepts(conceptDistribution.topConceptIds, domain.key);
+  const type = inferTypeFromDistribution(conceptDistribution.domainScores, persona);
 
   const quickMode = source.lexicon.timeHints.quickTokens.some((token) => normalizedInput.includes(token.toLowerCase()))
     || source.lexicon.timeHints.nowTokens.some((token) => normalizedInput.includes(token.toLowerCase()));
   const deepMode = source.lexicon.timeHints.deepTokens.some((token) => normalizedInput.includes(token.toLowerCase()));
   const preferredMinutes = extractPreferredMinutes(normalizedInput, source.lexicon);
+  const timeContext = inferTimeContextFromSignals(contextSignals, quickMode, deepMode, preferredMinutes);
 
-  const signalCount = [state.explicit, time.explicit, domain.explicit, persona.explicit, type.explicit]
-    .filter(Boolean)
-    .length
+  const signalCount = (conceptScores.size > 0 ? 1 : 0)
+    + (contextSignals.size > 0 ? 1 : 0)
+    + (domain.confidence > 0 ? 1 : 0)
+    + (state.confidence > 0 ? 1 : 0)
     + (quickMode ? 1 : 0)
     + (deepMode ? 1 : 0)
-    + (preferredMinutes ? 1 : 0);
+    + (preferredMinutes !== null ? 1 : 0);
 
   return {
-    persona: persona.persona,
-    type: type.type,
-    domain: domain.domain,
-    state: state.state,
-    timeContext: time.timeContext,
+    persona,
+    type,
+    domain: domain.key,
+    state: state.key,
+    timeContext,
     preferredMinutes,
     quickMode,
     deepMode,
@@ -793,40 +973,6 @@ function isNeighborTimeContext(source: RouteTimeContext, target: RouteTimeContex
   return neighborGroups.some((group) => group.includes(source) && group.includes(target));
 }
 
-function scoreRouteAlignment(entry: TemplateSearchIndex, routeProfile: RouteProfile): number {
-  let score = 0;
-
-  if (entry.routeDomain === routeProfile.domain) {
-    score += 0.35;
-  }
-
-  if (entry.persona === routeProfile.persona) {
-    score += 0.2;
-  } else if (isPersonaCompatible(routeProfile.persona, entry.persona, routeProfile.type)) {
-    score += 0.1;
-  }
-
-  if (entry.type === routeProfile.type) {
-    score += 0.1;
-  }
-
-  if (entry.timeContext === routeProfile.timeContext) {
-    score += 0.2;
-  } else if (isNeighborTimeContext(routeProfile.timeContext, entry.timeContext)) {
-    score += 0.1;
-  }
-
-  if (entry.state === routeProfile.state) {
-    score += 0.15;
-  }
-
-  if (routeProfile.state === "avoidance_refusal" && entry.difficulty <= 1 && entry.estimatedTimeMin <= 10) {
-    score += 0.2;
-  }
-
-  return clamp01(score);
-}
-
 function detectContextSignals(normalizedInput: string): Set<string> {
   const source = getDatasetRuntimeSource();
   const matchedContexts = new Set<string>();
@@ -841,7 +987,7 @@ function detectContextSignals(normalizedInput: string): Set<string> {
 }
 
 function computePreferredMinutesFit(routeProfile: RouteProfile, estimatedTimeMin: number): number {
-  if (!routeProfile.preferredMinutes) {
+  if (routeProfile.preferredMinutes === null) {
     return 0;
   }
 
@@ -859,6 +1005,296 @@ function computePreferredMinutesFit(routeProfile: RouteProfile, estimatedTimeMin
   return -0.8;
 }
 
+function scoreProfileCompatibility(entry: TemplateSearchIndex, routeProfile: RouteProfile): number {
+  let score = 0;
+
+  if (entry.routeDomain === routeProfile.domain) {
+    score += 0.42;
+  }
+
+  if (entry.persona === routeProfile.persona) {
+    score += 0.24;
+  } else if (isPersonaCompatible(routeProfile.persona, entry.persona, routeProfile.type)) {
+    score += 0.12;
+  }
+
+  if (entry.type === routeProfile.type) {
+    score += 0.14;
+  }
+
+  return clamp01(score);
+}
+
+function scoreContextStateTimeFit(
+  entry: TemplateSearchIndex,
+  routeProfile: RouteProfile,
+  contextSignals: Set<string>
+): number {
+  let score = 0;
+
+  const hasContextSignalMatch = entry.template.contexts.some((context) => contextSignals.has(context.toUpperCase()));
+  if (hasContextSignalMatch) {
+    score += 0.32;
+  }
+
+  if (entry.state === routeProfile.state) {
+    score += routeProfile.state === "in_progress" ? 0.14 : 0.28;
+  } else if (routeProfile.state === "avoidance_refusal" && entry.difficulty <= 1 && entry.estimatedTimeMin <= 10) {
+    score += 0.18;
+  } else if (routeProfile.state === "fatigued" && entry.difficulty <= 2) {
+    score += 0.12;
+  }
+
+  if (entry.timeContext === routeProfile.timeContext) {
+    score += 0.24;
+  } else if (isNeighborTimeContext(routeProfile.timeContext, entry.timeContext)) {
+    score += 0.12;
+  }
+
+  if (routeProfile.quickMode && entry.estimatedTimeMin <= 10) {
+    score += 0.16;
+  }
+
+  if (routeProfile.deepMode && entry.estimatedTimeMin >= 20) {
+    score += 0.14;
+  }
+
+  score += computePreferredMinutesFit(routeProfile, entry.estimatedTimeMin) / 4.5;
+
+  return clamp01(score);
+}
+
+interface LexicalSignals {
+  lexicalSimilarity: number;
+  semanticSimilarity: number;
+}
+
+function computeLexicalSignals(
+  queryVector: SparseVector,
+  queryTokens: Set<string>,
+  entry: TemplateSearchIndex
+): LexicalSignals {
+  const semanticSimilarity = computeCosineSimilarity(queryVector, entry.vector);
+  const titleSimilarity = computeCosineSimilarity(queryVector, entry.titleVector);
+  const missionSimilarity = computeCosineSimilarity(queryVector, entry.missionVector);
+  const tokenOverlap = computeTokenOverlapRatio(queryTokens, entry.tokens);
+
+  const lexicalSimilarity = clamp01(
+    semanticSimilarity * 0.52
+    + titleSimilarity * 0.3
+    + missionSimilarity * 0.16
+    + tokenOverlap * 0.24
+  );
+
+  return {
+    lexicalSimilarity,
+    semanticSimilarity
+  };
+}
+
+function computeConceptCoverage(
+  template: DatasetTemplate,
+  conceptScores: Map<string, number>,
+  conceptScoreTotal: number
+): number {
+  if (conceptScoreTotal <= 0 || conceptScores.size === 0) {
+    return 0;
+  }
+
+  let matchedConceptScore = 0;
+  let matchedConceptCount = 0;
+  template.concepts.forEach((conceptId) => {
+    const conceptScore = conceptScores.get(conceptId);
+    if (!conceptScore) {
+      return;
+    }
+
+    matchedConceptScore += conceptScore;
+    matchedConceptCount += 1;
+  });
+
+  if (matchedConceptScore <= 0) {
+    return 0;
+  }
+
+  const scoreCoverage = matchedConceptScore / conceptScoreTotal;
+  const countCoverage = matchedConceptCount / Math.max(1, Math.min(4, conceptScores.size));
+  return clamp01(scoreCoverage * 1.2 + countCoverage * 0.2);
+}
+
+function buildCandidateTemplatePool(
+  topClusterKeys: readonly string[],
+  conceptScores: Map<string, number>,
+  exactTitleTemplateIds: Set<string>
+): Set<string> {
+  const source = getDatasetRuntimeSource();
+  const candidateTemplateIds = new Set<string>();
+
+  topClusterKeys.forEach((clusterKey) => {
+    source.templatesByCluster.get(clusterKey)?.forEach((template) => {
+      candidateTemplateIds.add(template.id);
+    });
+  });
+
+  const scoredConcepts = new Set(conceptScores.keys());
+  if (scoredConcepts.size > 0) {
+    getTemplateSearchIndex().forEach((entry) => {
+      if (entry.template.concepts.some((conceptId) => scoredConcepts.has(conceptId))) {
+        candidateTemplateIds.add(entry.template.id);
+      }
+    });
+  }
+
+  exactTitleTemplateIds.forEach((templateId) => candidateTemplateIds.add(templateId));
+  return candidateTemplateIds;
+}
+
+function sortCandidatesByScore(candidates: DatasetRankCandidate[]): DatasetRankCandidate[] {
+  return candidates.sort((left, right) => {
+    if (right.totalScore !== left.totalScore) {
+      return right.totalScore - left.totalScore;
+    }
+
+    if (right.rerankConfidence !== left.rerankConfidence) {
+      return right.rerankConfidence - left.rerankConfidence;
+    }
+
+    if (right.routeConfidence !== left.routeConfidence) {
+      return right.routeConfidence - left.routeConfidence;
+    }
+
+    if (right.priority !== left.priority) {
+      return right.priority - left.priority;
+    }
+
+    if (left.difficulty !== right.difficulty) {
+      return left.difficulty - right.difficulty;
+    }
+
+    if (left.estimatedTimeMin !== right.estimatedTimeMin) {
+      return left.estimatedTimeMin - right.estimatedTimeMin;
+    }
+
+    return left.id.localeCompare(right.id, "en");
+  });
+}
+
+function computeNovelConceptRatio(template: DatasetTemplate, coveredConceptIds: Set<string>): number {
+  if (template.concepts.length === 0) {
+    return 0;
+  }
+
+  let novelConceptCount = 0;
+  template.concepts.forEach((conceptId) => {
+    if (!coveredConceptIds.has(conceptId)) {
+      novelConceptCount += 1;
+    }
+  });
+
+  return clamp01(novelConceptCount / template.concepts.length);
+}
+
+function rerankWithDiversity(candidates: DatasetRankCandidate[], limit: number): DatasetRankCandidate[] {
+  const safeLimit = Number.isFinite(limit) ? Math.max(1, Math.floor(limit)) : 5;
+  if (candidates.length === 0) {
+    return [];
+  }
+
+  const remaining = [...candidates];
+  const selected: DatasetRankCandidate[] = [];
+  const clusterCounts = new Map<string, number>();
+  const coveredConceptIds = new Set<string>();
+
+  const takeCandidateByIndex = (index: number): void => {
+    const [picked] = remaining.splice(index, 1);
+    if (!picked) {
+      return;
+    }
+
+    selected.push(picked);
+    picked.template.concepts.forEach((conceptId) => coveredConceptIds.add(conceptId));
+    const clusterKey = picked.template.clusterKey;
+    clusterCounts.set(clusterKey, (clusterCounts.get(clusterKey) ?? 0) + 1);
+  };
+
+  const exactMatchIndex = remaining.findIndex((candidate) => candidate.isExactTitleMatch);
+  if (exactMatchIndex >= 0) {
+    takeCandidateByIndex(exactMatchIndex);
+  }
+
+  const distinctClusterBudget = Math.min(
+    3,
+    safeLimit,
+    new Set([...selected, ...remaining].map((candidate) => candidate.template.clusterKey)).size
+  );
+
+  const selectBestIndex = (requireNewCluster: boolean): number => {
+    const representedClusters = new Set(selected.map((candidate) => candidate.template.clusterKey));
+    const topTotalScore = remaining[0]?.totalScore ?? 1;
+
+    let bestIndex = -1;
+    let bestScore = -Infinity;
+
+    for (let index = 0; index < remaining.length; index += 1) {
+      const candidate = remaining[index];
+      const clusterKey = candidate.template.clusterKey;
+      const existingInCluster = clusterCounts.get(clusterKey) ?? 0;
+      const isNewCluster = !representedClusters.has(clusterKey);
+
+      if (existingInCluster >= 2) {
+        continue;
+      }
+      if (requireNewCluster && !isNewCluster) {
+        continue;
+      }
+
+      const relevance = clamp01(candidate.totalScore / Math.max(1, topTotalScore));
+      const novelConceptRatio = computeNovelConceptRatio(candidate.template, coveredConceptIds);
+      const mmrScore = relevance * 0.68
+        + novelConceptRatio * 0.22
+        + (isNewCluster ? (requireNewCluster ? 0.18 : 0.08) : 0)
+        + candidate.routeConfidence * 0.04
+        + candidate.rerankConfidence * 0.04;
+
+      if (mmrScore > bestScore) {
+        bestScore = mmrScore;
+        bestIndex = index;
+        continue;
+      }
+
+      if (bestIndex >= 0 && mmrScore === bestScore) {
+        const previousBest = remaining[bestIndex];
+        if (candidate.totalScore > previousBest.totalScore) {
+          bestIndex = index;
+          continue;
+        }
+        if (candidate.totalScore === previousBest.totalScore && candidate.id.localeCompare(previousBest.id, "en") < 0) {
+          bestIndex = index;
+        }
+      }
+    }
+
+    return bestIndex;
+  };
+
+  while (selected.length < safeLimit && remaining.length > 0) {
+    const representedClusterCount = new Set(selected.map((candidate) => candidate.template.clusterKey)).size;
+    const needsMoreClusterCoverage = representedClusterCount < distinctClusterBudget;
+
+    let nextIndex = selectBestIndex(needsMoreClusterCoverage);
+    if (nextIndex < 0 && needsMoreClusterCoverage) {
+      nextIndex = selectBestIndex(false);
+    }
+    if (nextIndex < 0) {
+      break;
+    }
+
+    takeCandidateByIndex(nextIndex);
+  }
+
+  return selected;
+}
+
 function rankCore(input: string): DatasetRankCandidate[] {
   const source = getDatasetRuntimeSource();
   const normalizedInput = normalizeInput(input, source.lexicon);
@@ -867,96 +1303,89 @@ function rankCore(input: string): DatasetRankCandidate[] {
     return [];
   }
 
-  const routeProfile = buildRouteProfile(normalizedInput);
   const exactTitleTemplateIds = new Set<string>([
     ...findExactTitleTemplateIds(input),
     ...findExactTitleTemplateIds(normalizedInput)
   ]);
+  const legacyExactMatches = findLegacyExactMatches(input, normalizedInput);
+  legacyExactMatches.forEach((_, canonicalTemplateId) => {
+    exactTitleTemplateIds.add(canonicalTemplateId);
+  });
 
   const conceptScores = scoreConcepts(normalizedInput);
-  if (conceptScores.size === 0 && routeProfile.signalCount === 0 && exactTitleTemplateIds.size === 0) {
+  const contextSignals = detectContextSignals(normalizedInput);
+  const routeProfile = buildRouteProfile(normalizedInput, conceptScores, contextSignals);
+
+  if (conceptScores.size === 0 && exactTitleTemplateIds.size === 0) {
     return [];
   }
 
-  const clusterScores = scoreClusters(conceptScores, routeProfile);
+  const clusterScores = scoreClusters(conceptScores);
+  const topClusterKeys = selectTopClusterKeys(clusterScores, DEFAULT_TOP_K_CLUSTERS);
+  const candidateTemplatePool = buildCandidateTemplatePool(topClusterKeys, conceptScores, exactTitleTemplateIds);
+
+  if (candidateTemplatePool.size === 0 && exactTitleTemplateIds.size === 0) {
+    return [];
+  }
+
   const queryVector = buildSparseVector(normalizedInput);
   const queryTokens = new Set(tokenizeScoreText(normalizedInput));
-  const contextSignals = detectContextSignals(normalizedInput);
   const maxClusterScore = Math.max(...Array.from(clusterScores.values()), 1);
+  const conceptScoreTotal = Array.from(conceptScores.values()).reduce((sum, score) => sum + score, 0);
 
   const ranked = getTemplateSearchIndex().reduce<DatasetRankCandidate[]>((accumulator, entry) => {
+    if (!candidateTemplatePool.has(entry.template.id)) {
+      return accumulator;
+    }
+
     const isExactTitleMatch = exactTitleTemplateIds.has(entry.template.id);
     const clusterScore = clusterScores.get(entry.template.clusterKey) ?? 0;
     const clusterNormalized = clamp01(clusterScore / maxClusterScore);
 
-    const similarity = computeCosineSimilarity(queryVector, entry.vector);
-    const titleSimilarity = computeCosineSimilarity(queryVector, entry.titleVector);
-    const missionSimilarity = computeCosineSimilarity(queryVector, entry.missionVector);
-    const tokenOverlap = computeTokenOverlapRatio(queryTokens, entry.tokens);
+    const cappedClusterPrior = Math.min(MAX_CLUSTER_PRIOR, clusterNormalized);
+    const conceptCoverage = computeConceptCoverage(entry.template, conceptScores, conceptScoreTotal);
+    const { lexicalSimilarity, semanticSimilarity } = computeLexicalSignals(queryVector, queryTokens, entry);
+    const contextStateTimeFit = scoreContextStateTimeFit(entry, routeProfile, contextSignals);
+    const profileCompatibility = scoreProfileCompatibility(entry, routeProfile);
 
-    let templateScore = clusterScore;
-    entry.template.concepts.forEach((conceptId) => {
-      templateScore += (conceptScores.get(conceptId) ?? 0) * 0.7;
-    });
-
-    if (entry.template.contexts.some((context) => contextSignals.has(context.toUpperCase()))) {
-      templateScore += 2;
-    }
-
-    if (routeProfile.quickMode && entry.estimatedTimeMin <= 10) {
-      templateScore += 2.4;
-    }
-
-    if (routeProfile.deepMode && entry.estimatedTimeMin >= 20) {
-      templateScore += 1.8;
-    }
-
-    templateScore += computePreferredMinutesFit(routeProfile, entry.estimatedTimeMin);
-
-    const routeAlignment = scoreRouteAlignment(entry, routeProfile);
-    const routeConfidence = isExactTitleMatch
-      ? 1
-      : clamp01(0.05 + routeAlignment * 0.62 + clusterNormalized * 0.33);
-
-    const rerankConfidence = isExactTitleMatch
+    const templateScore = conceptCoverage + lexicalSimilarity + contextStateTimeFit + cappedClusterPrior;
+    const rerankConfidence = isExactTitleMatch ? 1 : clamp01(templateScore / 3.2);
+    const rawRouteConfidence = isExactTitleMatch
       ? 1
       : clamp01(
-        similarity * 0.68
-        + titleSimilarity * 0.58
-        + missionSimilarity * 0.4
-        + tokenOverlap * 0.3
-        + clusterNormalized * 0.34
-        + routeAlignment * 0.52
+        contextStateTimeFit * 0.28
+        + conceptCoverage * 0.2
+        + lexicalSimilarity * 0.28
+        + semanticSimilarity * 0.08
+        + cappedClusterPrior * 0.09
+        + profileCompatibility * 0.07
       );
+    const routeConfidence = renormalizeRouteConfidence(rawRouteConfidence);
 
-    const signalScore = Math.max(similarity, titleSimilarity, missionSimilarity, tokenOverlap)
-      + clusterNormalized * 0.4
-      + routeAlignment * 0.4;
+    const signalScore = Math.max(conceptCoverage, lexicalSimilarity, contextStateTimeFit, cappedClusterPrior);
 
-    if (!isExactTitleMatch && signalScore < 0.08) {
+    if (!isExactTitleMatch && signalScore < 0.1) {
       return accumulator;
     }
-
-    if (!isExactTitleMatch && clusterScore <= 0 && rerankConfidence < 0.28 && routeConfidence < 0.24) {
+    if (!isExactTitleMatch && conceptCoverage === 0 && lexicalSimilarity < 0.14 && routeProfile.signalCount <= 1) {
+      return accumulator;
+    }
+    if (!isExactTitleMatch && rerankConfidence < 0.22 && rawRouteConfidence < 0.2) {
       return accumulator;
     }
 
     const totalScore = Number(
       (
-        similarity * 125
-        + titleSimilarity * 88
-        + missionSimilarity * 52
-        + tokenOverlap * 28
-        + templateScore * 6
-        + routeConfidence * 44
-        + rerankConfidence * 38
-        + entry.priority * 3
+        conceptCoverage * 36
+        + lexicalSimilarity * 31
+        + contextStateTimeFit * 23
+        + cappedClusterPrior * 10
         + (isExactTitleMatch ? 10_000 : 0)
       ).toFixed(4)
     );
 
     accumulator.push({
-      id: entry.template.id,
+      id: legacyExactMatches.get(entry.template.id) ?? entry.template.id,
       intent: entry.intent,
       title: entry.template.title,
       persona: entry.persona,
@@ -965,7 +1394,7 @@ function rankCore(input: string): DatasetRankCandidate[] {
       state: entry.state,
       timeContext: entry.timeContext,
       totalScore,
-      similarity,
+      similarity: semanticSimilarity,
       rerankConfidence,
       routeConfidence,
       priority: entry.priority,
@@ -978,42 +1407,16 @@ function rankCore(input: string): DatasetRankCandidate[] {
     return accumulator;
   }, []);
 
-  return ranked.sort((a, b) => {
-    if (b.totalScore !== a.totalScore) {
-      return b.totalScore - a.totalScore;
-    }
-
-    if (b.rerankConfidence !== a.rerankConfidence) {
-      return b.rerankConfidence - a.rerankConfidence;
-    }
-
-    if (b.routeConfidence !== a.routeConfidence) {
-      return b.routeConfidence - a.routeConfidence;
-    }
-
-    if (b.priority !== a.priority) {
-      return b.priority - a.priority;
-    }
-
-    if (a.difficulty !== b.difficulty) {
-      return a.difficulty - b.difficulty;
-    }
-
-    if (a.estimatedTimeMin !== b.estimatedTimeMin) {
-      return a.estimatedTimeMin - b.estimatedTimeMin;
-    }
-
-    return a.id.localeCompare(b.id, "en");
-  });
+  return sortCandidatesByScore(ranked);
 }
 
 export function rankDatasetTemplates(input: string, limit = 5): DatasetRankCandidate[] {
   const safeLimit = Number.isFinite(limit) ? Math.max(1, Math.floor(limit)) : 5;
-  return rankCore(input).slice(0, safeLimit);
+  return rerankWithDiversity(rankCore(input), safeLimit);
 }
 
 export function selectDatasetTemplateCandidate(input: string): DatasetRankCandidate | null {
-  const rankedCandidates = rankCore(input).slice(0, 12);
+  const rankedCandidates = rerankWithDiversity(rankCore(input), 12);
   const topCandidate = rankedCandidates[0];
 
   if (!topCandidate) {
@@ -1053,5 +1456,5 @@ export function selectDatasetTemplateCandidate(input: string): DatasetRankCandid
 }
 
 export function findRankedTemplateById(templateId: string): DatasetTemplate | null {
-  return findDatasetTemplateById(templateId);
+  return findDatasetTemplateById(resolveCanonicalTemplateId(templateId));
 }
