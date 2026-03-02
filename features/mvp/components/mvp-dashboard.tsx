@@ -172,7 +172,7 @@ const SYNC_STATUS_LABEL: Record<ExternalSyncJobStatus, string> = {
 
 type QuestSuggestion = Pick<
   ReturnType<typeof rankLocalPresetCandidates>[number],
-  "id" | "title" | "routeConfidence" | "estimatedTimeMin"
+  "id" | "title" | "estimatedTimeMin"
 >;
 type RankedPresetCandidate = ReturnType<typeof rankLocalPresetCandidates>[number];
 
@@ -497,7 +497,6 @@ function mapCandidateToSuggestion(candidate: RankedPresetCandidate): QuestSugges
   return {
     id: candidate.id,
     title: candidate.title,
-    routeConfidence: candidate.routeConfidence,
     estimatedTimeMin: candidate.estimatedTimeMin
   };
 }

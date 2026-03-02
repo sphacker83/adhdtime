@@ -18,7 +18,6 @@ type MvpDashboardStyles = Record<string, string>;
 export interface QuestSuggestion {
   id: string;
   title: string;
-  routeConfidence: number;
   estimatedTimeMin: number;
 }
 
@@ -85,16 +84,6 @@ function formatMinutesButtonValue(rawValue: string): string {
   }
 
   return `${Math.min(MAX_TASK_TOTAL_MINUTES, Math.max(MIN_TASK_TOTAL_MINUTES, parsed))}분`;
-}
-
-function formatConfidencePercent(value: number): string {
-  const safeValue = Number.isFinite(value) ? Math.max(0, value) : 0;
-  if (safeValue === 1) {
-    return "100%";
-  }
-
-  const percent = Math.min(99.9, safeValue * 100);
-  return `${percent.toFixed(1)}%`;
 }
 
 export function TaskInputSection(props: TaskInputSectionProps) {
@@ -285,9 +274,6 @@ export function TaskInputSection(props: TaskInputSectionProps) {
                       }
                     >
                       <span className={styles.questRecommendationTitle}>{recommendation.title}</span>
-                      <span className={styles.questRecommendationMeta}>
-                        연관도 {formatConfidencePercent(recommendation.routeConfidence)}
-                      </span>
                     </button>
                   ))}
                 </div>
