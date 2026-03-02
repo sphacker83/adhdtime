@@ -62,11 +62,11 @@ describe("display and events model", () => {
     expect(getXpProgressPercent(statsFixture)).toBe(63);
 
     const shape = buildRadarShape({
-      initiation: { rank: "F", displayScore: 1, progress: 99, mastery: 0 },
-      focus: { rank: "E", displayScore: 20, progress: 10, mastery: 0 },
-      breakdown: { rank: "D", displayScore: 30, progress: 10, mastery: 0 },
-      recovery: { rank: "C", displayScore: 40, progress: 10, mastery: 0 },
-      consistency: { rank: "B", displayScore: 50, progress: 10, mastery: 0 }
+      initiation: { rank: "F", totalScore: 101, displayScore: 1, progress: 99, mastery: 0 },
+      focus: { rank: "E", totalScore: 220, displayScore: 20, progress: 10, mastery: 0 },
+      breakdown: { rank: "D", totalScore: 330, displayScore: 30, progress: 10, mastery: 0 },
+      recovery: { rank: "C", totalScore: 440, displayScore: 40, progress: 10, mastery: 0 },
+      consistency: { rank: "B", totalScore: 550, displayScore: 50, progress: 10, mastery: 0 }
     } as unknown as Parameters<typeof buildRadarShape>[0]);
     expect(STAT_META).toHaveLength(5);
     expect(shape.grid).toHaveLength(4);
@@ -74,8 +74,7 @@ describe("display and events model", () => {
 
     const firstPoint = shape.data.split(" ")[0];
     const firstY = Number(firstPoint?.split(",")[1]);
-    expect(firstY).toBeGreaterThan(59);
-    expect(firstY).toBeLessThan(59.8);
+    expect(firstY).toBeCloseTo(56.77, 2);
   });
 
   it("normalizes loaded events and event meta text", () => {

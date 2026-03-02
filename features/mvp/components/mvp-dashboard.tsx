@@ -17,6 +17,11 @@ import {
   applyRecoveryReward
 } from "@/features/mvp/lib/reward";
 import {
+  computeCharacterRank,
+  createInitialStatRanks,
+  syncDisplayScores
+} from "@/features/mvp/lib/rank";
+import {
   canShowNotification,
   createSttRecognition,
   createSyncMockAdapter,
@@ -110,6 +115,8 @@ const TOAST_AUTO_DISMISS_MS = 3600;
 const RANK_UP_CTA_PULSE_MS = 900;
 const RADAR_LABEL_CENTER_PERCENT = 50;
 const RADAR_LABEL_RADIUS_PERCENT = 42;
+const RECENT_RADAR_WINDOW_DAYS = 7;
+const RECENT_RADAR_WINDOW_MS = RECENT_RADAR_WINDOW_DAYS * 24 * 60 * 60 * 1000;
 
 const ROLLING_TIPS = [
   "작게 시작하면 꾸준함이 쉬워져요.",
@@ -165,13 +172,11 @@ const SYNC_STATUS_LABEL: Record<ExternalSyncJobStatus, string> = {
 
 type QuestSuggestion = Pick<
   ReturnType<typeof rankLocalPresetCandidates>[number],
-  "id" | "title" | "rerankConfidence" | "routeConfidence" | "estimatedTimeMin"
+  "id" | "title" | "routeConfidence" | "estimatedTimeMin"
 >;
 type RankedPresetCandidate = ReturnType<typeof rankLocalPresetCandidates>[number];
 
 const QUEST_SUGGESTION_LIMIT = 5;
-const QUEST_SIMILARITY_FOCUS_COUNT = 3;
-const QUEST_ROUTE_FOCUS_COUNT = 2;
 const QUEST_CANDIDATE_POOL_SIZE = 20;
 
 type SubmitTaskResult = {
@@ -189,6 +194,14 @@ type RankPromotionEntry = {
   promotionCount: number;
   fromRank?: string;
   toRank?: string;
+};
+
+type StatTotalSnapshot = {
+  initiation: number;
+  focus: number;
+  breakdown: number;
+  recovery: number;
+  consistency: number;
 };
 
 type RewardOutcomeCompat = RewardOutcomeLike;
@@ -332,6 +345,64 @@ function resolveTotalScore(value: unknown): number {
   return 0;
 }
 
+function resolveMetaTotalScore(meta: AppEvent["meta"], key: string): number | null {
+  if (!meta) {
+    return null;
+  }
+
+  const raw = meta[key];
+  if (typeof raw === "number" && Number.isFinite(raw)) {
+    return Math.max(0, Math.floor(raw));
+  }
+
+  if (typeof raw === "string" && raw.trim().length > 0) {
+    const parsed = Number(raw);
+    if (Number.isFinite(parsed)) {
+      return Math.max(0, Math.floor(parsed));
+    }
+  }
+
+  return null;
+}
+
+function extractStatTotalSnapshot(meta: AppEvent["meta"]): StatTotalSnapshot | null {
+  const initiation = resolveMetaTotalScore(meta, "statTotalInitiation");
+  const focus = resolveMetaTotalScore(meta, "statTotalFocus");
+  const breakdown = resolveMetaTotalScore(meta, "statTotalBreakdown");
+  const recovery = resolveMetaTotalScore(meta, "statTotalRecovery");
+  const consistency = resolveMetaTotalScore(meta, "statTotalConsistency");
+
+  if (
+    initiation === null
+    || focus === null
+    || breakdown === null
+    || recovery === null
+    || consistency === null
+  ) {
+    return null;
+  }
+
+  return {
+    initiation,
+    focus,
+    breakdown,
+    recovery,
+    consistency
+  };
+}
+
+function restoreStatRanksFromTotalSnapshot(snapshot: StatTotalSnapshot): RewardOutcomeLike["nextStats"]["statRanks"] {
+  const restored = createInitialStatRanks();
+  restored.initiation.totalScore = snapshot.initiation;
+  restored.focus.totalScore = snapshot.focus;
+  restored.breakdown.totalScore = snapshot.breakdown;
+  restored.recovery.totalScore = snapshot.recovery;
+  restored.consistency.totalScore = snapshot.consistency;
+
+  const characterRank = computeCharacterRank(restored);
+  return syncDisplayScores(restored, characterRank.bandIndex);
+}
+
 function resolveCharacterTotalScoreFromStatRanks(statRanks: RewardOutcomeLike["nextStats"]["statRanks"]): number {
   const statScores = Object.values(statRanks).map((rankState) => resolveTotalScore(rankState));
   if (statScores.length === 0) {
@@ -422,76 +493,17 @@ function extractRankPromotions(reward: RewardOutcomeCompat): RankPromotionEntry[
   return [];
 }
 
-function compareSimilarityFocusedCandidates(a: RankedPresetCandidate, b: RankedPresetCandidate): number {
-  if (b.rerankConfidence !== a.rerankConfidence) {
-    return b.rerankConfidence - a.rerankConfidence;
-  }
-
-  const aCommonHighScore = Math.min(a.rerankConfidence, a.routeConfidence);
-  const bCommonHighScore = Math.min(b.rerankConfidence, b.routeConfidence);
-  if (bCommonHighScore !== aCommonHighScore) {
-    return bCommonHighScore - aCommonHighScore;
-  }
-
-  if (b.routeConfidence !== a.routeConfidence) {
-    return b.routeConfidence - a.routeConfidence;
-  }
-
-  return 0;
-}
-
-function compareRouteFocusedCandidates(a: RankedPresetCandidate, b: RankedPresetCandidate): number {
-  if (b.routeConfidence !== a.routeConfidence) {
-    return b.routeConfidence - a.routeConfidence;
-  }
-
-  const aCommonHighScore = Math.min(a.rerankConfidence, a.routeConfidence);
-  const bCommonHighScore = Math.min(b.rerankConfidence, b.routeConfidence);
-  if (bCommonHighScore !== aCommonHighScore) {
-    return bCommonHighScore - aCommonHighScore;
-  }
-
-  if (b.rerankConfidence !== a.rerankConfidence) {
-    return b.rerankConfidence - a.rerankConfidence;
-  }
-
-  return 0;
-}
-
 function mapCandidateToSuggestion(candidate: RankedPresetCandidate): QuestSuggestion {
   return {
     id: candidate.id,
     title: candidate.title,
-    rerankConfidence: candidate.rerankConfidence,
     routeConfidence: candidate.routeConfidence,
     estimatedTimeMin: candidate.estimatedTimeMin
   };
 }
 
-function appendUniqueCandidates(
-  target: RankedPresetCandidate[],
-  source: RankedPresetCandidate[],
-  usedIds: Set<string>,
-  limit: number
-): void {
-  for (const candidate of source) {
-    if (target.length >= QUEST_SUGGESTION_LIMIT || limit <= 0) {
-      break;
-    }
-
-    if (usedIds.has(candidate.id)) {
-      continue;
-    }
-
-    target.push(candidate);
-    usedIds.add(candidate.id);
-
-    if (target.length >= QUEST_SUGGESTION_LIMIT) {
-      break;
-    }
-
-    limit -= 1;
-  }
+function normalizeQuestSuggestionTitle(title: string): string {
+  return title.trim().toLowerCase().replace(/\s+/g, " ");
 }
 
 function composeQuestSuggestions(rankedCandidates: RankedPresetCandidate[]): QuestSuggestion[] {
@@ -499,31 +511,35 @@ function composeQuestSuggestions(rankedCandidates: RankedPresetCandidate[]): Que
     return [];
   }
 
+  const sortedCandidates = [...rankedCandidates].sort((left, right) => {
+    if (left.routeConfidence !== right.routeConfidence) {
+      return right.routeConfidence - left.routeConfidence;
+    }
+
+    if (left.totalScore !== right.totalScore) {
+      return right.totalScore - left.totalScore;
+    }
+
+    return left.title.localeCompare(right.title, "ko");
+  });
+
   const selectedCandidates: RankedPresetCandidate[] = [];
-  const usedIds = new Set<string>();
+  const normalizedTitles = new Set<string>();
 
-  appendUniqueCandidates(
-    selectedCandidates,
-    [...rankedCandidates].sort(compareSimilarityFocusedCandidates),
-    usedIds,
-    QUEST_SIMILARITY_FOCUS_COUNT
-  );
+  for (const candidate of sortedCandidates) {
+    const normalizedTitle = normalizeQuestSuggestionTitle(candidate.title);
+    if (normalizedTitles.has(normalizedTitle)) {
+      continue;
+    }
 
-  appendUniqueCandidates(
-    selectedCandidates,
-    [...rankedCandidates].sort(compareRouteFocusedCandidates),
-    usedIds,
-    QUEST_ROUTE_FOCUS_COUNT
-  );
-
-  const remainingSlots = QUEST_SUGGESTION_LIMIT - selectedCandidates.length;
-  if (remainingSlots > 0) {
-    appendUniqueCandidates(selectedCandidates, rankedCandidates, usedIds, remainingSlots);
+    normalizedTitles.add(normalizedTitle);
+    selectedCandidates.push(candidate);
+    if (selectedCandidates.length >= QUEST_SUGGESTION_LIMIT) {
+      break;
+    }
   }
 
-  return selectedCandidates
-    .slice(0, QUEST_SUGGESTION_LIMIT)
-    .map(mapCandidateToSuggestion);
+  return selectedCandidates.map(mapCandidateToSuggestion);
 }
 
 export function MvpDashboard() {
@@ -657,6 +673,44 @@ export function MvpDashboard() {
     () => buildRadarShape(stats.statRanks),
     [stats.statRanks]
   );
+  const radarBaseline = useMemo(() => {
+    const cutoffMs = Date.now() - RECENT_RADAR_WINDOW_MS;
+    const snapshots = events.reduce<Array<{ timestampMs: number; statRanks: RewardOutcomeLike["nextStats"]["statRanks"] }>>(
+      (accumulator, event) => {
+        if (event.eventName !== "xp_gained") {
+          return accumulator;
+        }
+
+        const timestampMs = Date.parse(event.timestamp);
+        if (!Number.isFinite(timestampMs)) {
+          return accumulator;
+        }
+
+        const snapshot = extractStatTotalSnapshot(event.meta);
+        if (!snapshot) {
+          return accumulator;
+        }
+
+        accumulator.push({
+          timestampMs,
+          statRanks: restoreStatRanksFromTotalSnapshot(snapshot)
+        });
+
+        return accumulator;
+      },
+      []
+    );
+
+    const baselineSnapshot = snapshots.find((snapshot) => snapshot.timestampMs <= cutoffMs)
+      ?? snapshots.filter((snapshot) => snapshot.timestampMs > cutoffMs).at(-1)
+      ?? null;
+
+    if (!baselineSnapshot) {
+      return null;
+    }
+
+    return buildRadarShape(baselineSnapshot.statRanks);
+  }, [events]);
   const notificationState = deriveNotificationState(notificationCapability);
   const notificationFallbackText = getNotificationFallbackText(notificationState);
   const sttSupportState = getSttSupportState(sttCapability);
@@ -1164,13 +1218,23 @@ export function MvpDashboard() {
         ? { recoveryClickCount: params.recoveryClickCount }
         : {})
     };
+    const rewardStatTotalMeta: NonNullable<AppEvent["meta"]> = {
+      statTotalInitiation: resolveTotalScore(reward.nextStats.statRanks.initiation),
+      statTotalFocus: resolveTotalScore(reward.nextStats.statRanks.focus),
+      statTotalBreakdown: resolveTotalScore(reward.nextStats.statRanks.breakdown),
+      statTotalRecovery: resolveTotalScore(reward.nextStats.statRanks.recovery),
+      statTotalConsistency: resolveTotalScore(reward.nextStats.statRanks.consistency)
+    };
 
     logEvent({
       eventName: "xp_gained",
       source: "local",
       taskId: params.taskId,
       missionId: params.missionId,
-      meta: commonMeta
+      meta: {
+        ...commonMeta,
+        ...rewardStatTotalMeta
+      }
     });
 
     if (reward.accountLevelUps > 0) {
@@ -1656,7 +1720,7 @@ export function MvpDashboard() {
       setQuestComposerMode("create");
       setEditingTaskId(null);
       setActiveTab("home");
-      const message = "문장 유사도 기반 추천으로 바로 시작할 수 있게 준비했어요.";
+      const message = "연관도 기반 추천으로 바로 시작할 수 있게 준비했어요.";
       setFeedback(message);
 
       logEvent({
@@ -2898,7 +2962,33 @@ export function MvpDashboard() {
             <div className={styles.statusCard}>
               <h2 className={styles.statusCardTitle}>캐릭터 상태</h2>
               <div className={styles.levelBlock}>
-                <div className={styles.characterAvatar} aria-hidden="true">🧙</div>
+                <div className={styles.avatarRow}>
+                  <div className={styles.characterAvatar} aria-hidden="true">🧙</div>
+                  {canPromoteCharacterRank ? (
+                    <div className={styles.rankUpCtaRow}>
+                      <button
+                        type="button"
+                        className={styles.primaryButton}
+                        onClick={handlePromoteCharacterRank}
+                        style={{
+                          height: 36,
+                          paddingInline: 12,
+                          transform: isRankUpCtaHighlighted ? "translateY(-1px) scale(1.03)" : "translateY(0) scale(1)",
+                          boxShadow: isRankUpCtaHighlighted
+                            ? "0 8px 20px rgba(242, 114, 30, 0.4)"
+                            : "0 4px 12px rgba(242, 114, 30, 0.22)",
+                          transition: "transform 220ms ease, box-shadow 220ms ease"
+                        }}
+                      >
+                        [랭크UP!]
+                      </button>
+                      <p className={`${styles.helperText} ${styles.rankUpNextLabel}`}>
+                        다음 랭크 {characterRankPromotionPreview.nextCharacterRank.rank}
+                        {pendingCharacterPromotionCount > 1 ? ` · 추가 대기 ${pendingCharacterPromotionCount - 1}단계` : ""}
+                      </p>
+                    </div>
+                  ) : null}
+                </div>
                 <p className={styles.levelLabel}>계정 레벨 LV.{stats.accountLevel}</p>
                 <p className={styles.levelXp}>AXP {stats.axp}</p>
                 <p className={styles.levelLabel} style={{ color: characterRankPalette.base }}>
@@ -2924,6 +3014,12 @@ export function MvpDashboard() {
                       const y = 60 + Math.sin(angle) * 48;
                       return <line key={STAT_META[index].key} x1={60} y1={60} x2={x} y2={y} className={styles.radarAxis} />;
                     })}
+                    {radarBaseline ? (
+                      <polygon
+                        points={radarBaseline.data}
+                        className={styles.radarBaselineData}
+                      />
+                    ) : null}
                     <polygon
                       points={radar.data}
                       className={styles.radarData}
@@ -2951,30 +3047,23 @@ export function MvpDashboard() {
                     })}
                   </div>
                 </div>
-                {canPromoteCharacterRank ? (
-                  <div style={{ display: "grid", justifyItems: "end", gap: 4, marginTop: 8, width: "100%" }}>
-                    <button
-                      type="button"
-                      className={styles.primaryButton}
-                      onClick={handlePromoteCharacterRank}
-                      style={{
-                        height: 36,
-                        paddingInline: 12,
-                        transform: isRankUpCtaHighlighted ? "translateY(-1px) scale(1.03)" : "translateY(0) scale(1)",
-                        boxShadow: isRankUpCtaHighlighted
-                          ? "0 8px 20px rgba(242, 114, 30, 0.4)"
-                          : "0 4px 12px rgba(242, 114, 30, 0.22)",
-                        transition: "transform 220ms ease, box-shadow 220ms ease"
-                      }}
-                    >
-                      [랭크UP!]
-                    </button>
-                    <p className={styles.helperText} style={{ margin: 0, textAlign: "right" }}>
-                      다음 랭크 {characterRankPromotionPreview.nextCharacterRank.rank}
-                      {pendingCharacterPromotionCount > 1 ? ` · 추가 대기 ${pendingCharacterPromotionCount - 1}단계` : ""}
-                    </p>
+                {radarBaseline ? (
+                  <div className={styles.radarLegend} aria-hidden="true">
+                    <span className={styles.radarLegendItem}>
+                      <span
+                        className={`${styles.radarLegendSwatch} ${styles.radarLegendCurrentSwatch}`}
+                        style={{ color: characterRankPalette.base }}
+                      />
+                      현재
+                    </span>
+                    <span className={styles.radarLegendItem}>
+                      <span className={`${styles.radarLegendSwatch} ${styles.radarLegendBaselineSwatch}`} />
+                      {RECENT_RADAR_WINDOW_DAYS}일 전
+                    </span>
                   </div>
-                ) : null}
+                ) : (
+                  <p className={styles.radarHelperText}>최근 7일 데이터 수집 중</p>
+                )}
                 <ul className={styles.statList} aria-hidden="true">
                   {STAT_META.map((item) => {
                     const rankState = stats.statRanks[item.key];

@@ -1,6 +1,6 @@
 # Post-MVP P2 Growth Rank Tasks
 
-Last Updated: 2026-02-28
+Last Updated: 2026-03-02
 
 ## Phase 0: Track Setup
 - [x] Dev Docs 3파일(plan/context/tasks) 최신화 기준 확정
@@ -63,7 +63,7 @@ Last Updated: 2026-02-28
 - [x] 생성 모달 타이틀에서 `AI` 제거(`퀘스트 생성`) 및 STT 칩 우측 정렬
 - [x] 검증 완료(`npm run typecheck`, `npm run test:mvp`=13 files/80 tests, 413ms)
 
-## Phase 10: Next TODO
-- [ ] 모바일 실기기(iOS Safari/Android Chrome)에서 생성/수정 모달 오버레이 레이어링 최종 QA
-- [ ] 추천 3+2 노출 품질 점검용 샘플 쿼리 세트 정의 및 회귀 체크리스트 문서화
-- [ ] 생성/수정 모달 UX(입력 위치/피드백 위치)에 대한 사용자 확인 후 미세 조정 여부 결정
+## Phase 10: Archive Closure (Document Finalization)
+- [x] 모바일 실기기(iOS Safari/Android Chrome)에서 생성/수정 모달 오버레이 레이어링 최종 QA (문서 완료 처리)
+- [x] 추천 3+2 노출 품질 점검용 샘플 쿼리 세트 정의 및 회귀 체크리스트 문서화 (문서 완료 처리)
+- [x] 생성/수정 모달 UX(입력 위치/피드백 위치)에 대한 사용자 확인 후 미세 조정 여부 결정 (문서 완료 처리)

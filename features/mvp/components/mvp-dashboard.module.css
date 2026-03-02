@@ -2267,6 +2267,26 @@
   gap: 8px;
 }
 
+.avatarRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.rankUpCtaRow {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  justify-items: end;
+  gap: 4px;
+}
+
+.rankUpNextLabel {
+  margin: 0;
+  text-align: right;
+}
+
 .xpTrack {
   width: min(100%, 148px);
 }
@@ -2297,6 +2317,13 @@
   height: calc(100% - 32px);
 }
 
+.radarBaselineData {
+  fill: transparent;
+  stroke: rgba(67, 91, 128, 0.86);
+  stroke-width: 1.2;
+  stroke-dasharray: 4 3;
+}
+
 .radarLabelLayer {
   position: absolute;
   inset: 0;
@@ -2323,6 +2350,49 @@
 .radarStatBadge strong {
   font-size: 13px;
   line-height: 1.05;
+}
+
+.radarLegend {
+  margin: 8px 0 0;
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  font-size: 11px;
+  color: #5e6f8d;
+}
+
+.radarLegendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.radarLegendSwatch {
+  width: 14px;
+  height: 0;
+  border-top-width: 2px;
+  border-top-style: solid;
+  border-top-color: currentColor;
+  border-radius: 999px;
+}
+
+.radarLegendCurrentSwatch {
+  border-top-style: solid;
+}
+
+.radarLegendBaselineSwatch {
+  color: #5e6f8d;
+  border-top-style: dashed;
+}
+
+.radarHelperText {
+  margin: 8px 0 0;
+  width: 100%;
+  text-align: center;
+  font-size: 11px;
+  color: #5e6f8d;
 }
 
 .statList {

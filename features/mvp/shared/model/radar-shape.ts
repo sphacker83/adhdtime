@@ -7,34 +7,35 @@ export const STAT_META: Array<{ key: StatKey; label: string }> = [
   { key: "recovery", label: "회복력" },
   { key: "consistency", label: "지속력" }
 ];
+export const RADAR_ABSOLUTE_STAGE_CAP = 15;
 
 export function pointsToString(points: Array<[number, number]>): string {
   return points.map(([x, y]) => `${x},${y}`).join(" ");
 }
 
-function clampDisplayScore(value: number): number {
+function clampRatio(value: number): number {
   if (!Number.isFinite(value)) {
     return 0;
   }
 
-  return Math.max(0, Math.min(99, Math.round(value)));
+  return Math.max(0, Math.min(1, value));
 }
 
-function resolveDisplayScore(value: unknown): number {
+function resolveStageValue(value: unknown): number {
   if (!value || typeof value !== "object") {
     return 0;
   }
 
-  const withDisplayScore = value as { displayScore?: unknown; progress?: unknown };
-  if (typeof withDisplayScore.displayScore === "number" && Number.isFinite(withDisplayScore.displayScore)) {
-    return clampDisplayScore(withDisplayScore.displayScore);
+  const withTotalScore = value as { totalScore?: unknown };
+  if (typeof withTotalScore.totalScore !== "number" || !Number.isFinite(withTotalScore.totalScore)) {
+    return 0;
   }
 
-  if (typeof withDisplayScore.progress === "number" && Number.isFinite(withDisplayScore.progress)) {
-    return clampDisplayScore(withDisplayScore.progress);
-  }
+  const totalScore = Math.max(0, withTotalScore.totalScore);
+  const stageBase = Math.floor(totalScore / 100);
+  const stageProgress = (totalScore % 100) / 100;
 
-  return 0;
+  return stageBase + stageProgress;
 }
 
 export function buildRadarShape(statRanks: StatRankState): { data: string; grid: string[] } {
@@ -57,11 +58,11 @@ export function buildRadarShape(statRanks: StatRankState): { data: string; grid:
     )
   );
 
+  const stageValues = STAT_META.map(({ key }) => resolveStageValue(statRanks[key]));
+
   const data = pointsToString(
     axes.map(([x, y], index) => {
-      const key = STAT_META[index].key;
-      const displayScore = resolveDisplayScore(statRanks[key]);
-      const ratio = displayScore / 99;
+      const ratio = clampRatio(stageValues[index] / RADAR_ABSOLUTE_STAGE_CAP);
       return [
         center + (x - center) * ratio,
         center + (y - center) * ratio

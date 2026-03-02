@@ -1,0 +1,11 @@
+{
+  "lexiconCoveragePct": 10.08,
+  "targetLexiconCoveragePct": 12,
+  "maxCoverageDropPct": 1.5,
+  "templateGenericActionSharePct": 56.69,
+  "maxGenericActionIncreasePct": 3,
+  "missionActionUniqueRatioPct": 2.68,
+  "maxUniqueRatioDropPct": 0.5,
+  "top1ConcentrationPct": 5.91,
+  "maxTop1ConcentrationIncreasePct": 1
+}

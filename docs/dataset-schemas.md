@@ -36,6 +36,7 @@
 
 * 입력 텍스트를 “무슨 이야기인지” 분류하기 위한 라벨 집합
 * lexicon이 conceptId로 매칭하고, 엔진이 concept들을 조합해 추천 후보를 좁힘
+* concept `label` 정의 품질(명확도/경계 분리/중복 방지)이 검색 정확도와 추천 다양성에 직접 영향
 
 ## 2.2 스키마
 
@@ -80,11 +81,15 @@
 
   * 동률/충돌 시 우선순위(높을수록 강)
 * `label` (string, **필수**): 짧은 한국어 이름
+
+  * 의미가 즉시 떠오르도록 명확해야 하며, 인접 concept와 경계가 겹치지 않게 작성
+  * 비슷한 의미를 라벨만 바꿔 기계적으로 증식시키지 말 것
 * `description` (string, 선택): 설명(운영/생성용)
 * `parentConceptId` (string, 선택): 계층 트리용
 * `tags` (string[], **필수**, 3~15개 권장):
 
-  * fallback 키워드. lexicon이 커버 못하는 표현 최소한 받는 용도
+  * fallback 키워드. lexicon이 놓친 실제 사용자 입력 표현을 보완하는 용도
+  * 단어 땜질식 나열이 아니라, 현실 입력에서 관측되는 표현 커버 관점으로 작성
 
 ## 2.4 권장 분포(참고)
 
@@ -100,6 +105,7 @@
 
 * 추천 결과에서 “비슷한 방향 중복”을 막고 다양성을 만드는 그룹
 * 템플릿 생성/검증/운영을 돕기 위한 메타를 담음(엔진이 꼭 쓰지 않아도 됨)
+* cluster는 의미 그룹 단위로만 유지하고, 시간/강도/길이 변형은 템플릿 레이어에서 처리
 
 ## 3.2 스키마
 
@@ -131,7 +137,9 @@
 * `clusterKey` (string, **필수**, 유니크)
 
   * 패턴: `^[A-Z][A-Z0-9_]+$`
-  * **시간/분/ MIN 같은 시간 단어를 키에 포함하지 말 것**
+  * **의미 그룹 키로만 사용하며, 시간/강도/길이 변형(예: 5MIN, QUICK, LIGHT, SHORT)은 포함하지 말 것**
+  * **변형은 templates의 `time`/`meta`에서 처리하고 clusterKey에는 넣지 말 것**
+  * **동일/유사 의미를 다른 이름으로 중복 생성하지 말 것**
 * `domain` (enum, **필수**): concepts와 동일 도메인
 * `primaryType` (enum, **필수**): `process|narrative|friction`
 
@@ -182,7 +190,7 @@
 ## 5.1 목적
 
 * 사용자의 다양한 표현/오타/구어체를 conceptId로 매핑하는 입력 해석 사전
-* **lexicon은 반드시 concept 중심** (cluster 중심 금지)
+* **lexicon은 반드시 concept 중심으로 작성** (cluster 중심 분류/작성 금지)
 
 ## 5.2 스키마
 
@@ -248,15 +256,18 @@
 * `normalization`: 엔진 정규화 옵션(엔진이 이미 고정이면 참고용)
 * `fillers`: 제거 대상 군더더기(의미 훼손 큰 단어는 넣지 말 것)
 * `typos`: 오타/붙여쓰기/비표준 표현 치환 **(반드시 Record<string, string> 형식의 Key-Value 객체여야 하며 배열로 만들면 절대 안 됨)**
+  * 실제 사용자 입력을 반영해 오타/구어체/비문을 적극 포함
 * `timeHints`: 시간/강도 힌트 추출용
 * `contextHints`: HOME/WORK 등 상황 키워드
 * `stateHints`: state 컨셉 트리거용 표현(중요)
 * `conceptLexemes[]`: 컨셉별 표현 사전(핵심)
 
+  * 작성 단위는 cluster가 아니라 conceptId이며, cluster 기준으로 기계 분배하지 말 것
   * `keywords`: 5~15개 권장
-  * `variants`: 30~200개 권장(대량 확장 영역)
-  * `patterns`: 1~3개 권장(오탐 주의)
-  * `negativePatterns`: 필요할 때만(부정/반어 방어)
+  * `variants`: 30~200개 권장(우선 확장 영역, 현실 입력 표현을 최대한 넓게 커버)
+  * `patterns`: 1~3개 권장(정말 필요한 최소만 유지, 오탐 주의)
+  * `negativePatterns`: 꼭 필요한 경우에만 최소 운용(부정/반어 방어)
+  * 단어 치환 규칙만으로 기계적 대량 생성하지 말 것
 
 **중요 제약**
 
@@ -281,17 +292,17 @@
       "id": "TPL_HOME_DISHWASH_STD_15_HOME",
       "clusterKey": "HOME_DISHWASH",
       "type": "process",
-      "title": "설거지 15분 기본 프로세스(집)",
+      "title": "퇴근 후 싱크대 15분 리셋 퀘스트",
       "concepts": ["HOME.DISHWASH"],
       "contexts": ["HOME"],
       "states": [],
       "time": { "min": 10, "max": 25, "default": 15 },
       "missions": [
-        { "action": "싱크대에 설거지 거리 한곳에 모으기", "estMin": 2 },
-        { "action": "음식물 먼저 제거하기(휴지/수세미로 1차)", "estMin": 2 },
-        { "action": "그릇→컵→수저 순서로 세척", "estMin": 7 },
-        { "action": "건조대 정리 + 물기 정리", "estMin": 3 },
-        { "action": "싱크대 주변 30초 닦고 앱에서 완료 누르기", "estMin": 1 }
+        { "action": "먼저 싱크대에 있는 그릇과 컵을 한곳에 모아 주세요.", "estMin": 2 },
+        { "action": "음식물 찌꺼기를 버리고 물에 불릴 식기를 분리해 주세요.", "estMin": 3 },
+        { "action": "그릇, 컵, 수저 순서로 세척하고 헹군 뒤 건조대에 올려 주세요.", "estMin": 7 },
+        { "action": "조리대와 싱크대 물기를 닦아 마무리 준비를 해 주세요.", "estMin": 2 },
+        { "action": "마지막으로 남은 식기를 확인하고 앱에서 완료를 눌러 주세요.", "estMin": 1 }
       ],
       "meta": {
         "intensity": "STD",
@@ -338,7 +349,8 @@
   * AI가 자주 범하는 수학적 환각(산술 계산착오)으로 인해 검증이 깨지는 주원인입니다. 출력 확정 전 반드시 `default` 분(min)과 하위 미션들의 `estMin` 단순 합산치(sum)가 오차 없이 100% 일치하는지 재계산하여 검수하십시오.
 * `missions` (array, **필수**)
 
-  * 3~6개(권장 4~5)
+  * 최소 3개(권장 4~6)
+  * 상한은 `validation_rules.templateRules.missionsMax`가 정수일 때만 강제하며, `null`이면 상한 제한 없음
 * `missions[].action` (string, **필수**)
 
   * 동사+대상+조건/예시. “뭘 하라는지” 1초 안에 이해되게
@@ -378,7 +390,7 @@
   "version": 1,
   "templateRules": {
     "missionsMin": 3,
-    "missionsMax": 6,
+    "missionsMax": null,
     "mustMatchTimeDefaultExactly": true,
     "mustSatisfyTimeOrder": true,
     "requireStartEndHeuristic": true
@@ -429,6 +441,8 @@
   }
 }
 ```
+
+* `templateRules.missionsMin`은 필수 정수, `templateRules.missionsMax`는 정수 또는 `null`(`null`이면 상한 미적용)
 
 ---
 
@@ -485,6 +499,12 @@
 1. `time.min <= time.default <= time.max`
 2. `time.default == sum(missions.estMin)`
 3. `time.min`, `time.default`, `time.max`, `missions[].estMin`은 모두 양의 정수
+
+미션 개수 규칙:
+
+1. `templateRules.missionsMin`은 필수 최소 개수로 항상 강제한다.
+2. `templateRules.missionsMax`가 정수면 최대 개수도 함께 강제한다.
+3. `templateRules.missionsMax`가 `null`이면 최대 개수 제한은 적용하지 않는다.
 
 ### 11.3 시작/종료 휴리스틱 기준
 

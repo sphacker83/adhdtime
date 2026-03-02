@@ -1,6 +1,12 @@
 # Docs Archive
 
-Last Updated: 2026-02-28
+Last Updated: 2026-03-02
+
+## 2026-03-02-doc-cleanup
+현재 active 트랙(`reco-template-quality-routing-fix`)과 무관하고 완료된 비활성 문서를 정리해 보관했습니다.
+
+- `full-day-template-generator.md`
+- `README.md`
 
 ## 2026-02-28-legacy-cleanup
 아래 항목은 현재 기준 문서(`docs/PRD.md`, `docs/TRACEABILITY_MATRIX.md` 등)로 통합되어 운영 대상에서 제외된 레거시 자료입니다.

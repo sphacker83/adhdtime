@@ -18,7 +18,6 @@ type MvpDashboardStyles = Record<string, string>;
 export interface QuestSuggestion {
   id: string;
   title: string;
-  rerankConfidence: number;
   routeConfidence: number;
   estimatedTimeMin: number;
 }
@@ -287,8 +286,6 @@ export function TaskInputSection(props: TaskInputSectionProps) {
                     >
                       <span className={styles.questRecommendationTitle}>{recommendation.title}</span>
                       <span className={styles.questRecommendationMeta}>
-                        유사도 {formatConfidencePercent(recommendation.rerankConfidence)}
-                        {" · "}
                         연관도 {formatConfidencePercent(recommendation.routeConfidence)}
                       </span>
                     </button>
